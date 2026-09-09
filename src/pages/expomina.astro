@@ -1,11 +1,17 @@
 ---
 // Landing de captura de leads — EXPOMINA 2026 (09-11 setiembre, Lima)
 // Backend: web-astro/src/appscripts/expomina.js (Google Apps Script → Sheet)
-// Se llega por el QR del video del stand:
-//   https://home.inacons.com.pe/r/e  →  /empresa/?c=e  →  esta página
-// Todo sobre el host home.inacons.com.pe: inacons.com.pe hace 301 hacia él,
-// y entrar por el dominio principal duplicaría los saltos de redirección.
-import BaseLayout from '../../layouts/BaseLayout.astro';
+// URL pública: https://home.inacons.com.pe/expomina/
+//
+// Directa a propósito, sin pasar por el QR dinámico de /empresa/: son cero
+// redirecciones, no depende de la base de datos ni del panel, y sobre todo
+// es una URL que una persona puede LEER Y TECLEAR. Eso importa: si el QR
+// del video no escanea (reflejo en la pantalla, mala posición, distancia),
+// el visitante todavía puede escribirla. Con un código opaco tipo /r/e no
+// hay plan B.
+//
+// Host home.inacons.com.pe: inacons.com.pe hace 301 hacia él.
+import BaseLayout from '../layouts/BaseLayout.astro';
 
 const SERVICIOS = [
   'Minería',

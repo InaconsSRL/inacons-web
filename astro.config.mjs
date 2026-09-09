@@ -7,8 +7,9 @@ export default defineConfig({
   site: 'https://inacons.com.pe',
   integrations: [
     sitemap({
-      // /recursos y /formulario son internos (noindex) — no deben aparecer en el sitemap público.
-      filter: (page) => !/\/(recursos|formulario)\/?/i.test(page),
+      // /recursos, /formulario y /expomina son internos o de campaña (noindex)
+      // — no deben aparecer en el sitemap público.
+      filter: (page) => !/\/(recursos|formulario|expomina)\/?/i.test(page),
     }),
   ],
 });
