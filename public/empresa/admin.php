@@ -383,8 +383,17 @@ tr:hover td { background: #fafbfc; }
     <h3 id="qr-titulo">QR: codigo</h3>
     <div class="qr-url" id="qr-url-texto"></div>
     <div id="qrcode"></div>
+    <div style="margin-bottom:16px;text-align:left;font-size:13px;">
+      <label style="display:block;margin-bottom:6px;color:#aaa;">Destino del archivo</label>
+      <select id="qr-modo" onchange="refrescarQR()"
+              style="width:100%;padding:9px;border-radius:6px;border:1px solid #444;background:#222;color:#eee;">
+        <option value="pantalla">Pantalla / video — negro puro, ECC M</option>
+        <option value="impresion">Impresión — azul corporativo, ECC H</option>
+      </select>
+      <p id="qr-modo-hint" style="margin:8px 0 0;color:#888;font-size:11.5px;line-height:1.5;"></p>
+    </div>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="descargarQR()">⬇ Descargar PNG</button>
+      <button class="btn btn-primary" onclick="descargarQR()">⬇ Descargar PNG 1200px</button>
       <button class="btn btn-outline" onclick="cerrarModal()">Cerrar</button>
     </div>
   </div>
@@ -421,34 +430,85 @@ tr:hover td { background: #fafbfc; }
 
 <script>
 let qrInstance = null;
+let qrActual   = { codigo: '', url: '' };
+
+/*  Dos destinos, dos configuraciones distintas:
+ *
+ *  Pantalla/video → negro puro (máximo contraste; el azul corporativo recorta
+ *    el margen de lectura) y ECC M (H mete ~30% más módulos, y en pantalla no
+ *    hay suciedad ni desgaste contra los que proteger). Menos módulos = módulos
+ *    más grandes = sobreviven a la compresión del códec de video.
+ *
+ *  Impresión → azul corporativo y ECC H, que sí tolera manchas y desgaste.
+ */
+const QR_MODOS = {
+  pantalla:  { color: '#000000', ecc: 'M', hint: 'Negro puro y ECC M: la máxima legibilidad tras la compresión de video. Colócalo sobre fondo blanco sólido, sin nada en movimiento detrás, y déjalo fijo al menos 8 segundos.' },
+  impresion: { color: '#1a3a5c', ecc: 'H', hint: 'Azul corporativo y ECC H: tolera manchas y desgaste del papel. No lo uses para video.' }
+};
+
+function modoActual() {
+  const sel = document.getElementById('qr-modo');
+  return QR_MODOS[sel ? sel.value : 'pantalla'] || QR_MODOS.pantalla;
+}
 
 function mostrarQR(codigo, url) {
+  qrActual = { codigo: codigo, url: url };
   document.getElementById('qr-titulo').textContent = 'QR: ' + codigo;
   document.getElementById('qr-url-texto').textContent = url;
+  refrescarQR();
+  document.getElementById('modalQR').classList.add('open');
+}
+
+function refrescarQR() {
+  const modo = modoActual();
+  document.getElementById('qr-modo-hint').textContent = modo.hint;
   const cont = document.getElementById('qrcode');
   cont.innerHTML = '';
   qrInstance = new QRCode(cont, {
-    text: url, width: 220, height: 220,
-    colorDark: '#1a3a5c', colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
+    text: qrActual.url, width: 220, height: 220,
+    colorDark: modo.color, colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel[modo.ecc]
   });
-  document.getElementById('modalQR').classList.add('open');
 }
 
 function cerrarModal() {
   document.getElementById('modalQR').classList.remove('open');
 }
 
+/*  El PNG NO se saca del preview de 220px: se rerenderiza a 1200px fuera de
+ *  pantalla. Un QR de 220px escalado a pantalla de stand se ve como una mancha. */
 function descargarQR() {
+  const modo = modoActual();
+  const off  = document.createElement('div');
+  off.style.cssText = 'position:absolute;left:-9999px;top:0;';
+  document.body.appendChild(off);
+
+  new QRCode(off, {
+    text: qrActual.url, width: 1200, height: 1200,
+    colorDark: modo.color, colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel[modo.ecc]
+  });
+
   setTimeout(() => {
-    const canvas = document.querySelector('#qrcode canvas');
+    const canvas = off.querySelector('canvas');
+    const img    = off.querySelector('img');
+    const nombre = 'qr-' + qrActual.codigo + '-' +
+                   (document.getElementById('qr-modo').value) + '.png';
+    const link = document.createElement('a');
+    link.download = nombre;
+
     if (canvas) {
-      const link = document.createElement('a');
-      link.download = 'qr-' + document.getElementById('qr-titulo').textContent.replace('QR: ', '') + '.png';
       link.href = canvas.toDataURL('image/png');
-      link.click();
+    } else if (img && img.src) {
+      link.href = img.src;   // respaldo: qrcodejs cae a <img> en navegadores viejos
+    } else {
+      alert('No se pudo generar el PNG. Reintenta.');
+      off.remove();
+      return;
     }
-  }, 100);
+    link.click();
+    off.remove();
+  }, 250);
 }
 
 function abrirEditar(id, codigo, url, desc) {

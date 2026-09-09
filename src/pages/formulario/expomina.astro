@@ -1,0 +1,493 @@
+---
+// Landing de captura de leads — EXPOMINA 2026 (09-11 setiembre, Lima)
+// Backend: web-astro/src/appscripts/expomina.js (Google Apps Script → Sheet)
+// Se llega por QR dinámico: home.inacons.com.pe/empresa/?c=expo → /r/expo → esta página
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const SERVICIOS = [
+  'Minería',
+  'Obras civiles',
+  'Electromecánica',
+  'Infraestructura',
+  'Paisajismo',
+  'Consultoría',
+  'Aún no lo tengo definido',
+];
+---
+
+<BaseLayout
+  title="Registro | INACONS en Expomina 2026"
+  description="Déjanos tus datos y un ejecutivo de INACONS te contactará."
+  robots="noindex, nofollow"
+  minimalChrome={true}
+>
+
+  <style slot="head">
+    .xp-wrap {
+      min-height: 100vh;
+      background: var(--c-primary);
+      padding: 28px 18px 40px;
+      display: flex;
+      justify-content: center;
+    }
+    .xp-card {
+      width: 100%;
+      max-width: 460px;
+    }
+    .xp-head { text-align: center; margin-bottom: 26px; }
+    .xp-logo { height: 44px; width: auto; margin-bottom: 20px; }
+    .xp-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--c-accent);
+      border: 1px solid rgba(217, 130, 43, 0.45);
+      border-radius: 2px;
+      padding: 6px 14px;
+      margin-bottom: 16px;
+    }
+    .xp-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+    .xp-sub {
+      font-size: 0.9rem;
+      color: var(--c-text-white-70);
+      line-height: 1.55;
+    }
+
+    .xp-form {
+      background: #fff;
+      border-top: 3px solid var(--c-accent);
+      padding: 26px 22px 24px;
+    }
+    .xp-field { margin-bottom: 16px; }
+    .xp-field label {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--c-text-muted);
+      margin-bottom: 7px;
+    }
+    .xp-field input,
+    .xp-field select {
+      width: 100%;
+      border: 1.5px solid var(--c-border);
+      border-radius: 2px;
+      padding: 14px;
+      font-family: var(--font-ui);
+      /* 16px exactos: por debajo de eso iOS hace zoom al enfocar el campo */
+      font-size: 16px;
+      color: var(--c-text-heading);
+      background: var(--c-bg-muted);
+      outline: none;
+      -webkit-appearance: none;
+      transition: border-color .2s, background .2s;
+    }
+    .xp-field select {
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+    }
+    .xp-field input:focus,
+    .xp-field select:focus {
+      border-color: var(--c-secondary);
+      background-color: #fff;
+    }
+    .xp-field input.xp-err,
+    .xp-field select.xp-err { border-color: #c0392b; background-color: #fdf3f2; }
+    .xp-opt { font-weight: 400; text-transform: none; letter-spacing: 0; color: #b0b6c8; }
+
+    .xp-consent {
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      margin: 20px 0 18px;
+      padding: 14px;
+      background: var(--c-bg-muted);
+      border-radius: 2px;
+    }
+    .xp-consent input {
+      width: 20px;
+      height: 20px;
+      margin-top: 1px;
+      flex-shrink: 0;
+      accent-color: var(--c-secondary);
+    }
+    .xp-consent label {
+      font-size: 0.78rem;
+      color: var(--c-text-body);
+      line-height: 1.5;
+      cursor: pointer;
+    }
+    .xp-consent.xp-err { background: #fdf3f2; box-shadow: inset 0 0 0 1.5px #c0392b; }
+
+    .xp-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--c-accent);
+      color: #fff;
+      border: none;
+      border-radius: 2px;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .xp-submit:hover { background: var(--c-accent-hover); }
+    .xp-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+    .xp-hp {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+    .xp-msg {
+      display: none;
+      margin-top: 14px;
+      padding: 11px 13px;
+      border-radius: 2px;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .xp-msg.show { display: block; }
+    .xp-msg.err { background: #fdf3f2; color: #a5321f; }
+
+    /* Pantalla de gracias */
+    .xp-done { display: none; background: #fff; padding: 44px 26px; text-align: center; }
+    .xp-done.show { display: block; }
+    .xp-done-icon {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: rgba(39, 174, 96, .1);
+      color: #27ae60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .xp-done h2 { font-size: 1.25rem; color: var(--c-primary); margin-bottom: 10px; }
+    .xp-done p { font-size: 0.88rem; color: var(--c-text-muted); line-height: 1.6; margin-bottom: 26px; }
+    .xp-brochure {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      padding: 15px;
+      background: var(--c-secondary);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 2px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: background .2s;
+    }
+    .xp-brochure:hover { background: var(--c-primary); }
+    .xp-done-foot { margin-top: 22px; font-size: 0.78rem; color: var(--c-text-muted); }
+    .xp-done-foot a { color: var(--c-secondary); font-weight: 600; }
+
+    @media (max-width: 380px) {
+      .xp-wrap { padding: 20px 12px 32px; }
+      .xp-form { padding: 22px 16px 20px; }
+      .xp-title { font-size: 1.3rem; }
+    }
+  </style>
+
+  <div class="xp-wrap">
+    <div class="xp-card">
+
+      <div class="xp-head" id="xp-head">
+        <img src="/assets/imagenes/logos/logo_inacons_white.svg" alt="INACONS" class="xp-logo" width="160" height="44" />
+        <div class="xp-badge">Expomina 2026</div>
+        <h1 class="xp-title">Conversemos sobre tu proyecto</h1>
+        <p class="xp-sub">Déjanos tus datos y un ejecutivo te contactará. Toma menos de un minuto.</p>
+      </div>
+
+      <!-- FORMULARIO -->
+      <form class="xp-form" id="xp-form" novalidate>
+
+        <div class="xp-field">
+          <label for="nombre">Nombre y apellido</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="name" placeholder="Juan Pérez" required />
+        </div>
+
+        <div class="xp-field">
+          <label for="empresa">Empresa</label>
+          <input type="text" id="empresa" name="empresa" autocomplete="organization" placeholder="Nombre de tu empresa" required />
+        </div>
+
+        <div class="xp-field">
+          <label for="cargo">Cargo <span class="xp-opt">(opcional)</span></label>
+          <input type="text" id="cargo" name="cargo" autocomplete="organization-title" placeholder="Gerente de Proyectos" />
+        </div>
+
+        <div class="xp-field">
+          <label for="correo">Correo electrónico</label>
+          <input type="email" id="correo" name="correo" autocomplete="email" inputmode="email" placeholder="tu@empresa.com" required />
+        </div>
+
+        <div class="xp-field">
+          <label for="celular">Celular</label>
+          <input type="tel" id="celular" name="celular" autocomplete="tel" inputmode="tel" placeholder="999 999 999" required />
+        </div>
+
+        <div class="xp-field">
+          <label for="servicio">¿Qué servicio te interesa?</label>
+          <select id="servicio" name="servicio" required>
+            <option value="">Selecciona una opción</option>
+            {SERVICIOS.map((s) => <option value={s}>{s}</option>)}
+          </select>
+        </div>
+
+        <div class="xp-consent" id="xp-consent-box">
+          <input type="checkbox" id="consentimiento" name="consentimiento" required />
+          <label for="consentimiento">
+            Autorizo a INACONS S.R.L. a almacenar mis datos y contactarme con información comercial.
+          </label>
+        </div>
+
+        <!-- Honeypot: invisible para personas, irresistible para bots -->
+        <div class="xp-hp" aria-hidden="true">
+          <label for="website">No llenar</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <button type="submit" class="xp-submit" id="xp-btn">Registrarme</button>
+
+        <div class="xp-msg err" id="xp-msg"></div>
+      </form>
+
+      <!-- PANTALLA DE GRACIAS -->
+      <div class="xp-done" id="xp-done">
+        <div class="xp-done-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2>¡Gracias por registrarte!</h2>
+        <p id="xp-done-msg">Un ejecutivo de INACONS se pondrá en contacto contigo muy pronto.</p>
+        <a href="/assets/documentos/brochure_inacons.pdf" target="_blank" rel="noopener" class="xp-brochure">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          Descargar brochure
+        </a>
+        <p class="xp-done-foot">Conoce más en <a href="https://inacons.com.pe">inacons.com.pe</a></p>
+      </div>
+
+    </div>
+  </div>
+
+<script is:inline>
+/* ===========================================================
+   Registro Expomina 2026
+   is:inline → Astro no lo empaqueta como módulo ES.
+
+   Backend: src/appscripts/expomina.js
+   Hoja: docs.google.com/spreadsheets/d/1fwU-fOSgvrFG1CkoUuKSKdOWZUuZjUDu3JXlynCzoFk
+   =========================================================== */
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzj2LS8wF_XOihB4_fxUc1BfJGFTc6jW9kBv78Kg-CHEZP_1_jbyuw5xDKd53jGEIQ/exec';
+
+var COLA_KEY = 'inacons_expomina_pendientes';
+
+/* Origen: de qué QR vino (?o=video, ?o=banner, etc.) */
+function origenQR() {
+  try {
+    var o = new URLSearchParams(window.location.search).get('o');
+    return (o || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || 'video';
+  } catch (e) { return 'video'; }
+}
+
+/* ── Validación ── */
+function marcar(el, malo) {
+  if (!el) return;
+  el.classList.toggle('xp-err', !!malo);
+}
+
+function validar() {
+  var ok = true;
+  var primerError = null;
+
+  ['nombre', 'empresa', 'correo', 'celular', 'servicio'].forEach(function (id) {
+    var el = document.getElementById(id);
+    var vacio = !el.value.trim();
+    marcar(el, vacio);
+    if (vacio) { ok = false; primerError = primerError || el; }
+  });
+
+  var correo = document.getElementById('correo');
+  if (correo.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.value.trim())) {
+    marcar(correo, true);
+    ok = false;
+    primerError = primerError || correo;
+  }
+
+  // Celular: al menos 6 dígitos, sin importar cómo lo escriban
+  var cel = document.getElementById('celular');
+  if (cel.value.trim() && cel.value.replace(/\D/g, '').length < 6) {
+    marcar(cel, true);
+    ok = false;
+    primerError = primerError || cel;
+  }
+
+  var cons = document.getElementById('consentimiento');
+  var box = document.getElementById('xp-consent-box');
+  box.classList.toggle('xp-err', !cons.checked);
+  if (!cons.checked) { ok = false; primerError = primerError || box; }
+
+  if (primerError && primerError.scrollIntoView) {
+    primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return ok;
+}
+
+function payload() {
+  function val(id) { return (document.getElementById(id).value || '').trim(); }
+  return {
+    nombre:         val('nombre'),
+    empresa:        val('empresa'),
+    cargo:          val('cargo'),
+    correo:         val('correo'),
+    celular:        val('celular'),
+    servicio:       val('servicio'),
+    consentimiento: document.getElementById('consentimiento').checked,
+    website:        val('website'),
+    origen:         origenQR(),
+    dispositivo:    navigator.userAgent.slice(0, 120)
+  };
+}
+
+/* ── Envío ── */
+function enviar(data) {
+  return fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'data=' + encodeURIComponent(JSON.stringify(data))
+  }).then(function (r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return true;
+  });
+}
+
+/* ── Cola local ──
+   La señal en un pabellón de feria se cae. Si el envío falla el lead
+   NO se pierde: queda en el celular del visitante y se reintenta solo
+   cuando vuelve la conexión. */
+function encolar(data) {
+  try {
+    var cola = JSON.parse(localStorage.getItem(COLA_KEY) || '[]');
+    var yaEsta = cola.some(function (x) {
+      return (x.correo || '').toLowerCase() === (data.correo || '').toLowerCase();
+    });
+    if (!yaEsta) cola.push(data);
+    localStorage.setItem(COLA_KEY, JSON.stringify(cola));
+  } catch (e) { /* localStorage bloqueado (modo privado): seguimos igual */ }
+}
+
+function vaciarCola() {
+  var cola;
+  try { cola = JSON.parse(localStorage.getItem(COLA_KEY) || '[]'); }
+  catch (e) { return; }
+  if (!cola.length) return;
+
+  var pendientes = cola.slice();
+  var restantes = [];
+
+  (function siguiente() {
+    if (!pendientes.length) {
+      try { localStorage.setItem(COLA_KEY, JSON.stringify(restantes)); } catch (e) {}
+      return;
+    }
+    var item = pendientes.shift();
+    enviar(item)
+      .catch(function () { restantes.push(item); })
+      .then(siguiente);
+  })();
+}
+
+/* ── Vistas ── */
+function mostrarGracias(offline) {
+  document.getElementById('xp-form').style.display = 'none';
+  document.getElementById('xp-head').style.display = 'none';
+  if (offline) {
+    document.getElementById('xp-done-msg').textContent =
+      'Guardamos tus datos en este dispositivo y se enviarán apenas vuelva la señal. No necesitas hacer nada más.';
+  }
+  document.getElementById('xp-done').classList.add('show');
+  window.scrollTo(0, 0);
+}
+
+function error(txt) {
+  var m = document.getElementById('xp-msg');
+  m.textContent = txt;
+  m.classList.add('show');
+  m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function () {
+  vaciarCola();
+  window.addEventListener('online', vaciarCola);
+
+  // Limpiar el marcado de error al corregir
+  ['nombre', 'empresa', 'correo', 'celular', 'servicio'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('input', function () { marcar(el, false); });
+    el.addEventListener('change', function () { marcar(el, false); });
+  });
+  document.getElementById('consentimiento').addEventListener('change', function () {
+    document.getElementById('xp-consent-box').classList.toggle('xp-err', !this.checked);
+  });
+
+  document.getElementById('xp-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    document.getElementById('xp-msg').classList.remove('show');
+    if (!validar()) return;
+
+    var btn = document.getElementById('xp-btn');
+    var data = payload();
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+
+    enviar(data)
+      .then(function () { mostrarGracias(false); })
+      .catch(function () {
+        encolar(data);
+
+        /*  Distinguir sin señal de backend caído es crítico en un evento.
+         *
+         *  Sin señal (pabellón saturado): el reintento automático va a
+         *  funcionar cuando el visitante salga. Confirmamos con tranquilidad.
+         *
+         *  Con señal pero el servidor falla: el reintento va a fallar igual.
+         *  Mostrar "¡Gracias!" acá sería mentirle a la persona y perder el
+         *  lead en silencio — un backend caído toda la tarde se llevaría
+         *  cada registro del día sin que nadie se entere. Preferimos el
+         *  error visible: la persona reintenta o se acerca al stand. */
+        if (!navigator.onLine) {
+          mostrarGracias(true);
+        } else {
+          error('No pudimos completar tu registro. Toca "Registrarme" de nuevo; si vuelve a fallar, avísanos en el stand y te registramos ahí mismo.');
+        }
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.textContent = 'Registrarme';
+      });
+  });
+});
+</script>
+
+</BaseLayout>

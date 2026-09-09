@@ -1,6 +1,15 @@
 # Error pages
 ErrorDocument 404 /404.html
 
+# ── URL corta para QR ───────────────────────────────────────────
+#  inacons.com.pe/r/CODIGO  →  home.inacons.com.pe/empresa/?c=CODIGO
+#  Menos caracteres = menos módulos = QR más legible en pantalla y video.
+#  El destino sigue siendo editable desde /empresa/admin.php sin reimprimir.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^r/([A-Za-z0-9_-]+)/?$ https://home.inacons.com.pe/empresa/?c=$1 [R=302,L,NE]
+</IfModule>
+
 # ── Compresión Deflate/Gzip ─────────────────────────────────────────────────
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/css
