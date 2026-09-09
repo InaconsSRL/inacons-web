@@ -1,7 +1,10 @@
 ---
 // Landing de captura de leads — EXPOMINA 2026 (09-11 setiembre, Lima)
 // Backend: web-astro/src/appscripts/expomina.js (Google Apps Script → Sheet)
-// Se llega por QR dinámico: home.inacons.com.pe/empresa/?c=expo → /r/expo → esta página
+// Se llega por el QR del video del stand:
+//   https://home.inacons.com.pe/r/e  →  /empresa/?c=e  →  esta página
+// Todo sobre el host home.inacons.com.pe: inacons.com.pe hace 301 hacia él,
+// y entrar por el dominio principal duplicaría los saltos de redirección.
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const SERVICIOS = [

@@ -2,9 +2,17 @@
 ErrorDocument 404 /404.html
 
 # ── URL corta para QR ───────────────────────────────────────────
-#  inacons.com.pe/r/CODIGO  →  home.inacons.com.pe/empresa/?c=CODIGO
+#  home.inacons.com.pe/r/CODIGO  →  home.inacons.com.pe/empresa/?c=CODIGO
+#
+#  Usar SIEMPRE el host home.inacons.com.pe en el QR, nunca inacons.com.pe:
+#  el dominio principal hace 301 a home, así que entrar por él agrega un
+#  salto al inicio y otro al final (el destino también es home). Son cuatro
+#  redirecciones en vez de dos, sobre la wifi saturada de un pabellón.
+#
 #  Menos caracteres = menos módulos = QR más legible en pantalla y video.
-#  El destino sigue siendo editable desde /empresa/admin.php sin reimprimir.
+#    https://home.inacons.com.pe/r/e   → 31 caracteres → 25x25 módulos
+#  El destino sigue siendo editable desde /empresa/admin.php sin reimprimir
+#  ni volver a renderizar el video: esa es la razón de existir de esta capa.
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^r/([A-Za-z0-9_-]+)/?$ https://home.inacons.com.pe/empresa/?c=$1 [R=302,L,NE]
