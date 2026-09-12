@@ -10,13 +10,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       display: flex;
       gap: 0;
       border-bottom: 2px solid var(--c-border-light);
-      margin-bottom: 56px;
+      margin-bottom: var(--sp-l2);
     }
     .tab-btn {
-      padding: 18px 36px;
+      padding: var(--sp-4) var(--sp-7);
       font-family: 'Montserrat', sans-serif;
       font-size: var(--fs-sm);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-text-muted);
@@ -38,7 +38,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     /* Intro de sección */
     .docs-intro {
       max-width: 640px;
-      margin-bottom: 48px;
+      margin-bottom: var(--sp-l2);
     }
     .docs-intro p {
       font-size: var(--fs-md);
@@ -47,13 +47,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
 
     /* Cards */
-    .cert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+    .cert-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-1); }
     .cert-grid .cert-card:nth-child(4) { grid-column: 1; }
     .cert-grid .cert-card:nth-child(5) { grid-column: 2; }
     .cert-card {
       background: var(--c-bg-white);
       border: 1px solid var(--c-border-light);
-      padding: 40px 32px 32px;
+      padding: var(--sp-l1) var(--sp-7) var(--sp-7);
       display: flex; flex-direction: column; align-items: flex-start;
       position: relative; overflow: hidden;
       transition: box-shadow .25s, transform .25s;
@@ -69,7 +69,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .cert-card:hover::before { background: var(--c-secondary); }
     .cert-bg-num {
       position: absolute; top: 12px; right: 16px;
-      font-size: 4.5rem; font-weight: 800;
+      font-size: 4.5rem; font-weight: var(--fw-display);
       color: rgba(20,23,45,0.04);
       line-height: 1; pointer-events: none; user-select: none; letter-spacing: var(--ls-tight);
     }
@@ -77,29 +77,29 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       width: 52px; height: 52px;
       background: var(--c-bg-muted); border-radius: 2px;
       display: flex; align-items: center; justify-content: center;
-      color: var(--c-secondary); margin-bottom: 20px;
+      color: var(--c-secondary); margin-bottom: var(--sp-5);
       transition: background .25s, color .25s; position: relative; z-index: 1;
     }
     .cert-card:hover .cert-icon-wrap { background: var(--c-secondary); color: #fff; }
     .cert-norm {
-      font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--ls-label);
+      font-size: var(--fs-2xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-label);
       text-transform: uppercase; color: var(--c-secondary);
-      margin-bottom: 8px; position: relative; z-index: 1;
+      margin-bottom: var(--sp-2); position: relative; z-index: 1;
     }
     .cert-title {
-      font-size: var(--fs-md); font-weight: 700; color: var(--c-text-heading);
-      line-height: 1.3; margin-bottom: 12px; position: relative; z-index: 1;
+      font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--c-text-heading);
+      line-height: 1.3; margin-bottom: var(--sp-3); position: relative; z-index: 1;
     }
     .cert-desc {
       font-size: var(--fs-sm); color: var(--c-text-muted);
-      line-height: 1.75; flex: 1; margin-bottom: 28px;
+      line-height: 1.75; flex: 1; margin-bottom: var(--sp-6);
       position: relative; z-index: 1;
     }
     .cert-download {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 22px;
+      display: inline-flex; align-items: center; gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-5);
       font-family: 'Montserrat', sans-serif;
-      font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.5px;
+      font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: 0.5px;
       text-transform: uppercase; text-decoration: none;
       border: 1.5px solid var(--c-secondary); color: var(--c-secondary);
       border-radius: 2px;
@@ -111,20 +111,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     /* Banda de normas */
     .norms-band {
       display: flex; justify-content: center; flex-wrap: wrap; gap: 0;
-      margin-top: 56px;
+      margin-top: var(--sp-l2);
       border: 1px solid var(--c-border-light); border-radius: 2px; overflow: hidden;
     }
     .norm-item {
       flex: 1; min-width: 160px;
       display: flex; flex-direction: column; align-items: center;
-      padding: 28px 20px;
+      padding: var(--sp-6) var(--sp-5);
       border-right: 1px solid var(--c-border-light);
       text-align: center; transition: background .22s;
     }
     .norm-item:last-child { border-right: none; }
     .norm-item:hover { background: rgba(27,82,120,0.04); }
-    .norm-code { font-size: var(--fs-lg); font-weight: 800; color: var(--c-primary); letter-spacing: var(--ls-tight); margin-bottom: 4px; }
-    .norm-name { font-size: var(--fs-xs); color: var(--c-text-muted); font-weight: 500; }
+    .norm-code { font-size: var(--fs-lg); font-weight: var(--fw-display); color: var(--c-primary); letter-spacing: var(--ls-tight); margin-bottom: var(--sp-1); }
+    .norm-name { font-size: var(--fs-xs); color: var(--c-text-muted); font-weight: var(--fw-medium); }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -134,7 +134,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .norms-band { flex-direction: column; }
       .norm-item { border-right: none; border-bottom: 1px solid var(--c-border-light); }
       .norm-item:last-child { border-bottom: none; }
-      .tab-btn { padding: 14px 18px; font-size: var(--fs-xs); }
+      .tab-btn { padding: var(--sp-3) var(--sp-4); font-size: var(--fs-xs); }
     }
     @media (min-width: 769px) and (max-width: 1023px) {
       .cert-grid { grid-template-columns: repeat(2, 1fr); }

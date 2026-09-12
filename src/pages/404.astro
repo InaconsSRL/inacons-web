@@ -53,14 +53,14 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
       position: relative;
       overflow: hidden;
       box-sizing: border-box;
-      padding: clamp(24px, 5vw, 48px) 20px;
+      padding: clamp(24px, 5vw, 48px) var(--sp-5);
     }
 
     .error-section::before {
       content: '404';
       position: absolute;
       font-size: clamp(12rem, 30vw, 22rem);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       color: rgba(20, 23, 45, 0.045);
       line-height: 1;
       pointer-events: none;
@@ -111,7 +111,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
 
     .error-label {
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-secondary);
@@ -121,7 +121,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
 
     .error-title {
       font-size: clamp(1.8rem, 4vw, 3rem);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       color: var(--c-text-heading);
       line-height: 1.15;
       margin: 0 0 1.25rem;
@@ -137,7 +137,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
 
     .error-actions {
       display: flex;
-      gap: 12px;
+      gap: var(--sp-3);
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -145,7 +145,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
     .error-actions .btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--sp-2);
     }
 
     .error-actions .btn svg {
@@ -160,7 +160,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
 
     .error-links > p {
       font-size: var(--fs-sm);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-text-muted);
@@ -169,7 +169,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
 
     .error-links-grid {
       display: flex;
-      gap: 8px;
+      gap: var(--sp-2);
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -177,9 +177,9 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
     .error-link-item {
       display: inline-flex;
       align-items: center;
-      padding: 8px 18px;
+      padding: var(--sp-2) var(--sp-4);
       font-size: var(--fs-sm);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       color: var(--c-text-heading);
       border: 1.5px solid var(--c-border-light);
       border-radius: 2px;

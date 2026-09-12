@@ -54,9 +54,9 @@ for (const r of recursos) {
     .recursos-toolbar {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 16px 24px;
+      gap: var(--sp-4) var(--sp-6);
       align-items: center;
-      margin-bottom: 32px;
+      margin-bottom: var(--sp-7);
     }
     .recursos-search {
       position: relative;
@@ -64,7 +64,7 @@ for (const r of recursos) {
     }
     .recursos-search input {
       width: 100%;
-      padding: 11px 14px 11px 38px;
+      padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-l1);
       font: inherit;
       font-size: var(--fs-base);
       color: var(--c-text-heading);
@@ -88,7 +88,7 @@ for (const r of recursos) {
     }
     .recursos-count {
       font-size: var(--fs-sm);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       color: var(--c-text-muted);
       letter-spacing: 0.3px;
       white-space: nowrap;
@@ -96,25 +96,25 @@ for (const r of recursos) {
     }
     .recursos-count strong {
       color: var(--c-text-heading);
-      font-weight: 800;
+      font-weight: var(--fw-display);
     }
 
     .filtros {
       grid-column: 1 / -1;
       display: flex;
-      gap: 6px;
+      gap: var(--sp-1);
       flex-wrap: wrap;
-      padding-top: 20px;
+      padding-top: var(--sp-5);
       border-top: 1px solid var(--c-border-light);
     }
     .filtro-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 9px 16px;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
       font-family: var(--font-ui);
       font-size: var(--fs-xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: 0.6px;
       text-transform: uppercase;
       color: var(--c-text-muted);
@@ -135,8 +135,8 @@ for (const r of recursos) {
     }
     .filtro-btn .filtro-num {
       font-size: var(--fs-2xs);
-      font-weight: 700;
-      padding: 1px 7px;
+      font-weight: var(--fw-bold);
+      padding: 1px var(--sp-2);
       border-radius: 100px;
       background: var(--c-bg-muted);
       color: var(--c-text-muted);
@@ -152,7 +152,7 @@ for (const r of recursos) {
        ───────────────────────────────────────────────────────── */
     .recursos-intro {
       max-width: 680px;
-      margin-bottom: 36px;
+      margin-bottom: var(--sp-7);
     }
     .recursos-intro p {
       font-size: var(--fs-md);
@@ -162,7 +162,7 @@ for (const r of recursos) {
     }
     .recursos-intro a {
       color: var(--c-secondary);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       text-decoration: underline;
       text-underline-offset: 3px;
     }
@@ -173,7 +173,7 @@ for (const r of recursos) {
     .recursos-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 24px;
+      gap: var(--sp-6);
     }
 
     .recurso-card {
@@ -207,7 +207,7 @@ for (const r of recursos) {
       width: auto;
       height: auto;
       object-fit: contain;
-      padding: 16px;
+      padding: var(--sp-4);
       transition: transform .35s ease;
     }
     .recurso-card:hover .recurso-preview img { transform: scale(1.04); }
@@ -217,10 +217,10 @@ for (const r of recursos) {
     }
     .recurso-file-badge {
       font-size: var(--fs-sm);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       letter-spacing: var(--ls-label);
       color: var(--c-secondary);
-      padding: 14px 22px;
+      padding: var(--sp-3) var(--sp-5);
       border: 2px dashed var(--c-border);
       border-radius: 4px;
     }
@@ -232,46 +232,46 @@ for (const r of recursos) {
       background: var(--c-primary);
       color: #fff;
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: 1px;
       text-transform: uppercase;
-      padding: 4px 9px;
+      padding: var(--sp-1) var(--sp-2);
       border-radius: 2px;
     }
 
     .recurso-body {
-      padding: 18px 20px 20px;
+      padding: var(--sp-4) var(--sp-5) var(--sp-5);
       flex: 1;
       display: flex;
       flex-direction: column;
     }
     .recurso-titulo {
       font-size: var(--fs-md);
-      font-weight: 700;
+      font-weight: var(--fw-bold);
       color: var(--c-text-heading);
-      margin: 0 0 4px;
+      margin: 0 0 var(--sp-1);
       line-height: 1.35;
     }
     .recurso-meta {
       font-size: var(--fs-xs);
       color: var(--c-text-muted);
-      margin: 0 0 16px;
+      margin: 0 0 var(--sp-4);
     }
 
     .recurso-actions {
       display: flex;
-      gap: 8px;
+      gap: var(--sp-2);
       flex-wrap: wrap;
       margin-top: auto;
     }
     .recurso-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
+      gap: var(--sp-1);
+      padding: var(--sp-2) var(--sp-3);
       font-family: var(--font-ui);
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: 0.5px;
       text-transform: uppercase;
       border-radius: 2px;
@@ -315,14 +315,14 @@ for (const r of recursos) {
       z-index: 1100;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: var(--sp-5);
       backdrop-filter: blur(3px);
     }
     .qr-modal-overlay.open { display: flex; }
     .qr-modal {
       background: #fff;
       border-radius: 4px;
-      padding: 40px 36px 32px;
+      padding: var(--sp-l1) var(--sp-7) var(--sp-7);
       max-width: 400px;
       width: 100%;
       text-align: center;
@@ -337,27 +337,27 @@ for (const r of recursos) {
       border: none;
       cursor: pointer;
       color: var(--c-text-muted);
-      padding: 6px;
+      padding: var(--sp-1);
       border-radius: 2px;
       transition: color .2s, background .2s;
     }
     .qr-modal-close:hover { color: var(--c-primary); background: var(--c-bg-muted); }
     .qr-modal-titulo {
       font-size: var(--fs-md);
-      font-weight: 700;
+      font-weight: var(--fw-bold);
       color: var(--c-primary);
-      margin: 0 0 6px;
+      margin: 0 0 var(--sp-1);
     }
     .qr-modal-url {
       font-size: var(--fs-xs);
       color: var(--c-text-muted);
-      margin: 0 0 24px;
+      margin: 0 0 var(--sp-6);
       word-break: break-all;
     }
     .qr-canvas-wrap {
       display: flex;
       justify-content: center;
-      margin-bottom: 24px;
+      margin-bottom: var(--sp-6);
     }
     /* qrcodejs inyecta canvas + img — los centramos sin padding extra */
     .qr-canvas-wrap > div { display: inline-block; }
@@ -366,7 +366,7 @@ for (const r of recursos) {
 
     .qr-modal-actions {
       display: flex;
-      gap: 10px;
+      gap: var(--sp-2);
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -376,7 +376,7 @@ for (const r of recursos) {
        ───────────────────────────────────────────────────────── */
     .recursos-empty {
       text-align: center;
-      padding: 80px 20px;
+      padding: var(--sp-l3) var(--sp-5);
       color: var(--c-text-muted);
       font-size: var(--fs-md);
       display: none;
@@ -386,7 +386,7 @@ for (const r of recursos) {
       font-size: 0.85em;
       color: var(--c-text-heading);
       background: var(--c-bg-muted);
-      padding: 2px 6px;
+      padding: 2px var(--sp-1);
       border-radius: 2px;
     }
 
@@ -401,8 +401,8 @@ for (const r of recursos) {
       background: var(--c-primary);
       color: #fff;
       font-size: var(--fs-sm);
-      font-weight: 600;
-      padding: 10px 22px;
+      font-weight: var(--fw-semibold);
+      padding: var(--sp-2) var(--sp-5);
       border-radius: 100px;
       opacity: 0;
       transition: opacity .25s, transform .25s;
@@ -425,7 +425,7 @@ for (const r of recursos) {
       }
       .recursos-count { justify-self: start; }
       .recursos-search { max-width: none; }
-      .qr-modal { padding: 32px 24px 24px; }
+      .qr-modal { padding: var(--sp-7) var(--sp-6) var(--sp-6); }
     }
   </style>
 

@@ -35,7 +35,7 @@ const SERVICIOS = [
     .xp-wrap {
       min-height: 100vh;
       background: var(--c-primary);
-      padding: 28px 18px 40px;
+      padding: var(--sp-6) var(--sp-4) var(--sp-l1);
       display: flex;
       justify-content: center;
     }
@@ -43,26 +43,26 @@ const SERVICIOS = [
       width: 100%;
       max-width: 460px;
     }
-    .xp-head { text-align: center; margin-bottom: 26px; }
-    .xp-logo { height: 44px; width: auto; margin-bottom: 20px; }
+    .xp-head { text-align: center; margin-bottom: var(--sp-6); }
+    .xp-logo { height: 44px; width: auto; margin-bottom: var(--sp-5); }
     .xp-badge {
       display: inline-block;
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-accent);
       border: 1px solid rgba(217, 130, 43, 0.45);
       border-radius: 2px;
-      padding: 6px 14px;
-      margin-bottom: 16px;
+      padding: var(--sp-1) var(--sp-3);
+      margin-bottom: var(--sp-4);
     }
     .xp-title {
       font-size: var(--fs-2xl);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       color: #fff;
       line-height: 1.25;
-      margin-bottom: 10px;
+      margin-bottom: var(--sp-2);
     }
     .xp-sub {
       font-size: var(--fs-md);
@@ -73,24 +73,24 @@ const SERVICIOS = [
     .xp-form {
       background: #fff;
       border-top: 3px solid var(--c-accent);
-      padding: 26px 22px 24px;
+      padding: var(--sp-6) var(--sp-5) var(--sp-6);
     }
-    .xp-field { margin-bottom: 16px; }
+    .xp-field { margin-bottom: var(--sp-4); }
     .xp-field label {
       display: block;
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-text-muted);
-      margin-bottom: 7px;
+      margin-bottom: var(--sp-2);
     }
     .xp-field input,
     .xp-field select {
       width: 100%;
       border: 1.5px solid var(--c-border);
       border-radius: 2px;
-      padding: 14px;
+      padding: var(--sp-3);
       font-family: var(--font-ui);
       /* 16px exactos: por debajo de eso iOS hace zoom al enfocar el campo */
       font-size: var(--fs-md);
@@ -103,7 +103,7 @@ const SERVICIOS = [
     .xp-field select {
       background-repeat: no-repeat;
       background-position: right 14px center;
-      padding-right: 38px;
+      padding-right: var(--sp-l1);
     }
     .xp-field input:focus,
     .xp-field select:focus {
@@ -112,14 +112,14 @@ const SERVICIOS = [
     }
     .xp-field input.xp-err,
     .xp-field select.xp-err { border-color: #c0392b; background-color: #fdf3f2; }
-    .xp-opt { font-weight: 400; text-transform: none; letter-spacing: 0; color: #b0b6c8; }
+    .xp-opt { font-weight: var(--fw-normal); text-transform: none; letter-spacing: 0; color: #b0b6c8; }
 
     .xp-consent {
       display: flex;
-      gap: 11px;
+      gap: var(--sp-3);
       align-items: flex-start;
-      margin: 20px 0 18px;
-      padding: 14px;
+      margin: var(--sp-5) 0 var(--sp-4);
+      padding: var(--sp-3);
       background: var(--c-bg-muted);
       border-radius: 2px;
     }
@@ -140,14 +140,14 @@ const SERVICIOS = [
 
     .xp-submit {
       width: 100%;
-      padding: 16px;
+      padding: var(--sp-4);
       background: var(--c-accent);
       color: #fff;
       border: none;
       border-radius: 2px;
       font-family: var(--font-ui);
       font-size: var(--fs-base);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       cursor: pointer;
@@ -165,8 +165,8 @@ const SERVICIOS = [
     }
     .xp-msg {
       display: none;
-      margin-top: 14px;
-      padding: 11px 13px;
+      margin-top: var(--sp-3);
+      padding: var(--sp-3) var(--sp-3);
       border-radius: 2px;
       font-size: var(--fs-sm);
       line-height: 1.5;
@@ -175,12 +175,12 @@ const SERVICIOS = [
     .xp-msg.err { background: #fdf3f2; color: #a5321f; }
 
     /* Pantalla de gracias */
-    .xp-done { display: none; background: #fff; padding: 44px 26px; text-align: center; }
+    .xp-done { display: none; background: #fff; padding: var(--sp-l1) var(--sp-6); text-align: center; }
     .xp-done.show { display: block; }
     .xp-done-icon {
       width: 62px;
       height: 62px;
-      margin: 0 auto 20px;
+      margin: 0 auto var(--sp-5);
       border-radius: 50%;
       background: rgba(39, 174, 96, .1);
       color: #27ae60;
@@ -188,32 +188,32 @@ const SERVICIOS = [
       align-items: center;
       justify-content: center;
     }
-    .xp-done h2 { font-size: var(--fs-xl); color: var(--c-primary); margin-bottom: 10px; }
-    .xp-done p { font-size: var(--fs-base); color: var(--c-text-muted); line-height: 1.6; margin-bottom: 26px; }
+    .xp-done h2 { font-size: var(--fs-xl); color: var(--c-primary); margin-bottom: var(--sp-2); }
+    .xp-done p { font-size: var(--fs-base); color: var(--c-text-muted); line-height: 1.6; margin-bottom: var(--sp-6); }
     .xp-brochure {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
+      gap: var(--sp-2);
       width: 100%;
-      padding: 15px;
+      padding: var(--sp-4);
       background: var(--c-secondary);
       color: #fff;
       text-decoration: none;
       border-radius: 2px;
       font-size: var(--fs-sm);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       letter-spacing: 1px;
       text-transform: uppercase;
       transition: background .2s;
     }
     .xp-brochure:hover { background: var(--c-primary); }
-    .xp-done-foot { margin-top: 22px; font-size: var(--fs-sm); color: var(--c-text-muted); }
-    .xp-done-foot a { color: var(--c-secondary); font-weight: 600; }
+    .xp-done-foot { margin-top: var(--sp-5); font-size: var(--fs-sm); color: var(--c-text-muted); }
+    .xp-done-foot a { color: var(--c-secondary); font-weight: var(--fw-semibold); }
 
     @media (max-width: 380px) {
-      .xp-wrap { padding: 20px 12px 32px; }
-      .xp-form { padding: 22px 16px 20px; }
+      .xp-wrap { padding: var(--sp-5) var(--sp-3) var(--sp-7); }
+      .xp-form { padding: var(--sp-5) var(--sp-4) var(--sp-5); }
       .xp-title { font-size: var(--fs-xl); }
     }
   </style>

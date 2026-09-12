@@ -53,28 +53,28 @@ const destacados = proyectos
       max-width: 1200px;
       width: 100%;
       margin: 0 auto;
-      padding: 0 40px;
+      padding: 0 var(--sp-l1);
     }
     .home-hero h1 {
       font-family: 'Montserrat', sans-serif;
       font-size: clamp(2.2rem, 5vw, 3.8rem);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       line-height: 1.1;
-      margin-bottom: 28px;
+      margin-bottom: var(--sp-6);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: var(--sp-2);
       letter-spacing: var(--ls-tight);
     }
     .hero-line {
       display: flex;
       align-items: baseline;
-      gap: 14px;
+      gap: var(--sp-3);
       flex-wrap: wrap;
     }
-    .word.fixed   { color: rgba(255,255,255,0.68); font-weight: 300; letter-spacing: var(--ls-label); }
-    .word.highlight { color: #fff; font-weight: 800; letter-spacing: var(--ls-tight); }
+    .word.fixed   { color: rgba(255,255,255,0.68); font-weight: var(--fw-normal); letter-spacing: var(--ls-label); }
+    .word.highlight { color: #fff; font-weight: var(--fw-display); letter-spacing: var(--ls-tight); }
     .word.highlight.completed {
       background: linear-gradient(transparent 84%, rgba(27,82,120,0.40) 84%);
     }
@@ -108,12 +108,12 @@ const destacados = proyectos
     .hero-content > p {
       font-size: clamp(0.95rem, 1.6vw, 1.1rem);
       color: rgba(255,255,255,0.68);
-      margin-bottom: 36px;
+      margin-bottom: var(--sp-7);
       max-width: 500px;
-      font-weight: 300;
+      font-weight: var(--fw-normal);
       letter-spacing: 0.2px;
     }
-    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-actions { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
 
     /* ── INDICADORES ── */
     .hero-indicators {
@@ -126,7 +126,7 @@ const destacados = proyectos
     .indicators-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 40px;
+      padding: 0 var(--sp-l1);
       display: grid;
       grid-template-columns: repeat(4, 1fr);
     }
@@ -134,7 +134,7 @@ const destacados = proyectos
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 26px 16px;
+      padding: var(--sp-6) var(--sp-4);
       border-right: 1px solid rgba(255,255,255,0.07);
       position: relative;
       overflow: hidden;
@@ -154,10 +154,10 @@ const destacados = proyectos
     .indicator:hover::after { width: 52%; }
     .indicator:last-child { border-right: none; }
     .indicator:hover { background: rgba(255,255,255,0.04); }
-    .indicator-icon { color: rgba(255,255,255,0.28); margin-bottom: 10px; }
+    .indicator-icon { color: rgba(255,255,255,0.28); margin-bottom: var(--sp-2); }
     .indicator-number {
       font-size: clamp(2rem, 4vw, 2.8rem);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       color: #fff;
       line-height: 1;
       letter-spacing: var(--ls-tight);
@@ -167,7 +167,7 @@ const destacados = proyectos
       color: rgba(255,255,255,0.55);
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      margin-top: 4px;
+      margin-top: var(--sp-1);
       text-align: center;
     }
 
@@ -175,7 +175,7 @@ const destacados = proyectos
     .about-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 88px;
+      gap: var(--sp-l4);
       align-items: center;
     }
     .about-img-frame {
@@ -201,7 +201,7 @@ const destacados = proyectos
       bottom: -18px; right: -18px;
       z-index: 2;
       background: var(--c-primary);
-      padding: 20px 24px;
+      padding: var(--sp-5) var(--sp-6);
       min-width: 112px;
       text-align: center;
     }
@@ -209,7 +209,7 @@ const destacados = proyectos
       display: block;
       font-family: 'Montserrat', sans-serif;
       font-size: var(--fs-display);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       letter-spacing: var(--ls-tight);
       line-height: 1;
       color: var(--c-accent);
@@ -217,53 +217,53 @@ const destacados = proyectos
     .badge-text {
       display: block;
       font-size: var(--fs-2xs);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: 1px;
       color: rgba(255,255,255,0.55);
-      margin-top: 6px;
+      margin-top: var(--sp-1);
       line-height: 1.45;
     }
     .about-content { display: flex; flex-direction: column; }
-    .about-content .sh-label { margin-bottom: 14px; }
+    .about-content .sh-label { margin-bottom: var(--sp-3); }
     .about-heading {
       font-family: 'Montserrat', sans-serif;
       font-size: clamp(1.75rem, 2.8vw, 2.4rem);
-      font-weight: 700;
+      font-weight: var(--fw-bold);
       color: var(--c-primary);
       line-height: 1.18;
-      margin: 0 0 20px;
+      margin: 0 0 var(--sp-5);
     }
     .about-divider {
       width: 44px; height: 3px;
       background: var(--c-accent);
-      margin-bottom: 22px;
+      margin-bottom: var(--sp-5);
     }
     .about-body-text {
       font-size: var(--fs-md);
       color: rgba(20,23,45,0.68);
       line-height: 1.78;
-      margin: 0 0 14px;
+      margin: 0 0 var(--sp-3);
     }
     .about-kpi-row {
       display: flex;
       border-top: 1px solid rgba(20,23,45,0.09);
       border-bottom: 1px solid rgba(20,23,45,0.09);
-      padding: 22px 0;
-      margin: 22px 0 32px;
+      padding: var(--sp-5) 0;
+      margin: var(--sp-5) 0 var(--sp-7);
     }
     .about-kpi {
       flex: 1;
-      padding-right: 24px;
+      padding-right: var(--sp-6);
       border-right: 1px solid rgba(20,23,45,0.09);
     }
-    .about-kpi:last-child { border-right: none; padding-right: 0; padding-left: 24px; }
+    .about-kpi:last-child { border-right: none; padding-right: 0; padding-left: var(--sp-6); }
     .about-kpi:first-child { padding-left: 0; }
     .about-kpi-num {
       display: block;
       font-family: 'Montserrat', sans-serif;
       font-size: clamp(1.6rem, 2.4vw, 2rem);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       color: var(--c-primary);
       letter-spacing: var(--ls-tight);
       line-height: 1;
@@ -271,18 +271,18 @@ const destacados = proyectos
     .about-kpi-label {
       display: block;
       font-size: var(--fs-2xs);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: 1px;
       color: rgba(20,23,45,0.42);
-      margin-top: 5px;
+      margin-top: var(--sp-1);
     }
 
     /* ── REGIONAL GRID ── */
     .regional-grid {
       display: grid;
       grid-template-columns: 1fr 1.5fr;
-      gap: 80px;
+      gap: var(--sp-l3);
       align-items: center;
     }
     .regional-map-wrap { display: flex; justify-content: center; }
@@ -317,10 +317,10 @@ const destacados = proyectos
     }
     .info-slide-content {
       flex: 1;
-      padding: 40px;
+      padding: var(--sp-l1);
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: var(--sp-4);
       justify-content: center;
       background: var(--c-primary) !important;
       position: relative;
@@ -334,7 +334,7 @@ const destacados = proyectos
     }
     .info-carousel-title {
       font-size: clamp(1.5rem, 2.5vw, 2rem);
-      font-weight: 700;
+      font-weight: var(--fw-bold);
       line-height: 1.2;
       margin: 0;
       color: #fff !important;
@@ -373,7 +373,7 @@ const destacados = proyectos
         height: 100%;
       }
       .info-slide-content {
-        padding: 40px;
+        padding: var(--sp-l1);
       }
     }
 
@@ -398,7 +398,7 @@ const destacados = proyectos
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 18px 22px;
+      padding: var(--sp-4) var(--sp-5);
       border-right: 1px solid var(--c-border-light);
       filter: grayscale(100%);
       opacity: 0.48;
@@ -408,7 +408,7 @@ const destacados = proyectos
     .client-logo-item img { max-height: 40px; max-width: 108px; object-fit: contain; }
 
     /* ── CTA BAND ── */
-    .cta-band { background: var(--c-primary); padding: 88px 0; }
+    .cta-band { background: var(--c-primary); padding: var(--sp-l4) 0; }
     .cta-band .sh-label { color: rgba(255,255,255,0.70); }
     .cta-band .sh-label::before,
     .cta-band .sh-label::after { background: rgba(255,255,255,0.25); }
@@ -418,23 +418,23 @@ const destacados = proyectos
     /* ── CTA ACTIONS ── */
     .cta-actions {
       display: flex;
-      gap: 16px;
+      gap: var(--sp-4);
       flex-wrap: wrap;
       justify-content: center;
-      margin-top: 40px;
+      margin-top: var(--sp-l1);
     }
 
     /* ── EYEBROW ── */
     .hero-eyebrow {
       font-size: var(--fs-2xs);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-accent);
-      margin-bottom: 20px;
+      margin-bottom: var(--sp-5);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: var(--sp-2);
     }
     .hero-eyebrow::before {
       content: '';
@@ -473,7 +473,7 @@ const destacados = proyectos
       visibility: hidden;
       user-select: none;
       pointer-events: none;
-      font-weight: 800;
+      font-weight: var(--fw-display);
       letter-spacing: var(--ls-tight);
     }
     .cycle-word {
@@ -481,7 +481,7 @@ const destacados = proyectos
       left: 0;
       top: 0;
       color: #fff;
-      font-weight: 800;
+      font-weight: var(--fw-display);
       letter-spacing: var(--ls-tight);
       white-space: nowrap;
       opacity: 0;
@@ -548,7 +548,7 @@ const destacados = proyectos
       .scroll-hint    { display: none; }
       .hero-pause-btn { display: none; }
       .hero-content {
-        padding: 80px 20px 160px;
+        padding: var(--sp-l3) var(--sp-5) 160px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -557,13 +557,13 @@ const destacados = proyectos
         text-align: center;
         font-size: clamp(1.35rem, 6.5vw, 1.9rem);
         width: 100%;
-        padding: 0 4px;
+        padding: 0 var(--sp-1);
         letter-spacing: -0.3px;
       }
       .hero-line {
         flex-wrap: nowrap;
         justify-content: center;
-        gap: 8px;
+        gap: var(--sp-2);
         width: 100%;
         overflow: hidden;
       }
@@ -589,12 +589,12 @@ const destacados = proyectos
       }
 
       /* About */
-      .about-grid { grid-template-columns: 1fr; gap: 36px; }
+      .about-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
       .about-img-wrap { height: 280px; }
       .about-img-wrap::before { display: none; }
 
       /* Regional */
-      .regional-grid { grid-template-columns: 1fr; gap: 36px; }
+      .regional-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
 
       /* Indicadores */
       .indicators-container { grid-template-columns: repeat(2, 1fr); }
@@ -608,7 +608,7 @@ const destacados = proyectos
         height: 200px;
       }
       .info-slide-content {
-        padding: 28px 24px;
+        padding: var(--sp-6) var(--sp-6);
       }
       .info-carousel-title {
         font-size: var(--fs-xl);
@@ -637,7 +637,7 @@ const destacados = proyectos
     /* ── SERVICES SHOWCASE ── */
     .services-showcase {
       background: var(--c-primary);
-      padding: 80px 0 0;
+      padding: var(--sp-l3) 0 0;
     }
     .services-showcase .sh-label        { color: rgba(255,255,255,0.55); }
     .services-showcase .sh-label::before,
@@ -648,7 +648,7 @@ const destacados = proyectos
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 2px;
-      margin-top: 56px;
+      margin-top: var(--sp-l2);
       background: rgba(255,255,255,0.07);
     }
     .service-card {
@@ -690,22 +690,22 @@ const destacados = proyectos
       position: absolute;
       bottom: 0; left: 0; right: 0;
       z-index: 2;
-      padding: 28px 32px;
+      padding: var(--sp-6) var(--sp-7);
     }
     .svc-icon {
       color: var(--c-accent);
-      margin-bottom: 10px;
+      margin-bottom: var(--sp-2);
       opacity: 0.88;
       transition: opacity 0.3s, transform 0.3s;
     }
     .service-card:hover .svc-icon { opacity: 1; transform: translateY(-2px); }
     .svc-title {
       font-size: var(--fs-lg);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       color: #fff;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin: 0 0 6px;
+      margin: 0 0 var(--sp-1);
     }
     .svc-desc {
       font-size: var(--fs-sm);
@@ -721,10 +721,10 @@ const destacados = proyectos
     .svc-arrow {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      margin-top: 10px;
+      gap: var(--sp-1);
+      margin-top: var(--sp-2);
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: var(--ls-label);
       color: var(--c-accent);
@@ -738,15 +738,15 @@ const destacados = proyectos
     /* ── PROYECTOS DESTACADOS ── */
     .projects-showcase {
       background: var(--c-primary);
-      padding: 88px 0 0;
+      padding: var(--sp-l4) 0 0;
     }
     .projects-showcase .sh-label { color: var(--c-accent); opacity: 1; }
     .projects-showcase .sh-title { color: #fff; }
     .projects-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 3px;
-      margin-top: 52px;
+      gap: var(--sp-1);
+      margin-top: var(--sp-l2);
     }
     .project-card {
       position: relative;
@@ -781,38 +781,38 @@ const destacados = proyectos
     .project-info {
       position: absolute;
       bottom: 0; left: 0; right: 0;
-      padding: 30px 28px;
+      padding: var(--sp-7) var(--sp-6);
     }
     .project-tag {
       display: inline-block;
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: var(--ls-label);
       color: var(--c-accent);
       border: 1px solid rgba(217,130,43,0.45);
-      padding: 3px 10px;
-      margin-bottom: 10px;
+      padding: var(--sp-1) var(--sp-2);
+      margin-bottom: var(--sp-2);
     }
     .project-name {
       font-family: 'Montserrat', sans-serif;
       font-size: clamp(0.95rem, 1.3vw, 1.15rem);
-      font-weight: 700;
+      font-weight: var(--fw-bold);
       color: #fff;
-      margin: 0 0 6px;
+      margin: 0 0 var(--sp-1);
       line-height: 1.25;
     }
     .project-location {
       font-size: var(--fs-2xs);
       color: rgba(255,255,255,0.48);
-      margin: 0 0 14px;
+      margin: 0 0 var(--sp-3);
     }
     .project-cta {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: var(--sp-1);
       font-size: var(--fs-2xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: var(--ls-label);
       color: var(--c-accent);
@@ -821,15 +821,15 @@ const destacados = proyectos
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
     .project-card:hover .project-cta { opacity: 1; transform: translateY(0); }
-    .projects-footer { text-align: center; padding: 52px 0; }
+    .projects-footer { text-align: center; padding: var(--sp-l2) 0; }
 
     /* ── COVERAGE MAP ── */
     .coverage-stats {
       display: flex;
       justify-content: center;
-      gap: 72px;
-      margin: 40px 0 52px;
-      padding: 28px 0;
+      gap: var(--sp-l3);
+      margin: var(--sp-l1) 0 var(--sp-l2);
+      padding: var(--sp-6) 0;
       border-top: 1px solid rgba(20,23,45,0.08);
       border-bottom: 1px solid rgba(20,23,45,0.08);
     }
@@ -837,7 +837,7 @@ const destacados = proyectos
     .cov-stat-num {
       display: block;
       font-size: clamp(2rem, 4vw, 2.8rem);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       color: var(--c-primary);
       letter-spacing: var(--ls-tight);
       line-height: 1;
@@ -845,16 +845,16 @@ const destacados = proyectos
     .cov-stat-label {
       display: block;
       font-size: var(--fs-2xs);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: var(--ls-label);
       color: rgba(20,23,45,0.45);
-      margin-top: 7px;
+      margin-top: var(--sp-2);
     }
     .coverage-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 64px;
+      gap: var(--sp-l3);
       align-items: center;
     }
     /* Mapa SVG interactivo por departamentos */
@@ -877,28 +877,28 @@ const destacados = proyectos
     .map-stats { }
     .map-stats-title {
       font-size: var(--fs-xs);
-      font-weight: 700;
+      font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: var(--ls-label);
       color: rgba(20,23,45,0.40);
-      margin-bottom: 28px;
+      margin-bottom: var(--sp-6);
     }
-    .map-stat { margin-bottom: 18px; }
+    .map-stat { margin-bottom: var(--sp-4); }
     .map-stat:last-child { margin-bottom: 0; }
     .map-stat-meta {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 7px;
+      margin-bottom: var(--sp-2);
     }
     .map-stat-city {
       font-size: var(--fs-md);
-      font-weight: 600;
+      font-weight: var(--fw-semibold);
       color: var(--c-primary);
     }
     .map-stat-count {
       font-size: var(--fs-md);
-      font-weight: 800;
+      font-weight: var(--fw-display);
       color: var(--c-accent);
       letter-spacing: var(--ls-tight);
     }
@@ -917,23 +917,23 @@ const destacados = proyectos
     }
 
     @media (max-width: 768px) {
-      .services-showcase { padding: 60px 0 0; }
-      .services-grid { grid-template-columns: repeat(2, 1fr); margin-top: 36px; }
+      .services-showcase { padding: var(--sp-l3) 0 0; }
+      .services-grid { grid-template-columns: repeat(2, 1fr); margin-top: var(--sp-7); }
       .service-card { aspect-ratio: 3/2; }
-      .svc-body { padding: 14px 18px; }
+      .svc-body { padding: var(--sp-3) var(--sp-4); }
       .svc-title { font-size: var(--fs-sm); }
       .svc-desc, .svc-arrow { display: none; }
-      .about-grid { grid-template-columns: 1fr; gap: 48px; }
+      .about-grid { grid-template-columns: 1fr; gap: var(--sp-l2); }
       .about-img-frame { height: 360px; }
-      .about-years-badge { bottom: -12px; right: -12px; padding: 14px 18px; }
+      .about-years-badge { bottom: -12px; right: -12px; padding: var(--sp-3) var(--sp-4); }
       .about-kpi-row { gap: 0; }
-      .about-kpi { padding: 14px 16px; border-right: none; border-bottom: 1px solid rgba(20,23,45,0.09); }
-      .about-kpi:last-child { border-bottom: none; padding-left: 16px; }
+      .about-kpi { padding: var(--sp-3) var(--sp-4); border-right: none; border-bottom: 1px solid rgba(20,23,45,0.09); }
+      .about-kpi:last-child { border-bottom: none; padding-left: var(--sp-4); }
       .projects-grid { grid-template-columns: 1fr; }
       .project-card { height: 380px; }
       .project-cta { opacity: 1; transform: translateY(0); }
-      .coverage-stats { gap: 28px; }
-      .coverage-grid { grid-template-columns: 1fr; gap: 36px; }
+      .coverage-stats { gap: var(--sp-6); }
+      .coverage-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
       #peruMapContainer { max-width: 220px; }
     }
   </style>

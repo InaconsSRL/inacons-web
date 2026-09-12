@@ -132,7 +132,7 @@ servicios.sort((a: Servicio, b: Servicio) =>
   .services-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
+    gap: var(--sp-1);
   }
 
   .service-item {
@@ -175,34 +175,34 @@ servicios.sort((a: Servicio, b: Servicio) =>
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 32px 28px;
+    padding: var(--sp-7) var(--sp-6);
     z-index: 2;
   }
 
   .service-info h2 {
     font-size: var(--fs-xl);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: #fff;
-    margin-bottom: 10px;
+    margin-bottom: var(--sp-2);
   }
 
   .service-info p {
     font-size: var(--fs-base);
     color: rgba(255,255,255,0.72);
     line-height: 1.6;
-    margin-bottom: 20px;
+    margin-bottom: var(--sp-5);
   }
 
   /* Proceso */
   .process-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 3px;
-    margin-top: 48px;
+    gap: var(--sp-1);
+    margin-top: var(--sp-l2);
   }
 
   .process-step {
-    padding: 40px 28px;
+    padding: var(--sp-l1) var(--sp-6);
     background: var(--c-bg-muted);
     border: 1px solid var(--c-border-light);
     position: relative;
@@ -222,15 +222,15 @@ servicios.sort((a: Servicio, b: Servicio) =>
   .process-step:hover::before { transform: scaleX(1); }
 
   .process-num {
-    font-size: 3.5rem; font-weight: 800;
+    font-size: 3.5rem; font-weight: var(--fw-display);
     color: rgba(20,23,45,0.06);
-    line-height: 1; margin-bottom: 16px;
+    line-height: 1; margin-bottom: var(--sp-4);
     letter-spacing: var(--ls-tight);
   }
 
   .process-title {
-    font-size: var(--fs-md); font-weight: 700;
-    color: var(--c-text-heading); margin-bottom: 12px;
+    font-size: var(--fs-md); font-weight: var(--fw-bold);
+    color: var(--c-text-heading); margin-bottom: var(--sp-3);
   }
 
   .process-desc {
@@ -241,8 +241,8 @@ servicios.sort((a: Servicio, b: Servicio) =>
   .tech-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 3px;
-    margin-top: 48px;
+    gap: var(--sp-1);
+    margin-top: var(--sp-l2);
   }
 
   .tech-card {
@@ -263,16 +263,16 @@ servicios.sort((a: Servicio, b: Servicio) =>
 
   .tech-card:hover .tech-img img { transform: scale(1.04); }
 
-  .tech-content { padding: 32px 32px 36px; }
+  .tech-content { padding: var(--sp-7) var(--sp-7) var(--sp-7); }
 
   .tech-label {
-    font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--ls-label);
-    text-transform: uppercase; color: var(--c-secondary); margin-bottom: 10px;
+    font-size: var(--fs-2xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-label);
+    text-transform: uppercase; color: var(--c-secondary); margin-bottom: var(--sp-2);
   }
 
   .tech-title {
-    font-size: var(--fs-lg); font-weight: 700;
-    color: var(--c-text-heading); margin-bottom: 14px;
+    font-size: var(--fs-lg); font-weight: var(--fw-bold);
+    color: var(--c-text-heading); margin-bottom: var(--sp-3);
   }
 
   .tech-desc {

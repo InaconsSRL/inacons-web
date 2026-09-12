@@ -62,7 +62,7 @@ proyectos.sort((a: Proyecto, b: Proyecto) =>
   .proyectos-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
+    gap: var(--sp-1);
   }
 
   .proyecto-card {
@@ -105,25 +105,25 @@ proyectos.sort((a: Proyecto, b: Proyecto) =>
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 28px 24px;
+    padding: var(--sp-6) var(--sp-6);
     z-index: 2;
   }
 
   .proyecto-cat {
     display: inline-block;
     font-size: var(--fs-2xs);
-    font-weight: 700;
+    font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: rgba(255,255,255,0.60);
-    margin-bottom: 8px;
+    margin-bottom: var(--sp-2);
   }
 
   .proyecto-info h2 {
     font-size: var(--fs-lg);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     color: #fff;
-    margin-bottom: 6px;
+    margin-bottom: var(--sp-1);
     line-height: 1.3;
   }
 
