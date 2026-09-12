@@ -15,9 +15,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .tab-btn {
       padding: 18px 36px;
       font-family: 'Montserrat', sans-serif;
-      font-size: 0.78rem;
+      font-size: var(--fs-sm);
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-text-muted);
       background: none;
@@ -41,7 +41,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       margin-bottom: 48px;
     }
     .docs-intro p {
-      font-size: 0.93rem;
+      font-size: var(--fs-md);
       color: var(--c-text-muted);
       line-height: 1.85;
     }
@@ -71,7 +71,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       position: absolute; top: 12px; right: 16px;
       font-size: 4.5rem; font-weight: 800;
       color: rgba(20,23,45,0.04);
-      line-height: 1; pointer-events: none; user-select: none; letter-spacing: -2px;
+      line-height: 1; pointer-events: none; user-select: none; letter-spacing: var(--ls-tight);
     }
     .cert-icon-wrap {
       width: 52px; height: 52px;
@@ -82,16 +82,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     .cert-card:hover .cert-icon-wrap { background: var(--c-secondary); color: #fff; }
     .cert-norm {
-      font-size: 0.65rem; font-weight: 700; letter-spacing: 2.5px;
+      font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--ls-label);
       text-transform: uppercase; color: var(--c-secondary);
       margin-bottom: 8px; position: relative; z-index: 1;
     }
     .cert-title {
-      font-size: 1rem; font-weight: 700; color: var(--c-text-heading);
+      font-size: var(--fs-md); font-weight: 700; color: var(--c-text-heading);
       line-height: 1.3; margin-bottom: 12px; position: relative; z-index: 1;
     }
     .cert-desc {
-      font-size: 0.83rem; color: var(--c-text-muted);
+      font-size: var(--fs-sm); color: var(--c-text-muted);
       line-height: 1.75; flex: 1; margin-bottom: 28px;
       position: relative; z-index: 1;
     }
@@ -99,7 +99,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       display: inline-flex; align-items: center; gap: 8px;
       padding: 10px 22px;
       font-family: 'Montserrat', sans-serif;
-      font-size: 0.74rem; font-weight: 700; letter-spacing: 0.5px;
+      font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.5px;
       text-transform: uppercase; text-decoration: none;
       border: 1.5px solid var(--c-secondary); color: var(--c-secondary);
       border-radius: 2px;
@@ -123,8 +123,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }
     .norm-item:last-child { border-right: none; }
     .norm-item:hover { background: rgba(27,82,120,0.04); }
-    .norm-code { font-size: 1.1rem; font-weight: 800; color: var(--c-primary); letter-spacing: -0.5px; margin-bottom: 4px; }
-    .norm-name { font-size: 0.72rem; color: var(--c-text-muted); font-weight: 500; }
+    .norm-code { font-size: var(--fs-lg); font-weight: 800; color: var(--c-primary); letter-spacing: var(--ls-tight); margin-bottom: 4px; }
+    .norm-name { font-size: var(--fs-xs); color: var(--c-text-muted); font-weight: 500; }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -134,7 +134,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .norms-band { flex-direction: column; }
       .norm-item { border-right: none; border-bottom: 1px solid var(--c-border-light); }
       .norm-item:last-child { border-bottom: none; }
-      .tab-btn { padding: 14px 18px; font-size: 0.72rem; }
+      .tab-btn { padding: 14px 18px; font-size: var(--fs-xs); }
     }
     @media (min-width: 769px) and (max-width: 1023px) {
       .cert-grid { grid-template-columns: repeat(2, 1fr); }

@@ -180,14 +180,14 @@ servicios.sort((a: Servicio, b: Servicio) =>
   }
 
   .service-info h2 {
-    font-size: 1.3rem;
+    font-size: var(--fs-xl);
     font-weight: 700;
     color: #fff;
     margin-bottom: 10px;
   }
 
   .service-info p {
-    font-size: 0.88rem;
+    font-size: var(--fs-base);
     color: rgba(255,255,255,0.72);
     line-height: 1.6;
     margin-bottom: 20px;
@@ -225,16 +225,16 @@ servicios.sort((a: Servicio, b: Servicio) =>
     font-size: 3.5rem; font-weight: 800;
     color: rgba(20,23,45,0.06);
     line-height: 1; margin-bottom: 16px;
-    letter-spacing: -2px;
+    letter-spacing: var(--ls-tight);
   }
 
   .process-title {
-    font-size: 1rem; font-weight: 700;
+    font-size: var(--fs-md); font-weight: 700;
     color: var(--c-text-heading); margin-bottom: 12px;
   }
 
   .process-desc {
-    font-size: 0.83rem; color: var(--c-text-muted); line-height: 1.75;
+    font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.75;
   }
 
   /* Tecnología */
@@ -266,17 +266,17 @@ servicios.sort((a: Servicio, b: Servicio) =>
   .tech-content { padding: 32px 32px 36px; }
 
   .tech-label {
-    font-size: 0.65rem; font-weight: 700; letter-spacing: 2.5px;
+    font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--ls-label);
     text-transform: uppercase; color: var(--c-secondary); margin-bottom: 10px;
   }
 
   .tech-title {
-    font-size: 1.1rem; font-weight: 700;
+    font-size: var(--fs-lg); font-weight: 700;
     color: var(--c-text-heading); margin-bottom: 14px;
   }
 
   .tech-desc {
-    font-size: 0.85rem; color: var(--c-text-muted); line-height: 1.8;
+    font-size: var(--fs-base); color: var(--c-text-muted); line-height: 1.8;
   }
 
   @media (max-width: 1023px) {

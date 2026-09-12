@@ -65,7 +65,7 @@ const destacados = proyectos
       display: flex;
       flex-direction: column;
       gap: 8px;
-      letter-spacing: -0.6px;
+      letter-spacing: var(--ls-tight);
     }
     .hero-line {
       display: flex;
@@ -73,8 +73,8 @@ const destacados = proyectos
       gap: 14px;
       flex-wrap: wrap;
     }
-    .word.fixed   { color: rgba(255,255,255,0.68); font-weight: 300; letter-spacing: 1.5px; }
-    .word.highlight { color: #fff; font-weight: 800; letter-spacing: -0.5px; }
+    .word.fixed   { color: rgba(255,255,255,0.68); font-weight: 300; letter-spacing: var(--ls-label); }
+    .word.highlight { color: #fff; font-weight: 800; letter-spacing: var(--ls-tight); }
     .word.highlight.completed {
       background: linear-gradient(transparent 84%, rgba(27,82,120,0.40) 84%);
     }
@@ -160,10 +160,10 @@ const destacados = proyectos
       font-weight: 800;
       color: #fff;
       line-height: 1;
-      letter-spacing: -1.5px;
+      letter-spacing: var(--ls-tight);
     }
     .indicator-text {
-      font-size: 0.75rem;
+      font-size: var(--fs-xs);
       color: rgba(255,255,255,0.55);
       text-transform: uppercase;
       letter-spacing: 0.8px;
@@ -208,15 +208,15 @@ const destacados = proyectos
     .badge-num {
       display: block;
       font-family: 'Montserrat', sans-serif;
-      font-size: 2.4rem;
+      font-size: var(--fs-display);
       font-weight: 800;
-      letter-spacing: -2px;
+      letter-spacing: var(--ls-tight);
       line-height: 1;
       color: var(--c-accent);
     }
     .badge-text {
       display: block;
-      font-size: 0.62rem;
+      font-size: var(--fs-2xs);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -240,7 +240,7 @@ const destacados = proyectos
       margin-bottom: 22px;
     }
     .about-body-text {
-      font-size: 0.975rem;
+      font-size: var(--fs-md);
       color: rgba(20,23,45,0.68);
       line-height: 1.78;
       margin: 0 0 14px;
@@ -265,12 +265,12 @@ const destacados = proyectos
       font-size: clamp(1.6rem, 2.4vw, 2rem);
       font-weight: 800;
       color: var(--c-primary);
-      letter-spacing: -1px;
+      letter-spacing: var(--ls-tight);
       line-height: 1;
     }
     .about-kpi-label {
       display: block;
-      font-size: 0.65rem;
+      font-size: var(--fs-2xs);
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -340,7 +340,7 @@ const destacados = proyectos
       color: #fff !important;
     }
     .info-carousel-description {
-      font-size: 0.975rem;
+      font-size: var(--fs-md);
       line-height: 1.75;
       margin: 0;
       color: rgba(255,255,255,0.68) !important;
@@ -426,9 +426,9 @@ const destacados = proyectos
 
     /* ── EYEBROW ── */
     .hero-eyebrow {
-      font-size: 0.70rem;
+      font-size: var(--fs-2xs);
       font-weight: 600;
-      letter-spacing: 2.5px;
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-accent);
       margin-bottom: 20px;
@@ -474,7 +474,7 @@ const destacados = proyectos
       user-select: none;
       pointer-events: none;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      letter-spacing: var(--ls-tight);
     }
     .cycle-word {
       position: absolute;
@@ -482,7 +482,7 @@ const destacados = proyectos
       top: 0;
       color: #fff;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      letter-spacing: var(--ls-tight);
       white-space: nowrap;
       opacity: 0;
       transform: translateY(70%);
@@ -611,10 +611,10 @@ const destacados = proyectos
         padding: 28px 24px;
       }
       .info-carousel-title {
-        font-size: 1.3rem;
+        font-size: var(--fs-xl);
       }
       .info-carousel-description {
-        font-size: 0.875rem;
+        font-size: var(--fs-base);
       }
       .info-carousel-swiper .swiper-button-next,
       .info-carousel-swiper .swiper-button-prev {
@@ -700,7 +700,7 @@ const destacados = proyectos
     }
     .service-card:hover .svc-icon { opacity: 1; transform: translateY(-2px); }
     .svc-title {
-      font-size: 1.05rem;
+      font-size: var(--fs-lg);
       font-weight: 700;
       color: #fff;
       text-transform: uppercase;
@@ -708,7 +708,7 @@ const destacados = proyectos
       margin: 0 0 6px;
     }
     .svc-desc {
-      font-size: 0.80rem;
+      font-size: var(--fs-sm);
       color: rgba(255,255,255,0.72);
       line-height: 1.55;
       margin: 0;
@@ -723,10 +723,10 @@ const destacados = proyectos
       align-items: center;
       gap: 5px;
       margin-top: 10px;
-      font-size: 0.70rem;
+      font-size: var(--fs-2xs);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: var(--ls-label);
       color: var(--c-accent);
       max-height: 0;
       overflow: hidden;
@@ -785,10 +785,10 @@ const destacados = proyectos
     }
     .project-tag {
       display: inline-block;
-      font-size: 0.58rem;
+      font-size: var(--fs-2xs);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.6px;
+      letter-spacing: var(--ls-label);
       color: var(--c-accent);
       border: 1px solid rgba(217,130,43,0.45);
       padding: 3px 10px;
@@ -803,7 +803,7 @@ const destacados = proyectos
       line-height: 1.25;
     }
     .project-location {
-      font-size: 0.70rem;
+      font-size: var(--fs-2xs);
       color: rgba(255,255,255,0.48);
       margin: 0 0 14px;
     }
@@ -811,10 +811,10 @@ const destacados = proyectos
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.68rem;
+      font-size: var(--fs-2xs);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: var(--ls-label);
       color: var(--c-accent);
       opacity: 0;
       transform: translateY(8px);
@@ -839,15 +839,15 @@ const destacados = proyectos
       font-size: clamp(2rem, 4vw, 2.8rem);
       font-weight: 800;
       color: var(--c-primary);
-      letter-spacing: -1px;
+      letter-spacing: var(--ls-tight);
       line-height: 1;
     }
     .cov-stat-label {
       display: block;
-      font-size: 0.70rem;
+      font-size: var(--fs-2xs);
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: var(--ls-label);
       color: rgba(20,23,45,0.45);
       margin-top: 7px;
     }
@@ -876,10 +876,10 @@ const destacados = proyectos
     }
     .map-stats { }
     .map-stats-title {
-      font-size: 0.72rem;
+      font-size: var(--fs-xs);
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: var(--ls-label);
       color: rgba(20,23,45,0.40);
       margin-bottom: 28px;
     }
@@ -892,15 +892,15 @@ const destacados = proyectos
       margin-bottom: 7px;
     }
     .map-stat-city {
-      font-size: 0.92rem;
+      font-size: var(--fs-md);
       font-weight: 600;
       color: var(--c-primary);
     }
     .map-stat-count {
-      font-size: 0.98rem;
+      font-size: var(--fs-md);
       font-weight: 800;
       color: var(--c-accent);
-      letter-spacing: -0.5px;
+      letter-spacing: var(--ls-tight);
     }
     .map-stat-bar {
       height: 4px;
@@ -921,7 +921,7 @@ const destacados = proyectos
       .services-grid { grid-template-columns: repeat(2, 1fr); margin-top: 36px; }
       .service-card { aspect-ratio: 3/2; }
       .svc-body { padding: 14px 18px; }
-      .svc-title { font-size: 0.82rem; }
+      .svc-title { font-size: var(--fs-sm); }
       .svc-desc, .svc-arrow { display: none; }
       .about-grid { grid-template-columns: 1fr; gap: 48px; }
       .about-img-frame { height: 360px; }

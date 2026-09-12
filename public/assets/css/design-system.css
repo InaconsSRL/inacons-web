@@ -312,9 +312,9 @@ button {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.70rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
-    letter-spacing: 2.8px;
+    letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: var(--c-secondary);
     margin-bottom: 12px;
@@ -338,12 +338,12 @@ button {
     color: var(--c-text-heading);
     line-height: 1.15;
     margin-bottom: 16px;
-    letter-spacing: -0.5px;
+    letter-spacing: var(--ls-tight);
 }
 
 /* Descripción */
 .sh-desc {
-    font-size: 0.975rem;
+    font-size: var(--fs-md);
     font-weight: 400;
     line-height: 1.82;
     color: var(--c-text-muted);
@@ -403,7 +403,7 @@ a.btn {
     gap: 8px;
     padding: 12px 26px;
     font-family: var(--font-ui);
-    font-size: 0.80rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     letter-spacing: 0.6px;
     text-transform: uppercase;
@@ -487,12 +487,12 @@ a.btn:active {
 /* Tamaños */
 .btn-sm {
     padding: 8px 18px;
-    font-size: 0.74rem;
+    font-size: var(--fs-xs);
 }
 
 .btn-lg {
     padding: 16px 40px;
-    font-size: 0.86rem;
+    font-size: var(--fs-base);
     letter-spacing: 0.9px;
 }
 
@@ -596,12 +596,12 @@ a.btn:active {
     font-weight: 700;
     color: #fff;
     line-height: 1.1;
-    letter-spacing: -0.5px;
+    letter-spacing: var(--ls-tight);
     margin-bottom: 12px;
 }
 
 .page-hero-subtitle {
-    font-size: 0.88rem;
+    font-size: var(--fs-base);
     color: rgba(255, 255, 255, 0.58);
     font-weight: 400;
     letter-spacing: 0.2px;
@@ -623,9 +623,9 @@ a.btn:active {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     font-weight: 600;
-    letter-spacing: 1.5px;
+    letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.55);
     margin-bottom: 16px;
@@ -643,7 +643,7 @@ a.btn:active {
 
 .breadcrumb-sep {
     color: rgba(255, 255, 255, 0.30);
-    font-size: 0.6rem;
+    font-size: var(--fs-2xs);
 }
 
 .breadcrumb-current {
@@ -687,7 +687,7 @@ a.btn:active {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
     letter-spacing: 0.2px;
     color: rgba(255, 255, 255, 0.80);
 }
@@ -702,7 +702,7 @@ a.btn:active {
     display: inline-flex;
     align-items: center;
     padding: 4px 12px;
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -739,7 +739,7 @@ a.btn:active {
 
 .tb-sep {
     color: rgba(255, 255, 255, 0.22);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: 300;
     user-select: none;
     line-height: 1;
@@ -845,7 +845,7 @@ a.btn:active {
 }
 
 .nav a {
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -965,7 +965,7 @@ a.btn:active {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.74rem !important;
+    font-size: var(--fs-xs) !important;
     letter-spacing: 0.3px;
     padding: 10px 12px;
     color: rgba(255, 255, 255, 0.75) !important;
@@ -1001,7 +1001,7 @@ a.btn:active {
     background: var(--c-accent);
     color: #fff !important;
     padding: 9px 22px;
-    font-size: 0.76rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 0.6px;
     text-transform: uppercase;
@@ -1033,7 +1033,7 @@ a.btn:active {
 /* Nav condensado en pantallas medianas (1024px laptop) */
 @media (max-width: 1100px) {
     .nav ul { gap: 20px; }
-    .nav a   { font-size: 0.74rem; }
+    .nav a   { font-size: var(--fs-xs); }
 }
 
 /* Toggle mobile */
@@ -1100,7 +1100,7 @@ a.btn:active {
 }
 
 .footer-slogan {
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
     font-weight: 600;
     letter-spacing: 0.4px;
     line-height: 1.8;
@@ -1137,9 +1137,9 @@ a.btn:active {
 }
 
 .footer-section h3 {
-    font-size: 0.68rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
-    letter-spacing: 2.5px;
+    letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: var(--c-text-white-45);
     margin-bottom: 20px;
@@ -1147,7 +1147,7 @@ a.btn:active {
 
 .footer-section ul li {
     margin-bottom: 10px;
-    font-size: 0.88rem;
+    font-size: var(--fs-base);
     color: rgba(255, 255, 255, 0.60);
     display: flex;
     align-items: flex-start;
@@ -1181,7 +1181,7 @@ a.btn:active {
 
 .footer-bottom p {
     color: rgba(255, 255, 255, 0.35);
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
     margin: 0;
 }
 
@@ -1192,7 +1192,7 @@ a.btn:active {
 
 .footer-bottom-links a {
     color: rgba(255, 255, 255, 0.35);
-    font-size: 0.78rem;
+    font-size: var(--fs-sm);
     text-decoration: none;
     transition: color var(--t);
 }
@@ -1247,7 +1247,7 @@ a.btn:active {
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 1.35rem;
+    font-size: var(--fs-xl);
     text-decoration: none;
     box-shadow: 0 4px 18px rgba(37, 211, 102, 0.38);
     transition: transform var(--t), box-shadow var(--t);
@@ -1329,9 +1329,9 @@ body.menu-open {
 }
 
 .mobile-menu-tagline {
-    font-size: 0.58rem;
+    font-size: var(--fs-2xs);
     font-weight: 500;
-    letter-spacing: 1.2px;
+    letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.38);
     line-height: 1.3;
@@ -1367,9 +1367,9 @@ body.menu-open {
 }
 
 .mobile-nav-label {
-    font-size: 0.65rem;
+    font-size: var(--fs-2xs);
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: var(--ls-label);
     color: rgba(255, 255, 255, 0.28);
     text-transform: uppercase;
     padding: 14px 8px 10px;
@@ -1393,7 +1393,7 @@ body.menu-open {
     border-radius: 6px;
     text-decoration: none;
     color: #fff;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     letter-spacing: 0.6px;
     text-transform: uppercase;
@@ -1428,7 +1428,7 @@ body.menu-open {
     border: none;
     color: #fff;
     font-family: var(--font-ui);
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     font-weight: 700;
     letter-spacing: 0.6px;
     text-transform: uppercase;
@@ -1473,7 +1473,7 @@ body.menu-open {
 }
 
 .mobile-submenu a {
-    font-size: 0.78rem !important;
+    font-size: var(--fs-sm) !important;
     letter-spacing: 0.3px !important;
     color: rgba(255,255,255,0.55) !important;
     padding: 9px 12px !important;
@@ -1516,7 +1516,7 @@ body.menu-open {
     text-decoration: none;
     background: var(--c-secondary);
     color: #fff;
-    font-size: 0.76rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
@@ -1539,7 +1539,7 @@ body.menu-open {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.14);
     color: #fff;
-    font-size: 0.76rem;
+    font-size: var(--fs-xs);
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
@@ -1562,7 +1562,7 @@ body.menu-open {
 }
 
 .mobile-menu-email {
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     color: rgba(255,255,255,0.35);
     letter-spacing: 0.2px;
 }
@@ -1691,7 +1691,7 @@ body.menu-open {
 
 .swiper-button-next:after,
 .swiper-button-prev:after {
-    font-size: 18px !important;
+    font-size: var(--fs-lg) !important;
     font-weight: bold;
 }
 

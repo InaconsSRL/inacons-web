@@ -65,7 +65,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
       line-height: 1;
       pointer-events: none;
       user-select: none;
-      letter-spacing: -0.04em;
+      letter-spacing: var(--ls-tight);
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -110,9 +110,9 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
     }
 
     .error-label {
-      font-size: 0.68rem;
+      font-size: var(--fs-2xs);
       font-weight: 700;
-      letter-spacing: 0.22em;
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-secondary);
       margin-bottom: 1.25rem;
@@ -129,7 +129,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
     }
 
     .error-desc {
-      font-size: 0.95rem;
+      font-size: var(--fs-md);
       color: var(--c-text-muted);
       line-height: 1.75;
       margin: 0 0 2.5rem;
@@ -159,9 +159,9 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
     }
 
     .error-links > p {
-      font-size: 0.78rem;
+      font-size: var(--fs-sm);
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-text-muted);
       margin: 0 0 1.25rem;
@@ -178,7 +178,7 @@ const canonicalHome = Astro.site ? new URL('/', Astro.site).href : 'https://inac
       display: inline-flex;
       align-items: center;
       padding: 8px 18px;
-      font-size: 0.8rem;
+      font-size: var(--fs-sm);
       font-weight: 600;
       color: var(--c-text-heading);
       border: 1.5px solid var(--c-border-light);

@@ -22,7 +22,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       padding: 10px 18px;
       border: 1.5px solid var(--c-border);
       border-radius: 2px;
-      font-size: 0.78rem; font-weight: 600;
+      font-size: var(--fs-sm); font-weight: 600;
       color: var(--c-text-heading);
       background: var(--c-bg-white);
       transition: border-color .22s, background .22s, color .22s;
@@ -45,8 +45,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       transition: background .24s, color .24s;
     }
     .ods-card:hover .ods-icon { background: var(--c-secondary); color: #fff; }
-    .ods-title { font-size: 0.88rem; font-weight: 700; color: var(--c-text-heading); margin-bottom: 8px; }
-    .ods-desc { font-size: 0.80rem; color: var(--c-text-muted); line-height: 1.7; }
+    .ods-title { font-size: var(--fs-base); font-weight: 700; color: var(--c-text-heading); margin-bottom: 8px; }
+    .ods-desc { font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.7; }
     @media (max-width: 768px) {
       .split-grid { grid-template-columns: 1fr; gap: 36px; }
       .split-img { height: 260px; }

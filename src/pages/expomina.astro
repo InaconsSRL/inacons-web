@@ -47,9 +47,9 @@ const SERVICIOS = [
     .xp-logo { height: 44px; width: auto; margin-bottom: 20px; }
     .xp-badge {
       display: inline-block;
-      font-size: 0.62rem;
+      font-size: var(--fs-2xs);
       font-weight: 700;
-      letter-spacing: 2.5px;
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-accent);
       border: 1px solid rgba(217, 130, 43, 0.45);
@@ -58,14 +58,14 @@ const SERVICIOS = [
       margin-bottom: 16px;
     }
     .xp-title {
-      font-size: 1.5rem;
+      font-size: var(--fs-2xl);
       font-weight: 800;
       color: #fff;
       line-height: 1.25;
       margin-bottom: 10px;
     }
     .xp-sub {
-      font-size: 0.9rem;
+      font-size: var(--fs-md);
       color: var(--c-text-white-70);
       line-height: 1.55;
     }
@@ -78,9 +78,9 @@ const SERVICIOS = [
     .xp-field { margin-bottom: 16px; }
     .xp-field label {
       display: block;
-      font-size: 0.66rem;
+      font-size: var(--fs-2xs);
       font-weight: 700;
-      letter-spacing: 1.4px;
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: var(--c-text-muted);
       margin-bottom: 7px;
@@ -93,7 +93,7 @@ const SERVICIOS = [
       padding: 14px;
       font-family: var(--font-ui);
       /* 16px exactos: por debajo de eso iOS hace zoom al enfocar el campo */
-      font-size: 16px;
+      font-size: var(--fs-md);
       color: var(--c-text-heading);
       background: var(--c-bg-muted);
       outline: none;
@@ -131,7 +131,7 @@ const SERVICIOS = [
       accent-color: var(--c-secondary);
     }
     .xp-consent label {
-      font-size: 0.78rem;
+      font-size: var(--fs-sm);
       color: var(--c-text-body);
       line-height: 1.5;
       cursor: pointer;
@@ -146,9 +146,9 @@ const SERVICIOS = [
       border: none;
       border-radius: 2px;
       font-family: var(--font-ui);
-      font-size: 0.85rem;
+      font-size: var(--fs-base);
       font-weight: 700;
-      letter-spacing: 1.2px;
+      letter-spacing: var(--ls-label);
       text-transform: uppercase;
       cursor: pointer;
       transition: background .2s;
@@ -168,7 +168,7 @@ const SERVICIOS = [
       margin-top: 14px;
       padding: 11px 13px;
       border-radius: 2px;
-      font-size: 0.8rem;
+      font-size: var(--fs-sm);
       line-height: 1.5;
     }
     .xp-msg.show { display: block; }
@@ -188,8 +188,8 @@ const SERVICIOS = [
       align-items: center;
       justify-content: center;
     }
-    .xp-done h2 { font-size: 1.25rem; color: var(--c-primary); margin-bottom: 10px; }
-    .xp-done p { font-size: 0.88rem; color: var(--c-text-muted); line-height: 1.6; margin-bottom: 26px; }
+    .xp-done h2 { font-size: var(--fs-xl); color: var(--c-primary); margin-bottom: 10px; }
+    .xp-done p { font-size: var(--fs-base); color: var(--c-text-muted); line-height: 1.6; margin-bottom: 26px; }
     .xp-brochure {
       display: inline-flex;
       align-items: center;
@@ -201,20 +201,20 @@ const SERVICIOS = [
       color: #fff;
       text-decoration: none;
       border-radius: 2px;
-      font-size: 0.8rem;
+      font-size: var(--fs-sm);
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
       transition: background .2s;
     }
     .xp-brochure:hover { background: var(--c-primary); }
-    .xp-done-foot { margin-top: 22px; font-size: 0.78rem; color: var(--c-text-muted); }
+    .xp-done-foot { margin-top: 22px; font-size: var(--fs-sm); color: var(--c-text-muted); }
     .xp-done-foot a { color: var(--c-secondary); font-weight: 600; }
 
     @media (max-width: 380px) {
       .xp-wrap { padding: 20px 12px 32px; }
       .xp-form { padding: 22px 16px 20px; }
-      .xp-title { font-size: 1.3rem; }
+      .xp-title { font-size: var(--fs-xl); }
     }
   </style>
 
