@@ -1,56 +1,166 @@
 /* ══════════════════════════════════════════════════════════════
    1. TOKENS
 ══════════════════════════════════════════════════════════════ */
+/*
+  Los tokens son la única fuente de verdad. Si un valor de tipografía,
+  espaciado o color no sale de acá, es un bug: significa que alguien
+  volvió a decidir a mano algo que ya estaba decidido.
+
+  Antes de este bloque el sitio tenía 65 tamaños de fuente distintos,
+  106 de padding y 122 rgba() inventados en el punto de uso. De ahí
+  salieron los fallos de contraste: nadie los revisaba porque no había
+  un lugar donde revisarlos.
+*/
 :root {
-    /* Paleta corporativa */
+    /* ── PALETA CORPORATIVA ──────────────────────────────────── */
     --c-primary: #14172d;
     /* Azul marino profundo — identidad */
     --c-secondary: #1b5278;
     /* Azul medio — soporte */
     --c-accent: #d9822b;
-    /* Naranja — énfasis selectivo */
+    /* Naranja — énfasis. Solo sobre fondo OSCURO: sobre claro da
+       2.93:1 y no pasa AA. Para naranja sobre claro usar --c-accent-ink. */
     --c-accent-hover: #c2711e;
+    --c-accent-ink: #96530f;
+    /* Naranja oscurecido — 5.93:1 sobre blanco, 5.33:1 sobre muted */
 
-    /* Fondos de sección */
+    /* ── FONDOS ──────────────────────────────────────────────── */
     --c-bg-white: #ffffff;
     --c-bg-muted: #f0f3f7;
     /* Plomo azulado muy suave */
 
-    /* Texto */
+    /* ── TEXTO SOBRE CLARO ───────────────────────────────────── */
     --c-text-heading: #14172d;
     --c-text-body: #3d4460;
-    --c-text-muted: #6b7494;
-    --c-text-white: #ffffff;
-    --c-text-white-70: rgba(255, 255, 255, 0.70);
-    --c-text-white-45: rgba(255, 255, 255, 0.45);
+    --c-text-muted: #5a6280;
+    /* Antes #6b7494 → 4.15:1 sobre --c-bg-muted, fallaba AA.
+       #5a6280 da 6.01:1 sobre blanco y 5.40:1 sobre muted. */
 
-    /* Bordes */
+    /* ── TEXTO SOBRE OSCURO ──────────────────────────────────── */
+    /* Tres niveles, los tres verificados contra --c-primary.
+       No inventar alfas nuevas: si hace falta otro nivel, se agrega acá. */
+    --c-on-dark-1: rgba(255, 255, 255, 0.92);
+    /* 14.95:1 — titulares y texto principal */
+    --c-on-dark-2: rgba(255, 255, 255, 0.72);
+    /*  9.52:1 — texto de apoyo */
+    --c-on-dark-3: rgba(255, 255, 255, 0.62);
+    /*  7.37:1 — metadatos, rótulos. Es el mínimo permitido. */
+
+    --c-text-white: #ffffff;
+    --c-text-white-70: var(--c-on-dark-2);
+    --c-text-white-45: var(--c-on-dark-3);
+    /* Los dos de arriba son nombres heredados. El "45" daba 4.45:1 y
+       no pasaba AA; ahora apunta al nivel 3. Conservados como alias
+       para no romper usos existentes — reemplazar progresivamente. */
+
+    /* ── SUPERFICIES Y BORDES SOBRE OSCURO ───────────────────── */
+    --c-surface-dark-1: rgba(255, 255, 255, 0.05);
+    --c-surface-dark-2: rgba(255, 255, 255, 0.08);
+    --c-surface-dark-3: rgba(255, 255, 255, 0.12);
+    --c-border-dark: rgba(255, 255, 255, 0.12);
+    --c-border-dark-strong: rgba(255, 255, 255, 0.22);
+
+    /* ── BORDES SOBRE CLARO ──────────────────────────────────── */
     --c-border: #dce1ea;
     --c-border-light: #edf0f5;
 
-    /* Tipografía */
+    /* ── TIPOGRAFÍA ──────────────────────────────────────────── */
     --font-ui: 'Montserrat', sans-serif;
 
-    /* Espaciado de secciones */
-    --section-py: 96px;
-    --section-py-sm: 64px;
+    /*  Escala de texto — 8 pasos.
+        Calibrada sobre el uso real: los pasos caen donde ya había masa,
+        salvo en el extremo chico, que sube. El sitio tenía 29 tamaños
+        distintos entre 9.3px y 16px; el más repetido de todos era 12.5px
+        y el rótulo de sección estaba en 10.4px en caja alta. Demasiado
+        chico para el público que lee esto. */
+    --fs-2xs: 0.6875rem;
+    /* 11px — rótulos en caja alta (antes 10.4px) */
+    --fs-xs: 0.75rem;
+    /* 12px — metadatos, pies de foto */
+    --fs-sm: 0.8125rem;
+    /* 13px — texto secundario */
+    --fs-base: 0.875rem;
+    /* 14px — cuerpo en tarjetas */
+    --fs-md: 1rem;
+    /* 16px — cuerpo principal (antes 14.4–15.6px) */
+    --fs-lg: 1.125rem;
+    /* 18px — párrafo destacado */
+    --fs-xl: 1.375rem;
+    /* 22px — h3 */
+    --fs-2xl: clamp(1.5rem, 2.6vw, 2rem);
+    /* 24–32px — h2 */
 
-    /* Transición global */
+    /*  Display — fuera de la escala de texto, siempre fluido. */
+    --fs-display: clamp(2rem, 4vw, 3rem);
+    /* 32–48px — h1 de páginas interiores */
+    --fs-hero: clamp(1.5rem, 5vw, 3.8rem);
+    /* 24–61px — h1 del home */
+
+    /*  Pesos. El sitio usaba 700 en 77 lugares y 300/400/500 en 10:
+        cuando casi todo es bold, no hay jerarquía, hay volumen parejo.
+        Estos cuatro cubren todo; no usar otros. */
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    --fw-display: 800;
+
+    /*  Tracking. Antes había 28 valores distintos. En em, no en px,
+        para que escale con el tamaño de fuente. */
+    --ls-tight: -0.02em;
+    /* titulares grandes */
+    --ls-normal: 0;
+    --ls-label: 0.14em;
+    /* rótulos en caja alta */
+
+    /* ── ESPACIADO ───────────────────────────────────────────── */
+    /*  Escala de 4px. Seis pasos de componente + tres de layout.
+        Antes: 106 valores de padding, 29 de gap, 24 de margin-bottom. */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 24px;
+    --sp-6: 32px;
+
+    --sp-l1: 48px;
+    --sp-l2: 64px;
+    --sp-l3: 96px;
+
+    /* Espaciado vertical de sección */
+    --section-py: var(--sp-l3);
+    --section-py-sm: var(--sp-l2);
+
+    /* ── VARIOS ──────────────────────────────────────────────── */
     --t: 240ms ease;
 
-    /* Sombras */
     --shadow-card: 0 2px 16px rgba(20, 23, 45, 0.07);
     --shadow-card-hover: 0 8px 32px rgba(20, 23, 45, 0.13);
 
-    /* Radio */
     --radius: 2px;
 
-    /* Z-index */
     --z-topbar: 1001;
     --z-header: 1000;
     --z-mobile-menu: 1002;
     --z-float: 999;
 }
+
+/*
+  BREAKPOINTS — tres límites, y uno solo por frontera.
+
+  Antes convivían 768 y 769, y 1023 y 1024. Dos fronteras contiguas
+  definidas por separado son la receta para que en exactamente 1024px
+  no aplique ninguna de las dos y algo se rompa sin que nadie lo vea.
+  La solución es el par max-width:767.98px / min-width:768px.
+
+  Se conserva 768 como frontera móvil/escritorio en vez de bajarla a
+  640: es donde el nav cambia a hamburguesa, y moverla cambiaría el
+  layout de tablet sin que nadie lo haya pedido.
+
+     sm   640px   → teléfono grande
+     md   768px   → frontera móvil / escritorio (nav)
+     lg  1024px   → escritorio
+*/
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -112,9 +222,22 @@ button {
     font-family: var(--font-ui);
 }
 
+/*
+  Anillo de foco de doble contorno.
+
+  El anterior era un solo trazo en --c-secondary. Sobre el navy del
+  topbar, el header, el menú móvil y el footer daba 2.12:1 — por debajo
+  del 3:1 que pide WCAG 1.4.11. Justo en la navegación, que es donde
+  más se usa el teclado.
+
+  Dos anillos resuelven los dos fondos con una sola regla:
+  el blanco se ve sobre oscuro (17.64:1) y el azul sobre claro (8.32:1).
+*/
 :focus-visible {
-    outline: 2px solid var(--c-secondary);
-    outline-offset: 3px;
+    outline: 2px solid #fff;
+    outline-offset: 0;
+    box-shadow: 0 0 0 4px var(--c-secondary);
+    border-radius: 1px;
 }
 
 
