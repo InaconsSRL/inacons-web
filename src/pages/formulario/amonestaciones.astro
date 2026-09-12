@@ -26,7 +26,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     }
     .ch-sidebar-brand {
       padding: var(--sp-6) var(--sp-5) var(--sp-6);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid var(--c-border-dark);
     }
     .ch-sidebar-brand img { height: 36px; width: auto; margin-bottom: var(--sp-3); }
     .ch-sidebar-brand strong {
@@ -36,7 +36,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     }
     .ch-sidebar-brand span {
       display: block; font-size: var(--fs-md); font-weight: var(--fw-semibold);
-      color: rgba(255, 255, 255, 0.92); margin-top: var(--sp-1);
+      color: var(--c-on-dark-1); margin-top: var(--sp-1);
     }
     .ch-nav {
       flex: 1; padding: var(--sp-4) var(--sp-3);
@@ -46,14 +46,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       display: flex; align-items: center; gap: var(--sp-2);
       width: 100%; padding: var(--sp-3) var(--sp-3);
       border: none; border-radius: var(--radius);
-      background: transparent; color: rgba(255, 255, 255, 0.65);
+      background: transparent; color: var(--c-on-dark-3);
       font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label); text-transform: uppercase;
       text-decoration: none; cursor: pointer; text-align: left;
       transition: background var(--t), color var(--t);
     }
     .ch-nav-link:hover {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--c-surface-dark-2);
       color: #fff;
     }
     .ch-nav-link.active {
@@ -66,9 +66,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     }
     .ch-sidebar-foot {
       padding: var(--sp-4) var(--sp-3) var(--sp-6);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid var(--c-border-dark);
     }
-    .ch-nav-logout { color: rgba(255, 255, 255, 0.5); font-size: var(--fs-xs); }
+    .ch-nav-logout { color: var(--c-on-dark-3); font-size: var(--fs-xs); }
     .ch-nav-logout:hover { color: #fff; }
     .ch-main {
       flex: 1; min-width: 0;

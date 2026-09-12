@@ -128,18 +128,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .map-wrap { overflow: hidden; border-radius: 2px; border: 1px solid var(--c-border-light); height: 380px; }
     .map-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
     .channel-band { background: var(--c-primary); padding: var(--section-py) 0; }
-    .channel-band .sh-label { color: rgba(255,255,255,0.70);}
-    .channel-band .sh-label::before { background: rgba(255,255,255,0.25); }
+    .channel-band .sh-label { color: var(--c-on-dark-2);}
+    .channel-band .sh-label::before { background: var(--c-border-dark-strong); }
     .channel-band .sh-title { color: #fff; }
-    .channel-band .sh-desc  { color: rgba(255,255,255,0.62); }
+    .channel-band .sh-desc  { color: var(--c-on-dark-3); }
     .channel-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-6); margin: var(--sp-l2) 0; }
     .channel-feat {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.10);
+      background: var(--c-surface-dark-1);
+      border: 1px solid var(--c-border-dark);
       border-radius: 2px; padding: var(--sp-6) var(--sp-6);
       transition: background .22s, border-color .22s;
     }
-    .channel-feat:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.20); }
+    .channel-feat:hover { background: var(--c-surface-dark-2); border-color: var(--c-border-dark-strong); }
     .channel-feat-icon {
       width: 44px; height: 44px;
       background: rgba(27,82,120,0.40);
@@ -148,7 +148,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       color: #fff; margin-bottom: var(--sp-4);
     }
     .channel-feat-title { font-size: var(--fs-md); font-weight: var(--fw-bold); color: #fff; margin-bottom: var(--sp-1); }
-    .channel-feat-desc { font-size: var(--fs-sm); color: rgba(255,255,255,0.55); line-height: 1.65; }
+    .channel-feat-desc { font-size: var(--fs-sm); color: var(--c-on-dark-3); line-height: 1.65; }
     .channel-cta { text-align: center; }
     @media (max-width: 768px) {
       .contact-grid { grid-template-columns: 1fr; gap: var(--sp-l1); }

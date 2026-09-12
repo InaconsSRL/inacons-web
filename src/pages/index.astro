@@ -97,7 +97,7 @@ const destacados = proyectos
     }
     .word.typewriter.typing .tw-typed::after {
       content: '|';
-      color: rgba(255,255,255,0.55);
+      color: var(--c-on-dark-3);
       animation: blink .5s infinite;
       margin-left: 2px;
     }
@@ -107,7 +107,7 @@ const destacados = proyectos
     }
     .hero-content > p {
       font-size: clamp(0.95rem, 1.6vw, 1.1rem);
-      color: rgba(255,255,255,0.68);
+      color: var(--c-on-dark-2);
       margin-bottom: var(--sp-7);
       max-width: 500px;
       font-weight: var(--fw-normal);
@@ -135,7 +135,7 @@ const destacados = proyectos
       flex-direction: column;
       align-items: center;
       padding: var(--sp-6) var(--sp-4);
-      border-right: 1px solid rgba(255,255,255,0.07);
+      border-right: 1px solid var(--c-surface-dark-2);
       position: relative;
       overflow: hidden;
       transition: background .28s ease;
@@ -153,7 +153,7 @@ const destacados = proyectos
     }
     .indicator:hover::after { width: 52%; }
     .indicator:last-child { border-right: none; }
-    .indicator:hover { background: rgba(255,255,255,0.04); }
+    .indicator:hover { background: var(--c-surface-dark-1); }
     .indicator-icon { color: rgba(255,255,255,0.28); margin-bottom: var(--sp-2); }
     .indicator-number {
       font-size: clamp(2rem, 4vw, 2.8rem);
@@ -164,7 +164,7 @@ const destacados = proyectos
     }
     .indicator-text {
       font-size: var(--fs-xs);
-      color: rgba(255,255,255,0.55);
+      color: var(--c-on-dark-3);
       text-transform: uppercase;
       letter-spacing: 0.8px;
       margin-top: var(--sp-1);
@@ -220,7 +220,7 @@ const destacados = proyectos
       font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: rgba(255,255,255,0.55);
+      color: var(--c-on-dark-3);
       margin-top: var(--sp-1);
       line-height: 1.45;
     }
@@ -382,11 +382,11 @@ const destacados = proyectos
 
     /* ── CTA BAND ── */
     .cta-band { background: var(--c-primary); padding: var(--sp-l4) 0; }
-    .cta-band .sh-label { color: rgba(255,255,255,0.70); }
+    .cta-band .sh-label { color: var(--c-on-dark-2); }
     .cta-band .sh-label::before,
-    .cta-band .sh-label::after { background: rgba(255,255,255,0.25); }
+    .cta-band .sh-label::after { background: var(--c-border-dark-strong); }
     .cta-band .sh-title { color: #fff; }
-    .cta-band .sh-desc  { color: rgba(255,255,255,0.62); }
+    .cta-band .sh-desc  { color: var(--c-on-dark-3); }
 
     /* ── CTA ACTIONS ── */
     .cta-actions {
@@ -425,7 +425,7 @@ const destacados = proyectos
       left: 50%;
       transform: translateX(-50%);
       z-index: 4;
-      color: rgba(255,255,255,0.55);
+      color: var(--c-on-dark-3);
       animation: scrollBounce 1.8s ease-in-out infinite;
       cursor: pointer;
     }
@@ -468,15 +468,15 @@ const destacados = proyectos
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.10);
-      border: 1px solid rgba(255,255,255,0.18);
+      background: var(--c-border-dark);
+      border: 1px solid var(--c-border-dark-strong);
       border-radius: 50%;
-      color: rgba(255,255,255,0.65);
+      color: var(--c-on-dark-3);
       cursor: pointer;
       transition: background var(--t), color var(--t), border-color var(--t);
     }
     .hero-pause-btn:hover {
-      background: rgba(255,255,255,0.22);
+      background: var(--c-border-dark-strong);
       color: #fff;
       border-color: rgba(255,255,255,0.40);
     }
@@ -580,17 +580,17 @@ const destacados = proyectos
       background: var(--c-primary);
       padding: var(--sp-l3) 0 0;
     }
-    .services-showcase .sh-label        { color: rgba(255,255,255,0.55); }
+    .services-showcase .sh-label        { color: var(--c-on-dark-3); }
     .services-showcase .sh-label::before,
-    .services-showcase .sh-label::after  { background: rgba(255,255,255,0.20); }
+    .services-showcase .sh-label::after  { background: var(--c-border-dark-strong); }
     .services-showcase .sh-title         { color: #fff; }
-    .services-showcase .sh-desc          { color: rgba(255,255,255,0.58); }
+    .services-showcase .sh-desc          { color: var(--c-on-dark-3); }
     .services-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 2px;
       margin-top: var(--sp-l2);
-      background: rgba(255,255,255,0.07);
+      background: var(--c-surface-dark-2);
     }
     .service-card {
       position: relative;
