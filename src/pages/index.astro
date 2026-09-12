@@ -277,82 +277,11 @@ const destacados = proyectos
       color: rgba(20,23,45,0.42);
       margin-top: var(--sp-1);
     }
-
-    /* ── REGIONAL GRID ── */
-    .regional-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.5fr;
-      gap: var(--sp-l3);
-      align-items: center;
-    }
     .regional-map-wrap { display: flex; justify-content: center; }
     .peru-map {
       max-width: 260px;
       width: 100%;
       filter: drop-shadow(0 6px 20px rgba(20,23,45,0.10));
-    }
-
-    /* ── INFO CAROUSEL ── */
-    .info-slide-inner {
-      display: flex;
-      flex-direction: column;
-      height: 480px;
-      border-radius: 0 !important;
-      border: none !important;
-      box-shadow: 0 4px 24px rgba(20,23,45,0.08) !important;
-    }
-    .info-slide-image {
-      width: 100%;
-      height: 260px;
-      overflow: hidden;
-      flex-shrink: 0;
-      position: relative;
-    }
-    .info-slide-image img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .info-slide-content {
-      flex: 1;
-      padding: var(--sp-l1);
-      display: flex;
-      flex-direction: column;
-      gap: var(--sp-4);
-      justify-content: center;
-      background: var(--c-primary) !important;
-      position: relative;
-    }
-    .info-slide-content::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 3px; height: 100%;
-      background: var(--c-secondary);
-    }
-    .info-carousel-title {
-      font-size: clamp(1.5rem, 2.5vw, 2rem);
-      font-weight: var(--fw-bold);
-      line-height: 1.2;
-      margin: 0;
-      color: #fff !important;
-    }
-    .info-carousel-description {
-      font-size: var(--fs-md);
-      line-height: 1.75;
-      margin: 0;
-      color: rgba(255,255,255,0.68) !important;
-    }
-    .info-carousel-swiper .swiper-button-next,
-    .info-carousel-swiper .swiper-button-prev {
-      background: rgba(255,255,255,0.10) !important;
-      color: #fff !important;
-    }
-    .info-carousel-swiper .swiper-button-next:hover,
-    .info-carousel-swiper .swiper-button-prev:hover {
-      background: var(--c-secondary) !important;
     }
     .info-carousel-swiper .swiper-pagination-bullet {
       background: rgba(255,255,255,0.30) !important;
@@ -363,18 +292,7 @@ const destacados = proyectos
     }
 
     /* Desktop — lado a lado */
-    @media (min-width: 769px) {
-      .info-slide-inner {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        height: 480px;
-      }
-      .info-slide-image {
-        height: 100%;
-      }
-      .info-slide-content {
-        padding: var(--sp-l1);
-      }
+    @media (min-width: 768.02px) {
     }
 
     /* ── CLIENTES SCROLL ── */
@@ -476,21 +394,6 @@ const destacados = proyectos
       font-weight: var(--fw-display);
       letter-spacing: var(--ls-tight);
     }
-    .cycle-word {
-      position: absolute;
-      left: 0;
-      top: 0;
-      color: #fff;
-      font-weight: var(--fw-display);
-      letter-spacing: var(--ls-tight);
-      white-space: nowrap;
-      opacity: 0;
-      transform: translateY(70%);
-      animation: cycleWord 6s ease-in-out infinite;
-    }
-    .cycle-word:nth-child(2) { animation-delay: -0.5s; }
-    .cycle-word:nth-child(3) { animation-delay:  1.5s; }
-    .cycle-word:nth-child(4) { animation-delay:  3.5s; }
     @keyframes cycleWord {
       0%           { opacity: 0; transform: translateY(70%);  animation-timing-function: ease-out; }
       8.33%        { opacity: 1; transform: translateY(0);    animation-timing-function: ease;     }
@@ -532,8 +435,6 @@ const destacados = proyectos
         background-size: cover;
         background-position: center;
       }
-      .cycle-word           { animation: none; opacity: 0; }
-      .cycle-word:nth-child(2) { opacity: 1; transform: translateY(0); }
       .scroll-hint          { animation: none; opacity: 0.55; }
     }
 
@@ -590,36 +491,9 @@ const destacados = proyectos
 
       /* About */
       .about-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
-      .about-img-wrap { height: 280px; }
-      .about-img-wrap::before { display: none; }
-
-      /* Regional */
-      .regional-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
 
       /* Indicadores */
       .indicators-container { grid-template-columns: repeat(2, 1fr); }
-
-      /* Carrusel */
-      .info-slide-inner {
-        height: auto;
-        min-height: 0;
-      }
-      .info-slide-image {
-        height: 200px;
-      }
-      .info-slide-content {
-        padding: var(--sp-6) var(--sp-6);
-      }
-      .info-carousel-title {
-        font-size: var(--fs-xl);
-      }
-      .info-carousel-description {
-        font-size: var(--fs-base);
-      }
-      .info-carousel-swiper .swiper-button-next,
-      .info-carousel-swiper .swiper-button-prev {
-        top: 110px;
-      }
 
       /* CTA */
       .cta-actions {

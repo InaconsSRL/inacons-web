@@ -171,7 +171,6 @@
      lg  1024px   → escritorio
 */
 
-
 /* ══════════════════════════════════════════════════════════════
    2. RESET & BASE
 ══════════════════════════════════════════════════════════════ */
@@ -249,7 +248,6 @@ button {
     border-radius: 1px;
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    3. SECCIONES
    Uso: <section class="sec sec--white|sec--muted|sec--dark">
@@ -289,7 +287,6 @@ button {
 .sec--dark .sh-desc {
     color: var(--c-text-white-70);
 }
-
 
 /* ══════════════════════════════════════════════════════════════
    4. COMPONENTE: SECTION HEADER  (.sh-*)
@@ -400,7 +397,6 @@ button {
     flex-direction: row-reverse;
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    5. BOTONES
 ══════════════════════════════════════════════════════════════ */
@@ -505,7 +501,6 @@ a.btn:active {
     letter-spacing: 0.9px;
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    6. CARDS — base
 ══════════════════════════════════════════════════════════════ */
@@ -531,7 +526,6 @@ a.btn:active {
 .card--accent-hover:hover {
     border-left-color: var(--c-accent);
 }
-
 
 /* ══════════════════════════════════════════════════════════════
    7. COMPONENTE: PAGE HERO
@@ -617,7 +611,6 @@ a.btn:active {
     margin: 0;
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    8. COMPONENTE: BREADCRUMB
    Compartido por todas las páginas internas.
@@ -658,7 +651,6 @@ a.btn:active {
 .breadcrumb-current {
     color: rgba(255, 255, 255, 0.90);
 }
-
 
 /* ══════════════════════════════════════════════════════════════
    9. LAYOUT: TOP BAR
@@ -777,7 +769,6 @@ a.btn:active {
     align-items: center;
     gap: var(--sp-3);
 }
-
 
 /* ══════════════════════════════════════════════════════════════
    10. LAYOUT: HEADER / NAV
@@ -1072,7 +1063,6 @@ a.btn:active {
     color: var(--c-primary);
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    11. LAYOUT: FOOTER
 ══════════════════════════════════════════════════════════════ */
@@ -1266,7 +1256,6 @@ a.btn:active {
     transform: scale(1.08);
     box-shadow: 0 6px 26px rgba(37, 211, 102, 0.50);
 }
-
 
 /* ══════════════════════════════════════════════════════════════
    12. LAYOUT: MOBILE MENU
@@ -1599,7 +1588,6 @@ body.menu-open {
     color: #fff;
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    13. UTILITARIOS
 ══════════════════════════════════════════════════════════════ */
@@ -1665,7 +1653,6 @@ body.menu-open {
     }
 }
 
-
 /* ══════════════════════════════════════════════════════════════
    14. VENDORS: SWIPER & AOS
 ══════════════════════════════════════════════════════════════ */
@@ -1686,36 +1673,10 @@ body.menu-open {
     width: 24px !important;
 }
 
-/* Swiper — botones */
-.swiper-button-next,
-.swiper-button-prev {
-    color: var(--c-primary) !important;
-    background: rgba(255, 255, 255, 0.9);
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: var(--radius) !important;
-    box-shadow: var(--shadow-card);
-    transition: var(--t);
-}
-
-.swiper-button-next:after,
-.swiper-button-prev:after {
-    font-size: var(--fs-lg) !important;
-    font-weight: var(--fw-bold);
-}
-
-.swiper-button-next:hover,
-.swiper-button-prev:hover {
-    background: var(--c-primary);
-    color: #fff !important;
-    box-shadow: var(--shadow-card-hover);
-}
-
 /* AOS — sincronizar duración */
 [data-aos] {
     transition-duration: 240ms !important;
 }
-
 
 /* ══════════════════════════════════════════════════════════════
    15. RESPONSIVE
@@ -1810,14 +1771,14 @@ body.menu-open {
     }
 }
 
-@media (min-width: 769px) and (max-width: 1023px) {
+@media (min-width: 768.02px) and (max-width: 1023px) {
     .footer-content {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: var(--sp-7);
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1023.02px) {
     .nav {
         display: block;
     }

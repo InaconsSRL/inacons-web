@@ -4,7 +4,6 @@
   · Sin Lucide UMD (iconos SVG inline en HTML)
   · Animaciones scroll: IntersectionObserver (data-aos)
   · Menú móvil + acordeón Operaciones + focus trap accesible
-  · Swiper unificado en un solo DOMContentLoaded
   · Cargado con defer
 */
 
@@ -282,21 +281,6 @@ document.addEventListener('DOMContentLoaded', function () {
     track.addEventListener('touchend',   () => setTimeout(resume, 500), { passive: true });
   }
 
-  /* ─── 10. SWIPER (info carousel — solo si existe en la página) ─── */
-  function initSwiper() {
-    if (typeof Swiper === 'undefined') return;
-    const infoEl = document.querySelector('.info-carousel-swiper');
-    if (!infoEl) return;
-    new Swiper('.info-carousel-swiper', {
-      loop: true,
-      speed: 700,
-      autoplay: { delay: 5500, disableOnInteraction: false, pauseOnMouseEnter: true },
-      slidesPerView: 1,
-      grabCursor: true,
-      pagination: { el: '.swiper-pagination', clickable: true, dynamicBullets: true },
-      navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-    });
-  }
 
   /* ─── 11. MAP STAT BARS ─── */
   function initMapBars() {
@@ -489,7 +473,6 @@ document.addEventListener('DOMContentLoaded', function () {
   initSmoothScroll();
   initResponsive();
   initClientsCarousel();
-  initSwiper();
   initMapBars();
   initHeroPause();
   initScrollHint();
