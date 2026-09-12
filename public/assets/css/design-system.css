@@ -93,8 +93,10 @@
     /*  Display — fuera de la escala de texto, siempre fluido. */
     --fs-display: clamp(2rem, 4vw, 3rem);
     /* 32–48px — h1 de páginas interiores */
-    --fs-hero: clamp(1.5rem, 5vw, 3.8rem);
-    /* 24–61px — h1 del home */
+    --fs-hero: clamp(1.05rem, 5.2vw, 3.8rem);
+    /* 17–61px — h1 del home. El minimo es bajo a proposito: la linea
+       mas larga es "CONSTRUIMOS CONFIANZA" y en un telefono de 360px
+       tiene que entrar sin recortarse. */
 
     /*  Pesos. El sitio usaba 700 en 77 lugares y 300/400/500 en 10:
         cuando casi todo es bold, no hay jerarquía, hay volumen parejo.
@@ -111,7 +113,12 @@
     /* titulares grandes */
     --ls-normal: 0;
     --ls-label: 0.14em;
-    /* rótulos en caja alta */
+    /* rótulos en caja alta, tamaños 11–14px */
+    --ls-wide: 0.03em;
+    /* caja alta a tamaño display. NO usar --ls-label acá: 0.14em sobre
+       una palabra de 60px son 8.5px por carácter y revienta el ancho
+       de la línea. El tracking en caja alta tiene que aflojar a medida
+       que el tamaño sube, no mantenerse proporcional. */
 
     /* ── ESPACIADO ───────────────────────────────────────────── */
     /*  Escala de 4px. Siete pasos de componente + cuatro de layout.

@@ -272,13 +272,39 @@ document.addEventListener('DOMContentLoaded', function () {
   function initClientsCarousel() {
     const track = document.querySelector('.clients-track');
     if (!track) return;
-    const pause  = () => track.style.animationPlayState = 'paused';
-    const resume = () => track.style.animationPlayState = 'running';
 
-    track.addEventListener('mouseenter', pause);
-    track.addEventListener('mouseleave', resume);
-    track.addEventListener('touchstart', pause,  { passive: true });
-    track.addEventListener('touchend',   () => setTimeout(resume, 500), { passive: true });
+    const btn = document.getElementById('clientsPauseBtn');
+
+    /*  Detenido a propósito por el usuario vs. pausado al pasar el mouse.
+        Son dos cosas distintas: si no se distingue, mover el mouse fuera
+        de la banda reanuda una animación que la persona pidió detener.
+        El estado del botón manda; el hover solo actúa si no está detenido. */
+    let detenido = false;
+
+    const aplicar = () => {
+      track.style.animationPlayState = detenido ? 'paused' : '';
+    };
+
+    if (btn) {
+      const iconPause = btn.querySelector('.icon-pause');
+      const iconPlay  = btn.querySelector('.icon-play');
+      const label     = btn.querySelector('.clients-pause-label');
+
+      btn.addEventListener('click', () => {
+        detenido = !detenido;
+        track.classList.toggle('is-paused', detenido);
+        btn.setAttribute('aria-pressed', String(detenido));
+        if (iconPause) iconPause.style.display = detenido ? 'none' : 'block';
+        if (iconPlay)  iconPlay.style.display  = detenido ? 'block' : 'none';
+        if (label)     label.textContent       = detenido ? 'Reanudar' : 'Pausar';
+        aplicar();
+      });
+    }
+
+    track.addEventListener('mouseenter', () => { if (!detenido) track.style.animationPlayState = 'paused'; });
+    track.addEventListener('mouseleave', aplicar);
+    track.addEventListener('touchstart', () => { if (!detenido) track.style.animationPlayState = 'paused'; }, { passive: true });
+    track.addEventListener('touchend',   () => setTimeout(aplicar, 500), { passive: true });
   }
 
 

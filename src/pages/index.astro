@@ -57,7 +57,7 @@ const destacados = proyectos
     }
     .home-hero h1 {
       font-family: 'Montserrat', sans-serif;
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-size: var(--fs-hero);
       font-weight: var(--fw-semibold);
       text-transform: uppercase;
       line-height: 1.1;
@@ -73,7 +73,7 @@ const destacados = proyectos
       gap: var(--sp-3);
       flex-wrap: wrap;
     }
-    .word.fixed   { color: rgba(255,255,255,0.68); font-weight: var(--fw-normal); letter-spacing: var(--ls-label); }
+    .word.fixed   { color: var(--c-on-dark-2); font-weight: var(--fw-normal); letter-spacing: var(--ls-wide); }
     .word.highlight { color: #fff; font-weight: var(--fw-display); letter-spacing: var(--ls-tight); }
     .word.highlight.completed {
       background: linear-gradient(transparent 84%, rgba(27,82,120,0.40) 84%);
@@ -311,6 +311,16 @@ const destacados = proyectos
       from { transform: translateX(0); }
       to   { transform: translateX(-50%); }
     }
+    /*
+      Enel, Sedapal, Luz del Sur, GE Vernova, Kallpa, Indecopi: es lo
+      más persuasivo que tiene la home. Estaba en gris al 48% de
+      opacidad, y el color solo volvía con :hover — que en táctil no
+      existe. En celular la banda entera era una fila de manchas grises.
+
+      El gris uniforme se conserva en escritorio, donde el hover puede
+      devolver el color. En dispositivos sin hover se muestran a color
+      de entrada, porque ahí no hay forma de pedirlo.
+    */
     .client-logo-item {
       flex: 0 0 158px;
       display: flex;
@@ -319,10 +329,55 @@ const destacados = proyectos
       padding: var(--sp-4) var(--sp-5);
       border-right: 1px solid var(--c-border-light);
       filter: grayscale(100%);
-      opacity: 0.48;
+      opacity: 0.85;
       transition: filter .24s ease, opacity .24s ease;
     }
     .client-logo-item:hover { filter: grayscale(0%); opacity: 1; }
+
+    @media (hover: none) {
+      .client-logo-item { filter: none; opacity: 1; }
+    }
+
+    /*
+      Control de pausa del carrusel — WCAG 2.2.2 (nivel A).
+
+      Cualquier movimiento automático que dure más de 5 segundos tiene
+      que poder detenerse. La pausa al pasar el mouse no cumple: no es
+      alcanzable por teclado y no existe en táctil. El patrón es el
+      mismo que ya usa bien el botón de pausa del video del hero.
+    */
+    .clients-controls {
+      display: flex;
+      justify-content: center;
+      margin-top: var(--sp-5);
+    }
+    .clients-pause-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
+      min-height: 32px;
+      background: transparent;
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      color: var(--c-text-muted);
+      font-family: var(--font-ui);
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      cursor: pointer;
+      transition: border-color var(--t), color var(--t);
+    }
+    .clients-pause-btn:hover {
+      border-color: var(--c-secondary);
+      color: var(--c-secondary);
+    }
+    .clients-track.is-paused { animation-play-state: paused; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .clients-track { animation: none; }
+    }
     .client-logo-item img { max-height: 40px; max-width: 108px; object-fit: contain; }
 
     /* ── CTA BAND ── */
@@ -445,7 +500,12 @@ const destacados = proyectos
         min-height: 100svh;
         align-items: center;
       }
-      .hero-eyebrow   { display: none; }
+      /*
+        El eyebrow se queda. Era lo único en toda la primera pantalla
+        que decía a qué se dedica la empresa: el H1 es el eslogan y no
+        nombra el rubro. Ocultarlo dejaba al visitante de celular sin
+        saber qué vende INACONS hasta pasar el hero entero.
+      */
       .scroll-hint    { display: none; }
       .hero-pause-btn { display: none; }
       .hero-content {
@@ -454,19 +514,26 @@ const destacados = proyectos
         flex-direction: column;
         align-items: center;
       }
+      .hero-eyebrow { justify-content: center; }
       .home-hero h1 {
         text-align: center;
-        font-size: clamp(1.35rem, 6.5vw, 1.9rem);
         width: 100%;
-        padding: 0 var(--sp-1);
-        letter-spacing: -0.3px;
+        letter-spacing: var(--ls-tight);
       }
+      /*
+        Antes: nowrap + overflow:hidden. Eso no ajusta el titular, lo
+        recorta — en un teléfono de 360px "CONSTRUIMOS CONFIANZA" no
+        entra y perdía letras por el borde, en silencio.
+
+        Ahora el tamaño lo resuelve --fs-hero de forma fluida, y el
+        wrap queda como red de seguridad: en el peor caso la palabra
+        baja de línea, que es feo pero legible. Recortar no lo es.
+      */
       .hero-line {
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         justify-content: center;
         gap: var(--sp-2);
         width: 100%;
-        overflow: hidden;
       }
       .word.fixed,
       .word.highlight {
@@ -540,14 +607,20 @@ const destacados = proyectos
       transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     .service-card:hover img { transform: scale(1.07); }
+    /*
+      El velo en reposo usa los valores que antes tenía el :hover.
+      Ahora la tarjeta muestra la descripción sin necesidad de hover,
+      así que el texto tiene que ser legible en reposo, no al pasar
+      el mouse. El :hover solo refuerza.
+    */
     .svc-overlay {
       position: absolute;
       inset: 0;
       background: linear-gradient(
         to top,
-        rgba(20,23,45,0.93) 0%,
-        rgba(20,23,45,0.42) 45%,
-        rgba(20,23,45,0.12) 100%
+        rgba(20,23,45,0.97) 0%,
+        rgba(20,23,45,0.62) 50%,
+        rgba(20,23,45,0.22) 100%
       );
       transition: background 0.4s ease;
       z-index: 1;
@@ -555,9 +628,9 @@ const destacados = proyectos
     .service-card:hover .svc-overlay {
       background: linear-gradient(
         to top,
-        rgba(20,23,45,0.97) 0%,
-        rgba(20,23,45,0.62) 50%,
-        rgba(20,23,45,0.22) 100%
+        rgba(20,23,45,0.98) 0%,
+        rgba(20,23,45,0.74) 55%,
+        rgba(20,23,45,0.34) 100%
       );
     }
     .svc-body {
@@ -581,33 +654,37 @@ const destacados = proyectos
       letter-spacing: 0.5px;
       margin: 0 0 var(--sp-1);
     }
+    /*
+      La descripción y el "Ver más" están siempre visibles.
+
+      Antes ambos vivían detrás de :hover (max-height:0 + opacity:0), y
+      en móvil directamente display:none. El resultado era que la sección
+      que explica a qué se dedica la empresa no explicaba nada: seis
+      imágenes con un título encima, sin ningún indicio de que se puede
+      tocar. Y :hover no existe en táctil, que es donde está el tráfico.
+
+      El hover sigue aportando — la imagen escala y el ícono sube — pero
+      ya no es el que decide si la información se lee o no.
+    */
     .svc-desc {
       font-size: var(--fs-sm);
-      color: rgba(255,255,255,0.72);
+      color: var(--c-on-dark-2);
       line-height: 1.55;
       margin: 0;
-      max-height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transition: max-height 0.4s ease, opacity 0.35s ease;
     }
-    .service-card:hover .svc-desc { max-height: 64px; opacity: 1; }
     .svc-arrow {
       display: inline-flex;
       align-items: center;
       gap: var(--sp-1);
-      margin-top: var(--sp-2);
+      margin-top: var(--sp-3);
       font-size: var(--fs-2xs);
       font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: var(--ls-label);
       color: var(--c-accent);
-      max-height: 0;
-      overflow: hidden;
-      opacity: 0;
-      transition: max-height 0.35s ease 0.05s, opacity 0.35s ease 0.05s;
+      transition: gap .24s ease;
     }
-    .service-card:hover .svc-arrow { max-height: 30px; opacity: 1; }
+    .service-card:hover .svc-arrow { gap: var(--sp-2); }
 
     /* ── PROYECTOS DESTACADOS ── */
     .projects-showcase {
@@ -722,7 +799,7 @@ const destacados = proyectos
       font-weight: var(--fw-semibold);
       text-transform: uppercase;
       letter-spacing: var(--ls-label);
-      color: rgba(20,23,45,0.45);
+      color: var(--c-text-muted);
       margin-top: var(--sp-2);
     }
     .coverage-grid {
@@ -773,7 +850,11 @@ const destacados = proyectos
     .map-stat-count {
       font-size: var(--fs-md);
       font-weight: var(--fw-display);
-      color: var(--c-accent);
+      /* --c-accent sobre --c-bg-muted da 2.63:1. Estas son las cifras
+         de proyectos por ciudad: el dato mas importante del bloque,
+         y era el peor contraste del sitio. --c-accent-ink conserva el
+         naranja y llega a 5.33:1. */
+      color: var(--c-accent-ink);
       letter-spacing: var(--ls-tight);
     }
     .map-stat-bar {
@@ -796,7 +877,16 @@ const destacados = proyectos
       .service-card { aspect-ratio: 3/2; }
       .svc-body { padding: var(--sp-3) var(--sp-4); }
       .svc-title { font-size: var(--fs-sm); }
-      .svc-desc, .svc-arrow { display: none; }
+      /* La descripción se queda. Ocultarla dejaba la tarjeta en una
+         imagen con una palabra encima, justo en el dispositivo donde
+         está la mayor parte del tráfico. Se acorta a dos líneas para
+         que la tarjeta no crezca de más. */
+      .svc-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
       .about-grid { grid-template-columns: 1fr; gap: var(--sp-l2); }
       .about-img-frame { height: 360px; }
       .about-years-badge { bottom: -12px; right: -12px; padding: var(--sp-3) var(--sp-4); }
@@ -1143,36 +1233,44 @@ const destacados = proyectos
       </div>
       <div class="clients-track-wrap">
         <div class="clients-track">
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrocentro.png" alt="Electrocentro" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrodunas.png" alt="Electrodunas" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_enel.png" alt="Enel" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_epsgrau.png" alt="EPS Grau" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_grupocentenario.png" alt="Grupo Centenario" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_indecopi.png" alt="Indecopi" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_losportales.png" alt="Los Portales" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_luzdelsur.png" alt="Luz del Sur" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_mediacommerce.png" alt="Media Commerce" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sanmiguel.png" alt="San Miguel" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sedapal.png" alt="Sedapal" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_zv.png" alt="ZV" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/ge_vernova.svg" alt="GE Vernova" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/kallpa.png" alt="Kallpa" loading="lazy"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrocentro.png" alt="Electrocentro" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrodunas.png" alt="Electrodunas" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_enel.png" alt="Enel" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_epsgrau.png" alt="EPS Grau" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_grupocentenario.png" alt="Grupo Centenario" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_indecopi.png" alt="Indecopi" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_losportales.png" alt="Los Portales" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_luzdelsur.png" alt="Luz del Sur" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_mediacommerce.png" alt="Media Commerce" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sanmiguel.png" alt="San Miguel" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sedapal.png" alt="Sedapal" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_zv.png" alt="ZV" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/ge_vernova.svg" alt="GE Vernova" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/kallpa.png" alt="Kallpa" loading="lazy" width="108" height="40"></div>
           <!-- Duplicado para scroll infinito -->
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrocentro.png" alt="Electrocentro" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrodunas.png" alt="Electrodunas" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_enel.png" alt="Enel" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_epsgrau.png" alt="EPS Grau" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_grupocentenario.png" alt="Grupo Centenario" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_indecopi.png" alt="Indecopi" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_losportales.png" alt="Los Portales" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_luzdelsur.png" alt="Luz del Sur" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_mediacommerce.png" alt="Media Commerce" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sanmiguel.png" alt="San Miguel" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sedapal.png" alt="Sedapal" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_zv.png" alt="ZV" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/ge_vernova.svg" alt="GE Vernova" loading="lazy"></div>
-          <div class="client-logo-item"><img src="/assets/imagenes/clientes/kallpa.png" alt="Kallpa" loading="lazy"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrocentro.png" alt="Electrocentro" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_electrodunas.png" alt="Electrodunas" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_enel.png" alt="Enel" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_epsgrau.png" alt="EPS Grau" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_grupocentenario.png" alt="Grupo Centenario" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_indecopi.png" alt="Indecopi" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_losportales.png" alt="Los Portales" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_luzdelsur.png" alt="Luz del Sur" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_mediacommerce.png" alt="Media Commerce" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sanmiguel.png" alt="San Miguel" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_sedapal.png" alt="Sedapal" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/cliente_zv.png" alt="ZV" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/ge_vernova.svg" alt="GE Vernova" loading="lazy" width="108" height="40"></div>
+          <div class="client-logo-item"><img src="/assets/imagenes/clientes/kallpa.png" alt="Kallpa" loading="lazy" width="108" height="40"></div>
         </div>
+      </div>
+
+      <div class="clients-controls">
+        <button type="button" class="clients-pause-btn" id="clientsPauseBtn" aria-pressed="false">
+          <svg class="icon-pause" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+          <svg class="icon-play" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span class="clients-pause-label">Pausar</span>
+        </button>
       </div>
     </div>
   </section>
