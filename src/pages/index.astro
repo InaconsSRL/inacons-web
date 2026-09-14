@@ -321,14 +321,12 @@ const servicios = [
     }
 
     /* ── SERVICES SHOWCASE ── */
+    /*  El fondo y la adaptacion de .sh-* sobre oscuro los pone
+        .sec--dark del sistema. Aca solo el padding, que es propio:
+        sin padding inferior porque la rejilla va a sangre. */
     .services-showcase {
-      background: var(--c-primary);
       padding: var(--sp-l3) 0 0;
     }
-    .services-showcase .sh-label        { color: var(--c-on-dark-3); }
-    .services-showcase .sh-label::before { background: var(--c-accent); }
-    .services-showcase .sh-title         { color: #fff; }
-    .services-showcase .sh-desc          { color: var(--c-on-dark-3); }
     .services-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -339,11 +337,8 @@ const servicios = [
 
     /* ── PROYECTOS DESTACADOS ── */
     .projects-showcase {
-      background: var(--c-primary);
-      padding: var(--sp-l4) 0 0;
+      padding: var(--section-py) 0 0;
     }
-    .projects-showcase .sh-label { color: var(--c-accent); opacity: 1; }
-    .projects-showcase .sh-title { color: #fff; }
     .projects-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -527,7 +522,7 @@ const servicios = [
   </section>
 
   <!-- ② SERVICIOS -->
-  <section class="services-showcase">
+  <section class="sec--dark services-showcase">
     <div class="container" data-aos="fade-up" data-aos-duration="700">
       <div class="sh sh--center sh--medium">
         <p class="sh-label">Nuestras Especialidades</p>
@@ -650,7 +645,7 @@ const servicios = [
 
   <!-- ⑤ PROYECTOS DESTACADOS — dinámico desde src/content/proyectos/ -->
   {destacados.length > 0 && (
-    <section class="projects-showcase">
+    <section class="sec--dark projects-showcase">
       <div class="container">
         <div class="sh sh--medium" data-aos="fade-up" data-aos-duration="700">
           <p class="sh-label">Proyectos destacados</p>
