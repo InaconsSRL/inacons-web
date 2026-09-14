@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MediaCard from '../components/MediaCard.astro';
-import CtaBand from '../components/CtaBand.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 
@@ -461,8 +460,10 @@ const servicios = [
     .map-stat-count {
       font-size: var(--fs-md);
       font-weight: var(--fw-display);
-      /* --c-accent sobre claro da 2.93:1 y no pasa AA. --c-accent-ink
-         conserva el naranja: 5.93:1 sobre el blanco de esta seccion. */
+      /* Son las cifras de proyectos por ciudad: el dato del bloque.
+         --c-accent sobre claro da 2.93:1 y no pasa AA. --c-accent-ink
+         conserva el naranja y llega a 5.33:1 sobre --c-bg-muted, que
+         es el fondo de esta seccion. */
       color: var(--c-accent-ink);
       letter-spacing: var(--ls-tight);
     }
@@ -628,13 +629,14 @@ const servicios = [
     </div>
   </section>
 
-  <!-- ② QUIENES SOMOS — claro -->
   <!--
-    Eran dos secciones. Juntas repetian "96+ Proyectos ejecutados"
-    palabra por palabra y se contradecian en "Departamentos": 7 en una
-    y 6 en la otra, a treinta lineas de distancia. Entre las dos
-    sumaban diez cifras y dos cabeceras de seccion para contar una
-    sola cosa: quienes somos y donde estamos.
+    ② QUIENES SOMOS — claro.
+
+    Estuvo fusionada con Cobertura para matar datos repetidos: "96+
+    Proyectos ejecutados" salia dos veces palabra por palabra y
+    "Departamentos" decia 7 en una y 6 en la otra. Eso ya no vuelve
+    —las cifras estan repartidas y no se pisan—, asi que vuelven a ser
+    dos secciones: cada una cuenta una cosa.
   -->
   <section class="sec sec--white">
     <div class="container">
@@ -672,6 +674,49 @@ const servicios = [
             Conoce nuestra historia <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </a>
         </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ③ LO QUE CONSTRUIMOS — oscuro -->
+  <section class="sec--dark services-showcase">
+    <div class="container" data-aos="fade-up" data-aos-duration="700">
+      <div class="sh sh--center sh--medium">
+        <p class="sh-label">Nuestras Especialidades</p>
+        <h2 class="sh-title">Lo que construimos</h2>
+        <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
+      </div>
+    </div>
+    <div class="cards-row services-grid">
+      {servicios.map((s) => (
+        <MediaCard
+          href={`/servicios/${s.slug}`}
+          image={s.imagen}
+          alt={`${s.titulo} INACONS`}
+          title={s.titulo}
+          desc={s.desc}
+          ratioMobile="3/2"
+          width={640}
+          height={480}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!--
+    ④ DONDE CONSTRUIMOS — claro.
+
+    Ocupa el hueco que deja la banda CTA. El mapa deja de ser un
+    bloque subordinado dentro de Quienes somos y tiene su propia
+    cabecera, que es lo que siempre fue: un argumento de cobertura.
+  -->
+  <section class="sec sec--muted">
+    <div class="container">
+      <div class="sh sh--medium" data-aos="fade-up">
+        <p class="sh-label">Presencia nacional</p>
+        <h2 class="sh-title">Dónde construimos</h2>
+        <p class="sh-desc">Desde la costa hasta la sierra, operamos en las zonas de mayor actividad económica del país.</p>
       </div>
 
       <div class="coverage-grid" data-aos="fade-up">
@@ -720,48 +765,6 @@ const servicios = [
       </div>
     </div>
   </section>
-
-  <!-- ③ LO QUE CONSTRUIMOS — oscuro -->
-  <section class="sec--dark services-showcase">
-    <div class="container" data-aos="fade-up" data-aos-duration="700">
-      <div class="sh sh--center sh--medium">
-        <p class="sh-label">Nuestras Especialidades</p>
-        <h2 class="sh-title">Lo que construimos</h2>
-        <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
-      </div>
-    </div>
-    <div class="cards-row services-grid">
-      {servicios.map((s) => (
-        <MediaCard
-          href={`/servicios/${s.slug}`}
-          image={s.imagen}
-          alt={`${s.titulo} INACONS`}
-          title={s.titulo}
-          desc={s.desc}
-          ratioMobile="3/2"
-          width={640}
-          height={480}
-        />
-      ))}
-    </div>
-  </section>
-
-  <!--
-    ④ HABLEMOS — claro. El rotulo decia "¿Tienes un proyecto?" y el titulo
-    justo debajo "¿Listo para iniciar su proyecto?": la misma pregunta
-    dos veces seguidas. Y eran tres botones, con "Descargar Brochure"
-    por segunda vez en la misma pagina (ya esta en el hero).
-  -->
-  <CtaBand
-    label="Hablemos"
-    title="¿Listo para iniciar su proyecto?"
-    description="Nuestro equipo de expertos está listo para asesorarlo en soluciones de ingeniería y construcción a medida."
-    primaryHref="/contacto"
-    primaryLabel="Contáctenos"
-    secondaryHref="https://wa.me/51948888070"
-    secondaryLabel="WhatsApp"
-    tone="light"
-  />
 
   <!-- ⑤ NUESTROS PROYECTOS — oscuro — dinámico desde src/content/proyectos/ -->
   {destacados.length > 0 && (
