@@ -1,0 +1,91 @@
+---
+/**
+ * MediaCard.astro
+ * ─────────────────────────────────────────────────────────────
+ * Tarjeta de imagen a sangre con velo y cuerpo anclado abajo.
+ *
+ * Existia cuatro veces con el mismo markup de tres nodos y distinto
+ * nombre de clase: .service-card y .project-card en el home,
+ * .service-item en /servicios y .proyecto-card en /proyectos. Quince
+ * instancias, dos velos distintos y otros dos para el hover.
+ *
+ * El chrome vive en design-system.css (.card--media y sus partes).
+ * Aca solo esta el markup y las props.
+ *
+ * Uso — servicio (proporcion por defecto 4/3):
+ *   <MediaCard
+ *     href="/servicios/obras-civiles"
+ *     image="/assets/imagenes/image_obra_civiles.webp"
+ *     alt="Obras Civiles INACONS"
+ *     title="Obras Civiles"
+ *     desc="Infraestructura urbana, vial e industrial con metodologia BIM"
+ *     width={640} height={480}
+ *   />
+ *
+ * Uso — proyecto (vertical, con etiqueta de categoria):
+ *   <MediaCard
+ *     href={`/proyectos/${proyecto.id}`}
+ *     image={proyecto.data.imagen}
+ *     alt={proyecto.data.titulo}
+ *     tag={proyecto.data.categoria}
+ *     title={proyecto.data.titulo}
+ *     meta={`${proyecto.data.ubicacion} · ${proyecto.data.año}`}
+ *     ratio="4/5"
+ *     width={640} height={800}
+ *   />
+ */
+
+interface Props {
+  href: string;
+  image: string;
+  alt: string;
+  title: string;
+  /** Parrafo bajo el titulo — servicios */
+  desc?: string;
+  /** Linea de metadatos bajo el titulo — ubicacion, año */
+  meta?: string;
+  /** Etiqueta sobre el titulo — categoria del proyecto */
+  tag?: string;
+  /** Proporcion de la tarjeta. Por defecto 4/3 */
+  ratio?: string;
+  width: number;
+  height: number;
+  loading?: 'lazy' | 'eager';
+}
+
+const {
+  href,
+  image,
+  alt,
+  title,
+  desc,
+  meta,
+  tag,
+  ratio,
+  width,
+  height,
+  loading = 'lazy',
+} = Astro.props;
+---
+
+<a
+  href={href}
+  class="card card--media"
+  style={ratio ? `--card-ratio: ${ratio}` : undefined}
+>
+  <img
+    class="card-media-img"
+    src={image}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={loading}
+  />
+  <div class="card-media-overlay"></div>
+  <div class="card-media-body">
+    {tag && <span class="card-media-tag">{tag}</span>}
+    <h3 class="card-media-title">{title}</h3>
+    {desc && <p class="card-media-desc">{desc}</p>}
+    {meta && <p class="card-media-meta">{meta}</p>}
+  </div>
+</a>
