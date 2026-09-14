@@ -70,15 +70,29 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(next, 800);
   }
 
-  /* ─── 3. CONTADORES ANIMADOS ─── */
+  /*
+    ─── 3. CONTADORES ANIMADOS ───
+
+    Un contador es cualquier elemento con [data-counter]. Ese es el
+    contrato completo: no hace falta una clase concreta ni vivir dentro
+    de un contenedor con un nombre determinado.
+
+    Antes hacían falta las dos cosas. El selector aceptaba
+    .indicator-number o [data-counter], pero después exigía además un
+    envoltorio llamado .hero-indicators o .about-stat-row para poder
+    observarlo. Un contador correcto fuera de esos dos envoltorios se
+    quedaba en "0" sin un solo error en consola — y eso es exactamente
+    lo que llevaba meses pasando con las tres cifras de Cobertura, que
+    además usaban data-target, que este selector nunca miró.
+
+    Ahora se observa cada contador por su cuenta.
+  */
   function initCounters() {
-    const counters = document.querySelectorAll('.indicator-number, [data-counter]');
+    const counters = document.querySelectorAll('[data-counter]');
     if (!counters.length) return;
 
-    let done = false;
-
     function animateCounter(el) {
-      const target = parseInt(el.getAttribute('data-target') || el.getAttribute('data-counter'), 10);
+      const target = parseInt(el.getAttribute('data-counter'), 10);
       const suffix = el.getAttribute('data-suffix') || '';
       if (!Number.isFinite(target)) return;
       const duration = 1800;
@@ -95,19 +109,15 @@ document.addEventListener('DOMContentLoaded', function () {
       requestAnimationFrame(step);
     }
 
-    const wrap = document.querySelector('.hero-indicators') || document.querySelector('.about-stat-row');
-    if (!wrap) return;
-
     const obs = new IntersectionObserver((entries) => {
-      if (done) return;
-      if (entries[0].isIntersecting) {
-        done = true;
-        counters.forEach((c, i) => setTimeout(() => animateCounter(c), i * 150));
-        obs.disconnect();
-      }
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        animateCounter(entry.target);
+        obs.unobserve(entry.target);
+      });
     }, { threshold: 0.3 });
 
-    obs.observe(wrap);
+    counters.forEach((c) => obs.observe(c));
   }
 
   /* ─── 4. MENÚ MÓVIL (+ acordeón Operaciones + focus trap) ─── */
@@ -308,22 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
 
-  /* ─── 11. MAP STAT BARS ─── */
-  function initMapBars() {
-    const bars = document.querySelectorAll('[data-bar-width]');
-    if (!bars.length) return;
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.style.width = e.target.dataset.barWidth + '%';
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.2 });
-    bars.forEach(b => obs.observe(b));
-  }
-
-  /* ─── 12. HERO VIDEO PAUSE ─── */
+  /* ─── 10. HERO VIDEO PAUSE ─── */
   function initHeroPause() {
     const btn   = document.getElementById('heroPauseBtn');
     const video = document.querySelector('.hero-video');
@@ -347,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ─── 13. MAPA INTERACTIVO DE COBERTURA ─── */
+  /* ─── 11. MAPA INTERACTIVO DE COBERTURA ─── */
   function initCoverageMap() {
     const container = document.getElementById('peruMapContainer');
     if (!container) return;
@@ -499,7 +494,6 @@ document.addEventListener('DOMContentLoaded', function () {
   initSmoothScroll();
   initResponsive();
   initClientsCarousel();
-  initMapBars();
   initHeroPause();
   initScrollHint();
   initCoverageMap();
