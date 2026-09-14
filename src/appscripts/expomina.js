@@ -1,6 +1,6 @@
 // ============================================================
 //  BACKEND — Registro de visitantes EXPOMINA 2026
-//  Frontend: web-astro/src/pages/formulario/expomina.astro
+//  Frontend: web-astro/src/pages/expomina.astro
 //
 //  Hoja destino:
 //  docs.google.com/spreadsheets/d/1fwU-fOSgvrFG1CkoUuKSKdOWZUuZjUDu3JXlynCzoFk
@@ -15,11 +15,27 @@
 //   5. Autorizar (aparece "Google no verificó la app" →
 //      Configuración avanzada → Ir a Registro Expomina).
 //   6. Copiar la URL que termina en /exec y pegarla en SCRIPT_URL
-//      dentro de src/pages/formulario/expomina.astro.
+//      dentro de src/pages/expomina.astro.
 // ============================================================
 
 var SHEET_ID   = '1fwU-fOSgvrFG1CkoUuKSKdOWZUuZjUDu3JXlynCzoFk';
 var SHEET_NAME = 'Leads';
+
+// ── CAPTURA CERRADA ───────────────────────────────────────────
+//  La feria terminó el 11 de setiembre de 2026. Con esto en false el
+//  backend deja de escribir filas nuevas: sin él, la URL /exec sigue
+//  abierta indefinidamente y lo único que puede llegar es basura de bots.
+//
+//  DESPLEGAR SOLO DESPUÉS DE EXPORTAR EL HISTÓRICO (Fase 0, paso 2).
+//
+//  OJO: el frontend no puede notar el rechazo. `enviar()` en
+//  expomina.astro solo mira el status HTTP, y Apps Script responde 200
+//  aunque el cuerpo diga ok:false. Con la captura cerrada y el formulario
+//  todavía publicado, quien lo envíe ve la pantalla de gracias y su
+//  registro se descarta en silencio. Por eso el formulario debe quedar
+//  deshabilitado en la página al mismo tiempo que se cierra esto —
+//  la Fase 4 lo resuelve de raíz con el estado `cerrado` del evento.
+var CAPTURA_ABIERTA = false;
 
 var HEADERS = [
   'Fecha',
@@ -39,6 +55,12 @@ var HEADERS = [
 // ── POST: recibe el formulario ────────────────────────────────
 function doPost(e) {
   try {
+    if (!CAPTURA_ABIERTA) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ ok: false, cerrado: true, error: 'La inscripción a este evento está cerrada.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var raw = (e.parameter && e.parameter.data) || (e.postData && e.postData.contents);
     var d   = JSON.parse(raw);
 
