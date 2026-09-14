@@ -374,8 +374,13 @@ const servicios = [
     /*  El fondo y la adaptacion de .sh-* sobre oscuro los pone
         .sec--dark del sistema. Aca solo el padding, que es propio:
         sin padding inferior porque la rejilla va a sangre. */
+    /*  Las tarjetas ya no van a sangre: viven dentro de .container,
+        alineadas con la cabecera y con el resto de la pagina. Iban de
+        borde a borde de la ventana (1440px) mientras todo lo demas
+        estaba en 1200, y se leian como un bloque ajeno pegado encima.
+        Con la rejilla dentro, la seccion recupera su padding inferior. */
     .services-showcase {
-      padding: var(--section-py) 0 0;
+      padding: var(--section-py) 0;
     }
 
     /*  Servicios y proyectos son la misma tarjeta: tienen que medir
@@ -399,9 +404,9 @@ const servicios = [
 
     /* ── PROYECTOS DESTACADOS ── */
     .projects-showcase {
-      padding: var(--section-py) 0 0;
+      padding: var(--section-py) 0;
     }
-    .projects-footer { text-align: center; padding: var(--sp-l2) 0; }
+    .projects-footer { text-align: center; padding-top: var(--sp-l2); }
 
     /* ── COVERAGE MAP ── */
     .coverage-grid {
@@ -676,14 +681,13 @@ const servicios = [
 
   <!-- ③ LO QUE CONSTRUIMOS — oscuro -->
   <section class="sec--dark services-showcase">
-    <div class="container" data-aos="fade-up" data-aos-duration="700">
-      <div class="sh sh--center sh--medium">
+    <div class="container">
+      <div class="sh sh--center sh--medium" data-aos="fade-up" data-aos-duration="700">
         <p class="sh-label">Nuestras Especialidades</p>
         <h2 class="sh-title">Lo que construimos</h2>
         <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
       </div>
-    </div>
-    <div class="cards-row services-grid">
+      <div class="cards-row services-grid">
       {servicios.map((s) => (
         <MediaCard
           href={`/servicios/${s.slug}`}
@@ -696,6 +700,7 @@ const servicios = [
           height={480}
         />
       ))}
+      </div>
     </div>
   </section>
 
@@ -769,12 +774,8 @@ const servicios = [
           <p class="sh-label">Proyectos destacados</p>
           <h2 class="sh-title">Nuestra huella en el Perú</h2>
         </div>
-      </div>
 
-      <div
-        class="cards-row projects-grid"
-        data-aos="fade-up" data-aos-duration="800" data-aos-delay="100"
-      >
+        <div class="cards-row projects-grid" data-aos="fade-up" data-aos-duration="800">
         {destacados.map((proyecto) => (
           <MediaCard
             href={`/proyectos/${proyecto.id}`}
@@ -788,9 +789,8 @@ const servicios = [
             height={480}
           />
         ))}
-      </div>
+        </div>
 
-      <div class="container">
         <div class="projects-footer" data-aos="fade-up" data-aos-duration="600">
           <a href="/proyectos" class="btn btn-outline-light">
             Ver todos los proyectos
