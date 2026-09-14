@@ -37,6 +37,16 @@ interface Props {
   primaryLabel: string;
   secondaryHref?: string;
   secondaryLabel?: string;
+  /**
+   * Fondo de la banda. 'dark' (por defecto) para el cierre de las
+   * páginas slug; 'light' cuando la banda va intercalada entre dos
+   * secciones oscuras y tiene que ser el respiro claro entre ambas.
+   *
+   * No es solo el fondo: el botón secundario cambia de variante. En
+   * claro, .btn-outline-light es texto blanco con borde blanco —
+   * invisible.
+   */
+  tone?: 'dark' | 'light';
 }
 
 const {
@@ -47,10 +57,14 @@ const {
   primaryLabel,
   secondaryHref,
   secondaryLabel,
+  tone = 'dark',
 } = Astro.props;
+
+const sectionClass  = tone === 'light' ? 'sec sec--muted' : 'sec sec--dark';
+const secondaryClass = tone === 'light' ? 'btn btn-outline btn-lg' : 'btn btn-outline-light btn-lg';
 ---
 
-<section class="sec sec--dark">
+<section class={sectionClass}>
   <div class="container">
     <div class="sh sh--center sh--medium">
       <p class="sh-label">{label}</p>
@@ -64,7 +78,7 @@ const {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
       </a>
       {secondaryHref && secondaryLabel && (
-        <a href={secondaryHref} class="btn btn-outline-light btn-lg">
+        <a href={secondaryHref} class={secondaryClass}>
           {secondaryLabel}
           <!-- SVG inline: arrow-right -->
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>

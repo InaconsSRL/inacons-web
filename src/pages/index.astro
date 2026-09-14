@@ -91,8 +91,17 @@ const servicios = [
     }
     .hero-stat { white-space: nowrap; text-align: left; }
 
-    /*  Entre 768 y 1024 no hay ancho para las dos columnas: "CONSTRUIMOS
-        CONFIANZA" a 5.2vw ya ocupa casi todo el contenedor y las cifras
+    .hero-stat .stat-num {
+      font-size: var(--fs-display);
+      color: var(--c-text-white);
+    }
+    .hero-stat .stat-label {
+      color: var(--c-on-dark-3);
+      margin-top: var(--sp-1);
+    }
+
+    /*  Entre 768 y 1024 no hay ancho para las dos columnas: el titular
+        a 4.3vw ya ocupa casi todo el contenedor y las cifras al costado
         lo empujarian a partirse. En tablet van en fila bajo el mensaje,
         que es donde si hay sitio horizontal. */
     @media (max-width: 1023.98px) {
@@ -110,14 +119,6 @@ const servicios = [
         border-top: 1px solid var(--c-border-dark-strong);
       }
       .hero-stat { text-align: center; }
-    }
-    .hero-stat .stat-num {
-      font-size: var(--fs-display);
-      color: var(--c-text-white);
-    }
-    .hero-stat .stat-label {
-      color: var(--c-on-dark-3);
-      margin-top: var(--sp-1);
     }
     .home-hero h1 {
       font-family: 'Montserrat', sans-serif;
@@ -547,6 +548,14 @@ const servicios = [
     }
   </style>
 
+  <!--
+    ORDEN DEL HOME — claro y oscuro alternados.
+
+    Antes iba hero(video) → oscuro → claro → oscuro → claro → oscuro,
+    con dos oscuras pegadas al arrancar y la banda CTA compitiendo con
+    Proyectos por ser el cierre. Ahora cada seccion se apoya en el
+    contraste de la anterior, y Clientes cierra en claro.
+  -->
   <!-- ① HERO -->
   <section class="home-hero">
     <video class="hero-video" autoplay muted loop playsinline poster="/assets/imagenes/image_heroprincipal.webp">
@@ -610,32 +619,7 @@ const servicios = [
     </div>
   </section>
 
-  <!-- ② SERVICIOS -->
-  <section class="sec--dark services-showcase">
-    <div class="container" data-aos="fade-up" data-aos-duration="700">
-      <div class="sh sh--center sh--medium">
-        <p class="sh-label">Nuestras Especialidades</p>
-        <h2 class="sh-title">Lo que construimos</h2>
-        <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
-      </div>
-    </div>
-    <div class="services-grid">
-      {servicios.map((s) => (
-        <MediaCard
-          href={`/servicios/${s.slug}`}
-          image={s.imagen}
-          alt={`${s.titulo} INACONS`}
-          title={s.titulo}
-          desc={s.desc}
-          ratioMobile="3/2"
-          width={640}
-          height={480}
-        />
-      ))}
-    </div>
-  </section>
-
-  <!-- ③ NOSOTROS + COBERTURA -->
+  <!-- ② QUIENES SOMOS — claro -->
   <!--
     Eran dos secciones. Juntas repetian "96+ Proyectos ejecutados"
     palabra por palabra y se contradecian en "Departamentos": 7 en una
@@ -728,7 +712,49 @@ const servicios = [
     </div>
   </section>
 
-  <!-- ⑤ PROYECTOS DESTACADOS — dinámico desde src/content/proyectos/ -->
+  <!-- ③ LO QUE CONSTRUIMOS — oscuro -->
+  <section class="sec--dark services-showcase">
+    <div class="container" data-aos="fade-up" data-aos-duration="700">
+      <div class="sh sh--center sh--medium">
+        <p class="sh-label">Nuestras Especialidades</p>
+        <h2 class="sh-title">Lo que construimos</h2>
+        <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
+      </div>
+    </div>
+    <div class="services-grid">
+      {servicios.map((s) => (
+        <MediaCard
+          href={`/servicios/${s.slug}`}
+          image={s.imagen}
+          alt={`${s.titulo} INACONS`}
+          title={s.titulo}
+          desc={s.desc}
+          ratioMobile="3/2"
+          width={640}
+          height={480}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!--
+    ④ HABLEMOS — claro. El rotulo decia "¿Tienes un proyecto?" y el titulo
+    justo debajo "¿Listo para iniciar su proyecto?": la misma pregunta
+    dos veces seguidas. Y eran tres botones, con "Descargar Brochure"
+    por segunda vez en la misma pagina (ya esta en el hero).
+  -->
+  <CtaBand
+    label="Hablemos"
+    title="¿Listo para iniciar su proyecto?"
+    description="Nuestro equipo de expertos está listo para asesorarlo en soluciones de ingeniería y construcción a medida."
+    primaryHref="/contacto"
+    primaryLabel="Contáctenos"
+    secondaryHref="https://wa.me/51948888070"
+    secondaryLabel="WhatsApp"
+    tone="light"
+  />
+
+  <!-- ⑤ NUESTROS PROYECTOS — oscuro — dinámico desde src/content/proyectos/ -->
   {destacados.length > 0 && (
     <section class="sec--dark projects-showcase">
       <div class="container">
@@ -769,7 +795,7 @@ const servicios = [
     </section>
   )}
 
-  <!-- ⑥ CLIENTES -->
+  <!-- ⑥ NUESTROS CLIENTES — claro, cierre -->
   <section class="sec sec--white" id="clientes">
     <div class="container">
       <div class="sh sh--center sh--medium" data-aos="fade-up" data-aos-duration="600">
@@ -821,21 +847,5 @@ const servicios = [
       </div>
     </div>
   </section>
-
-  <!--
-    ⑥ CTA — El rotulo decia "¿Tienes un proyecto?" y el titulo
-    justo debajo "¿Listo para iniciar su proyecto?": la misma pregunta
-    dos veces seguidas. Y eran tres botones, con "Descargar Brochure"
-    por segunda vez en la misma pagina (ya esta en el hero).
-  -->
-  <CtaBand
-    label="Hablemos"
-    title="¿Listo para iniciar su proyecto?"
-    description="Nuestro equipo de expertos está listo para asesorarlo en soluciones de ingeniería y construcción a medida."
-    primaryHref="/contacto"
-    primaryLabel="Contáctenos"
-    secondaryHref="https://wa.me/51948888070"
-    secondaryLabel="WhatsApp"
-  />
 
 </BaseLayout>

@@ -93,10 +93,15 @@
     /*  Display — fuera de la escala de texto, siempre fluido. */
     --fs-display: clamp(2rem, 4vw, 3rem);
     /* 32–48px — h1 de páginas interiores */
-    --fs-hero: clamp(1.05rem, 5.2vw, 3.8rem);
-    /* 17–61px — h1 del home. El minimo es bajo a proposito: la linea
-       mas larga es "CONSTRUIMOS CONFIANZA" y en un telefono de 360px
-       tiene que entrar sin recortarse. */
+    --fs-hero: clamp(1rem, 4.3vw, 3.1rem);
+    /* 16–50px — h1 del home. Era clamp(1.05rem, 5.2vw, 3.8rem), un 18%
+       mas grande: seis palabras en caja alta a 61px se comian la
+       pantalla y, con las cifras al costado, empujaban el titular a
+       partirse antes de tiempo.
+
+       El minimo sigue siendo bajo a proposito: la linea mas larga es
+       "CONSTRUIMOS CONFIANZA" y en un telefono de 360px tiene que
+       entrar sin recortarse. */
 
     /*  Pesos. El sitio usaba 700 en 77 lugares y 300/400/500 en 10:
         cuando casi todo es bold, no hay jerarquía, hay volumen parejo.
