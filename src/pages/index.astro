@@ -75,9 +75,6 @@ const destacados = proyectos
     }
     .word.fixed   { color: var(--c-on-dark-2); font-weight: var(--fw-normal); letter-spacing: var(--ls-wide); }
     .word.highlight { color: #fff; font-weight: var(--fw-display); letter-spacing: var(--ls-tight); }
-    .word.highlight.completed {
-      background: linear-gradient(transparent 84%, rgba(27,82,120,0.40) 84%);
-    }
     /* Ghost reserva el espacio final desde el inicio — sin CLS */
     .word.typewriter {
       position: relative;
@@ -95,15 +92,12 @@ const destacados = proyectos
       white-space: nowrap;
       color: inherit;
     }
+    /* @keyframes blink vive en design-system.css */
     .word.typewriter.typing .tw-typed::after {
       content: '|';
       color: var(--c-on-dark-3);
       animation: blink .5s infinite;
       margin-left: 2px;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0; }
     }
     .hero-content > p {
       font-size: clamp(0.95rem, 1.6vw, 1.1rem);
@@ -277,40 +271,19 @@ const destacados = proyectos
       color: rgba(20,23,45,0.42);
       margin-top: var(--sp-1);
     }
-    .regional-map-wrap { display: flex; justify-content: center; }
-    .peru-map {
-      max-width: 260px;
-      width: 100%;
-      filter: drop-shadow(0 6px 20px rgba(20,23,45,0.10));
-    }
-    .info-carousel-swiper .swiper-pagination-bullet {
-      background: rgba(255,255,255,0.30) !important;
-      opacity: 1 !important;
-    }
-    .info-carousel-swiper .swiper-pagination-bullet-active {
-      background: #fff !important;
-    }
-
-    /* Desktop — lado a lado */
-    @media (min-width: 768.02px) {
-    }
-
     /* ── CLIENTES SCROLL ── */
     .clients-track-wrap {
       overflow: hidden;
       mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
       -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
     }
+    /* @keyframes clientsScroll vive en design-system.css */
     .clients-track {
       display: flex;
       width: max-content;
       animation: clientsScroll 30s linear infinite;
     }
     .clients-track:hover { animation-play-state: paused; }
-    @keyframes clientsScroll {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-50%); }
-    }
     /*
       Enel, Sedapal, Luz del Sur, GE Vernova, Kallpa, Indecopi: es lo
       más persuasivo que tiene la home. Estaba en gris al 48% de
@@ -375,9 +348,6 @@ const destacados = proyectos
     }
     .clients-track.is-paused { animation-play-state: paused; }
 
-    @media (prefers-reduced-motion: reduce) {
-      .clients-track { animation: none; }
-    }
     .client-logo-item img { max-height: 40px; max-width: 108px; object-fit: contain; }
 
     /* ── CTA BAND ── */
@@ -435,28 +405,6 @@ const destacados = proyectos
       50%       { transform: translateX(-50%) translateY(8px); opacity: 0.90; }
     }
 
-    /* ── WORD CYCLE ── */
-    .hero-cycle {
-      position: relative;
-      display: inline-block;
-      overflow: hidden;
-      vertical-align: bottom;
-    }
-    .cycle-ghost {
-      visibility: hidden;
-      user-select: none;
-      pointer-events: none;
-      font-weight: var(--fw-display);
-      letter-spacing: var(--ls-tight);
-    }
-    @keyframes cycleWord {
-      0%           { opacity: 0; transform: translateY(70%);  animation-timing-function: ease-out; }
-      8.33%        { opacity: 1; transform: translateY(0);    animation-timing-function: ease;     }
-      25%          { opacity: 1; transform: translateY(0);    animation-timing-function: ease-in;  }
-      33.33%       { opacity: 0; transform: translateY(-55%); animation-timing-function: step-start; }
-      33.34%, 100% { opacity: 0; transform: translateY(70%);  }
-    }
-
     /* ── PAUSA VIDEO ── */
     .hero-pause-btn {
       position: absolute;
@@ -482,7 +430,7 @@ const destacados = proyectos
     }
     /* icon-play initial state se maneja por JS en initHeroPause */
 
-    /* Accesibilidad: ocultar video y mostrar imagen estática para usuarios con preferencia de movimiento reducido */
+    /* Accesibilidad: todo lo que se mueve solo, quieto. Bloque unico. */
     @media (prefers-reduced-motion: reduce) {
       .hero-video { display: none; }
       .home-hero {
@@ -490,89 +438,8 @@ const destacados = proyectos
         background-size: cover;
         background-position: center;
       }
-      .scroll-hint          { animation: none; opacity: 0.55; }
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      /* Hero */
-      .home-hero {
-        min-height: 100svh;
-        align-items: center;
-      }
-      /*
-        El eyebrow se queda. Era lo único en toda la primera pantalla
-        que decía a qué se dedica la empresa: el H1 es el eslogan y no
-        nombra el rubro. Ocultarlo dejaba al visitante de celular sin
-        saber qué vende INACONS hasta pasar el hero entero.
-      */
-      .scroll-hint    { display: none; }
-      .hero-pause-btn { display: none; }
-      .hero-content {
-        padding: var(--sp-l3) var(--sp-5) 160px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-      .hero-eyebrow { justify-content: center; }
-      .home-hero h1 {
-        text-align: center;
-        width: 100%;
-        letter-spacing: var(--ls-tight);
-      }
-      /*
-        Antes: nowrap + overflow:hidden. Eso no ajusta el titular, lo
-        recorta — en un teléfono de 360px "CONSTRUIMOS CONFIANZA" no
-        entra y perdía letras por el borde, en silencio.
-
-        Ahora el tamaño lo resuelve --fs-hero de forma fluida, y el
-        wrap queda como red de seguridad: en el peor caso la palabra
-        baja de línea, que es feo pero legible. Recortar no lo es.
-      */
-      .hero-line {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: var(--sp-2);
-        width: 100%;
-      }
-      .word.fixed,
-      .word.highlight {
-        white-space: nowrap;
-        font-size: inherit;
-      }
-      .hero-content > p {
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        max-width: 100%;
-      }
-      .hero-actions {
-        justify-content: center;
-        flex-direction: column;
-        width: 100%;
-      }
-      .hero-actions .btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      /* About */
-      .about-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
-
-      /* Indicadores */
-      .indicators-container { grid-template-columns: repeat(2, 1fr); }
-
-      /* CTA */
-      .cta-actions {
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-      }
-      .cta-actions .btn {
-        width: 100%;
-        max-width: 320px;
-        justify-content: center;
-      }
+      .scroll-hint   { animation: none; opacity: 0.55; }
+      .clients-track { animation: none; }
     }
 
     /* ── SERVICES SHOWCASE ── */
@@ -871,7 +738,87 @@ const destacados = proyectos
       transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
+    /* ── RESPONSIVE ──
+       Bloque unico. Antes habia dos @media (max-width:768px) separados,
+       uno arriba y otro aca, y ambos declaraban .about-grid con gap
+       distinto: ganaba el de abajo y el de arriba no hacia nada. */
     @media (max-width: 768px) {
+      /* Hero */
+      .home-hero {
+        min-height: 100svh;
+        align-items: center;
+      }
+      /*
+        El eyebrow se queda. Era lo único en toda la primera pantalla
+        que decía a qué se dedica la empresa: el H1 es el eslogan y no
+        nombra el rubro. Ocultarlo dejaba al visitante de celular sin
+        saber qué vende INACONS hasta pasar el hero entero.
+      */
+      .scroll-hint    { display: none; }
+      .hero-pause-btn { display: none; }
+      .hero-content {
+        padding: var(--sp-l3) var(--sp-5) 160px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .hero-eyebrow { justify-content: center; }
+      .home-hero h1 {
+        text-align: center;
+        width: 100%;
+        letter-spacing: var(--ls-tight);
+      }
+      /*
+        Antes: nowrap + overflow:hidden. Eso no ajusta el titular, lo
+        recorta — en un teléfono de 360px "CONSTRUIMOS CONFIANZA" no
+        entra y perdía letras por el borde, en silencio.
+
+        Ahora el tamaño lo resuelve --fs-hero de forma fluida, y el
+        wrap queda como red de seguridad: en el peor caso la palabra
+        baja de línea, que es feo pero legible. Recortar no lo es.
+      */
+      .hero-line {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--sp-2);
+        width: 100%;
+      }
+      .word.fixed,
+      .word.highlight {
+        white-space: nowrap;
+        font-size: inherit;
+      }
+      .hero-content > p {
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
+      }
+      .hero-actions {
+        justify-content: center;
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Indicadores */
+      .indicators-container { grid-template-columns: repeat(2, 1fr); }
+
+      /* CTA */
+      .cta-actions {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
+      .cta-actions .btn {
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+      }
+
       .services-showcase { padding: var(--sp-l3) 0 0; }
       .services-grid { grid-template-columns: repeat(2, 1fr); margin-top: var(--sp-7); }
       .service-card { aspect-ratio: 3/2; }
@@ -1296,7 +1243,5 @@ const destacados = proyectos
       </div>
     </div>
   </section>
-
-  <!-- Swiper inicializado desde /assets/js/main.js con defer -->
 
 </BaseLayout>

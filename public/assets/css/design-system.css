@@ -1239,31 +1239,6 @@ a.btn:active {
     transform: translateY(-3px) !important;
 }
 
-/* WhatsApp flotante */
-.whatsapp-float {
-    position: fixed;
-    bottom: 88px;
-    right: 28px;
-    z-index: var(--z-float);
-    width: 50px;
-    height: 50px;
-    background: #25D366;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: var(--fs-xl);
-    text-decoration: none;
-    box-shadow: 0 4px 18px rgba(37, 211, 102, 0.38);
-    transition: transform var(--t), box-shadow var(--t);
-}
-
-.whatsapp-float:hover {
-    transform: scale(1.08);
-    box-shadow: 0 6px 26px rgba(37, 211, 102, 0.50);
-}
-
 /* ══════════════════════════════════════════════════════════════
    12. LAYOUT: MOBILE MENU
 ══════════════════════════════════════════════════════════════ */
@@ -1637,15 +1612,17 @@ body.menu-open {
 }
 
 /* Animaciones */
+/*  Cursor del typewriter del home. Convive con initTypewriter en main.js.
+    El corte duro (51%) se reemplazo por el desvanecido: a 500ms el salto
+    binario se lee como un parpadeo nervioso al lado de un titular de 60px. */
 @keyframes blink {
 
     0%,
-    50% {
+    100% {
         opacity: 1;
     }
 
-    51%,
-    100% {
+    50% {
         opacity: 0;
     }
 }
@@ -1661,24 +1638,8 @@ body.menu-open {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   14. VENDORS: SWIPER & AOS
+   14. VENDORS: AOS
 ══════════════════════════════════════════════════════════════ */
-
-/* Swiper — bullets */
-.swiper-pagination-bullet {
-    background: var(--c-border) !important;
-    opacity: 0.5 !important;
-    width: 10px !important;
-    height: 10px !important;
-    border-radius: var(--radius) !important;
-    transition: var(--t) !important;
-}
-
-.swiper-pagination-bullet-active {
-    background: var(--c-accent) !important;
-    opacity: 1 !important;
-    width: 24px !important;
-}
 
 /* AOS — sincronizar duración */
 [data-aos] {
