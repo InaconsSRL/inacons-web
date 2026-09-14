@@ -27,3 +27,5 @@ pnpm-debug.log*
 # ── ARCHIVOS SENSIBLES PHP — NUNCA subir a Git ────────────────
 public/empresa/config.php
 public/empresa/setup.php
+# reportes generados por unlighthouse — 32 MB de artefactos
+.unlighthouse/
