@@ -148,9 +148,18 @@
     --sp-l3: 64px;
     --sp-l4: 96px;
 
-    /* Espaciado vertical de sección */
-    --section-py: var(--sp-l4);
-    --section-py-sm: var(--sp-l3);
+    /*  Respiración vertical de sección.
+
+        Eran 96px en escritorio y 60 en móvil. Con seis secciones
+        alternando claro y oscuro, ese aire no alcanzaba: el contraste
+        de fondo marca el corte, pero sin margen suficiente las
+        secciones se leen pegadas y el cambio de color parece una
+        franja más que un respiro.
+
+        --section-py-sm llevaba declarado desde el inicio con CERO
+        usos. Ahora tiene su trabajo: es la variante de móvil. */
+    --section-py: 128px;
+    --section-py-sm: 80px;
 
     /* ── PRESUPUESTO DE ORNAMENTO ────────────────────────────── */
     /*  Estos cuatro valores son el techo, no una sugerencia.
@@ -206,7 +215,7 @@
   real tenía max-width:768px junto a min-width:768.02px, y
   max-width:1023px junto a min-width:1023.02px — dos huecos de 0.02px
   en 768.01 y 1023.01 donde no aplicaba ninguna de las dos reglas. En
-  768.01px reaparecía el topbar y --section-py saltaba de 60 a 96px.
+  768.01px reaparecía el topbar y --section-py daba un salto entero.
   No es teórico: innerWidth fraccional es normal con DPI fraccional en
   Windows y en cualquier nivel de zoom del navegador.
 
@@ -1869,7 +1878,7 @@ body.menu-open {
 ══════════════════════════════════════════════════════════════ */
 @media (max-width: 767.98px) {
     :root {
-        --section-py: 60px;
+        --section-py: var(--section-py-sm);
     }
 
     /* Topbar */
