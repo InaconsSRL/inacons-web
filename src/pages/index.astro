@@ -109,62 +109,6 @@ const destacados = proyectos
     }
     .hero-actions { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
 
-    /* ── INDICADORES ── */
-    .hero-indicators {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      z-index: 3;
-      background: var(--c-primary);
-      border-top: 1px solid rgba(27,82,120,0.5);
-    }
-    .indicators-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 var(--sp-l1);
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-    }
-    .indicator {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: var(--sp-6) var(--sp-4);
-      border-right: 1px solid var(--c-surface-dark-2);
-      position: relative;
-      overflow: hidden;
-      transition: background .28s ease;
-    }
-    .indicator::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 2px;
-      background: var(--c-accent);
-      transition: width .35s ease;
-    }
-    .indicator:hover::after { width: 52%; }
-    .indicator:last-child { border-right: none; }
-    .indicator:hover { background: var(--c-surface-dark-1); }
-    .indicator-icon { color: rgba(255,255,255,0.28); margin-bottom: var(--sp-2); }
-    .indicator-number {
-      font-size: clamp(2rem, 4vw, 2.8rem);
-      font-weight: var(--fw-display);
-      color: #fff;
-      line-height: 1;
-      letter-spacing: var(--ls-tight);
-    }
-    .indicator-text {
-      font-size: var(--fs-xs);
-      color: var(--c-on-dark-3);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-top: var(--sp-1);
-      text-align: center;
-    }
-
     /* ── ABOUT (Bechtel-style 2-col) ── */
     .about-grid {
       display: grid;
@@ -389,9 +333,12 @@ const destacados = proyectos
     }
 
     /* ── SCROLL HINT ── */
+    /* Los 168px de bottom eran la altura medida de la banda de
+       indicadores que ocupaba el pie del hero. Sin banda, van al
+       borde. Mismo motivo en .hero-pause-btn. */
     .scroll-hint {
       position: absolute;
-      bottom: 168px;
+      bottom: var(--sp-l1);
       left: 50%;
       transform: translateX(-50%);
       z-index: 4;
@@ -408,8 +355,8 @@ const destacados = proyectos
     /* ── PAUSA VIDEO ── */
     .hero-pause-btn {
       position: absolute;
-      right: 40px;
-      bottom: 168px;
+      right: var(--sp-l1);
+      bottom: var(--sp-l1);
       z-index: 4;
       width: 36px;
       height: 36px;
@@ -757,7 +704,7 @@ const destacados = proyectos
       .scroll-hint    { display: none; }
       .hero-pause-btn { display: none; }
       .hero-content {
-        padding: var(--sp-l3) var(--sp-5) 160px;
+        padding: var(--sp-l3) var(--sp-5);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -803,9 +750,6 @@ const destacados = proyectos
         width: 100%;
         justify-content: center;
       }
-
-      /* Indicadores */
-      .indicators-container { grid-template-columns: repeat(2, 1fr); }
 
       /* CTA */
       .cta-actions {
@@ -887,30 +831,6 @@ const destacados = proyectos
     </button>
     <div class="scroll-hint" aria-hidden="true">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-    </div>
-    <div class="hero-indicators">
-      <div class="indicators-container">
-        <div class="indicator">
-          <div class="indicator-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></div>
-          <div class="indicator-number" data-target="15" data-suffix="+">0</div>
-          <div class="indicator-text">Años de experiencia</div>
-        </div>
-        <div class="indicator">
-          <div class="indicator-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg></div>
-          <div class="indicator-number" data-target="150" data-suffix="+">0</div>
-          <div class="indicator-text">km² construidos</div>
-        </div>
-        <div class="indicator">
-          <div class="indicator-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-          <div class="indicator-number" data-target="100" data-suffix="M+">0</div>
-          <div class="indicator-text">Inversión gestionada</div>
-        </div>
-        <div class="indicator">
-          <div class="indicator-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <div class="indicator-number" data-target="100" data-suffix="+">0</div>
-          <div class="indicator-text">Profesionales</div>
-        </div>
-      </div>
     </div>
   </section>
 
