@@ -49,7 +49,7 @@ servicios.sort((a: Servicio, b: Servicio) =>
             <div class="service-info">
               <h2>{servicio.data.titulo}</h2>
               <p>{servicio.data.descripcion}</p>
-              <span class="btn btn-outline btn-sm">
+              <span class="btn btn-outline-light btn-sm">
                 Ver más <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </span>
             </div>
@@ -157,6 +157,15 @@ servicios.sort((a: Servicio, b: Servicio) =>
 
   .service-item:hover .service-img img {
     transform: scale(1.05);
+  }
+
+  /* La tarjeta entera es el enlace, asi que el boton responde al hover
+     de la tarjeta y no solo al suyo: de lo contrario la imagen hace
+     zoom mientras el boton se queda inerte a un centimetro del cursor.
+     Mismos valores que .btn-outline-light:hover del sistema. */
+  .service-item:hover .btn-outline-light {
+    background: var(--c-border-dark);
+    border-color: rgba(255, 255, 255, 0.75);
   }
 
   .service-img::after {
