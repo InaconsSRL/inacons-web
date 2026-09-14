@@ -82,6 +82,7 @@ ver el comentario de orden en `src/pages/index.astro`.
 
 | Doc | Contenido |
 |---|---|
+| **[docs/ESPECIFICACION.md](docs/ESPECIFICACION.md)** | **Documento canónico: decisiones congeladas, fases y criterios de aceptación. Abrirlo al empezar cada sesión.** |
 | [docs/arquitectura.md](docs/arquitectura.md) | Estructura, `main.js`, CSS, el mapa, el home sección por sección |
 | [docs/contenido.md](docs/contenido.md) | Cómo agregar proyectos, servicios y recursos |
 | [docs/deploy.md](docs/deploy.md) | CI/CD, hosting, dominios, `.htaccess` |
