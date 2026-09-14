@@ -303,7 +303,7 @@ const destacados = proyectos
       border-right: 1px solid var(--c-border-light);
       filter: grayscale(100%);
       opacity: 0.85;
-      transition: filter .24s ease, opacity .24s ease;
+      transition: filter var(--t), opacity var(--t);
     }
     .client-logo-item:hover { filter: grayscale(0%); opacity: 1; }
 
@@ -471,7 +471,7 @@ const destacados = proyectos
       inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
-      transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transition: transform var(--t-slow);
     }
     .service-card:hover img { transform: scale(1.07); }
     /*
@@ -489,7 +489,7 @@ const destacados = proyectos
         rgba(20,23,45,0.62) 50%,
         rgba(20,23,45,0.22) 100%
       );
-      transition: background 0.4s ease;
+      transition: background var(--t);
       z-index: 1;
     }
     .service-card:hover .svc-overlay {
@@ -576,7 +576,7 @@ const destacados = proyectos
     .project-card img {
       width: 100%; height: 100%;
       object-fit: cover;
-      transition: transform 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transition: transform var(--t-slow);
     }
     .project-card:hover img { transform: scale(1.07); }
     .project-overlay {
@@ -587,7 +587,7 @@ const destacados = proyectos
         rgba(20,23,45,0.28) 45%,
         rgba(20,23,45,0.05) 100%
       );
-      transition: background 0.4s ease;
+      transition: background var(--t);
     }
     .project-card:hover .project-overlay {
       background: linear-gradient(to top,
@@ -636,7 +636,7 @@ const destacados = proyectos
       color: var(--c-accent);
       opacity: 0;
       transform: translateY(8px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transition: opacity var(--t), transform var(--t);
     }
     .project-card:hover .project-cta { opacity: 1; transform: translateY(0); }
     .projects-footer { text-align: center; padding: var(--sp-l2) 0; }

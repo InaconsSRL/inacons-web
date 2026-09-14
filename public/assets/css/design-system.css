@@ -147,8 +147,30 @@
     --section-py: var(--sp-l4);
     --section-py-sm: var(--sp-l3);
 
-    /* ── VARIOS ──────────────────────────────────────────────── */
+    /* ── PRESUPUESTO DE ORNAMENTO ────────────────────────────── */
+    /*  Estos cuatro valores son el techo, no una sugerencia.
+
+        El sitio tenia 25 sombras distintas contra estos 2 tokens, 9
+        radios contra 1, y 25 duraciones de transicion. Trece de esas
+        sombras estaban dentro de ESTE archivo: cada componente del
+        chrome se habia inventado su propia elevacion, con cuatro
+        familias de color de sombra (navy, azul, naranja, verde).
+
+        Reglas:
+        · Elevacion: --shadow-card y --shadow-card-hover. Nada mas.
+          Si algo necesita destacarse y no es una superficie que flota,
+          no lleva sombra: lleva contraste, borde o espacio.
+        · Radio: --radius. Unicas excepciones, 50% para circulos y el
+          1px del anillo de foco.
+        · Movimiento: --t para cambios de estado, --t-slow SOLO para
+          el zoom de imagen en tarjetas. Dos duraciones honestas baten
+          a una sola mentirosa: forzar 240ms sobre un zoom de foto lo
+          vuelve un tiron.
+        · Excepciones nombradas, y son estas tres: el Ken Burns de 8s
+          del page-hero, los 80ms de .btn:active y el max-height del
+          acordeon movil. */
     --t: 240ms ease;
+    --t-slow: 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     --shadow-card: 0 2px 16px rgba(20, 23, 45, 0.07);
     --shadow-card-hover: 0 8px 32px rgba(20, 23, 45, 0.13);
@@ -334,6 +356,12 @@ button {
     line-height: 1;
 }
 
+/*  Un solo guion, siempre delante. Antes el rotulo centrado llevaba
+    ademas un ::after simetrico: doce guiones en el home, dos por cada
+    cabecera de seccion. Con seis secciones usando el mismo patron de
+    rotulo + titulo + descripcion, la cinta decorativa era justo lo que
+    hacia que ninguna destacara. El transition no animaba nada: nada
+    cambiaba el width. */
 .sh-label::before {
     content: '';
     display: block;
@@ -341,7 +369,6 @@ button {
     height: 2px;
     background: var(--c-accent);
     flex-shrink: 0;
-    transition: width var(--t);
 }
 
 /* Título */
@@ -383,15 +410,6 @@ button {
 .sh--center .sh-label {
     justify-content: center;
     width: 100%;
-}
-
-.sh--center .sh-label::after {
-    content: '';
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--c-accent);
-    flex-shrink: 0;
 }
 
 .sh--right {
@@ -436,12 +454,13 @@ a.btn {
     border-color: var(--c-secondary);
 }
 
+/*  Sin sombra: el boton ya cambia de color y sube 1px. Una sombra
+    encima de eso es el tercer aviso del mismo evento. */
 .btn-primary:hover,
 .btn.btn-primary:hover {
     background: var(--c-primary);
     border-color: var(--c-primary);
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(20, 23, 45, 0.18);
 }
 
 /* Outline */
@@ -478,7 +497,6 @@ a.btn {
     background: var(--c-accent);
     color: #fff;
     border-color: var(--c-accent);
-    box-shadow: 0 3px 12px rgba(217, 130, 43, 0.28);
 }
 
 .btn-accent:hover,
@@ -486,7 +504,6 @@ a.btn {
     background: var(--c-accent-hover);
     border-color: var(--c-accent-hover);
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(217, 130, 43, 0.38);
 }
 
 /* Press tactile */
@@ -521,8 +538,8 @@ a.btn:active {
 }
 
 .card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 14px 44px rgba(20, 23, 45, 0.13);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
 }
 
 .card--accent-hover {
@@ -643,7 +660,7 @@ a.btn:active {
 .breadcrumb a {
     color: var(--c-on-dark-3);
     text-decoration: none;
-    transition: color .2s;
+    transition: color var(--t);
 }
 
 .breadcrumb a:hover {
@@ -706,53 +723,6 @@ a.btn:active {
     gap: var(--sp-2);
 }
 
-.top-bar-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: var(--sp-1) var(--sp-3);
-    font-size: var(--fs-2xs);
-    font-weight: var(--fw-semibold);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--c-on-dark-2);
-    border: 1px solid var(--c-border-dark-strong);
-    border-radius: 2px;
-    transition: background var(--t), color var(--t), border-color var(--t);
-    white-space: nowrap;
-}
-
-.top-bar-pill:hover {
-    background: var(--c-border-dark);
-    color: #fff;
-    border-color: rgba(255,255,255,0.50);
-}
-
-.top-bar-pill--accent {
-    color: var(--c-accent);
-    border-color: var(--c-accent);
-}
-
-.top-bar-pill--accent:hover {
-    background: rgba(217,130,43,0.15);
-    border-color: var(--c-accent);
-    color: var(--c-accent);
-}
-
-.top-bar-links {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-1);
-}
-
-.tb-sep {
-    color: rgba(255, 255, 255, 0.22);
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-normal);
-    user-select: none;
-    line-height: 1;
-}
-
 .top-bar-social a {
     width: 28px;
     height: 28px;
@@ -795,9 +765,11 @@ a.btn:active {
     top: 42px;
 }
 
+/*  El primer valor es un filete de 1px, no una elevacion: separa el
+    header del contenido blanco. El segundo si es sombra, y es el token. */
 .header.scrolled {
     background: var(--c-bg-white);
-    box-shadow: 0 1px 0 var(--c-border), 0 4px 20px rgba(20, 23, 45, 0.07);
+    box-shadow: 0 1px 0 var(--c-border), var(--shadow-card);
     padding: var(--sp-3) 0;
     top: 0 !important;
 }
@@ -948,8 +920,8 @@ a.btn:active {
     left: 0;
     background: var(--c-primary);
     border-top: 2px solid var(--c-accent);
-    border-radius: 0 0 4px 4px;
-    box-shadow: 0 12px 40px rgba(20, 23, 45, 0.24);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow-card-hover);
     min-width: 210px;
     padding: var(--sp-2);
     opacity: 0;
@@ -976,7 +948,7 @@ a.btn:active {
     letter-spacing: 0.3px;
     padding: var(--sp-2) var(--sp-3);
     color: var(--c-on-dark-2) !important;
-    border-radius: 3px;
+    border-radius: var(--radius);
     transition: background var(--t), color var(--t);
 }
 
@@ -1015,16 +987,15 @@ a.btn:active {
     text-decoration: none;
     border-radius: var(--radius);
     border: 1.5px solid var(--c-accent);
-    transition: background var(--t), transform var(--t), box-shadow var(--t);
+    transition: background var(--t), border-color var(--t), transform var(--t);
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(217, 130, 43, 0.28);
 }
 
+/*  Sin resplandor naranja bajo un boton naranja. */
 .nav-cta-btn:hover {
     background: var(--c-accent-hover);
     border-color: var(--c-accent-hover);
     transform: translateY(-1px);
-    box-shadow: 0 5px 18px rgba(217, 130, 43, 0.38);
 }
 
 .nav-cta-btn::after {
@@ -1087,14 +1058,18 @@ a.btn:active {
     position: relative;
 }
 
+/*  Filete plano, no degradado de tres paradas. Rima con el
+    border-bottom del topbar: la pagina queda acotada arriba y abajo
+    por la misma linea de 2px, que es una regla del sistema y no un
+    adorno distinto en cada extremo. */
 .footer::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--c-accent) 0%, var(--c-secondary) 55%, var(--c-primary) 100%);
+    height: 2px;
+    background: var(--c-accent);
 }
 
 .footer-content {
@@ -1215,25 +1190,28 @@ a.btn:active {
 }
 
 /* Back to top */
+/*  Los seis !important de este bloque no defendian de nada: ninguna
+    pagina redefine .back-to-top. Eran de cuando Swiper y Font Awesome
+    peleaban por la cascada. */
 .back-to-top {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: var(--sp-7);
+    right: var(--sp-7);
     z-index: var(--z-float);
-    width: 44px !important;
-    height: 44px !important;
-    background: var(--c-secondary) !important;
+    width: 44px;
+    height: 44px;
+    background: var(--c-secondary);
     color: #fff;
     border: none;
-    border-radius: var(--radius) !important;
+    border-radius: var(--radius);
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
-    transition: all var(--t);
+    transition: opacity var(--t), visibility var(--t), background var(--t), transform var(--t);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 3px 12px rgba(27, 82, 120, 0.30) !important;
+    box-shadow: var(--shadow-card-hover);
 }
 
 .back-to-top.visible {
@@ -1242,8 +1220,8 @@ a.btn:active {
 }
 
 .back-to-top:hover {
-    background: var(--c-primary) !important;
-    transform: translateY(-3px) !important;
+    background: var(--c-primary);
+    transform: translateY(-3px);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1332,7 +1310,7 @@ body.menu-open {
     justify-content: center;
     background: var(--c-surface-dark-2);
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius);
     color: #fff;
     cursor: pointer;
     transition: background var(--t);
@@ -1377,7 +1355,7 @@ body.menu-open {
     align-items: center;
     gap: var(--sp-3);
     padding: var(--sp-3) var(--sp-3);
-    border-radius: 6px;
+    border-radius: var(--radius);
     text-decoration: none;
     color: #fff;
     font-size: var(--fs-sm);
@@ -1410,7 +1388,7 @@ body.menu-open {
     align-items: center;
     gap: var(--sp-3);
     padding: var(--sp-3) var(--sp-3);
-    border-radius: 6px;
+    border-radius: var(--radius);
     background: none;
     border: none;
     color: #fff;
@@ -1438,7 +1416,7 @@ body.menu-open {
 .mobile-dropdown-icon {
     margin-left: auto;
     opacity: 0.35;
-    transition: transform 0.25s ease;
+    transition: transform var(--t);
     flex-shrink: 0;
 }
 
@@ -1499,7 +1477,7 @@ body.menu-open {
     gap: var(--sp-2);
     width: 100%;
     padding: var(--sp-3) var(--sp-4);
-    border-radius: 6px;
+    border-radius: var(--radius);
     text-decoration: none;
     background: var(--c-secondary);
     color: #fff;
@@ -1521,7 +1499,7 @@ body.menu-open {
     gap: var(--sp-2);
     width: 100%;
     padding: var(--sp-3) var(--sp-4);
-    border-radius: 6px;
+    border-radius: var(--radius);
     text-decoration: none;
     background: var(--c-surface-dark-1);
     border: 1px solid var(--c-border-dark);
