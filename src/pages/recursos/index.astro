@@ -6,11 +6,12 @@ import PageHero from '../../components/PageHero.astro';
 
 type Recurso = CollectionEntry<'recursos'>;
 
-/** Base donde resuelve cada QR del backend de empresa. */
-const QR_BASE = 'https://home.inacons.com.pe/empresa/';
-
 /** Origen del sitio (build / dev) para enlaces absolutos en «Copiar». */
-const SITE_ORIGIN = (import.meta.env.SITE || 'https://inacons.com.pe').replace(/\/$/, '');
+const SITE_ORIGIN = (import.meta.env.SITE || 'https://home.inacons.com.pe').replace(/\/$/, '');
+
+/** Base donde resuelve cada QR del backend de empresa.
+ *  Pasa a /r/ en la Fase 2; hasta entonces resuelve por la ruta larga. */
+const QR_BASE = `${SITE_ORIGIN}/empresa/`;
 
 /** Categorías en el orden que aparecen en los filtros. */
 const CATEGORIAS = [

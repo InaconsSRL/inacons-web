@@ -54,7 +54,8 @@ const {
   size = 'sm',
   bgPosition = 'center',
 } = Astro.props;
-const BASE = 'https://inacons.com.pe';
+// Dominio desde `site` de astro.config.mjs; no se escribe a mano en ningun lado.
+const BASE = Astro.site?.origin ?? 'https://home.inacons.com.pe';
 
 // Construir items del breadcrumb para JSON-LD
 const breadcrumbItems = [

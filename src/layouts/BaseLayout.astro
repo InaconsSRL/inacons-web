@@ -22,7 +22,10 @@ const {
 const pageTitle       = title ?? 'INACONS — Empresa Constructora en Perú';
 const metaDescription = description ?? 'INACONS S.R.L. — Empresa peruana de ingeniería y construcción con más de 15 años de experiencia en obras civiles, infraestructura, electromecánica y más.';
 const canonicalURL    = canonical ?? Astro.url.href;
-const ogImageURL      = `https://inacons.com.pe${ogImage}`;
+// El dominio sale de `site` en astro.config.mjs, nunca escrito a mano: si se
+// repite, el dia que cambie quedan mitad de las URLs apuntando al sitio viejo.
+const siteOrigin      = Astro.site?.origin ?? 'https://home.inacons.com.pe';
+const ogImageURL      = new URL(ogImage, siteOrigin).href;
 const pathname        = Astro.url.pathname;
 ---
 
@@ -94,9 +97,9 @@ const pathname        = Astro.url.pathname;
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "INACONS S.R.L.",
-      "url": "https://inacons.com.pe",
-      "logo": "https://inacons.com.pe/assets/imagenes/logos/logo_inacons.svg",
-      "image": "https://inacons.com.pe/assets/imagenes/image_heroprincipal.webp",
+      "url": siteOrigin,
+      "logo": new URL('/assets/imagenes/logos/logo_inacons.svg', siteOrigin).href,
+      "image": new URL('/assets/imagenes/image_heroprincipal.webp', siteOrigin).href,
       "description": "Empresa peruana de ingeniería y construcción con más de 15 años de experiencia en obras civiles, infraestructura, electromecánica, minería y consultoría.",
       "foundingDate": "2009",
       "telephone": "+51-064-654-736",

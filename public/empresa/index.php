@@ -1,6 +1,8 @@
 <?php
 // ============================================================
-//  MOTOR DE REDIRECCIÓN — inacons.com.pe/empresa/?c=CODIGO
+//  MOTOR DE REDIRECCIÓN — home.inacons.com.pe/empresa/?c=CODIGO
+//  Fase 2: se reemplaza por /r/CODIGO y esta ruta queda como 301 de
+//  compatibilidad, porque /recursos/ ya generó códigos con la forma larga.
 // ============================================================
 
 require_once __DIR__ . '/config.php';
@@ -8,9 +10,11 @@ require_once __DIR__ . '/config.php';
 // Leer el código de la URL
 $codigo = trim($_GET['c'] ?? '');
 
-// Sin código → home
+// Sin código → home del sitio. Se deriva de BASE_URL, que ya existe en el
+// config del servidor: el sitio vive en home.inacons.com.pe y el dominio
+// corto solo redirige la raiz, asi que mandar ahi sumaba un salto de mas.
 if ($codigo === '') {
-    header('Location: https://inacons.com.pe', true, 302);
+    header('Location: ' . preg_replace('#/empresa/?$#', '/', BASE_URL), true, 302);
     exit;
 }
 
@@ -62,7 +66,7 @@ try {
         h1{color:#c0392b;}a{color:#1a3a5c;}</style></head>
         <body><h1>404 — Enlace no encontrado</h1>
         <p>El código <strong>' . htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8') . '</strong> no existe o fue desactivado.</p>
-        <a href="https://inacons.com.pe">← Volver al inicio</a></body></html>';
+        <a href="' . htmlspecialchars(preg_replace('#/empresa/?$#', '/', BASE_URL), ENT_QUOTES, 'UTF-8') . '">← Volver al inicio</a></body></html>';
         exit;
     }
 
