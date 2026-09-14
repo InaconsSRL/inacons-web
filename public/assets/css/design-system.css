@@ -184,20 +184,41 @@
 }
 
 /*
-  BREAKPOINTS — tres límites, y uno solo por frontera.
+  BREAKPOINTS — cuatro fronteras, y un solo par por frontera.
 
-  Antes convivían 768 y 769, y 1023 y 1024. Dos fronteras contiguas
-  definidas por separado son la receta para que en exactamente 1024px
-  no aplique ninguna de las dos y algo se rompa sin que nadie lo vea.
-  La solución es el par max-width:767.98px / min-width:768px.
+     sm    640px  → teléfono grande
+     md    768px  → frontera móvil / escritorio (nav a hamburguesa)
+     lg   1024px  → escritorio
+     xl   1100px  → nav condensado en portátiles
 
-  Se conserva 768 como frontera móvil/escritorio en vez de bajarla a
-  640: es donde el nav cambia a hamburguesa, y moverla cambiaría el
-  layout de tablet sin que nadie lo haya pedido.
+  El par es siempre max-width:(N - 0.02px) / min-width:N.
 
-     sm   640px   → teléfono grande
-     md   768px   → frontera móvil / escritorio (nav)
-     lg  1024px   → escritorio
+     sm →  max-width:  639.98px  /  min-width:  640px
+     md →  max-width:  767.98px  /  min-width:  768px
+     lg →  max-width: 1023.98px  /  min-width: 1024px
+
+  Este bloque describía justamente eso y NADA lo usaba. El código
+  real tenía max-width:768px junto a min-width:768.02px, y
+  max-width:1023px junto a min-width:1023.02px — dos huecos de 0.02px
+  en 768.01 y 1023.01 donde no aplicaba ninguna de las dos reglas. En
+  768.01px reaparecía el topbar y --section-py saltaba de 60 a 96px.
+  No es teórico: innerWidth fraccional es normal con DPI fraccional en
+  Windows y en cualquier nivel de zoom del navegador.
+
+  Además main.js decide escritorio con innerWidth >= 768. Con
+  max-width:768px, en exactamente 768px el CSS ocultaba el topbar
+  mientras el JS lo daba por visible. Con 767.98px coinciden.
+
+  1100px se conserva y se declara como cuarta frontera en vez de
+  plegarla a 1024: entre 1024 y 1100 el nav lleva seis elementos
+  incluido el botón CTA, y es la combinación más apretada del sitio.
+  Mejor cuatro fronteras honestas que romper portátiles por llegar a
+  un número redondo.
+
+  OJO: var() no funciona dentro de @media, y este proyecto no tiene
+  PostCSS (astro.config.mjs solo carga el sitemap). Esto es una
+  convención escrita, no una variable. Quien escriba
+  @media (max-width: var(--bp-md)) no va a matchear nunca, en silencio.
 */
 
 /* ══════════════════════════════════════════════════════════════
@@ -1784,7 +1805,7 @@ body.menu-open {
 /* ══════════════════════════════════════════════════════════════
    15. RESPONSIVE
 ══════════════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     :root {
         --section-py: 60px;
     }
@@ -1874,14 +1895,14 @@ body.menu-open {
     }
 }
 
-@media (min-width: 768.02px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1023.98px) {
     .footer-content {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: var(--sp-7);
     }
 }
 
-@media (min-width: 1023.02px) {
+@media (min-width: 1024px) {
     .nav {
         display: block;
     }
