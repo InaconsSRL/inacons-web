@@ -62,6 +62,11 @@ const servicios = [
         linear-gradient(to bottom, rgba(20,23,45,0.30) 0%, rgba(20,23,45,0.92) 100%),
         linear-gradient(110deg, rgba(20,23,45,0.85) 0%, rgba(27,82,120,0.35) 60%, transparent 100%);
     }
+    /*  Dos columnas: el mensaje a la izquierda y las cifras al costado.
+        Estaban en una banda al pie del hero, que las ponia por debajo
+        de los botones y empujaba scroll-hint y boton de pausa 168px
+        hacia arriba. Al costado del titular se leen a la vez que el, y
+        el hero recupera su borde inferior. */
     .hero-content {
       position: relative;
       z-index: 2;
@@ -69,6 +74,50 @@ const servicios = [
       width: 100%;
       margin: 0 auto;
       padding: 0 var(--sp-l1);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--sp-l3);
+      align-items: center;
+    }
+    .hero-main { min-width: 0; }
+
+    /* ── CIFRAS DEL HERO ── */
+    .hero-stats {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-6);
+      padding-left: var(--sp-7);
+      border-left: 1px solid var(--c-border-dark-strong);
+    }
+    .hero-stat { white-space: nowrap; text-align: left; }
+
+    /*  Entre 768 y 1024 no hay ancho para las dos columnas: "CONSTRUIMOS
+        CONFIANZA" a 5.2vw ya ocupa casi todo el contenedor y las cifras
+        lo empujarian a partirse. En tablet van en fila bajo el mensaje,
+        que es donde si hay sitio horizontal. */
+    @media (max-width: 1023.98px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: var(--sp-l2);
+      }
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--sp-5);
+        padding-left: 0;
+        padding-top: var(--sp-6);
+        border-left: none;
+        border-top: 1px solid var(--c-border-dark-strong);
+      }
+      .hero-stat { text-align: center; }
+    }
+    .hero-stat .stat-num {
+      font-size: var(--fs-display);
+      color: var(--c-text-white);
+    }
+    .hero-stat .stat-label {
+      color: var(--c-on-dark-3);
+      margin-top: var(--sp-1);
     }
     .home-hero h1 {
       font-family: 'Montserrat', sans-serif;
@@ -114,7 +163,7 @@ const servicios = [
       animation: blink .5s infinite;
       margin-left: 2px;
     }
-    .hero-content > p {
+    .hero-desc {
       font-size: clamp(0.95rem, 1.6vw, 1.1rem);
       color: var(--c-on-dark-2);
       margin-bottom: var(--sp-7);
@@ -149,12 +198,13 @@ const servicios = [
       line-height: 1.78;
       margin: 0 0 var(--sp-3);
     }
-    /*  Cuatro cifras en 2x2, no cuatro en fila: esto vive en media
-        columna y en fila quedaban ilegibles. Las tarjetas de dato son
-        .card--stat del sistema; aca solo va el layout. */
+    /*  Tres cifras propias de esta seccion: recorrido y alcance. Las
+        de escala (anos, km2, inversion, equipo) estan en el hero y no
+        se repiten aca. Las tarjetas son .card--stat del sistema; aca
+        solo va el layout. */
     .about-kpi-row {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: var(--sp-5) var(--sp-6);
       border-top: 1px solid var(--c-border-light);
       border-bottom: 1px solid var(--c-border-light);
@@ -452,7 +502,7 @@ const servicios = [
         white-space: nowrap;
         font-size: inherit;
       }
-      .hero-content > p {
+      .hero-desc {
         text-align: center;
         margin-left: auto;
         margin-right: auto;
@@ -467,6 +517,23 @@ const servicios = [
         width: 100%;
         justify-content: center;
       }
+      /*  En una columna no caben cuatro cifras al costado: bajan bajo
+          los botones en 2x2, sin el filete lateral, que ahi no separa
+          nada. */
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: var(--sp-l2);
+      }
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--sp-6) var(--sp-4);
+        padding-left: 0;
+        border-left: none;
+        width: 100%;
+      }
+      .hero-stat { text-align: center; }
+      .hero-stat .stat-num { font-size: var(--fs-2xl); }
 
       /* CTA */
 
@@ -487,6 +554,7 @@ const servicios = [
     </video>
     <div class="hero-overlay"></div>
     <div class="hero-content">
+     <div class="hero-main">
       <p class="hero-eyebrow">Ingeniería &amp; Construcción</p>
       <h1 id="typewriter-text">
         <span class="hero-line">
@@ -502,7 +570,7 @@ const servicios = [
           <span class="word highlight typewriter" data-text="JUNTOS" aria-label="JUNTOS"><span class="tw-ghost" aria-hidden="true">JUNTOS</span><span class="tw-typed" aria-hidden="true"></span></span>
         </span>
       </h1>
-      <p>Más de 15 años de experiencia en ingeniería y construcción al servicio del Perú.</p>
+      <p class="hero-desc">Más de 15 años de experiencia en ingeniería y construcción al servicio del Perú.</p>
       <div class="hero-actions">
         <a href="/proyectos" class="btn btn-primary btn-lg">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg> Ver Proyectos
@@ -510,6 +578,27 @@ const servicios = [
         <a href="/assets/documentos/brochure_inacons.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light btn-lg">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> Descargar Brochure
         </a>
+      </div>
+     </div>
+
+      <!-- data-counter es el contrato con initCounters() de main.js -->
+      <div class="hero-stats">
+        <div class="hero-stat card--stat">
+          <span class="stat-num" data-counter="15" data-suffix="+">15+</span>
+          <span class="stat-label">Años de experiencia</span>
+        </div>
+        <div class="hero-stat card--stat">
+          <span class="stat-num" data-counter="150" data-suffix="+">150+</span>
+          <span class="stat-label">km² construidos</span>
+        </div>
+        <div class="hero-stat card--stat">
+          <span class="stat-num" data-counter="100" data-suffix="M+">100M+</span>
+          <span class="stat-label">Inversión gestionada</span>
+        </div>
+        <div class="hero-stat card--stat">
+          <span class="stat-num" data-counter="100" data-suffix="+">100+</span>
+          <span class="stat-label">Profesionales</span>
+        </div>
       </div>
     </div>
     <button class="hero-pause-btn" id="heroPauseBtn" aria-label="Pausar video">
@@ -572,10 +661,6 @@ const servicios = [
 
           <!-- data-counter es el contrato con initCounters() de main.js -->
           <div class="about-kpi-row">
-            <div class="card--stat">
-              <span class="stat-num" data-counter="15" data-suffix="+">15+</span>
-              <span class="stat-label">Años de experiencia</span>
-            </div>
             <div class="card--stat">
               <span class="stat-num" data-counter="96" data-suffix="+">96+</span>
               <span class="stat-label">Proyectos ejecutados</span>

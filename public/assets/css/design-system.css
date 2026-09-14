@@ -894,6 +894,56 @@ a.btn:active {
     gap: var(--sp-2);
 }
 
+/*  Pildoras de acceso rapido del topbar: Intranet y Contactenos.
+    "Canal Etico" salio de aca y vive en el pie, donde tiene su propio
+    boton de acento — no era un tercer enlace mas de esta fila. */
+.top-bar-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--sp-1) var(--sp-3);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--c-on-dark-2);
+    border: 1px solid var(--c-border-dark-strong);
+    border-radius: var(--radius);
+    transition: background var(--t), color var(--t), border-color var(--t);
+    white-space: nowrap;
+}
+
+.top-bar-pill:hover {
+    background: var(--c-border-dark);
+    color: #fff;
+    border-color: var(--c-border-dark-strong);
+}
+
+.top-bar-pill--accent {
+    color: var(--c-accent);
+    border-color: var(--c-accent);
+}
+
+.top-bar-pill--accent:hover {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: #fff;
+}
+
+.top-bar-links {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+}
+
+.tb-sep {
+    color: var(--c-border-dark-strong);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-normal);
+    user-select: none;
+    line-height: 1;
+}
+
 .top-bar-social a {
     width: 28px;
     height: 28px;
@@ -1322,6 +1372,13 @@ a.btn:active {
 .footer-section ul li a:hover {
     color: #fff;
     padding-left: var(--sp-1);
+}
+
+/*  Único botón del pie. Es acceso rápido a un canal de denuncias:
+    tiene que encontrarse de un vistazo, no leerse en una lista. */
+.footer-ethics {
+    align-self: flex-start;
+    margin-top: var(--sp-6);
 }
 
 .footer-bottom {
@@ -1876,6 +1933,10 @@ body.menu-open {
 
     .footer-section ul {
         align-items: center;
+    }
+
+    .footer-ethics {
+        align-self: center;
     }
 
     .footer-bottom .container {
