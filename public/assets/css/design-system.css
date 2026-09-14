@@ -707,6 +707,46 @@ a.btn:active {
     margin-bottom: var(--sp-2);
 }
 
+/* ── Fila de tarjetas iguales ──
+   Envuelve N tarjetas del mismo ancho y las centra cuando la ultima
+   fila queda incompleta (util cuando hay 2 proyectos destacados y la
+   rejilla es de 3).
+
+     <div class="cards-row"> … </div>
+
+   Tres por fila en escritorio, dos en tablet, una en movil.
+
+   ESTO TIENE QUE VIVIR ACA Y NO EN EL <style> DE LA PAGINA.
+   El selector es "> *" y los hijos son instancias de MediaCard.
+   Astro scopea el CSS de una pagina anadiendo su data-astro-cid al
+   ultimo selector, y un componente sin <style> propio no lleva NINGUN
+   cid: ".cards-row > *" compila a ".cards-row[cid] > [cid]" y no
+   engancha con nada. Las tarjetas se quedan sin ancho, y como la
+   imagen va en position:absolute, colapsan a cero y desaparecen
+   —sin error, sin aviso. */
+.cards-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--sp-1);
+}
+
+.cards-row > * {
+    flex: 0 1 calc((100% - 2 * var(--sp-1)) / 3);
+}
+
+@media (max-width: 1023.98px) {
+    .cards-row > * {
+        flex-basis: calc((100% - var(--sp-1)) / 2);
+    }
+}
+
+@media (max-width: 639.98px) {
+    .cards-row > * {
+        flex-basis: 100%;
+    }
+}
+
 /* ── Card de dato ──
    El numero lleva data-counter (+ data-suffix opcional): es un
    contrato con initCounters() de main.js, que lo anima al entrar en
