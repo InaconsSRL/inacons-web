@@ -572,6 +572,35 @@ a.btn:active {
     box-shadow: none;
 }
 
+/*  La proporcion movil viaja como custom property y no como selector
+    de pagina a proposito: el <style> de una pagina Astro esta scopeado
+    y no alcanza a los elementos que renderiza MediaCard. Lo que la
+    pagina puede pasar es una variable inline, y eso si atraviesa. */
+@media (max-width: 767.98px) {
+    .card--media {
+        aspect-ratio: var(--card-ratio-mobile, var(--card-ratio, 4/3));
+    }
+
+    .card-media-body {
+        padding: var(--sp-4);
+    }
+
+    .card-media-title {
+        font-size: var(--fs-sm);
+    }
+
+    /*  La descripcion se queda visible: ocultarla dejaba la tarjeta en
+        una imagen con una palabra encima, justo en el dispositivo donde
+        esta la mayor parte del trafico. Se acorta a dos lineas para que
+        la tarjeta no crezca de mas. */
+    .card-media-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
 .card--media:hover {
     transform: none;
     box-shadow: none;
