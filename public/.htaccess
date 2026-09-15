@@ -19,10 +19,21 @@ ErrorDocument 404 /404.html
     #  Reescritura INTERNA, no redirección: el visitante no paga un salto de
     #  más y la URL que ve sigue siendo /r/CODIGO.
     #
+    #  [NC] NO ES OPCIONAL. El módulo codifica la URL entera en MAYÚSCULAS para
+    #  habilitar el modo alfanumérico del estándar QR, así que lo que llega del
+    #  escaneo es `/R/CODIGO`, no `/r/codigo`. Sin [NC] este patrón no engancha
+    #  y Apache devuelve 404 antes de que el PHP llegue a ejecutarse: el código
+    #  existe, la base está bien, el redirector funciona, y aun así falla.
+    #
+    #  Pasó: todos los QR generados por el panel devolvían "no encontrado"
+    #  mientras los enlaces tecleados en minúsculas funcionaban. Se hizo
+    #  insensible el CÓDIGO dentro de resolver_qr() y se olvidó el SEGMENTO de
+    #  la ruta, que lo resuelve Apache y no Postgres.
+    #
     #  El patrón no admite puntos, así que /r/index.php no se reescribe a sí
     #  mismo. La condición !-f es el cinturón además del tirante.
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^r/([A-Za-z0-9_-]{2,24})/?$ /r/index.php?c=$1 [L,QSA]
+    RewriteRule ^r/([A-Za-z0-9_-]{2,24})/?$ /r/index.php?c=$1 [L,QSA,NC]
 
     #  Compatibilidad con la forma larga. /recursos/ generó códigos con este
     #  formato y alguno puede estar en un flyer o una presentación.
@@ -33,7 +44,7 @@ ErrorDocument 404 /404.html
     #  vieja se borró en el mismo commit que entró esta. Si alguna vez hay que
     #  revertir, se revierten las dos juntas o el sitio se cuelga.
     RewriteCond %{QUERY_STRING} (?:^|&)c=([A-Za-z0-9_-]{2,24})(?:&|$) [NC]
-    RewriteRule ^empresa/?$ /r/%1? [R=301,L,NE]
+    RewriteRule ^empresa/?$ /r/%1? [R=301,L,NE,NC]
 </IfModule>
 
 # ── Compresión Deflate/Gzip ─────────────────────────────────────────────────
