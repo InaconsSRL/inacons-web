@@ -266,25 +266,68 @@ export function modulosDeUrl(url: string, perfil: PerfilQR = 'pantalla'): number
 }
 
 /**
- * PNG del código, rasterizado DESDE EL SVG al tamaño pedido. Solo navegador.
+ * Mínimo de píxeles por módulo, por perfil.
+ *
+ * No es el lado del PNG: es cuántos píxeles mide UNA celda. Es lo que decide
+ * si el borde entre módulos sale neto, y no cambia porque la imagen sea más
+ * grande — un PNG enorme con 3 px por módulo sigue siendo papilla.
+ *
+ * 4 px por módulo es el piso absoluto por debajo del cual el borde se
+ * emborrona al imprimir. Impresión pide 20 porque tiene que sobrevivir a una
+ * reducción en maquetación que nadie avisa: si alguien coloca el PNG al 50%
+ * en un flyer, a 20 quedan 10 y sigue sirviendo; partiendo de 6 quedan 3 y no.
+ */
+const PX_POR_MODULO_MIN: Record<PerfilQR, number> = {
+  pantalla: 8,
+  impresion: 20,
+};
+
+export interface ResultadoPNG {
+  blob: Blob;
+  /** Lado real del PNG. Puede no ser el pedido: se ajusta al múltiplo exacto. */
+  lado: number;
+  pixelesPorModulo: number;
+  /** Lado en mm hasta el que este PNG imprime a 300 dpi o más. */
+  mmHasta300dpi: number;
+}
+
+/**
+ * PNG del código, rasterizado DESDE EL SVG. Solo navegador.
  *
  * Nunca se escala un preview. Es el error que hoy tiene `/recursos/`: descarga
  * el `<canvas>` de 220 px del panel estirado al tamaño final, y un QR
  * interpolado pierde el borde neto entre módulos — que es justo lo que el
  * escáner busca. Se ve bien en la pantalla y falla sobre papel.
  *
- * `tamano` es el lado en píxeles. 1200 es el mínimo para material impreso.
+ * El lado final se ajusta al múltiplo exacto del número de módulos, y por eso
+ * puede no coincidir con `tamano`. No es un detalle: pedir 1200 px sobre un
+ * lienzo de 41 módulos da 29,2683 px por módulo, así que el rasterizador le
+ * reparte 29 px a unos y 30 a otros. Medido sobre la salida real: a 1200 px
+ * aparecen anchos de 29 y de 30 mezclados; a 1189 (29 × 41) todos miden 29.
+ *
+ * Un módulo que se corre un píxel respecto del vecino desplaza la cuadrícula
+ * que el lector reconstruye, y eso se paga justo en el caso difícil: lejos,
+ * torcido, con poca luz.
  */
 export async function pngDeUrl(
   url: string,
   opciones: OpcionesQR = {},
   tamano = 1200,
-): Promise<Blob> {
+): Promise<ResultadoPNG> {
   if (typeof document === 'undefined') {
     throw new Error('pngDeUrl necesita un navegador: rasteriza sobre un <canvas>.');
   }
 
-  const { svg } = await generarQR(url, opciones);
+  const { svg, modulos, perfil } = await generarQR(url, opciones);
+
+  // Lienzo = simbolo + las dos zonas de silencio. Es lo que hay que dividir.
+  const lienzo = modulos + ZONA_SILENCIO * 2;
+
+  const pixelesPorModulo = Math.max(
+    PX_POR_MODULO_MIN[perfil],
+    Math.round(tamano / lienzo),
+  );
+  const lado = pixelesPorModulo * lienzo;
 
   // El SVG viaja como data URI en base64. `encodeURIComponent` sobre el XML
   // crudo también funciona, pero base64 evita que un carácter del marcado
@@ -292,8 +335,8 @@ export async function pngDeUrl(
   const fuente = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svg)))}`;
 
   const imagen = new Image();
-  imagen.width = tamano;
-  imagen.height = tamano;
+  imagen.width = lado;
+  imagen.height = lado;
 
   await new Promise<void>((listo, falla) => {
     imagen.onload = () => listo();
@@ -301,28 +344,36 @@ export async function pngDeUrl(
     imagen.src = fuente;
   });
 
-  const lienzo = document.createElement('canvas');
-  lienzo.width = tamano;
-  lienzo.height = tamano;
+  const canvas = document.createElement('canvas');
+  canvas.width = lado;
+  canvas.height = lado;
 
-  const ctx = lienzo.getContext('2d');
+  const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('El navegador no dio contexto 2D.');
 
   // Fondo blanco explícito: un PNG con fondo transparente colocado sobre un
   // color oscuro invierte el contraste y deja de leerse.
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, tamano, tamano);
+  ctx.fillRect(0, 0, lado, lado);
 
   // imageSmoothing apagado: el suavizado es exactamente lo que hay que evitar.
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(imagen, 0, 0, tamano, tamano);
+  ctx.drawImage(imagen, 0, 0, lado, lado);
 
-  return new Promise<Blob>((listo, falla) => {
-    lienzo.toBlob(
-      (blob) => (blob ? listo(blob) : falla(new Error('El lienzo no produjo un PNG.'))),
+  const blob = await new Promise<Blob>((listo, falla) => {
+    canvas.toBlob(
+      (b) => (b ? listo(b) : falla(new Error('El lienzo no produjo un PNG.'))),
       'image/png',
     );
   });
+
+  return {
+    blob,
+    lado,
+    pixelesPorModulo,
+    // 25.4 mm por pulgada. Hasta este tamano el PNG sigue dando 300 dpi.
+    mmHasta300dpi: Math.floor((lado / 300) * 25.4),
+  };
 }
 
 /**
