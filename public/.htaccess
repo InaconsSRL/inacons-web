@@ -92,13 +92,17 @@ ErrorDocument 404 /404.html
 
 # ── Cabeceras de seguridad ───────────────────────────────────────────────────
 <IfModule mod_headers.c>
+    Header always unset Cache-Control env=ASSET_INMUTABLE
     Header always set Cache-Control "public, max-age=31536000, immutable" env=ASSET_INMUTABLE
 
     #  El HTML se revalida SIEMPRE. Es la única forma de que un despliegue se
     #  vea al instante: sin esto el hosting le pone una hora, y durante esa
     #  hora quien ya había entrado sigue viendo la versión anterior. Pasó de
     #  verdad — una página quedó mostrando un código QR ya corregido.
+    #  `unset` antes de `set`: el hosting agrega su propia cabecera y sin
+    #  quitarla primero la respuesta sale con dos Cache-Control en conflicto.
     <FilesMatch "\.html$">
+        Header always unset Cache-Control
         Header always set Cache-Control "no-cache, must-revalidate"
     </FilesMatch>
 
