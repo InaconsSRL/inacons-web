@@ -202,16 +202,22 @@ const servicios = [
         de escala (anos, km2, inversion, equipo) estan en el hero y no
         se repiten aca. Las tarjetas son .card--stat del sistema; aca
         solo va el layout. */
+    /*
+      auto-fit en vez de repeat(3, 1fr) fijo: con tres columnas rígidas, a
+      320px los rótulos ("PROYECTOS EJECUTADOS") no entraban y la fila
+      desbordaba el contenedor. Con minmax el navegador coloca tres cuando
+      hay sitio y baja a dos cuando no, sin necesidad de otro breakpoint.
+    */
     .about-kpi-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
       gap: var(--sp-5) var(--sp-6);
       border-top: 1px solid var(--c-border-light);
       border-bottom: 1px solid var(--c-border-light);
       padding: var(--sp-6) 0;
       margin: var(--sp-6) 0 var(--sp-7);
     }
-    .about-kpi-row .card--stat { text-align: left; }
+    .about-kpi-row .card--stat { text-align: left; min-width: 0; }
 
     /* ── CLIENTES SCROLL ── */
     .clients-track-wrap {
@@ -545,7 +551,24 @@ const servicios = [
         border-left: none;
         width: 100%;
       }
-      .hero-stat { text-align: center; }
+      /*
+        El nowrap de .hero-stat es para escritorio, donde las cifras van en
+        columna y "Inversión gestionada" cabe de sobra en una línea. En el
+        grid de dos columnas del móvil ese nowrap es el que rompía la página:
+        una columna 1fr no puede encogerse por debajo de su contenido, y con
+        el texto sin poder partirse el mínimo era la frase entera. A 320px el
+        grid medía más que el viewport y arrastraba a todo el documento con
+        scroll horizontal — de ahí la franja blanca a la derecha de las
+        secciones, que solo pintan hasta donde llega el ancho real.
+
+        min-width: 0 es el cinturón: anula el mínimo automático de la celda
+        para que el ajuste no dependa solo de que el texto pueda partirse.
+      */
+      .hero-stat {
+        text-align: center;
+        white-space: normal;
+        min-width: 0;
+      }
       .hero-stat .stat-num { font-size: var(--fs-2xl); }
 
       /* CTA */
