@@ -19,6 +19,7 @@ Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/
 | Necesitas tocar | Archivo |
 |---|---|
 | Tokens, utilidades, estilos que cruzan componentes | `public/assets/css/design-system.css` |
+| Ver los componentes que ya existen | `/sistema/` — referencia viva, se pinta con el CSS real |
 | Comportamiento del sitio | `public/assets/js/main.js` (12 funciones `init*`, un solo `DOMContentLoaded`) |
 | Head, nav, footer, meta OG | `src/layouts/BaseLayout.astro` |
 | Home | `src/pages/index.astro` |
@@ -48,9 +49,17 @@ Regla práctica: **si el selector cruza la frontera de un componente, no lo escr
 la página.** Se verifica con `grep '\[data-astro-cid-[^]]*\] > \[data-astro-cid' dist/_astro/*.css`
 — ese patrón casi siempre es un bug.
 
-**2. Los valores salen de los tokens.** Si un tamaño, espaciado o color no viene de una
-custom property de `design-system.css`, es un bug. El naranja `--c-accent` solo va sobre
-fondo oscuro (sobre claro da 2.93:1 y no pasa AA); sobre claro se usa `--c-accent-ink`.
+**2. Los valores salen de los tokens, y los componentes del sistema.** Si un tamaño,
+espaciado o color no viene de una custom property de `design-system.css`, es un bug. El
+naranja `--c-accent` solo va sobre fondo oscuro (sobre claro da 2.93:1 y no pasa AA);
+sobre claro se usa `--c-accent-ink`.
+
+Lo mismo con los componentes: **una página nueva no define estilos de campo, botón,
+aviso, superficie ni lista.** Abrir `/sistema/` primero — están todos ahí, con su
+markup. Si falta uno, se agrega al sistema y después se usa; nunca dentro del `<style>`
+de la página. Esto ya pasó una vez: `/contacto` tenía su juego de estilos de formulario
+y el panel escribió otro distinto para lo mismo, y habían empezado a divergir en el
+radio del borde y la duración de la transición.
 
 **3. El contenido dinámico viene de `src/content/`.** Proyectos, servicios y recursos
 nunca se escriben a mano en el HTML.
