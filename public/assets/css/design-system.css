@@ -238,6 +238,24 @@
 /* ══════════════════════════════════════════════════════════════
    2. RESET & BASE
 ══════════════════════════════════════════════════════════════ */
+/*
+  El atributo `hidden` gana SIEMPRE.
+
+  Por defecto `hidden` solo vale `display: none` en la hoja del navegador, asi
+  que cualquier regla de autor que fije `display` lo anula -- y lo anula en
+  silencio, porque el atributo sigue ahi en el HTML y todo parece correcto.
+
+  Paso con `.dialogo`, que declara `display: flex`: los dos dialogos del panel
+  se pintaban apilados sobre la pagina y no se podia usar nada. El componente
+  llevaba escrito en su propio comentario que se mostraba con `hidden`.
+
+  Con esto, `hidden` vuelve a significar oculto para todo componente presente y
+  futuro, y ocultar deja de depender de que nadie declare `display` despues.
+*/
+[hidden] {
+    display: none !important;
+}
+
 *,
 *::before,
 *::after {
