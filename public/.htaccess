@@ -45,6 +45,18 @@ ErrorDocument 404 /404.html
 </IfModule>
 
 # ── Caché de activos estáticos ──────────────────────────────────────────────
+#
+#  LEER ANTES DE TOCAR. Este bloque no basta por sí solo.
+#
+#  El hosting inyecta su propio `Cache-Control` por encima de lo que declare
+#  mod_expires, y cuando la respuesta lleva los dos, `Cache-Control: max-age`
+#  le gana a `Expires`. Medido en producción: el HTML salía con
+#  `Expires: <ahora>` —el "0 segundos" de aquí, aplicado correctamente— y a la
+#  vez `Cache-Control: max-age=3600`. Ganaba el segundo, así que un despliegue
+#  tardaba hasta una hora en llegarle a quien ya había visitado el sitio.
+#
+#  Por eso lo que de verdad importa se fija más abajo con mod_headers, que sí
+#  se respeta. Esto queda como valor de base para lo que nadie pise.
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/webp             "access plus 1 year"
@@ -52,17 +64,44 @@ ErrorDocument 404 /404.html
     ExpiresByType image/jpeg             "access plus 1 year"
     ExpiresByType image/svg+xml          "access plus 1 year"
     ExpiresByType image/x-icon           "access plus 1 year"
-    ExpiresByType text/css               "access plus 1 year"
-    ExpiresByType application/javascript "access plus 1 year"
     ExpiresByType font/woff2             "access plus 1 year"
     ExpiresByType font/woff              "access plus 1 year"
     ExpiresByType application/pdf        "access plus 6 months"
     ExpiresByType video/mp4              "access plus 1 month"
     ExpiresByType text/html              "access plus 0 seconds"
+
+    #  CSS y JS a un día, NO a un año.
+    #
+    #  /assets/css/design-system.css y /assets/js/main.js viven en public/ con
+    #  un nombre fijo: si cambia el contenido, la URL no cambia. Cachearlos un
+    #  año significa que un arreglo de estilos no le llega durante un año a
+    #  quien ya visitó el sitio, sin forma de corregirlo salvo renombrar el
+    #  archivo. Los que sí pueden cachearse para siempre son los de /_astro/,
+    #  que llevan un hash en el nombre — ver la regla de abajo.
+    ExpiresByType text/css               "access plus 1 day"
+    ExpiresByType application/javascript "access plus 1 day"
+</IfModule>
+
+# ── Activos con hash: inmutables ────────────────────────────────────────────
+#  Astro nombra lo de /_astro/ con un hash del contenido. Cambiar el contenido
+#  cambia la URL, así que la respuesta vieja nunca queda obsoleta y se puede
+#  guardar para siempre.
+<IfModule mod_rewrite.c>
+    RewriteRule ^_astro/ - [E=ASSET_INMUTABLE:1]
 </IfModule>
 
 # ── Cabeceras de seguridad ───────────────────────────────────────────────────
 <IfModule mod_headers.c>
+    Header always set Cache-Control "public, max-age=31536000, immutable" env=ASSET_INMUTABLE
+
+    #  El HTML se revalida SIEMPRE. Es la única forma de que un despliegue se
+    #  vea al instante: sin esto el hosting le pone una hora, y durante esa
+    #  hora quien ya había entrado sigue viendo la versión anterior. Pasó de
+    #  verdad — una página quedó mostrando un código QR ya corregido.
+    <FilesMatch "\.html$">
+        Header always set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+
     Header always set X-Frame-Options        "SAMEORIGIN"
     Header always set X-Content-Type-Options "nosniff"
     Header always set Referrer-Policy        "strict-origin-when-cross-origin"
