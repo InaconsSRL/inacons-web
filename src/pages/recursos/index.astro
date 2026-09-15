@@ -360,8 +360,14 @@ for (const r of recursos) {
       justify-content: center;
       margin-bottom: var(--sp-6);
     }
-    /* qrcodejs inyecta canvas + img — los centramos sin padding extra */
-    .qr-canvas-wrap > div { display: inline-block; }
+    /* El SVG del módulo no trae tamaño propio: se le da aquí. */
+    .qr-canvas-wrap svg { width: 220px; max-width: 100%; height: auto; display: block; }
+    .qr-modal-info {
+      margin-top: var(--sp-3);
+      font-size: var(--fs-xs);
+      color: var(--c-text-muted);
+      line-height: 1.5;
+    }
     .qr-canvas-wrap img,
     .qr-canvas-wrap canvas { display: block; }
 
@@ -576,6 +582,7 @@ for (const r of recursos) {
       <p class="qr-modal-titulo" id="qrModalTitulo"></p>
       <p class="qr-modal-url" id="qrModalUrl"></p>
       <div class="qr-canvas-wrap" id="qrCanvasWrap"></div>
+      <p class="qr-modal-info" id="qrModalInfo"></p>
       <div class="qr-modal-actions">
         <button type="button" class="recurso-btn recurso-btn--primary" id="qrDescargar">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
@@ -592,17 +599,14 @@ for (const r of recursos) {
   <!-- ───── TOAST ───── -->
   <div class="copy-toast" id="copyToast" role="status" aria-live="polite">¡Enlace copiado!</div>
 
-  <!-- ───── QR Library (qrcodejs) ───── -->
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
-    integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-    is:inline
-  ></script>
-
   <!-- ───── Lógica de la página ───── -->
-  <script is:inline>
+  <script>
+    // Sin `is:inline`: Astro empaqueta este script y por eso puede importar el
+    // módulo de QR. Antes traía qrcodejs desde un CDN con su hash SRI, que era
+    // una dependencia externa que mantener y un punto de fallo en una página
+    // que se usa desde obra, con conexión mala.
+    import { generarQR, pngDeUrl } from '../../lib/qr';
+
     (function () {
       // ── ELEMENTOS ─────────────────────────────────────────
       const grid       = document.getElementById('recursosGrid');
@@ -617,6 +621,7 @@ for (const r of recursos) {
       const modalTit   = document.getElementById('qrModalTitulo');
       const modalUrl   = document.getElementById('qrModalUrl');
       const qrWrap     = document.getElementById('qrCanvasWrap');
+      const qrInfo     = document.getElementById('qrModalInfo');
       const btnDlQr    = document.getElementById('qrDescargar');
       const btnDlFlyer = document.getElementById('qrDescargarFlyer');
 
@@ -630,6 +635,7 @@ for (const r of recursos) {
       let categoriaActual = 'todos';
       let queryActual     = '';
       let imagenActual    = '';
+      let urlActual    = '';
       let lastFocused     = null;
       let toastTimer      = 0;
 
@@ -678,29 +684,24 @@ for (const r of recursos) {
       aplicarFiltros();
 
       // ── MODAL QR ──────────────────────────────────────────
-      function abrirModal(titulo, url, imagen) {
+      async function abrirModal(titulo, url, imagen) {
         modalTit.textContent = titulo;
         modalUrl.textContent = url;
         imagenActual         = imagen;
+        urlActual            = url;
 
+        // SVG y no canvas: el preview y el archivo que se descarga salen del
+        // mismo símbolo, y el SVG no tiene resolución propia, así que se ve
+        // nítido a cualquier tamaño sin generarlo dos veces.
         qrWrap.innerHTML = '';
-        const QR = window.QRCode;
-        if (typeof QR === 'function') {
-          try {
-            const opts = {
-              text:       url,
-              width:      220,
-              height:     220,
-              colorDark:  '#14172d',
-              colorLight: '#ffffff',
-            };
-            if (QR.CorrectLevel) opts.correctLevel = QR.CorrectLevel.H;
-            new QR(qrWrap, opts);
-          } catch (e) {
-            qrWrap.textContent = 'No se pudo generar el código QR.';
-          }
-        } else {
-          qrWrap.textContent = 'No se pudo cargar el generador de QR.';
+        qrInfo.textContent = '';
+        try {
+          const r = await generarQR(url, { perfil: 'impresion' });
+          qrWrap.innerHTML = r.svg;
+          qrInfo.textContent = r.modulos + '×' + r.modulos + ' módulos · ECC ' + r.ecc +
+                               ' · no imprimir a menos de ' + r.mmMinimos + ' mm';
+        } catch (e) {
+          qrWrap.textContent = 'No se pudo generar el código QR.';
         }
 
         lastFocused = document.activeElement;
@@ -736,30 +737,36 @@ for (const r of recursos) {
         if (e.key === 'Escape' && modal.classList.contains('open')) cerrarModal();
       });
 
-      // ── DESCARGAR QR (lee la imagen ya generada por qrcodejs) ──
-      btnDlQr.addEventListener('click', () => {
-        const img    = qrWrap.querySelector('img');
-        const canvas = qrWrap.querySelector('canvas');
-        let dataUrl = img && img.src ? img.src : null;
-        if (!dataUrl && canvas) {
-          try {
-            dataUrl = canvas.toDataURL('image/png');
-          } catch (e) {
-            dataUrl = null;
-          }
+      // ── DESCARGAR QR ──────────────────────────────────────
+      //
+      // Se RE-GENERA al tamaño de descarga. Antes se descargaba `img.src`, que
+      // era la imagen de 220 px del preview: lo que llegaba a la imprenta era
+      // la miniatura, estirada. Un QR interpolado pierde el borde neto entre
+      // módulos, que es justo lo que el lector usa para reconstruir la
+      // cuadrícula, y el fallo aparece sobre papel después de haberse visto
+      // perfecto en la pantalla.
+      btnDlQr.addEventListener('click', async () => {
+        if (!urlActual) return;
+        const textoOriginal = btnDlQr.textContent;
+        btnDlQr.disabled = true;
+
+        try {
+          const r = await pngDeUrl(urlActual, { perfil: 'impresion' }, 1200);
+          const a = document.createElement('a');
+          a.download = 'qr-' + (modalTit.textContent || 'inacons')
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-') + '-' + r.lado + 'px.png';
+          a.href = URL.createObjectURL(r.blob);
+          a.click();
+          URL.revokeObjectURL(a.href);
+        } catch (e) {
+          window.alert('No se pudo generar el PNG. Recarga la página e intenta de nuevo.');
+        } finally {
+          btnDlQr.disabled = false;
+          btnDlQr.textContent = textoOriginal;
         }
-        if (!dataUrl) {
-          window.alert('No hay imagen de QR para descargar. Comprueba la conexión o recarga la página.');
-          return;
-        }
-        const a = document.createElement('a');
-        a.download = 'qr-' + (modalTit.textContent || 'inacons')
-          .toLowerCase()
-          .replace(/[^\w\s-]/g, '')
-          .trim()
-          .replace(/\s+/g, '-') + '.png';
-        a.href = dataUrl;
-        a.click();
       });
 
       // ── DESCARGAR FLYER (imagen de origen) ────────────────

@@ -5,7 +5,6 @@ Allow: /
 # Mantener en paralelo con el filtro del sitemap en astro.config.mjs:
 # una ruta nueva que no deba indexarse va en los dos sitios.
 Disallow: /panel/
-Disallow: /diagnostico.php
 Disallow: /sistema/
 Disallow: /empresa/
 Disallow: /admin/
