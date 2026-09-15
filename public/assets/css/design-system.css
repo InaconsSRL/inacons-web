@@ -1884,8 +1884,8 @@ body.menu-open {
         justify-content: center !important;
     }
 
-    .footer-section ul {
-        align-items: center;
+    .footer-section ul li {
+        justify-content: center;
     }
 
     .footer-ethics {
