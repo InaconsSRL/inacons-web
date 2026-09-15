@@ -5,6 +5,9 @@
 Push a `main` → GitHub Actions (`.github/workflows/deploy.yml`) → `npm ci` →
 `npm run build` → sube `dist/` por FTP a cPanel.
 
+Hay un segundo workflow, `latido.yml`, que no despliega nada — ver
+[Latido](#latido-contra-la-suspensión).
+
 - Runner: `ubuntu-latest`, Node 22, caché de npm.
 - Acción de subida: `SamKirkland/FTP-Deploy-Action@v4.3.5`.
 - Destino: `/sites/home.inacons.com.pe/`.
@@ -84,8 +87,19 @@ orden**, una sola vez:
 | `0002_rls.sql` | Row Level Security. **Sin esto la base está abierta** |
 | `0003_agregados.sql` | `escaneos_diarios` + tarea de `pg_cron` |
 | `0004_datos_prueba.sql` | Filas de ejemplo, borrables |
+| `0005_redirector.sql` | Permiso de `resolver_qr()` al rol anónimo + validación de host |
+| `0006_migrar_codigos.sql` | Los cuatro códigos de MySQL, con su nombre exacto |
+| `0007_codigo_tolerante.sql` | El guión bajo y el medio son el mismo código |
+| `0008_codigo_existe.sql` | Comprobación sin registrar escaneo — la usa el build |
+| `0009_panel.sql` | `reasignar_qr()` y permisos del panel |
+| `0010_latido.sql` | Tabla y función del latido |
 
 Entre `0001` y `0002` las tablas existen sin protección. Se ejecutan seguidos.
+
+Cada archivo va en **una sola transacción**: el SQL Editor ejecuta sentencia por
+sentencia, así que sin eso un error a la mitad deja la base en un estado intermedio que
+hay que deshacer a mano antes de poder reintentar. Y son idempotentes: reejecutar uno no
+duplica nada.
 
 ### Configuración obligatoria del proyecto
 
@@ -95,9 +109,33 @@ Entre `0001` y `0002` las tablas existen sin protección. Se ejecutan seguidos.
   registrado no alcanza: las políticas de RLS consultan esa allowlist. Es lo que
   evita que activar el registro por error abra la base entera.
 - **Respaldos.** El plan gratuito no tiene ninguno. Ver ESPECIFICACION.md §10.
-- El plan gratuito **pausa el proyecto** tras una semana sin uso. Con QRs
-  impresos circulando eso es una caída sin aviso: contratar plan de pago antes de
-  imprimir el primer lote (§13).
+
+### Latido contra la suspensión
+
+El plan gratuito **pausa el proyecto tras una semana sin actividad**. Con QRs
+impresos circulando eso es una caída sin aviso: la gente escanea, no llega a
+ningún lado, y nadie se entera hasta que alguien se queja.
+
+`.github/workflows/latido.yml` lo evita llamando a `latido()` cada 3 días.
+
+**No se puede resolver con `pg_cron`**, que sería lo natural: `pg_cron` corre
+*dentro* de la base, así que si el proyecto se pausa se pausa con él. Lo que lo
+mantiene vivo tiene que venir de afuera.
+
+Cada 3 días y no cada 6 porque el cron de Actions es "cuando se pueda", no "a
+esta hora": puede retrasarse o saltarse bajo carga. Con ese período hacen falta
+dos fallos seguidos para llegar a los 7 días.
+
+El latido **escribe** en vez de leer. Una escritura es actividad sin ambigüedad,
+y no conviene averiguar cómo mide Supabase una lectura el día que el proyecto
+amanezca pausado. Además deja rastro: si la tarea muere en silencio —GitHub
+desactiva los cron de repositorios inactivos durante 60 días—, `latidos.ultimo`
+lo dice; sin eso la primera señal sería la pausa.
+
+> **Esto no reemplaza al plan de pago.** Evita la pausa, no los respaldos: el
+> plan gratuito no tiene ninguno, y eso no lo arregla ningún script. Cuando
+> entren contactos de personas reales (Fase 4), esa sigue siendo la razón para
+> pagar — no la pausa.
 
 ### Comprobar que RLS funciona
 
@@ -112,21 +150,56 @@ Se copia tal cual al build. Contiene cinco bloques:
 
 **1. Página de error** — `ErrorDocument 404 /404.html`.
 
-**2. URL corta para QR** — `home.inacons.com.pe/r/CODIGO` → `/empresa/?c=CODIGO` (302).
+**2. URL corta para QR** — `/r/CODIGO` se reescribe **internamente** a
+`public/r/index.php`, que resuelve contra Supabase y hace el 302. Reescritura interna y no
+redirección: el visitante no paga un salto de más y la URL que ve sigue siendo la corta.
+
+La regla lleva **`[NC]`, y no es opcional**. El módulo codifica la URL entera en
+mayúsculas, así que lo que llega de un escaneo es `/R/CODIGO`. Sin `[NC]`, `^r/` no
+engancha y Apache devuelve 404 antes de que el PHP se ejecute: el código existe, la base
+está bien, y solo falla lo que sale de un escaneo real. Todas las pruebas tecleadas en
+minúsculas pasan.
+
+`/empresa/?c=CODIGO` queda como **301 de compatibilidad** hacia `/r/CODIGO`, para el
+material ya impreso. Cuesta tres líneas y evita papel muerto.
+
+> **Las dos reglas son inversas entre sí.** Antes de la Fase 2, `/r/X` redirigía a
+> `/empresa/?c=X`; ahora es al revés. Tenerlas a la vez es un bucle infinito de
+> redirecciones, por eso la vieja se borró en el mismo commit que entró esta. Si alguna
+> vez hay que revertir, se revierten las dos juntas.
+
 Usar siempre el host `home.…` en un QR, nunca `inacons.com.pe`: el dominio principal hace
 301 a home, así que entrar por él agrega un salto al inicio y otro al final. Son cuatro
-redirecciones en vez de dos, sobre la wifi saturada de un pabellón de feria. Menos
-caracteres significa menos módulos y un QR más legible. Ver [formularios.md](formularios.md).
-
-> La Fase 2 invierte esta regla: el redirector pasa a vivir en `/r/` y
-> `/empresa/?c=` queda como 301 de compatibilidad. **Las dos reglas juntas son un
-> bucle infinito de redirecciones**, así que la vieja se borra en el mismo commit
-> que crea la nueva.
+redirecciones en vez de dos, sobre la wifi saturada de un pabellón de feria. Ver
+[formularios.md](formularios.md).
 
 **3. Compresión** — Deflate/gzip para html, css, js, json, svg, pdf y fuentes.
 
-**4. Caché** — ya aplicada: imágenes, css, js y fuentes a 1 año; PDF a 6 meses; mp4 a 1
-mes; html a 0 segundos.
+**4. Caché** — y acá hay una trampa que costó encontrar.
+
+El hosting **inyecta su propio `Cache-Control` por encima** de lo que declare
+`mod_expires`, y cuando la respuesta lleva los dos, `Cache-Control: max-age` le gana a
+`Expires`. Medido en producción: el HTML salía con `Expires: <ahora>` —el "0 segundos" del
+`.htaccess`, aplicado correctamente— y a la vez `max-age=3600`. Ganaba el segundo, así que
+**cada despliegue tardaba hasta una hora en llegarle a quien ya había visitado el sitio**.
+El síntoma parecía un fallo de la aplicación y era una cabecera.
+
+Por eso lo que importa se fija con `mod_headers`, que el hosting sí respeta:
+
+- **HTML** → `no-cache, must-revalidate`. El navegador pregunta siempre y recibe 304 si no
+  cambió nada, así que no cuesta ancho de banda.
+- **`/_astro/`** → `max-age=31536000, immutable`. Astro les pone un hash en el nombre:
+  cambiar el contenido cambia la URL, así que la respuesta vieja nunca queda obsoleta.
+- **CSS y JS de `public/`** → 1 día, **no 1 año**. `design-system.css` y `main.js` tienen
+  nombre fijo: cachearlos un año significa que un arreglo de estilos no llega durante un
+  año a quien ya visitó el sitio, sin forma de corregirlo salvo renombrar el archivo. Esa
+  regla llevaba tiempo escrita y no hizo daño solo porque el hosting la estaba pisando.
+- Imágenes y fuentes a 1 año, PDF a 6 meses, mp4 a 1 mes.
+
+**La cabecera del hosting no se puede quitar**: la agrega después de que corren las reglas
+del `.htaccess`, así que `unset` no la alcanza. Quedan las dos, con la nuestra primero; por
+norma `no-cache` gana al combinarse. Si algún día algo se ve raro tras un despliegue, este
+es el primer sitio donde mirar.
 
 **5. Cabeceras de seguridad** — `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options:
 nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`
@@ -139,8 +212,8 @@ Dos listas que hay que mantener **en paralelo**: el filtro del sitemap en
 `astro.config.mjs` y los `Disallow` de `public/robots.txt`. Una ruta interna
 nueva va en las dos.
 
-Hoy quedan fuera del sitemap y del rastreo: `/panel/`, `/empresa/`, `/recursos/`,
-`/formulario/` y `/expomina/`.
+Hoy quedan fuera del sitemap y del rastreo: `/panel/`, `/sistema/`, `/empresa/`,
+`/recursos/`, `/formulario/` y `/expomina/`.
 
 El filtro compara el **primer segmento** de la ruta, no la URL entera. La versión
 anterior buscaba la palabra en cualquier posición, así que una futura

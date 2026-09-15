@@ -9,10 +9,18 @@
 | Animaciones | IntersectionObserver + `scroll-animations.css` (AOS fue eliminado) |
 | Iconos | SVG inline (Lucide y Font Awesome fueron eliminados) |
 | Fuentes | Google Fonts — Montserrat, carga asíncrona |
-| Dependencias | `astro` + `@astrojs/sitemap`. Nada más |
+| Datos y sesión | Supabase (Postgres + Auth), solo en `/panel/` |
+| Dependencias | `astro`, `@astrojs/sitemap`, `@supabase/supabase-js`, `qrcode` |
 
-La ausencia de dependencias es deliberada: cada librería que entró (AOS, Swiper, Lucide,
-Font Awesome) terminó saliendo por peso. El sitio es estático y el JS es un solo archivo.
+Las dependencias se cuentan con los dedos de una mano, y es deliberado: cada librería que
+entró para decorar (AOS, Swiper, Lucide, Font Awesome) terminó saliendo por peso. Las dos
+que se agregaron en 2026 no decoran — `@supabase/supabase-js` es el cliente de la base y
+`qrcode` genera los símbolos. Esta última reemplazó a `qrcodejs` cargado desde un CDN:
+solo implementaba modo byte, no emitía SVG, y era una dependencia externa con su hash SRI
+que mantener.
+
+Las páginas públicas siguen sin cargar nada de eso: Supabase viaja únicamente en el bundle
+de `/panel/`, y `qrcode` en el de `/panel/` y `/recursos/`.
 
 ## Árbol
 
@@ -24,6 +32,9 @@ web-astro/
 ├── astro.config.mjs           # site + filtro del sitemap
 ├── src/
 │   ├── content.config.ts      # schemas Zod de las 3 colecciones
+│   ├── lib/
+│   │   ├── qr.ts              # ÚNICA fuente de generación de QR
+│   │   └── supabase.ts        # ÚNICO lugar que instancia el cliente
 │   ├── layouts/
 │   │   └── BaseLayout.astro   # head, nav, footer, meta OG
 │   ├── components/
@@ -35,10 +46,12 @@ web-astro/
 │   │   ├── proyectos/         # 2 entradas
 │   │   ├── servicios/         # 6 entradas
 │   │   └── recursos/          # 3 entradas
-│   └── appscripts/            # backends Google Apps Script (no se compilan)
-│       ├── amonestacion.js
+│   └── appscripts/            # backends Apps Script — CERRADOS, solo histórico
 │       ├── expomina.js
 │       └── expomina-avisos.js
+├── supabase/
+│   └── migrations/            # se ejecutan a mano en el SQL Editor, en orden
+├── _archivo/                  # código despublicado que no se borra
 └── public/
     ├── .htaccess              # QR corto, gzip, caché, cabeceras de seguridad
     ├── robots.txt
@@ -50,8 +63,8 @@ web-astro/
     │   ├── videos/hero.mp4             # 4.6 MB
     │   ├── documentos/                 # 11 PDF públicos (certificados, políticas)
     │   └── recursos/                   # flyers descargables
-    ├── empresa/               # panel PHP de QR dinámicos (config.php en .gitignore)
-    └── admin/                 # config de CMS
+    ├── r/index.php            # redirector de QR — resuelve contra Supabase y hace el 302
+    └── empresa/               # panel PHP antiguo (config.php en .gitignore)
 ```
 
 ## Rutas
@@ -70,10 +83,21 @@ web-astro/
 | `/documentos` | `documentos.astro` | ✅ |
 | `/404` | `404.astro` | — |
 | `/recursos` | `recursos/index.astro` | ❌ noindex |
-| `/formulario/amonestaciones` | `formulario/amonestaciones.astro` | ❌ noindex |
-| `/expomina` | `expomina.astro` | ❌ noindex (campaña) |
+| `/expomina` | `expomina.astro` | ❌ noindex (campaña terminada) |
+| `/panel` | `panel/index.astro` | ❌ noindex — administración |
+| `/sistema` | `sistema/index.astro` | ❌ noindex — referencia de componentes |
+| `/r/CODIGO` | `public/r/index.php` | ❌ no es una página: redirige |
 
-Las tres últimas se excluyen del sitemap en `astro.config.mjs` y de `robots.txt`.
+Las internas se excluyen del sitemap en `astro.config.mjs` y de `robots.txt`. **Las dos
+listas se mantienen en paralelo**: una ruta nueva que no deba indexarse va en las dos.
+
+El filtro del sitemap compara el **primer segmento** de la ruta, no la URL entera. La
+versión anterior buscaba la palabra en cualquier posición, así que una futura
+`/proyectos/recursos-hidricos/` habría quedado fuera sin que nadie lo notara.
+
+`/formulario/amonestaciones` ya no existe: se despublicó en la Fase 0 y su código está en
+`_archivo/`. Tenía PIN en el cliente y un endpoint que devolvía todos los registros
+disciplinarios sin autenticación.
 
 ## CSS
 
@@ -104,9 +128,29 @@ verdad. Usar `--c-on-dark-2` y `--c-on-dark-3` directamente.
 
 ### Clases globales
 
-`.sec` / `.sec--white` / `.sec--muted` / `.sec--dark` (secciones), `.container`,
-`.sh` con `.sh-label` / `.sh-title` / `.sh-desc` (cabecera de sección), `.btn`,
-`.card--stat` con `.stat-num`.
+Están **todas** en `/sistema/`, que las muestra armadas y con su markup al lado. Esa
+página se pinta con el CSS real, así que no puede quedar desactualizada.
+
+- **Layout:** `.sec` / `.sec--white` / `.sec--muted` / `.sec--dark`, `.container`
+- **Cabecera de sección:** `.sh` con `.sh-label` / `.sh-title` / `.sh-desc`
+- **Botones:** `.btn` + `.btn-primary` / `-outline` / `-outline-light` / `-accent` /
+  `-sm` / `-lg` / `-block`
+- **Tarjetas:** `.card`, `.card--media`, `.card--stat` con `.stat-num`
+- **Formularios:** `.form-row`, `.form-group`, `.form-input` / `-textarea` / `-select`,
+  `.form-hint`, `.form-error`
+- **Avisos:** `.notice` + `--ok` / `--error` / `--warn` / `--info`
+- **Superficies:** `.panel` + `--accent` / `--raised` / `--ghost`
+- **Datos:** `.data-list`, `.tabla` dentro de `.tabla-scroll`, `.status-ok` / `-error` /
+  `-warn` / `-off`
+- **Diálogos:** `.dialogo` con `.dialogo-caja`
+- **QR:** `.qr-lienzo` — ver la trampa de abajo
+
+La capa de formularios y avisos nació tarde y por duplicado: `/contacto` tenía su juego
+dentro de la página y el panel escribió otro distinto para lo mismo, ya divergiendo en el
+radio del borde y la duración de la transición. Los valores canónicos salieron de
+`/contacto`, con los tokens puestos donde había literales.
+
+`/contacto` todavía conserva su copia local — es el único duplicado que queda.
 
 ### Scoping — la trampa principal
 
@@ -119,6 +163,59 @@ El caso que más costó: `.cards-row > *` en `index.astro` compilaba a
 no lleva ningún cid**. La regla no enganchó, las tarjetas se quedaron sin `flex-basis`, y
 como su imagen va en `position:absolute` no aportan ancho intrínseco: colapsaron a cero.
 Servicios y proyectos desaparecieron del home sin error de build ni nada en consola.
+
+Y volvió a pasar, en tres páginas a la vez. `/recursos/`, `/sistema/` y `/panel/`
+dimensionaban el SVG del QR desde su propio `<style>`. Ese SVG llega en tiempo de
+ejecución —lo inyecta JS o entra por `set:html`— así que **nunca lleva el cid**. Cuatro
+reglas compiladas como `.contenedor[cid] svg[cid]`, ninguna enganchando. Como el SVG del
+módulo trae `viewBox` pero no `width` ni `height`, el símbolo salía del tamaño que el
+navegador quisiera.
+
+La solución es la que dice CLAUDE.md: el estilo va en `design-system.css`, que es el único
+CSS que alcanza a lo que la página no escribió, y el tamaño viaja como custom property
+inline, que sí atraviesa la frontera:
+
+```html
+<div class="qr-lienzo" style="--qr-lado: 210px"></div>
+```
+
+Se verifica con:
+
+```bash
+grep -roh '\[data-astro-cid-[a-z0-9]*\] svg\[data-astro-cid-[a-z0-9]*\]' dist/_astro/*.css
+```
+
+Cada resultado hay que mirarlo: si ese `<svg>` está escrito en el markup de la página,
+está bien; si lo pone JavaScript, está roto.
+
+### El atributo `hidden` gana siempre
+
+`design-system.css` declara `[hidden] { display: none !important }` en el reset, y no es
+decoración. Por defecto `hidden` solo vale `display: none` en la hoja del navegador, así
+que **cualquier regla de autor que fije `display` lo anula** — y lo anula en silencio,
+porque el atributo sigue en el HTML y todo parece correcto al leerlo.
+
+Pasó con `.dialogo`, que declara `display: flex`: los dos diálogos del panel se pintaban
+apilados sobre la página y no se podía usar nada.
+
+## Los tres subsistemas fuera del sitio público
+
+El sitio institucional es estático y no depende de nada. Encima de él conviven tres cosas
+que sí:
+
+| | Qué es | Dónde | Detalle |
+|---|---|---|---|
+| **Módulo QR** | Genera los símbolos. Única fuente | `src/lib/qr.ts` | [formularios.md](formularios.md) |
+| **Redirector** | Resuelve `/r/CODIGO` y hace el 302 | `public/r/index.php` | [formularios.md](formularios.md) |
+| **Panel** | Administra los códigos | `src/pages/panel/` | [deploy.md](deploy.md) |
+
+El redirector es la única parte no estática del sitio, junto con `/empresa/`. Sigue siendo
+PHP porque es la única forma de dar un **302 real del servidor** con dominio propio sin
+meter Cloudflare delante: un sitio estático solo puede servir una página que después
+redirige con JavaScript, y eso mete una pantalla en blanco justo después del escaneo.
+
+`public/empresa/` es el panel PHP antiguo. **Sigue en pie a propósito** hasta que
+`/panel/` haga todo lo que hace él; el 301 se activa al final de la Fase 3.
 
 ## main.js
 

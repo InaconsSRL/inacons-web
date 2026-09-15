@@ -106,8 +106,13 @@ atributos del archivo.
 | `.btn-sm` | 28 px | sí |
 | `.mobile-menu-close` | 40 px | solo móvil |
 | `.footer-social a` | 36 px | sí |
-| `.mobile-menu-socials a` | 30 px | solo móvil |
+| ~~`.mobile-menu-socials a`~~ | ~~30 px~~ → **44 px** | corregido |
 | `.clients-pause-btn` (`index.astro:274`) | 32 px | sí |
+
+Lo nuevo sí cumple: `.btn-block` lleva `min-height: 44px`, y `.dialogo-cerrar` mide 44×44.
+No se corrigió `.btn` base porque cambiar su altura mueve el layout de todas las páginas a
+la vez; en un formulario el botón es el objetivo más importante de la pantalla, así que ese
+usa `.btn-block`.
 
 `.btn-lg` (46 px) y `.menu-toggle` (44×44) cumplen. `.top-bar-social a` (28 px) y
 `.hero-pause-btn` (36 px) están ocultos en móvil, así que no cuentan.
@@ -122,10 +127,38 @@ Las dos de `sostenibilidad.astro` tampoco tienen `loading="lazy"`, y `seguridad.
 único PNG que nunca se migró a WebP. `MediaCard` está bien: `width` y `height` son props
 obligatorias.
 
+## Caché — el hallazgo que explicaba despliegues "que no se veían"
+
+El `.htaccess` declaraba `text/html "access plus 0 seconds"` y `mod_expires` lo aplicaba
+bien: la respuesta traía `Expires: <ahora>`. Pero el hosting **inyecta además su propio
+`Cache-Control: max-age=3600, public`**, y cuando la respuesta lleva los dos, `max-age` le
+gana a `Expires`.
+
+Consecuencia: **cada despliegue tardaba hasta una hora en llegarle a quien ya había
+visitado el sitio.** Se detectó cuando una página seguía mostrando un código QR ya
+corregido y desplegado; el síntoma parecía un fallo de la aplicación y era una cabecera.
+
+Se corrige con `mod_headers`, que el hosting sí respeta — las cabeceras de seguridad del
+mismo archivo llegan intactas, así que ese camino funciona.
+
+Y salió a la luz una bomba de tiempo: **`text/css` estaba declarado a un año**, y
+`design-system.css` tiene nombre fijo. Si esa regla hubiera llegado a aplicarse, un arreglo
+de estilos no habría llegado durante un año a quien ya visitó el sitio, sin forma de
+corregirlo salvo renombrar el archivo. Nunca hizo daño **solo porque el hosting la estaba
+pisando con un día**.
+
+Los que sí se cachean para siempre son los de `/_astro/`, que llevan hash en el nombre:
+ahí cambiar el contenido cambia la URL. Esa es la ganancia real que la regla de un año
+buscaba y no podía dar.
+
 ## Historial
 
 | Fecha | Optimización |
 |---|---|
+| Set 2026 | Caché corregida: HTML revalida siempre, `/_astro/` inmutable, CSS/JS de nombre fijo a 1 día |
+| Set 2026 | `qrcodejs` desde CDN eliminado — el QR viaja en el bundle, sin dependencia externa ni hash SRI |
+| Set 2026 | PNG del QR rasterizado desde el SVG con píxeles por módulo enteros |
+| Set 2026 | `site.webmanifest` agregado: estaba enlazado en el layout y no existía, un 404 en cada carga de cada página |
 | Set 2026 | Limpieza: seis imágenes huérfanas (684 KB), nueve clases y dos tokens sin uso, y los dos alias heredados de texto sobre oscuro |
 | Set 2026 | Bloque de tokens en `design-system.css`: de 65 tamaños de fuente, 106 paddings y 122 `rgba()` sueltos a una sola fuente de verdad, con contrastes verificados |
 | Set 2026 | Caché y compresión en `.htaccess` (`mod_expires` + `mod_deflate`) |

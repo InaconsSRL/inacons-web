@@ -61,10 +61,31 @@ categoria: logo                             # requerido — logo | flyer-impreso
 imagen: /assets/recursos/logo.png           # requerido — archivo o preview
 formato: SVG                                # opcional, default "PNG"
 dimensiones: 1200x400                       # opcional
-qr: https://…                               # opcional
+qr: canal_etico                             # opcional — CÓDIGO, no URL
 orden: 1                                    # opcional
 ---
 ```
+
+### El campo `qr`
+
+Es un **código del sistema de QR**, no una URL. La página arma con él
+`https://home.inacons.com.pe/r/<codigo>` y genera el símbolo. Un recurso con `qr:` muestra
+el botón "Ver QR"; sin él, no.
+
+**El código tiene que existir y estar activo en la base.** El build lo comprueba contra
+Supabase y **falla** si alguno no existe. No es una precaución teórica: `ticket-ti` en el
+markdown contra `tickets_ti` en la base —singular contra plural— generaba un QR hacia la
+nada, en un flyer A4 pensado para imprimirse. Ese fallo se descubre escaneando el papel,
+que es cuando ya no se puede arreglar.
+
+Si Supabase no responde, el build **avisa y continúa**: un código roto tiene que romper el
+build, pero Supabase caído no puede impedir publicar el sitio.
+
+Los códigos se dan de alta en `/panel/`. Si el build se queja de uno, hay dos salidas:
+corregir el `.md`, o crear el código en el panel.
+
+> Los códigos y los `.md` son dos sitios distintos y hay que mantenerlos alineados a mano.
+> La validación del build es la red que impide que se desalineen sin que nadie lo note.
 
 ## Imágenes
 
