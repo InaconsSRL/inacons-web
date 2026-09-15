@@ -1488,26 +1488,9 @@ body.menu-open {
 .mobile-menu-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: var(--sp-5) var(--sp-5) var(--sp-4);
-    border-bottom: 1px solid var(--c-surface-dark-2);
+    justify-content: flex-end;
+    padding: var(--sp-4) var(--sp-5);
     flex-shrink: 0;
-}
-
-.mobile-menu-logo {
-    display: block;
-    text-decoration: none;
-    flex-shrink: 0;
-}
-
-/*  aspect-ratio fija el ancho sin depender de que el navegador lo deduzca:
-    con `width:auto` dentro de un contenedor flex el resultado variaba y el
-    logo llegaba a medir cero. El valor sale del viewBox del SVG. */
-.mobile-menu-logo img {
-    height: 30px;
-    width: auto;
-    aspect-ratio: 21169.32 / 4049.78;
-    display: block;
 }
 
 .mobile-menu-close {
@@ -1541,14 +1524,6 @@ body.menu-open {
     overscroll-behavior: contain;
 }
 
-/*  Centrado vertical con margenes automaticos, no con justify-content:
-    en un contenedor que puede desbordar, justify-content:center recorta la
-    parte de arriba y la deja inalcanzable al hacer scroll. `margin:auto`
-    centra cuando sobra sitio y cede cuando falta. */
-.mobile-nav > ul {
-    margin-block: auto;
-}
-
 .mobile-nav ul {
     display: flex;
     flex-direction: column;
@@ -1556,6 +1531,20 @@ body.menu-open {
     list-style: none;
     margin: 0;
     padding: 0;
+}
+
+/*  Centrado vertical con margenes automaticos, no con justify-content: en un
+    contenedor que puede desbordar, justify-content:center recorta la parte de
+    arriba y la deja inalcanzable al hacer scroll. `margin:auto` centra cuando
+    sobra sitio y cede cuando falta.
+
+    Va DESPUES de `.mobile-nav ul` a proposito. `.mobile-nav > ul` y
+    `.mobile-nav ul` tienen la misma especificidad -- una clase y un elemento
+    en las dos -- asi que decide el orden, y puesta antes perdia contra el
+    `margin: 0` de arriba sin dar ninguna senal. El selector de hijo directo
+    es para no tocar los submenus. */
+.mobile-nav > ul {
+    margin-block: auto;
 }
 
 .mobile-nav a {
