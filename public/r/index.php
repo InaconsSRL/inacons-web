@@ -85,11 +85,22 @@ $fila = $respuesta[0] ?? null;
 $destino = $fila['destino'] ?? null;
 
 if ($destino) {
-    /* El codigo de origen viaja al destino. Es lo que despues permite cruzar
-       escaneos con inscripciones y saber que QR del stand funciono. En
-       Expomina existia a medias y habia que acordarse de ponerlo a mano en
-       cada enlace. */
-    $destino .= (strpos($destino, '?') === false ? '?' : '&') . 'o=' . rawurlencode($codigo);
+    /* El codigo de origen viaja al destino, pero SOLO si el destino es nuestro.
+     *
+     * Para que sirve: si en una feria hay tres QR -- stand, pendon, folleto --
+     * los tres llevando al mismo formulario, `?o=` es lo unico que despues
+     * dice cual de los tres trajo las inscripciones. El escaneo ya queda
+     * registrado en `escaneos`, pero eso solo cuenta que alguien escaneo; no
+     * lo conecta con lo que esa persona hizo en la pagina siguiente.
+     *
+     * Por que solo en lo propio: un sitio de terceros no sabe que es `o=`, no
+     * lo va a leer y no lo necesita. Anadirlo no aporta nada y modifica la URL
+     * de otro, que es algo que no hay que hacer sin motivo. El motivo existe
+     * para nuestras paginas; para las de afuera, no.
+     */
+    if (esDominioPropio($destino)) {
+        $destino .= (strpos($destino, '?') === false ? '?' : '&') . 'o=' . rawurlencode($codigo);
+    }
 
     /* Sin cache: el destino de un codigo puede cambiar, y un 302 cacheado por
        el navegador seguiria mandando al anterior sin volver a preguntar. */
@@ -151,6 +162,19 @@ function llamarRpc(string $funcion, array $parametros)
 
     $datos = json_decode($cuerpo, true);
     return is_array($datos) ? $datos : null;
+}
+
+/** Si la URL apunta a un host de INACONS. */
+function esDominioPropio(string $url): bool
+{
+    $host = strtolower(parse_url($url, PHP_URL_HOST) ?? '');
+    if ($host === '') return false;
+
+    $propio = strtolower(parse_url(SITIO, PHP_URL_HOST) ?? '');
+
+    return $host === $propio
+        || $host === 'inacons.com.pe'
+        || substr($host, -strlen('.inacons.com.pe')) === '.inacons.com.pe';
 }
 
 /** Clasificacion gruesa, suficiente para un tablero. No es analitica. */
