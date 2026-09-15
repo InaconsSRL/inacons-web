@@ -189,8 +189,7 @@ const codigoLista = `<ul class="data-list">
 
     .ds-qr { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--sp-4); }
     .ds-qr-item { min-width: 0; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-bg-white); overflow: hidden; }
-    .ds-qr-img { padding: var(--sp-4); display: flex; justify-content: center; }
-    .ds-qr-img svg { width: 100%; max-width: 190px; height: auto; display: block; }
+    .ds-qr-img { padding: var(--sp-4); }
     .ds-qr-pie { padding: var(--sp-3) var(--sp-4) var(--sp-4); border-top: 1px solid var(--c-border-light); }
     .ds-qr-pie strong { display: block; font-size: var(--fs-sm); color: var(--c-text-heading); }
     .ds-qr-pie small { display: block; margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--c-text-muted); line-height: 1.5; }
@@ -533,7 +532,7 @@ const codigoLista = `<ul class="data-list">
         <div class="ds-qr">
           {muestrasQR.map((m) => (
             <div class="ds-qr-item">
-              <div class="ds-qr-img" set:html={m.r.svg} />
+              <div class="ds-qr-img qr-lienzo" style="--qr-lado: 190px" set:html={m.r.svg} />
               <div class="ds-qr-pie">
                 <strong>{m.etiqueta}</strong>
                 <small>

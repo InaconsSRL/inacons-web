@@ -405,8 +405,6 @@ for (const r of recursos) {
       justify-content: center;
       margin-bottom: var(--sp-6);
     }
-    /* El SVG del módulo no trae tamaño propio: se le da aquí. */
-    .qr-canvas-wrap svg { width: 220px; max-width: 100%; height: auto; display: block; }
     .qr-modal-info {
       margin-top: var(--sp-3);
       font-size: var(--fs-xs);
@@ -626,7 +624,7 @@ for (const r of recursos) {
       </button>
       <p class="qr-modal-titulo" id="qrModalTitulo"></p>
       <p class="qr-modal-url" id="qrModalUrl"></p>
-      <div class="qr-canvas-wrap" id="qrCanvasWrap"></div>
+      <div class="qr-canvas-wrap qr-lienzo" id="qrCanvasWrap" style="--qr-lado: 220px"></div>
       <p class="qr-modal-info" id="qrModalInfo"></p>
       <div class="qr-modal-actions">
         <button type="button" class="recurso-btn recurso-btn--primary" id="qrDescargar">

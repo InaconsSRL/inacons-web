@@ -2039,7 +2039,228 @@ body.menu-open {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   14. UTILITARIOS
+   14. TABLAS Y DIÁLOGOS
+══════════════════════════════════════════════════════════════ */
+/*
+  Las dos piezas que faltaban para poder administrar algo. Nacen acá y no
+  dentro del panel porque el panel no va a ser la única pantalla que liste
+  filas ni la única que pregunte algo antes de actuar.
+*/
+
+/* ── Lienzo de un QR generado ───────────────────────────────── */
+/*
+  El SVG del QR llega en tiempo de ejecucion: lo inyecta JavaScript o entra por
+  `set:html`. En los dos casos NUNCA lleva el data-astro-cid de la pagina.
+
+  Una regla escrita en el <style> de la pagina se compila como
+  `.contenedor[cid] svg[cid]` y no engancha con nada. Y falla en silencio: el
+  CSS es valido, el build pasa, y el QR sale del tamano que el navegador
+  quiera. Estaba roto a la vez en /recursos/, en /sistema/ y en el panel --
+  cuatro reglas, tres paginas, ninguna aplicando.
+
+  Vive aca porque este archivo es el unico cuyo CSS alcanza a lo que la pagina
+  no escribio. El tamano viaja como custom property, que si atraviesa la
+  frontera del componente:
+
+      <div class="qr-lienzo" style="--qr-lado: 210px">
+
+  El SVG que emite src/lib/qr.ts trae viewBox pero no width ni height, asi que
+  sin esto el navegador lo pinta a su tamano por defecto.
+*/
+.qr-lienzo {
+    display: flex;
+    justify-content: center;
+}
+
+.qr-lienzo svg {
+    width: 100%;
+    max-width: var(--qr-lado, 220px);
+    height: auto;
+    display: block;
+}
+
+
+/* ── Tabla ──────────────────────────────────────────────────── */
+/*
+  El envoltorio con scroll propio NO es opcional. Una tabla de seis columnas
+  no entra en un teléfono, y sin este contenedor el desbordamiento lo absorbe
+  la página entera: aparece scroll horizontal en todo el documento y las
+  secciones muestran franja vacía al costado. Ya pasó en este sitio, con la
+  fila de cifras del home.
+*/
+.tabla-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    background: var(--c-bg-white);
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+    /*  Que no se comprima hasta partir las palabras letra por letra: por
+        debajo de esto, que scrollee. */
+    min-width: 640px;
+}
+
+.tabla th {
+    text-align: left;
+    padding: var(--sp-3) var(--sp-4);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    background: var(--c-bg-muted);
+    border-bottom: 1px solid var(--c-border);
+    white-space: nowrap;
+}
+
+.tabla td {
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--c-border-light);
+    color: var(--c-text-body);
+    vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla tbody tr:hover {
+    background: var(--c-bg-muted);
+}
+
+/*  Para la columna del identificador: monoespaciada, porque se compara a ojo
+    con algo impreso y las proporcionales hacen que 0 y O se parezcan más. */
+.tabla-codigo {
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    white-space: nowrap;
+}
+
+/*  Una URL larga no puede ensanchar la tabla hasta el infinito. */
+.tabla-url {
+    max-width: 30ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tabla-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.tabla-acciones {
+    display: flex;
+    gap: var(--sp-2);
+    justify-content: flex-end;
+    white-space: nowrap;
+}
+
+.tabla-vacia {
+    padding: var(--sp-l1) var(--sp-5);
+    text-align: center;
+    color: var(--c-text-muted);
+    font-size: var(--fs-base);
+}
+
+
+/* ── Diálogo ────────────────────────────────────────────────── */
+/*
+  Se muestra con el atributo `hidden`, no con una clase: así el contenido
+  queda fuera del árbol de accesibilidad cuando está cerrado, sin que haya que
+  acordarse de sincronizar `aria-hidden` a mano.
+
+  Quien lo abra tiene que ocuparse de dos cosas que el CSS no puede: bloquear
+  el scroll del fondo y devolver el foco al elemento que lo abrió.
+*/
+.dialogo {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-mobile-menu);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-5);
+    background: rgba(20, 23, 45, 0.55);
+    overflow-y: auto;
+}
+
+.dialogo-caja {
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--c-bg-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card-hover);
+    padding: var(--sp-7);
+    position: relative;
+}
+
+.dialogo-caja--ancho { max-width: 680px; }
+
+.dialogo-titulo {
+    font-size: var(--fs-xl);
+    color: var(--c-text-heading);
+    margin-bottom: var(--sp-2);
+    padding-right: var(--sp-7);
+}
+
+.dialogo-desc {
+    font-size: var(--fs-base);
+    color: var(--c-text-muted);
+    line-height: 1.6;
+    margin-bottom: var(--sp-6);
+}
+
+/*  44px: por encima del mínimo táctil. Cerrar es la acción que más se busca
+    a las apuradas. */
+.dialogo-cerrar {
+    position: absolute;
+    top: var(--sp-4);
+    right: var(--sp-4);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    color: var(--c-text-muted);
+    cursor: pointer;
+    transition: background var(--t), color var(--t);
+}
+
+.dialogo-cerrar:hover {
+    background: var(--c-bg-muted);
+    color: var(--c-text-heading);
+}
+
+/*  Las acciones van a la derecha y la destructiva o secundaria a la
+    izquierda de la principal, que es donde el ojo termina el recorrido. */
+.dialogo-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    justify-content: flex-end;
+    margin-top: var(--sp-6);
+}
+
+@media (max-width: 479.98px) {
+    .dialogo-caja { padding: var(--sp-5); }
+    .dialogo-acciones > .btn { flex: 1 1 100%; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   15. UTILITARIOS
 ══════════════════════════════════════════════════════════════ */
 .container {
     max-width: 1200px;
@@ -2087,7 +2308,7 @@ body.menu-open {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   15. VENDORS: AOS
+   16. VENDORS: AOS
 ══════════════════════════════════════════════════════════════ */
 
 /* AOS — sincronizar duración */
@@ -2096,7 +2317,7 @@ body.menu-open {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   16. RESPONSIVE
+   17. RESPONSIVE
 ══════════════════════════════════════════════════════════════ */
 @media (max-width: 767.98px) {
     :root {
