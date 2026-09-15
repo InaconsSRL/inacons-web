@@ -203,10 +203,9 @@ const servicios = [
         se repiten aca. Las tarjetas son .card--stat del sistema; aca
         solo va el layout. */
     /*
-      auto-fit en vez de repeat(3, 1fr) fijo: con tres columnas rígidas, a
-      320px los rótulos ("PROYECTOS EJECUTADOS") no entraban y la fila
-      desbordaba el contenedor. Con minmax el navegador coloca tres cuando
-      hay sitio y baja a dos cuando no, sin necesidad de otro breakpoint.
+      auto-fit en vez de repeat(3, 1fr) fijo: con tres columnas rígidas los
+      rótulos ("PROYECTOS EJECUTADOS") no entraban y la fila desbordaba el
+      contenedor. Con minmax el navegador decide cuántas caben.
     */
     .about-kpi-row {
       display: grid;
@@ -218,6 +217,39 @@ const servicios = [
       margin: var(--sp-6) 0 var(--sp-7);
     }
     .about-kpi-row .card--stat { text-align: left; min-width: 0; }
+
+    /*
+      En móvil se apilan, una cifra por fila.
+
+      Repartidas en columnas a 375px cada rótulo cae en tres o cuatro líneas
+      —"PROYECTOS" / "EJECUTADOS" partido— y las tres cifras quedan
+      desalineadas entre sí a distinta altura. Apiladas, cada una es una
+      línea legible: el número a la izquierda y su rótulo al lado.
+
+      El min-width del número alinea los rótulos en una columna aunque las
+      cifras tengan distinto largo (96+, 40+, 6). Sin eso el ojo no encuentra
+      dónde empieza cada rótulo.
+    */
+    @media (max-width: 767.98px) {
+      .about-kpi-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 0;
+      }
+      .about-kpi-row .card--stat {
+        display: flex;
+        align-items: baseline;
+        gap: var(--sp-4);
+        padding: var(--sp-4) 0;
+      }
+      .about-kpi-row .card--stat + .card--stat {
+        border-top: 1px solid var(--c-border-light);
+      }
+      .about-kpi-row .stat-num {
+        flex-shrink: 0;
+        min-width: 3ch;
+      }
+    }
 
     /* ── CLIENTES SCROLL ── */
     .clients-track-wrap {
