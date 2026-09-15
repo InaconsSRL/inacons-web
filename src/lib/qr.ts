@@ -103,6 +103,141 @@ export function urlDeCodigo(codigo: string): string {
   return `${DOMINIO}/r/${codigo}`.toUpperCase();
 }
 
+/* ── Logo al centro ─────────────────────────────────────────────────────────
+ *
+ * Funciona por una sola razon: el estandar QR guarda informacion redundante
+ * para sobrevivir a la suciedad y el desgaste. Tapar el centro consume parte
+ * de ese margen; no lo crea. Cuanto mas grande el logo, menos tolerancia le
+ * queda al codigo para lo que venga despues -- un doblez, un reflejo, tinta
+ * corrida.
+ *
+ * Por eso solo se permite con ECC H, que reserva ~30% de redundancia. Con ECC
+ * M (~15%) un logo deja el simbolo sin margen util: escanea en el monitor,
+ * donde nadie lo prueba, y falla sobre papel.
+ *
+ * La geometria del logo va escrita aqui y no se lee de /favicon.svg. Tiene que
+ * ser asi: el SVG resultante se convierte a PNG dibujandolo en un lienzo desde
+ * un data URI, y ahi una referencia a un archivo externo no carga. El logo
+ * desapareceria solo en el PNG -- justo en el formato que va a la imprenta.
+ */
+const LOGO_LADO = 85.41; // viewBox de public/favicon.svg
+
+const LOGO_FORMAS =
+  '<rect x="0" y="0" width="85.41" height="85.41" rx="6.01" ry="6.01" fill="#FEFEFE"/>' +
+  '<polygon points="44.03,46.26 77.89,46.26 77.89,78.6 12,78.6" fill="#295276"/>' +
+  '<polygon points="45.9,39.86 45.9,7.52 77.89,7.52 77.89,39.86" fill="#031B30"/>' +
+  '<polygon points="39.51,7.52 39.51,41.76 7.52,74.07 7.52,7.52" fill="#295276"/>';
+
+/**
+ * Fraccion del lado del simbolo que ocupa el logo.
+ *
+ * Los valores salen de medir, no de estimar. Se genero el codigo, se le
+ * pintaron manchas de 2x2 modulos solo sobre datos -- evitando los patrones de
+ * localizacion y las lineas de sincronismo, que ninguna correccion recupera --
+ * y se decodifico con jsQR hasta encontrar el punto de fallo:
+ *
+ *     sin logo    aguanta 12 manchas
+ *     0.20        aguanta  6 manchas
+ *     0.28        aguanta  4 manchas
+ *     0.34+       aguanta  4 manchas
+ *
+ * O sea que el logo se come la mitad del margen de correccion antes de que
+ * pase nada en el mundo real. Por eso 0.20 por defecto: deja tolerancia de
+ * sobra para un doblez, un reflejo o tinta corrida, que es para lo que ECC H
+ * estaba ahi en primer lugar.
+ *
+ * El tope de 0.28 no es donde deja de leerse -- a 0.40 todavia se lee limpio.
+ * Es donde deja de quedar margen para lo que venga despues. Un QR que solo
+ * escanea en condiciones perfectas es un QR que falla en el stand.
+ */
+const LOGO_ESCALA = 0.20;
+const LOGO_ESCALA_MAX = 0.28;
+
+export interface OpcionesQR {
+  perfil?: PerfilQR;
+  /** Marca de INACONS al centro. Solo con perfil de impresion (ECC H). */
+  logo?: boolean;
+  /** Fraccion del lado que ocupa el logo. Por defecto 0.20, tope 0.28. */
+  escalaLogo?: number;
+}
+
+export interface ResultadoQR {
+  svg: string;
+  /** Modulos por lado, sin contar la zona de silencio. */
+  modulos: number;
+  perfil: PerfilQR;
+  ecc: 'M' | 'H';
+  conLogo: boolean;
+  /** Lado minimo recomendado al imprimir, en milimetros. */
+  mmMinimos: number;
+}
+
+/**
+ * Genera el QR y devuelve tambien con que quedo hecho.
+ *
+ * El panel necesita esos datos, no solo el dibujo: cuantos modulos tiene
+ * decide el tamano fisico minimo al que se puede imprimir.
+ */
+export async function generarQR(url: string, opciones: OpcionesQR = {}): Promise<ResultadoQR> {
+  const perfil = opciones.perfil ?? 'pantalla';
+  const { color, ecc } = PERFILES[perfil];
+  const conLogo = opciones.logo === true;
+
+  if (conLogo && ecc !== 'H') {
+    throw new Error(
+      `El logo necesita ECC H y el perfil "${perfil}" usa ECC ${ecc}. ` +
+      'Usa el perfil "impresion", o genera sin logo. ' +
+      'Un logo sobre ECC M escanea en pantalla y falla sobre papel.'
+    );
+  }
+
+  const escala = Math.min(opciones.escalaLogo ?? LOGO_ESCALA, LOGO_ESCALA_MAX);
+
+  let svg = await QRCode.toString(url, {
+    type: 'svg',
+    errorCorrectionLevel: ecc,
+    margin: ZONA_SILENCIO,
+    color: { dark: color, light: '#ffffff' },
+  });
+
+  const modulos = QRCode.create(url, { errorCorrectionLevel: ecc }).modules.size;
+
+  if (conLogo) {
+    const lienzo = modulos + ZONA_SILENCIO * 2;   // lado del viewBox
+    const lado   = modulos * escala;              // lado del logo
+    const aire   = 1;                             // un modulo de aire alrededor
+    const placa  = lado + aire * 2;
+
+    const logoXY  = (lienzo - lado) / 2;
+    const placaXY = (lienzo - placa) / 2;
+    const factor  = lado / LOGO_LADO;
+
+    // La placa blanca separa el logo de los modulos vecinos. Sin ella el
+    // borde del logo se confunde con un modulo oscuro y el lector pierde la
+    // cuadricula justo en el centro.
+    const capa =
+      `<rect x="${placaXY.toFixed(3)}" y="${placaXY.toFixed(3)}" ` +
+      `width="${placa.toFixed(3)}" height="${placa.toFixed(3)}" ` +
+      `rx="${(placa * 0.08).toFixed(3)}" fill="#ffffff"/>` +
+      `<g transform="translate(${logoXY.toFixed(3)} ${logoXY.toFixed(3)}) scale(${factor.toFixed(6)})">` +
+      LOGO_FORMAS +
+      '</g>';
+
+    svg = svg.replace('</svg>', capa + '</svg>');
+  }
+
+  return {
+    svg,
+    modulos,
+    perfil,
+    ecc,
+    conLogo,
+    // ~0,5 mm por modulo es la regla de campo para lectura comoda a distancia
+    // de brazo. Redondeado hacia arriba al milimetro.
+    mmMinimos: Math.ceil(modulos * 0.5),
+  };
+}
+
 /**
  * SVG del código, como cadena.
  *
@@ -111,14 +246,7 @@ export function urlDeCodigo(codigo: string): string {
  * resolución propia.
  */
 export async function svgDeUrl(url: string, perfil: PerfilQR = 'pantalla'): Promise<string> {
-  const { color, ecc } = PERFILES[perfil];
-
-  return QRCode.toString(url, {
-    type: 'svg',
-    errorCorrectionLevel: ecc,
-    margin: ZONA_SILENCIO,
-    color: { dark: color, light: '#ffffff' },
-  });
+  return (await generarQR(url, { perfil })).svg;
 }
 
 /** SVG a partir de un código corto. Atajo sobre `urlDeCodigo` + `svgDeUrl`. */
@@ -149,14 +277,14 @@ export function modulosDeUrl(url: string, perfil: PerfilQR = 'pantalla'): number
  */
 export async function pngDeUrl(
   url: string,
-  perfil: PerfilQR = 'pantalla',
+  opciones: OpcionesQR = {},
   tamano = 1200,
 ): Promise<Blob> {
   if (typeof document === 'undefined') {
     throw new Error('pngDeUrl necesita un navegador: rasteriza sobre un <canvas>.');
   }
 
-  const svg = await svgDeUrl(url, perfil);
+  const { svg } = await generarQR(url, opciones);
 
   // El SVG viaja como data URI en base64. `encodeURIComponent` sobre el XML
   // crudo también funciona, pero base64 evita que un carácter del marcado

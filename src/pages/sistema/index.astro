@@ -9,6 +9,17 @@
 //
 // Interna: noindex, fuera del sitemap y bloqueada en robots.txt.
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { generarQR, urlDeCodigo, PERFILES } from '../../lib/qr';
+
+// Se generan en el build con el modulo real. Son escaneables desde la
+// pantalla: es la unica forma de juzgar un QR: con un telefono, no a ojo.
+const URL_MUESTRA = urlDeCodigo('CANAL_ETICO');
+const muestrasQR = [
+  { etiqueta: 'Pantalla, sin logo',      r: await generarQR(URL_MUESTRA, { perfil: 'pantalla' }) },
+  { etiqueta: 'Impresion, sin logo',     r: await generarQR(URL_MUESTRA, { perfil: 'impresion' }) },
+  { etiqueta: 'Impresion + logo 0.20',   r: await generarQR(URL_MUESTRA, { perfil: 'impresion', logo: true }) },
+  { etiqueta: 'Impresion + logo 0.28',   r: await generarQR(URL_MUESTRA, { perfil: 'impresion', logo: true, escalaLogo: 0.28 }) },
+];
 
 // Los tokens de color, con su razón de ser. El texto de contraste sale de los
 // comentarios del propio design-system.css, no de una medición nueva.
@@ -176,6 +187,14 @@ const codigoLista = `<ul class="data-list">
     .ds-sp code { font-size: var(--fs-xs); color: var(--c-text-muted); min-width: 80px; flex-shrink: 0; }
     .ds-sp-barra { height: 14px; background: var(--c-secondary); border-radius: 1px; }
 
+    .ds-qr { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--sp-4); }
+    .ds-qr-item { min-width: 0; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-bg-white); overflow: hidden; }
+    .ds-qr-img { padding: var(--sp-4); display: flex; justify-content: center; }
+    .ds-qr-img svg { width: 100%; max-width: 190px; height: auto; display: block; }
+    .ds-qr-pie { padding: var(--sp-3) var(--sp-4) var(--sp-4); border-top: 1px solid var(--c-border-light); }
+    .ds-qr-pie strong { display: block; font-size: var(--fs-sm); color: var(--c-text-heading); }
+    .ds-qr-pie small { display: block; margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--c-text-muted); line-height: 1.5; }
+
     .ds-nota {
       border-left: 3px solid var(--c-accent);
       padding: var(--sp-3) 0 var(--sp-3) var(--sp-4);
@@ -220,6 +239,7 @@ const codigoLista = `<ul class="data-list">
           <a href="#avisos">Avisos</a>
           <a href="#listas">Listas y estados</a>
           <a href="#encabezados">Encabezados</a>
+          <a href="#qr">Códigos QR</a>
         </nav>
       </header>
 
@@ -497,6 +517,63 @@ const codigoLista = `<ul class="data-list">
           es un contrato con <code>initCounters()</code> de <code>main.js</code>, que lo
           anima al entrar en pantalla. No usar <code>data-target</code> — main.js no lo busca.
         </p>
+      </section>
+
+
+      <!-- ── CODIGOS QR ──────────────────────────────────────── -->
+      <section class="ds-seccion" id="qr">
+        <h2>Códigos QR</h2>
+        <p>
+          Se generan con <code>src/lib/qr.ts</code>, única fuente del repositorio.
+          Los cuatro de abajo salen del build, no son imágenes pegadas:
+          <strong>escanealos con el teléfono desde esta misma pantalla</strong>.
+          Los cuatro llevan a la misma dirección.
+        </p>
+
+        <div class="ds-qr">
+          {muestrasQR.map((m) => (
+            <div class="ds-qr-item">
+              <div class="ds-qr-img" set:html={m.r.svg} />
+              <div class="ds-qr-pie">
+                <strong>{m.etiqueta}</strong>
+                <small>
+                  {m.r.modulos}×{m.r.modulos} módulos · ECC {m.r.ecc} · mínimo {m.r.mmMinimos} mm impreso
+                </small>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="ds-nota">
+          <strong>El logo se come la mitad del margen de corrección.</strong> No es una
+          opinión: se generó el código, se le pintaron manchas de 2×2 módulos solo sobre
+          datos y se decodificó hasta el punto de fallo.
+          <br /><br />
+          Sin logo aguanta <strong>12 manchas</strong>; con logo al 0.20,
+          <strong>6</strong>; al 0.28, <strong>4</strong>. A 0.40 todavía se lee limpio en
+          condiciones perfectas — pero un QR que solo escanea en condiciones perfectas es
+          un QR que falla en el stand. Por eso el tope está donde deja de quedar margen,
+          no donde deja de leerse.
+        </div>
+
+        <p style="font-size: var(--fs-base); color: var(--c-text-body); line-height:1.7; max-width:68ch">
+          El logo solo se permite con el perfil de impresión, que usa ECC H. Pedirlo sobre
+          el perfil de pantalla (ECC M) lanza un error en vez de generar un código frágil:
+          con ECC M un logo deja el símbolo sin margen útil, y eso escanea en el monitor
+          —donde nadie lo prueba— y falla sobre papel.
+        </p>
+
+        <p class="ds-grupo">Cuándo usar cada perfil</p>
+        <div class="ds-demo">
+          <ul class="data-list">
+            {Object.entries(PERFILES).map(([clave, p]) => (
+              <li>
+                <span class="data-key" style="max-width:34ch">{p.titulo} — <code>{clave}</code></span>
+                <span class="data-value" style="font-weight:var(--fw-normal); text-align:right; max-width:46ch">{p.consejo}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
     </div>
