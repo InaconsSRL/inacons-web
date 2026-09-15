@@ -610,3 +610,71 @@ herramienta.
 
 El criterio pide que **un QR en perfil impresión, impreso en A4, escanee
 correctamente**. Eso solo se comprueba imprimiendo y escaneando.
+
+### Fase 3 — a mitad (set 2026)
+
+Hecho:
+
+| Qué | Dónde |
+|---|---|
+| Listado de códigos con estado y escaneos acumulados | `src/pages/panel/index.astro` |
+| Alta, edición, baja y reactivación. **Sin borrar** | idem |
+| Reasignación de destino con motivo, vía `reasignar_qr()` | `supabase/migrations/0009_panel.sql` |
+| Generación del QR en los dos perfiles, export SVG y PNG | `src/lib/qr.ts` |
+| Hoja de impresión con la URL legible debajo | `src/pages/panel/index.astro` |
+| Recálculo del agregado a demanda | `agregar_escaneos_diarios()` |
+| `.tabla` y `.dialogo` en el sistema de diseño | `design-system.css` |
+
+Falta: generación **masiva**, pantalla que muestre el **registro de auditoría**
+(hoy se escribe pero no se lee desde ningún sitio), **tablero** de escaneos por
+día, y el 301 de `/empresa/admin.php` a `/panel/`, que se activa al final de
+esta fase.
+
+#### Cinco fallos que aparecieron probando, no revisando
+
+Todos los encontró el usuario usando el panel. Ninguno lo encontró una lectura
+del código, incluida la mía.
+
+**`/R/` en mayúscula devolvía 404, y eso rompía TODOS los QR generados.** El
+módulo codifica la URL entera en mayúsculas para habilitar el modo
+alfanumérico, así que un escaneo real llega como `/R/CODIGO`; la regla de
+Apache era `^r/`, sensible a mayúsculas. El código existía, la base estaba
+bien, `resolver_qr()` respondía, y el enlace tecleado en minúsculas funcionaba:
+solo fallaba lo que salía de un escaneo. Se hizo insensible el CÓDIGO, dentro
+de Postgres, y se olvidó el SEGMENTO de la ruta, que lo resuelve Apache. La
+especificación pedía las dos cosas en la misma frase.
+
+**`display: flex` en `.dialogo` anulaba el atributo `hidden`.** Los dos
+diálogos del panel se pintaban apilados sobre la página y no se podía usar
+nada. La protección `[hidden] { display: none !important }` existía en el
+`<style>` del panel y se perdió al mover los componentes al sistema de diseño.
+Ahora vive en el reset, donde protege a todo componente futuro.
+
+**Cuatro reglas CSS dimensionaban un SVG inyectado en tiempo de ejecución**, en
+`/recursos/`, `/sistema/` y el panel. Astro las compila como
+`.contenedor[cid] svg[cid]` y el SVG inyectado no lleva ese `cid`: no
+enganchaban con nada. Es exactamente la trampa que CLAUDE.md documenta en su
+primera regla dura, escrita tres veces seguidas sin verla.
+
+**La URL se mostraba en mayúsculas.** Correcto para el símbolo, incorrecto para
+una persona: parece un error y es incómoda de teclear en la hoja impresa. Ahora
+se codifica en mayúsculas y se muestra en minúsculas.
+
+**El código de origen se añadía también a destinos ajenos.** `?o=` sirve para
+conectar un escaneo con lo que la persona hizo después, y eso requiere que la
+página de destino lo lea. Un sitio de terceros no lo lee: solo se le
+modificaba la URL sin motivo.
+
+#### Y uno de infraestructura
+
+**El HTML se cacheaba una hora.** El `.htaccess` pedía cero segundos y
+`mod_expires` lo aplicaba, pero el hosting inyecta su propio `Cache-Control`, y
+`max-age` le gana a `Expires`. Cada despliegue tardaba hasta una hora en
+llegarle a quien ya había visitado el sitio; el síntoma parecía un fallo de la
+aplicación y era una cabecera. Se corrige con `mod_headers`, que el hosting sí
+respeta.
+
+De paso: `text/css` estaba declarado a un año y `design-system.css` tiene
+nombre fijo. Si esa regla hubiera llegado a aplicarse, un arreglo de estilos no
+habría llegado durante un año a quien ya visitó el sitio. Los que sí se cachean
+para siempre son los de `/_astro/`, que llevan hash en el nombre.
