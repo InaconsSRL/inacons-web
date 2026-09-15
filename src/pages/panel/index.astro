@@ -239,6 +239,16 @@ import { supabaseConfigurado } from '../../lib/supabase';
           </div>
 
           <div class="pnl-tarjeta">
+            <!--
+              Tener sesión y ser administrador son dos cosas distintas, y esta
+              es la única pantalla donde se nota la diferencia: hasta la Fase 3
+              el panel no lee ninguna tabla, así que alguien fuera de la
+              allowlist entraría, vería todo normal y solo descubriría que no
+              tiene acceso semanas después, cuando algo devuelva cero filas sin
+              explicar por qué.
+            -->
+            <div class="pnl-aviso" id="aviso-admin" hidden></div>
+
             <h2>Fase 1 completa</h2>
             <p>
               Hay sesión contra Supabase y esta página llegó al servidor por el
@@ -313,11 +323,38 @@ import { supabaseConfigurado } from '../../lib/supabase';
       const loginError   = document.getElementById('login-error')!;
       const sesionCorreo = document.getElementById('sesion-correo')!;
 
+      const avisoAdmin = document.getElementById('aviso-admin')!;
+
+      // es_admin() es SECURITY DEFINER: consulta la allowlist sin que nadie
+      // tenga permiso de leer esa tabla. Es la única forma de preguntar
+      // "¿estoy dentro?" sin exponer quiénes están.
+      async function comprobarAdmin() {
+        const { data, error: err } = await supabase.rpc('es_admin');
+
+        if (err) {
+          avisoAdmin.className = 'pnl-aviso pnl-aviso--error';
+          avisoAdmin.textContent = `No se pudo comprobar el acceso: ${err.message}`;
+        } else if (data === true) {
+          avisoAdmin.className = 'pnl-aviso pnl-aviso--ok';
+          avisoAdmin.textContent =
+            'Usuario reconocido como administrador. La allowlist tiene tu fila y las políticas te dejan pasar.';
+        } else {
+          avisoAdmin.className = 'pnl-aviso pnl-aviso--error';
+          avisoAdmin.textContent =
+            'Hay sesión, pero este usuario NO está en la tabla administradores: ' +
+            'toda consulta va a devolver cero filas. Falta ejecutar el insert de la allowlist.';
+        }
+        avisoAdmin.hidden = false;
+      }
+
       function mostrar(sesion: { user: { email?: string } } | null) {
         const dentro = Boolean(sesion);
         vistaLogin!.hidden  = dentro;
         vistaSesion!.hidden = !dentro;
-        if (sesion) sesionCorreo.textContent = sesion.user.email ?? '—';
+        if (sesion) {
+          sesionCorreo.textContent = sesion.user.email ?? '—';
+          comprobarAdmin();
+        }
       }
 
       function error(mensaje: string) {
