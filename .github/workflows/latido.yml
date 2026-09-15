@@ -1,0 +1,68 @@
+# ============================================================================
+#  LATIDO DE SUPABASE
+#
+#  El plan gratuito pausa el proyecto tras una semana sin actividad. Con QRs
+#  impresos circulando eso es una caída sin aviso: la gente escanea y no llega
+#  a ningún lado, y nadie se entera hasta que alguien se queja.
+#
+#  Por qué desde acá y no con pg_cron: pg_cron corre DENTRO de la base, así que
+#  si el proyecto se pausa, pg_cron se pausa con él. Lo que lo mantiene vivo
+#  tiene que venir de afuera.
+#
+#  Cada 3 días y no cada 6: el margen absorbe una ejecución perdida. El cron de
+#  GitHub Actions es "cuando se pueda", no "a esta hora" — puede retrasarse o
+#  saltarse bajo carga. Con 3 días de período y 7 de plazo, hacen falta dos
+#  fallos seguidos para que el proyecto llegue a pausarse.
+#
+#  OJO: GitHub desactiva los cron de repositorios sin actividad durante 60
+#  días. Si el proyecto queda quieto, este latido se apaga solo y la pausa
+#  vuelve. `latidos.ultimo` en la base dice cuándo fue el último, que es la
+#  forma de enterarse antes de que duela.
+#
+#  LO QUE ESTO NO RESUELVE: el plan gratuito no tiene ningún respaldo. Un
+#  latido evita la pausa; no devuelve una tabla borrada por error.
+# ============================================================================
+name: Latido de Supabase
+
+on:
+  schedule:
+    - cron: '17 9 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  latido:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar a latido()
+        env:
+          URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
+          KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${URL:-}" ] || [ -z "${KEY:-}" ]; then
+            echo "Faltan los secrets PUBLIC_SUPABASE_URL o PUBLIC_SUPABASE_ANON_KEY."
+            exit 1
+          fi
+
+          cuerpo=$(mktemp)
+          estado=$(curl -sS -o "$cuerpo" -w '%{http_code}' --max-time 30 \
+            -X POST "$URL/rest/v1/rpc/latido" \
+            -H "apikey: $KEY" \
+            -H "Authorization: Bearer $KEY" \
+            -H 'Content-Type: application/json' \
+            -d '{}')
+
+          echo "HTTP $estado"
+          cat "$cuerpo"
+          echo
+
+          # Falla a propósito si no responde 200. Un latido que falla en
+          # silencio es peor que no tenerlo: da la falsa seguridad de que algo
+          # está cuidando el proyecto.
+          if [ "$estado" != "200" ]; then
+            echo "El latido no llegó. Si el proyecto está pausado, hay que reactivarlo a mano en supabase.com."
+            exit 1
+          fi
+
+          echo "Proyecto vivo."
