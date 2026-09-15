@@ -36,6 +36,13 @@
     /* Antes #6b7494 → 4.15:1 sobre --c-bg-muted, fallaba AA.
        #5a6280 da 6.01:1 sobre blanco y 5.40:1 sobre muted. */
 
+    --c-text-placeholder: #b0b6c8;
+    /* Deliberadamente por debajo de AA, y por eso con una regla atada:
+       el placeholder NUNCA lleva informacion necesaria. Si se sube a un
+       valor que pase contraste, deja de distinguirse de un campo lleno y
+       la gente cree haber respondido lo que no respondio. Lo que tiene
+       que decir el campo va en su <label>, que es obligatoria. */
+
     /* ── TEXTO SOBRE OSCURO ──────────────────────────────────── */
     /* Tres niveles, los tres verificados contra --c-primary.
        No inventar alfas nuevas: si hace falta otro nivel, se agrega acá. */
@@ -551,6 +558,30 @@ a.btn:active {
     padding: var(--sp-4) var(--sp-l1);
     font-size: var(--fs-base);
     letter-spacing: 0.9px;
+}
+
+/*  Boton a ancho completo, para formularios y paneles.
+
+    Lleva min-height 44px, que es el minimo tactil recomendado, y .btn
+    base se queda en 37. No se corrige .btn aca porque cambiar su altura
+    mueve el layout de todas las paginas del sitio a la vez; queda
+    registrado como pendiente en docs/performance.md. En un formulario el
+    boton es el objetivo mas importante de la pantalla, asi que este si
+    lo cumple. */
+.btn-block {
+    width: 100%;
+    min-height: 44px;
+}
+
+/*  El sistema no tenia estado deshabilitado. Cualquier boton que dispare
+    una peticion lo necesita: sin el se puede pulsar dos veces y mandar el
+    formulario duplicado. `progress` y no `not-allowed` porque el caso
+    normal es "esperando respuesta", no "no podes hacer esto". */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: progress;
+    transform: none;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1745,7 +1776,270 @@ body.menu-open {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   13. UTILITARIOS
+   13. FORMULARIOS, AVISOS Y SUPERFICIES
+══════════════════════════════════════════════════════════════ */
+/*
+  Esta capa nació tarde y por duplicado. /contacto tenía su juego de
+  estilos de formulario dentro de la página, y el panel escribió otro
+  distinto para lo mismo: dos definiciones de "un campo de texto", en
+  dos archivos, que ya habían empezado a divergir en el radio del
+  borde y en la duración de la transición.
+
+  Los valores de acá salen de /contacto, que era la implementación
+  madura, con los tokens puestos donde había literales: la fuente
+  estaba escrita a mano en vez de --font-ui, el radio como 2px en vez
+  de --radius y las transiciones como .22s en vez de --t.
+
+  Regla: una pantalla nueva NO define estilos de campo, aviso ni
+  superficie. Si algo falta acá, se agrega acá.
+*/
+
+/* ── Campos ─────────────────────────────────────────────────── */
+
+/*  Dos columnas que caen a una en móvil. Para un campo a ancho
+    completo, dejarlo fuera de .form-row. */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-4);
+}
+
+.form-group {
+    margin-bottom: var(--sp-4);
+}
+
+/*  La etiqueta es obligatoria y visible, nunca reemplazada por el
+    placeholder: el placeholder desaparece al escribir, así que quien
+    vuelve a un formulario a medio llenar pierde la referencia de qué
+    iba en cada casilla. Además es lo único que lee un lector de
+    pantalla de forma fiable. */
+.form-group label {
+    display: block;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    margin-bottom: var(--sp-2);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    /*  min-width:0 porque un campo dentro de una pista de rejilla no
+        puede encogerse por debajo de su tamaño intrínseco sin esto, y
+        .form-row desborda en pantallas angostas. */
+    min-width: 0;
+    padding: var(--sp-3);
+    font-family: var(--font-ui);
+    font-size: var(--fs-base);
+    color: var(--c-text-heading);
+    background: var(--c-bg-muted);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color var(--t), box-shadow var(--t), background var(--t);
+    -webkit-appearance: none;
+}
+
+/*  El foco cambia borde Y fondo: el anillo solo no se distingue con
+    suficiente claridad sobre el gris del campo en reposo. */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    border-color: var(--c-secondary);
+    background: var(--c-bg-white);
+    box-shadow: 0 0 0 3px rgba(27, 82, 120, 0.09);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--c-text-placeholder);
+}
+
+.form-input:disabled,
+.form-textarea:disabled,
+.form-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/*  Invalidez visible solo después de intentar enviar: :invalid a secas
+    pinta de rojo un campo obligatorio que la persona todavía no llegó
+    a tocar. Se activa agregando .was-validated al <form>. */
+.was-validated .form-input:invalid,
+.was-validated .form-textarea:invalid,
+.was-validated .form-select:invalid {
+    border-color: #c0392b;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 130px;
+}
+
+/*  Texto de ayuda bajo el campo. Va enlazado con aria-describedby. */
+.form-hint {
+    display: block;
+    margin-top: var(--sp-2);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    line-height: 1.5;
+}
+
+.form-error {
+    display: block;
+    margin-top: var(--sp-2);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    color: #8c1d1d;
+    line-height: 1.5;
+}
+
+/* ── Avisos ─────────────────────────────────────────────────── */
+/*
+  Un solo componente para "algo salió bien", "algo falló" y "ojo con
+  esto". Antes eran .form-success en /contacto y .pnl-aviso en el
+  panel, con paletas distintas para el mismo estado.
+
+  Los cuatro pares de color están verificados sobre su propio fondo:
+  ninguno baja de 7:1, que es holgado incluso para texto chico.
+*/
+.notice {
+    padding: var(--sp-4);
+    border-radius: var(--radius);
+    border: 1px solid;
+    font-size: var(--fs-base);
+    line-height: 1.55;
+}
+
+.notice + .notice {
+    margin-top: var(--sp-3);
+}
+
+.notice--ok {
+    background: #e9f6ee;
+    color: #1c6b3c;
+    border-color: #c3e5d0;
+}
+
+.notice--error {
+    background: #fdeaea;
+    color: #8c1d1d;
+    border-color: #f3c9c9;
+}
+
+.notice--warn {
+    background: #fdf3e6;
+    color: #7a4a10;
+    border-color: #f0dcc0;
+}
+
+.notice--info {
+    background: #eaf1f7;
+    color: #1b4b6e;
+    border-color: #c8dced;
+}
+
+/* ── Superficies ────────────────────────────────────────────── */
+/*
+  .card levanta al pasar el cursor, porque es un objeto sobre el que
+  se hace clic. Una superficie que solo contiene contenido no se
+  mueve: el movimiento promete una acción que no existe. Por eso esto
+  no es un modificador de .card.
+*/
+.panel {
+    background: var(--c-bg-white);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--radius);
+    padding: var(--sp-7);
+}
+
+.panel + .panel {
+    margin-top: var(--sp-5);
+}
+
+/*  Filete superior de acento. Es el que usa el formulario de contacto
+    para señalar dónde está la acción principal de la página. */
+.panel--accent {
+    border-top: 3px solid var(--c-secondary);
+}
+
+.panel--raised {
+    box-shadow: var(--shadow-card);
+}
+
+/*  Borde punteado: esto todavía no existe. Se usa para un módulo
+    anunciado pero no construido, nunca para contenido real. */
+.panel--ghost {
+    background: var(--c-bg-muted);
+    border: 1px dashed var(--c-border);
+    padding: var(--sp-5);
+}
+
+.panel-title {
+    font-size: var(--fs-xl);
+    color: var(--c-text-heading);
+    margin-bottom: var(--sp-2);
+}
+
+.panel-desc {
+    font-size: var(--fs-base);
+    color: var(--c-text-muted);
+    line-height: 1.6;
+}
+
+/* ── Estado en texto ────────────────────────────────────────── */
+/*  Para una celda o un renglon que informa un estado sin ocupar un aviso
+    entero: un codigo activo o dado de baja, el resultado de una
+    comprobacion. Misma paleta que .notice, para que verde signifique lo
+    mismo en los dos sitios. */
+.status-ok    { color: #1c6b3c; font-weight: var(--fw-semibold); }
+.status-error { color: #8c1d1d; font-weight: var(--fw-bold); }
+.status-warn  { color: #7a4a10; font-weight: var(--fw-semibold); }
+.status-off   { color: var(--c-text-muted); font-weight: var(--fw-medium); }
+
+/* ── Lista de clave y valor ─────────────────────────────────── */
+/*  Filas de dato con etiqueta a la izquierda y valor a la derecha.
+    flex-wrap para que en pantallas angostas el valor baje en vez de
+    comprimir la etiqueta hasta partirla letra por letra. */
+.data-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: var(--fs-sm);
+}
+
+.data-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    justify-content: space-between;
+    padding: var(--sp-3) 0;
+    border-bottom: 1px solid var(--c-border-light);
+}
+
+.data-list li:last-child {
+    border-bottom: none;
+}
+
+.data-list dt,
+.data-list .data-key {
+    color: var(--c-text-muted);
+    min-width: 0;
+}
+
+.data-list dd,
+.data-list .data-value {
+    margin: 0;
+    color: var(--c-text-heading);
+    font-weight: var(--fw-semibold);
+    text-align: right;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. UTILITARIOS
 ══════════════════════════════════════════════════════════════ */
 .container {
     max-width: 1200px;
@@ -1793,7 +2087,7 @@ body.menu-open {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   14. VENDORS: AOS
+   15. VENDORS: AOS
 ══════════════════════════════════════════════════════════════ */
 
 /* AOS — sincronizar duración */
@@ -1802,7 +2096,7 @@ body.menu-open {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   15. RESPONSIVE
+   16. RESPONSIVE
 ══════════════════════════════════════════════════════════════ */
 @media (max-width: 767.98px) {
     :root {
@@ -1856,6 +2150,11 @@ body.menu-open {
 
     .page-hero-content {
         padding: 0 var(--sp-5) var(--sp-l1);
+    }
+
+    /* Formularios */
+    .form-row {
+        grid-template-columns: 1fr;
     }
 
     /* Footer */
