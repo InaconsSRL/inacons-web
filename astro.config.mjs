@@ -7,6 +7,7 @@ import sitemap from '@astrojs/sitemap';
 // nueva que no deba indexarse va en los dos sitios.
 const SECCIONES_PRIVADAS = new Set([
   'panel',
+  'sistema',
   'empresa',
   'recursos',
   'formulario',

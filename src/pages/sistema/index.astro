@@ -1,0 +1,505 @@
+---
+// SISTEMA DE DISEÑO — /sistema/
+//
+// Referencia viva: cada ejemplo de esta página se pinta con
+// public/assets/css/design-system.css, el mismo archivo que usa el sitio. No
+// hay copias de los estilos acá. Si un componente cambia, esta página cambia
+// con él; si alguien la ve desactualizada, es que el componente cambió y nadie
+// lo notó, que es exactamente la señal que se busca.
+//
+// Interna: noindex, fuera del sitemap y bloqueada en robots.txt.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+// Los tokens de color, con su razón de ser. El texto de contraste sale de los
+// comentarios del propio design-system.css, no de una medición nueva.
+const colores = [
+  { grupo: 'Paleta', items: [
+    { token: '--c-primary',      valor: '#14172d', nota: 'Azul marino profundo. Identidad y fondos oscuros.' },
+    { token: '--c-secondary',    valor: '#1b5278', nota: 'Azul medio. Acciones y enlaces.' },
+    { token: '--c-accent',       valor: '#d9822b', nota: 'Naranja. SOLO sobre fondo oscuro: sobre claro da 2.93:1.' },
+    { token: '--c-accent-ink',   valor: '#96530f', nota: 'Naranja oscurecido, para fondo claro. 5.93:1 sobre blanco.' },
+  ]},
+  { grupo: 'Fondos', items: [
+    { token: '--c-bg-white',     valor: '#ffffff', nota: 'Superficies y secciones claras.' },
+    { token: '--c-bg-muted',     valor: '#f0f3f7', nota: 'Plomo azulado. Alterna con el blanco y es el fondo de los campos.' },
+  ]},
+  { grupo: 'Texto sobre claro', items: [
+    { token: '--c-text-heading', valor: '#14172d', nota: 'Titulares.' },
+    { token: '--c-text-body',    valor: '#3d4460', nota: 'Cuerpo de texto.' },
+    { token: '--c-text-muted',   valor: '#5a6280', nota: '6.01:1 sobre blanco, 5.40:1 sobre muted.' },
+  ]},
+];
+
+const tipografia = [
+  { token: '--fs-2xs',     px: '11px',    uso: 'Rótulos en caja alta' },
+  { token: '--fs-xs',      px: '12px',    uso: 'Metadatos, pies de foto' },
+  { token: '--fs-sm',      px: '13px',    uso: 'Texto secundario' },
+  { token: '--fs-base',    px: '14px',    uso: 'Cuerpo en tarjetas' },
+  { token: '--fs-md',      px: '16px',    uso: 'Cuerpo principal' },
+  { token: '--fs-lg',      px: '18px',    uso: 'Párrafo destacado' },
+  { token: '--fs-xl',      px: '22px',    uso: 'h3' },
+  { token: '--fs-2xl',     px: '24–32px', uso: 'h2, cifras' },
+  { token: '--fs-display', px: '32–48px', uso: 'h1 de páginas interiores' },
+];
+
+const espaciado = ['--sp-1', '--sp-2', '--sp-3', '--sp-4', '--sp-5', '--sp-6', '--sp-7', '--sp-l1', '--sp-l2', '--sp-l3'];
+
+const codigoBotones = `<button class="btn btn-primary">Guardar</button>
+<button class="btn btn-outline">Cancelar</button>
+<button class="btn btn-primary btn-block">Entrar</button>`;
+
+const codigoFormulario = `<div class="form-row">
+  <div class="form-group">
+    <label for="nombre">Nombre</label>
+    <input type="text" id="nombre" class="form-input" />
+  </div>
+  <div class="form-group">
+    <label for="correo">Correo</label>
+    <input type="email" id="correo" class="form-input" />
+    <span class="form-hint">Nunca se comparte.</span>
+  </div>
+</div>`;
+
+const codigoAviso = `<div class="notice notice--ok">Se guardaron los cambios.</div>
+<div class="notice notice--error">No se pudo guardar.</div>`;
+
+const codigoPanel = `<div class="panel panel--raised">
+  <h2 class="panel-title">Título</h2>
+  <p class="panel-desc">Descripción.</p>
+</div>`;
+
+const codigoLista = `<ul class="data-list">
+  <li><span class="data-key">Código</span><span class="data-value">A7F3K</span></li>
+  <li><span class="data-key">Estado</span><span class="status-ok">Activo</span></li>
+</ul>`;
+---
+
+<BaseLayout
+  title="Sistema de diseño | INACONS"
+  description="Referencia interna de componentes."
+  robots="noindex, nofollow"
+  minimalChrome={true}
+>
+
+  <style slot="head">
+    .ds { background: var(--c-bg-muted); min-height: 100vh; padding: var(--sp-l1) var(--sp-5) var(--sp-l4); }
+    .ds-wrap { max-width: 900px; margin: 0 auto; }
+
+    .ds-head { margin-bottom: var(--sp-l2); }
+    .ds-head h1 { font-size: var(--fs-display); color: var(--c-text-heading); letter-spacing: var(--ls-tight); }
+    .ds-head p  { font-size: var(--fs-md); color: var(--c-text-body); line-height: 1.7; margin-top: var(--sp-4); max-width: 62ch; }
+
+    .ds-indice {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      margin-top: var(--sp-6);
+    }
+    .ds-indice a {
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-secondary);
+      text-decoration: none;
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+    }
+    .ds-indice a:hover { background: var(--c-secondary); color: #fff; border-color: var(--c-secondary); }
+
+    .ds-seccion { margin-top: var(--sp-l3); scroll-margin-top: var(--sp-5); }
+    .ds-seccion > h2 {
+      font-size: var(--fs-2xl);
+      color: var(--c-text-heading);
+      letter-spacing: var(--ls-tight);
+      padding-bottom: var(--sp-3);
+      border-bottom: 2px solid var(--c-accent);
+      margin-bottom: var(--sp-5);
+    }
+    .ds-seccion > p {
+      font-size: var(--fs-base);
+      color: var(--c-text-body);
+      line-height: 1.7;
+      max-width: 68ch;
+      margin-bottom: var(--sp-6);
+    }
+
+    .ds-demo {
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      padding: var(--sp-6);
+      margin-bottom: var(--sp-4);
+    }
+    .ds-demo--oscuro { background: var(--c-primary); }
+
+    .ds-fila { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+
+    .ds-codigo {
+      background: var(--c-primary);
+      border-radius: var(--radius);
+      padding: var(--sp-4) var(--sp-5);
+      overflow-x: auto;
+      margin-bottom: var(--sp-6);
+    }
+    .ds-codigo pre {
+      margin: 0;
+      font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: var(--fs-xs);
+      line-height: 1.7;
+      color: var(--c-on-dark-1);
+      white-space: pre;
+    }
+
+    /* Color */
+    .ds-colores { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--sp-4); }
+    .ds-color { min-width: 0; border: 1px solid var(--c-border); border-radius: var(--radius); overflow: hidden; background: var(--c-bg-white); }
+    .ds-muestra { height: 64px; }
+    .ds-color-info { padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+    .ds-color-info code { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--c-text-heading); }
+    .ds-color-info small { display: block; margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--c-text-muted); }
+    .ds-color-info em { display: block; margin-top: var(--sp-2); font-size: var(--fs-xs); color: var(--c-text-muted); font-style: normal; line-height: 1.5; }
+    .ds-grupo { font-size: var(--fs-2xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--c-text-muted); margin: var(--sp-6) 0 var(--sp-3); }
+    .ds-grupo:first-of-type { margin-top: 0; }
+
+    /* Tipografía y espaciado */
+    .ds-tipo { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-4); padding: var(--sp-4) 0; border-bottom: 1px solid var(--c-border-light); }
+    .ds-tipo:last-child { border-bottom: none; }
+    .ds-tipo-meta { min-width: 180px; flex-shrink: 0; }
+    .ds-tipo-meta code { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--c-text-heading); }
+    .ds-tipo-meta small { display: block; font-size: var(--fs-xs); color: var(--c-text-muted); margin-top: 2px; }
+    .ds-tipo-ej { color: var(--c-text-heading); min-width: 0; }
+
+    .ds-sp { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-2) 0; }
+    .ds-sp code { font-size: var(--fs-xs); color: var(--c-text-muted); min-width: 80px; flex-shrink: 0; }
+    .ds-sp-barra { height: 14px; background: var(--c-secondary); border-radius: 1px; }
+
+    .ds-nota {
+      border-left: 3px solid var(--c-accent);
+      padding: var(--sp-3) 0 var(--sp-3) var(--sp-4);
+      margin: var(--sp-5) 0;
+      font-size: var(--fs-base);
+      color: var(--c-text-body);
+      line-height: 1.65;
+      max-width: 68ch;
+    }
+  </style>
+
+  <div class="ds">
+    <div class="ds-wrap">
+
+      <header class="ds-head">
+        <h1>Sistema de diseño</h1>
+        <p>
+          Todo lo que sigue se pinta con <code>public/assets/css/design-system.css</code>,
+          el mismo archivo que usa el sitio. No hay copias de los estilos en esta
+          página: si un componente cambia, esto cambia con él.
+        </p>
+
+        <div class="ds-nota">
+          <strong>La regla es una sola:</strong> una pantalla nueva no inventa estilos.
+          Si el componente que necesitás está acá, se usa tal cual. Si no está, se
+          agrega <em>al sistema</em> y después se usa — nunca dentro del
+          <code>&lt;style&gt;</code> de una página.
+          <br /><br />
+          Antes de esta regla el sitio tenía 65 tamaños de fuente distintos, 106 valores
+          de padding y 122 <code>rgba()</code> inventados en el punto de uso. De ahí
+          salieron los fallos de contraste: nadie los revisaba porque no había un lugar
+          donde revisarlos.
+        </div>
+
+        <nav class="ds-indice">
+          <a href="#color">Color</a>
+          <a href="#tipografia">Tipografía</a>
+          <a href="#espaciado">Espaciado</a>
+          <a href="#botones">Botones</a>
+          <a href="#superficies">Superficies</a>
+          <a href="#formularios">Formularios</a>
+          <a href="#avisos">Avisos</a>
+          <a href="#listas">Listas y estados</a>
+          <a href="#encabezados">Encabezados</a>
+        </nav>
+      </header>
+
+      <!-- ── COLOR ───────────────────────────────────────────── -->
+      <section class="ds-seccion" id="color">
+        <h2>Color</h2>
+        <p>
+          Un color que no sale de un token es un bug. La restricción importante:
+          el naranja <code>--c-accent</code> solo va sobre fondo oscuro — sobre
+          claro da 2.93:1 y no pasa AA. Para naranja sobre claro existe
+          <code>--c-accent-ink</code>.
+        </p>
+
+        {colores.map((g) => (
+          <>
+            <p class="ds-grupo">{g.grupo}</p>
+            <div class="ds-colores">
+              {g.items.map((c) => (
+                <div class="ds-color">
+                  <div class="ds-muestra" style={`background: ${c.valor}`}></div>
+                  <div class="ds-color-info">
+                    <code>{c.token}</code>
+                    <small>{c.valor}</small>
+                    <em>{c.nota}</em>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ))}
+
+        <p class="ds-grupo">Texto sobre oscuro</p>
+        <div class="ds-demo ds-demo--oscuro">
+          <p style="color: var(--c-on-dark-1); font-size: var(--fs-md); margin-bottom: var(--sp-3)">
+            <code style="color:inherit">--c-on-dark-1</code> — 14.95:1, titulares y texto principal
+          </p>
+          <p style="color: var(--c-on-dark-2); font-size: var(--fs-md); margin-bottom: var(--sp-3)">
+            <code style="color:inherit">--c-on-dark-2</code> — 9.52:1, texto de apoyo
+          </p>
+          <p style="color: var(--c-on-dark-3); font-size: var(--fs-md)">
+            <code style="color:inherit">--c-on-dark-3</code> — 7.37:1, metadatos y rótulos. Es el mínimo permitido.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── TIPOGRAFÍA ──────────────────────────────────────── -->
+      <section class="ds-seccion" id="tipografia">
+        <h2>Tipografía</h2>
+        <p>
+          Una sola familia, <code>--font-ui</code> (Montserrat), y nueve pasos. Los
+          pesos son cinco y no se usan otros: el sitio llegó a tener 700 en 77 lugares,
+          y cuando casi todo es bold no hay jerarquía, hay volumen parejo.
+        </p>
+
+        <div class="ds-demo">
+          {tipografia.map((t) => (
+            <div class="ds-tipo">
+              <div class="ds-tipo-meta">
+                <code>{t.token}</code>
+                <small>{t.px} · {t.uso}</small>
+              </div>
+              <div class="ds-tipo-ej" style={`font-size: var(${t.token})`}>Construimos confianza</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── ESPACIADO ───────────────────────────────────────── -->
+      <section class="ds-seccion" id="espaciado">
+        <h2>Espaciado</h2>
+        <p>
+          Escala de 4px: siete pasos de componente y cuatro de layout. Incluye 20px
+          aunque rompa la serie redonda, porque sin ese paso 45 declaraciones caían a
+          16px y el layout se movía sin ninguna ganancia.
+        </p>
+
+        <div class="ds-demo">
+          {espaciado.map((sp) => (
+            <div class="ds-sp">
+              <code>{sp}</code>
+              <div class="ds-sp-barra" style={`width: var(${sp})`}></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── BOTONES ─────────────────────────────────────────── -->
+      <section class="ds-seccion" id="botones">
+        <h2>Botones</h2>
+        <p>
+          <code>.btn</code> siempre, más una variante. <code>.btn-outline-light</code>
+          es para fondo oscuro; usar <code>.btn-outline</code> ahí lo vuelve ilegible.
+        </p>
+
+        <div class="ds-demo">
+          <div class="ds-fila">
+            <button class="btn btn-primary">Primario</button>
+            <button class="btn btn-outline">Outline</button>
+            <button class="btn btn-accent">Accent</button>
+            <button class="btn btn-primary btn-sm">Pequeño</button>
+            <button class="btn btn-primary" disabled>Deshabilitado</button>
+          </div>
+        </div>
+
+        <div class="ds-demo ds-demo--oscuro">
+          <div class="ds-fila">
+            <button class="btn btn-primary">Primario</button>
+            <button class="btn btn-outline-light">Outline claro</button>
+            <button class="btn btn-accent">Accent</button>
+          </div>
+        </div>
+
+        <div class="ds-demo">
+          <button class="btn btn-primary btn-block">Bloque — ancho completo, 44px de alto</button>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoBotones}</pre></div>
+      </section>
+
+      <!-- ── SUPERFICIES ─────────────────────────────────────── -->
+      <section class="ds-seccion" id="superficies">
+        <h2>Superficies</h2>
+        <p>
+          <code>.panel</code> contiene; <code>.card</code> se clickea y por eso levanta
+          al pasar el cursor. No mezclarlos: el movimiento de la tarjeta promete una
+          acción, y en una superficie que solo contiene texto esa promesa es falsa.
+        </p>
+
+        <div class="ds-demo">
+          <div class="panel panel--raised">
+            <h3 class="panel-title">.panel .panel--raised</h3>
+            <p class="panel-desc">Superficie con sombra. La caja por defecto de un panel.</p>
+          </div>
+          <div class="panel panel--accent" style="margin-top: var(--sp-4)">
+            <h3 class="panel-title">.panel--accent</h3>
+            <p class="panel-desc">Filete superior. Señala dónde está la acción principal de la pantalla.</p>
+          </div>
+          <div class="panel--ghost" style="margin-top: var(--sp-4)">
+            <h3 class="panel-title" style="font-size: var(--fs-base)">.panel--ghost</h3>
+            <p class="panel-desc">Borde punteado: esto todavía no existe. Nunca para contenido real.</p>
+          </div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoPanel}</pre></div>
+      </section>
+
+      <!-- ── FORMULARIOS ─────────────────────────────────────── -->
+      <section class="ds-seccion" id="formularios">
+        <h2>Formularios</h2>
+        <p>
+          La etiqueta es obligatoria y visible, nunca reemplazada por el placeholder:
+          el placeholder desaparece al escribir, así que quien vuelve a un formulario
+          a medio llenar pierde la referencia de qué iba en cada casilla. Y es lo único
+          que un lector de pantalla anuncia de forma fiable.
+        </p>
+
+        <div class="ds-demo">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ds-nombre">Nombre</label>
+              <input type="text" id="ds-nombre" class="form-input" placeholder="Ej. María Quispe" />
+            </div>
+            <div class="form-group">
+              <label for="ds-correo">Correo</label>
+              <input type="email" id="ds-correo" class="form-input" aria-describedby="ds-correo-hint" />
+              <span class="form-hint" id="ds-correo-hint">Nunca se comparte con terceros.</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-select">Tipo de código</label>
+            <select id="ds-select" class="form-select">
+              <option>Evento</option>
+              <option>Empleado</option>
+              <option>Recurso</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-mensaje">Mensaje</label>
+            <textarea id="ds-mensaje" class="form-textarea"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-error">Campo con error</label>
+            <input type="text" id="ds-error" class="form-input" style="border-color:#c0392b" value="valor inválido" />
+            <span class="form-error">Este código ya existe.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-off">Deshabilitado</label>
+            <input type="text" id="ds-off" class="form-input" value="No editable" disabled />
+          </div>
+
+          <button class="btn btn-primary btn-block">Guardar</button>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoFormulario}</pre></div>
+      </section>
+
+      <!-- ── AVISOS ──────────────────────────────────────────── -->
+      <section class="ds-seccion" id="avisos">
+        <h2>Avisos</h2>
+        <p>
+          Un solo componente para los cuatro estados. Verde significa lo mismo acá que
+          en <code>.status-ok</code>: son la misma paleta a propósito.
+        </p>
+
+        <div class="ds-demo">
+          <div class="notice notice--ok">Se guardaron los cambios.</div>
+          <div class="notice notice--error">No se pudo guardar: el código ya existe.</div>
+          <div class="notice notice--warn">Este código está en material impreso. Reasignarlo afecta papel circulando.</div>
+          <div class="notice notice--info">Los cambios se publican en el sitio en uno o dos minutos.</div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoAviso}</pre></div>
+      </section>
+
+      <!-- ── LISTAS Y ESTADOS ────────────────────────────────── -->
+      <section class="ds-seccion" id="listas">
+        <h2>Listas y estados</h2>
+        <p>
+          <code>.data-list</code> para pares de clave y valor. Las filas envuelven en
+          pantallas angostas en vez de comprimir la etiqueta hasta partirla letra por
+          letra.
+        </p>
+
+        <div class="ds-demo">
+          <ul class="data-list">
+            <li><span class="data-key">Código</span><span class="data-value">A7F3K</span></li>
+            <li><span class="data-key">Destino</span><span class="data-value">/empleados/</span></li>
+            <li><span class="data-key">Estado</span><span class="status-ok">Activo</span></li>
+            <li><span class="data-key">En material impreso</span><span class="status-warn">Sí — revisar antes de reasignar</span></li>
+            <li><span class="data-key">Código anterior</span><span class="status-off">Dado de baja</span></li>
+            <li><span class="data-key">Última comprobación</span><span class="status-error">Falló</span></li>
+          </ul>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoLista}</pre></div>
+      </section>
+
+      <!-- ── ENCABEZADOS ─────────────────────────────────────── -->
+      <section class="ds-seccion" id="encabezados">
+        <h2>Encabezados de sección</h2>
+        <p>
+          <code>.sh</code> es el encabezado de las secciones del sitio público.
+          Modificadores de ancho: <code>--narrow</code>, <code>--medium</code>,
+          <code>--wide</code>. De alineación: <code>--left</code>,
+          <code>--center</code>, <code>--right</code>.
+        </p>
+
+        <div class="ds-demo">
+          <div class="sh sh--medium">
+            <p class="sh-label">Rótulo</p>
+            <h2 class="sh-title">Construimos los proyectos que mueven al Perú</h2>
+            <p class="sh-desc">Descripción opcional, para cuando el titular necesita contexto.</p>
+          </div>
+        </div>
+
+        <p class="ds-grupo">Card de dato</p>
+        <div class="ds-demo">
+          <div class="ds-fila" style="gap: var(--sp-l1)">
+            <div class="card--stat">
+              <span class="stat-num">96+</span>
+              <span class="stat-label">Proyectos ejecutados</span>
+            </div>
+            <div class="card--stat">
+              <span class="stat-num">6</span>
+              <span class="stat-label">Departamentos</span>
+            </div>
+          </div>
+        </div>
+        <p style="font-size: var(--fs-sm); color: var(--c-text-muted); line-height:1.6">
+          El número lleva <code>data-counter</code> (y <code>data-suffix</code> opcional):
+          es un contrato con <code>initCounters()</code> de <code>main.js</code>, que lo
+          anima al entrar en pantalla. No usar <code>data-target</code> — main.js no lo busca.
+        </p>
+      </section>
+
+    </div>
+  </div>
+
+</BaseLayout>
