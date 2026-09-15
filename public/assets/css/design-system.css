@@ -1487,7 +1487,7 @@ body.menu-open {
 /* Header */
 .mobile-menu-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     padding: var(--sp-5) var(--sp-5) var(--sp-4);
     border-bottom: 1px solid var(--c-surface-dark-2);
@@ -1495,16 +1495,18 @@ body.menu-open {
 }
 
 .mobile-menu-logo {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-1);
+    display: block;
     text-decoration: none;
-    min-width: 0;
+    flex-shrink: 0;
 }
 
+/*  aspect-ratio fija el ancho sin depender de que el navegador lo deduzca:
+    con `width:auto` dentro de un contenedor flex el resultado variaba y el
+    logo llegaba a medir cero. El valor sale del viewBox del SVG. */
 .mobile-menu-logo img {
-    height: 28px;
+    height: 30px;
     width: auto;
+    aspect-ratio: 21169.32 / 4049.78;
     display: block;
 }
 
@@ -1531,20 +1533,20 @@ body.menu-open {
 .mobile-nav {
     flex: 1 1 auto;
     min-height: 0;
-    padding: var(--sp-1) var(--sp-3) var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-4) var(--sp-3);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
 }
 
-.mobile-nav-label {
-    font-size: var(--fs-2xs);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-label);
-    color: rgba(255, 255, 255, 0.28);
-    text-transform: uppercase;
-    padding: var(--sp-3) var(--sp-2) var(--sp-2);
-    margin: 0;
+/*  Centrado vertical con margenes automaticos, no con justify-content:
+    en un contenedor que puede desbordar, justify-content:center recorta la
+    parte de arriba y la deja inalcanzable al hacer scroll. `margin:auto`
+    centra cuando sobra sitio y cede cuando falta. */
+.mobile-nav > ul {
+    margin-block: auto;
 }
 
 .mobile-nav ul {
@@ -1671,11 +1673,6 @@ body.menu-open {
     gap: var(--sp-2);
 }
 
-.mobile-menu-actions .mobile-nav-label {
-    padding-top: var(--sp-2);
-    padding-bottom: var(--sp-1);
-}
-
 .mobile-btn-primary {
     display: flex;
     align-items: center;
@@ -1726,20 +1723,23 @@ body.menu-open {
 .mobile-menu-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: var(--sp-3);
-    padding: var(--sp-3) var(--sp-5) var(--sp-4);
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
     border-top: 1px solid var(--c-surface-dark-2);
 }
 
 .mobile-menu-socials {
     display: flex;
-    gap: var(--sp-2);
+    justify-content: center;
+    gap: var(--sp-3);
 }
 
+/*  44px: el minimo tactil recomendado. Estaban en 30, por debajo del umbral
+    y ademas perdidas contra el ancho de la pantalla. */
 .mobile-menu-socials a {
-    width: 30px;
-    height: 30px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
