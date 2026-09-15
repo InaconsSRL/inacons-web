@@ -4,7 +4,7 @@ categoria: flyer-impreso
 imagen: /assets/recursos/flyer_a4_canaldecomunicaciones.png
 formato: PNG
 dimensiones: 2480×3508px
-qr: canal-etico
+qr: canal_etico
 orden: 1
 ---
 

@@ -76,3 +76,39 @@ export const TABLAS = [
   'inscripciones',
   'leads',
 ] as const;
+
+/**
+ * Comprueba que un código QR existe y está activo. Pensada para el BUILD.
+ *
+ * Usa `fetch` directo y no el cliente: en el build no hay sesión que persistir
+ * ni token que renovar, y crear un cliente completo para una pregunta de sí o
+ * no es traer una maquinaria que no hace falta.
+ *
+ * Devuelve `null` cuando no se pudo consultar. Es deliberado: el build NO debe
+ * depender de que Supabase esté disponible. Un código roto tiene que romper el
+ * build; Supabase caído, no — si no, el sitio deja de poder publicarse por algo
+ * que no tiene nada que ver con el sitio.
+ *
+ * No llama a `resolver_qr` a propósito: esa registra un escaneo, y validar en
+ * cada build metería escaneos falsos en las estadísticas.
+ */
+export async function codigoExiste(codigo: string): Promise<boolean | null> {
+  if (!supabaseConfigurado) return null;
+
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/codigo_existe`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ p_codigo: codigo }),
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return null;
+    return (await r.json()) === true;
+  } catch {
+    return null;
+  }
+}

@@ -3,15 +3,17 @@ import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
+import { codigoExiste } from '../../lib/supabase';
 
 type Recurso = CollectionEntry<'recursos'>;
 
 /** Origen del sitio (build / dev) para enlaces absolutos en «Copiar». */
 const SITE_ORIGIN = (import.meta.env.SITE || 'https://home.inacons.com.pe').replace(/\/$/, '');
 
-/** Base donde resuelve cada QR del backend de empresa.
- *  Pasa a /r/ en la Fase 2; hasta entonces resuelve por la ruta larga. */
-const QR_BASE = `${SITE_ORIGIN}/empresa/`;
+/** Base del acortador. La forma larga `/empresa/?c=` quedó solo como 301 de
+ *  compatibilidad para material ya impreso: lo nuevo no debe nacer usándola.
+ *  Además es más corta, y menos caracteres son menos módulos. */
+const QR_BASE = `${SITE_ORIGIN}/r/`;
 
 /** Categorías en el orden que aparecen en los filtros. */
 const CATEGORIAS = [
@@ -34,6 +36,49 @@ const BADGE_LABEL: Record<string, string> = {
 const PREVIEW_FORMATS = new Set(['PNG', 'SVG', 'JPG', 'JPEG', 'WEBP', 'GIF', 'AVIF']);
 
 const recursos = await getCollection('recursos');
+
+/*
+  Los códigos QR se declaran en el frontmatter de cada .md, y los códigos viven
+  en Supabase. Son dos sitios, y ya se habían separado sin que nadie lo notara:
+  un recurso apuntaba a `ticket-ti` cuando el código real es `tickets_ti`.
+
+  Eso generaba un QR hacia un código inexistente en un flyer A4 pensado para
+  imprimirse, así que el fallo aparecía al escanear el papel — el único momento
+  en que ya no se puede arreglar.
+
+  Se comprueba acá, en el build, donde arreglarlo cuesta un commit.
+
+  Si Supabase no responde se avisa y se sigue: un código roto tiene que romper
+  el build, pero Supabase caído no debe impedir publicar el sitio.
+*/
+const codigosDeclarados = [...new Set(
+  recursos.map((r: Recurso) => r.data.qr).filter((c): c is string => Boolean(c))
+)];
+
+const codigosRotos: string[] = [];
+let validacionOmitida = false;
+
+for (const codigo of codigosDeclarados) {
+  const existe = await codigoExiste(codigo);
+  if (existe === false) codigosRotos.push(codigo);
+  if (existe === null) validacionOmitida = true;
+}
+
+if (codigosRotos.length > 0) {
+  throw new Error(
+    `Códigos QR inexistentes o dados de baja en src/content/recursos/: ${codigosRotos.join(', ')}.
+` +
+    'Cada uno genera un QR que no lleva a ningún lado. Corregir el campo `qr:` ' +
+    'del .md, o dar de alta el código en el panel.'
+  );
+}
+
+if (validacionOmitida) {
+  console.warn(
+    '[recursos] No se pudieron validar los códigos QR contra Supabase. ' +
+    'El sitio se construye igual, pero nadie comprobó que esos códigos existan.'
+  );
+}
 recursos.sort((a: Recurso, b: Recurso) => (a.data.orden ?? 99) - (b.data.orden ?? 99));
 
 // Conteos por categoría — se renderizan junto al filtro.
@@ -495,7 +540,7 @@ for (const r of recursos) {
         {recursos.map((r: Recurso) => {
           const formato   = (r.data.formato || '').toUpperCase();
           const esVisual  = PREVIEW_FORMATS.has(formato);
-          const enlaceQr  = r.data.qr ? `${QR_BASE}?c=${encodeURIComponent(r.data.qr)}` : '';
+          const enlaceQr  = r.data.qr ? `${QR_BASE}${encodeURIComponent(r.data.qr)}` : '';
           const enlaceCopy =
             enlaceQr ||
             (r.data.imagen.startsWith('http')

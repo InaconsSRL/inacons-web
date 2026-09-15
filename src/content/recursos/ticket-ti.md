@@ -4,7 +4,7 @@ categoria: flyer-impreso
 imagen: /assets/recursos/flyer_a4_ticketsti.png
 formato: PNG
 dimensiones: 2480×3508px
-qr: ticket-ti
+qr: tickets_ti
 orden: 2
 ---
 
