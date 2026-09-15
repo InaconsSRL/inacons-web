@@ -50,7 +50,9 @@ $codigo = preg_replace('/[^A-Za-z0-9_-]/', '', $codigo);
 $codigo = substr($codigo, 0, 24);
 
 if ($codigo === '') {
-    paginaSobria('Falta el codigo', 'Esta direccion necesita un codigo. Revisa el enlace o escanea de nuevo.');
+    http_response_code(404);
+    paginaSobria('Enlace incompleto', 'Falta el codigo',
+        'Esta direccion necesita un codigo. Revisa el enlace o escanea de nuevo.', '404');
 }
 
 
@@ -72,8 +74,10 @@ if ($respuesta === null) {
        excepcional. */
     http_response_code(503);
     paginaSobria(
+        'Servicio no disponible',
         'No pudimos resolver el enlace',
-        'Hubo un problema momentaneo de nuestro lado. Vuelve a escanear en unos segundos.'
+        'Hubo un problema momentaneo de nuestro lado. Vuelve a escanear en unos segundos.',
+        '503'
     );
 }
 
@@ -103,10 +107,12 @@ $existe = !empty($fila['encontrado']);
 
 http_response_code(404);
 paginaSobria(
-    $existe ? 'Este enlace ya no esta disponible' : 'Enlace no encontrado',
+    $existe ? 'Enlace dado de baja' : 'Enlace no encontrado',
+    $existe ? 'Este enlace ya no esta disponible' : 'No encontramos ese codigo',
     $existe
         ? 'El codigo fue dado de baja. Si llegaste desde material impreso, es probable que haya una version mas reciente.'
-        : 'El codigo no existe. Revisa que lo hayas escrito bien, o escanea de nuevo.'
+        : 'El codigo no existe. Revisa que lo hayas escrito bien, o escanea de nuevo.',
+    '404'
 );
 
 
@@ -169,23 +175,31 @@ function pais(): ?string
 }
 
 /**
- * Pagina de error. Sobria: logo, una frase que explica y un camino de salida.
+ * Pagina de error.
  *
- * Nunca un 404 crudo de Apache ni un error de servidor. Quien llega aca acaba
- * de escanear un QR impreso en algo que le dieron en la mano: una pagina de
- * error del servidor le dice que el problema es suyo, cuando no lo es.
+ * Es el MISMO diseno que src/pages/404.astro: fondo claro, el numero enorme
+ * detras, el logo arriba y el rotulo en azul. Habia dos paginas de "no
+ * encontrado" con dos esteticas distintas, y al visitante le da igual cual de
+ * los dos sistemas fallo -- ve el mismo sitio, o deberia.
  *
  * Los estilos van embebidos, duplicando valores del sistema de diseno a
- * proposito. Es la unica pagina del sitio que tiene que verse bien aunque nada
- * mas cargue: si dependiera de una hoja externa, un fallo de red le sumaria un
- * segundo problema al que ya tiene.
+ * proposito. Es la unica pagina que tiene que verse bien aunque nada mas
+ * cargue: quien llega aca acaba de escanear un QR impreso en algo que le
+ * dieron en la mano, y si dependiera de una hoja externa un fallo de red le
+ * sumaria un segundo problema al que ya tiene.
+ *
+ * La tipografia si se pide a Google, sin bloquear, y con la pila del sistema
+ * detras: si no llega, la pagina se ve igual de bien con otra letra.
  */
-function paginaSobria(string $titulo, string $mensaje): void
+function paginaSobria(string $rotulo, string $titulo, string $mensaje, string $numero = '404'): void
 {
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-store');
-    $t = htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8');
+
+    $r = htmlspecialchars($rotulo,  ENT_QUOTES, 'UTF-8');
+    $t = htmlspecialchars($titulo,  ENT_QUOTES, 'UTF-8');
     $m = htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8');
+    $n = htmlspecialchars($numero,  ENT_QUOTES, 'UTF-8');
     $sitio = SITIO;
 
     echo <<<HTML
@@ -196,26 +210,88 @@ function paginaSobria(string $titulo, string $mensaje): void
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>$t — INACONS</title>
+<link rel="icon" type="image/svg+xml" href="$sitio/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap&subset=latin">
 <style>
-  *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       padding:24px;background:#14172d;
-       font-family:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-  .c{width:100%;max-width:400px;text-align:center}
-  .c img{height:38px;width:auto;margin-bottom:40px}
-  h1{font-size:22px;line-height:1.3;color:rgba(255,255,255,.92);margin:0 0 12px;font-weight:700}
-  p{font-size:15px;line-height:1.6;color:rgba(255,255,255,.72);margin:0 0 32px}
-  a{display:inline-block;padding:14px 32px;min-height:44px;background:#1b5278;color:#fff;
-    text-decoration:none;border-radius:2px;font-size:13px;font-weight:600;
-    letter-spacing:.14em;text-transform:uppercase}
+  *,*::before,*::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: clamp(24px, 5vw, 48px) 20px;
+    background: #f0f3f7;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  /* El numero enorme detras, igual que en el 404 del sitio. */
+  body::before {
+    content: '$n';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(12rem, 30vw, 22rem);
+    font-weight: 800;
+    color: rgba(20, 23, 45, 0.045);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    pointer-events: none;
+    user-select: none;
+  }
+  .logo { margin-bottom: clamp(24px, 4vw, 40px); z-index: 1; }
+  .logo img { height: 32px; width: auto; display: block; opacity: .85; }
+  .contenido { text-align: center; position: relative; z-index: 1; max-width: 560px; width: 100%; }
+  .rotulo {
+    display: block;
+    font-size: .6875rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #1b5278;
+    margin-bottom: 1.25rem;
+  }
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    color: #14172d;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin: 0 0 1.25rem;
+  }
+  p { font-size: 1rem; color: #5a6280; line-height: 1.75; margin: 0 0 2.5rem; }
+  a.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 12px 24px;
+    background: #1b5278;
+    border: 1.5px solid #1b5278;
+    border-radius: 2px;
+    color: #fff;
+    text-decoration: none;
+    font-size: .8125rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    transition: background .24s ease, border-color .24s ease;
+  }
+  a.btn:hover { background: #14172d; border-color: #14172d; }
 </style>
 </head>
 <body>
-  <div class="c">
-    <img src="$sitio/assets/imagenes/logos/logo_inacons_white.svg" alt="INACONS" width="140" height="38">
+  <a href="$sitio/" class="logo"><img src="$sitio/assets/imagenes/logos/logo_inacons.svg" alt="INACONS" width="120" height="32"></a>
+  <div class="contenido">
+    <span class="rotulo">$r</span>
     <h1>$t</h1>
     <p>$m</p>
-    <a href="$sitio/">Ir al sitio</a>
+    <a href="$sitio/" class="btn">Ir al inicio</a>
   </div>
 </body>
 </html>

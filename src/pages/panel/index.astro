@@ -306,8 +306,15 @@ import { supabaseConfigurado } from '../../lib/supabase';
             <div class="pnl-qr-vista qr-lienzo" id="qr-vista" style="--qr-lado: 210px"></div>
             <p class="form-hint" id="qr-datos" style="text-align:center"></p>
 
+            <!--
+              Las dos filas juntas y no solo la primera: viendo únicamente la
+              URL corta, cuesta creer que lleve al sitio correcto, porque no se
+              parece en nada al destino. Ponerlas una encima de la otra explica
+              la indirección sin tener que explicarla.
+            -->
             <ul class="data-list pnl-espacio">
-              <li><span class="data-key">URL corta</span><span class="data-value" id="qr-url"></span></li>
+              <li><span class="data-key">URL del QR</span><span class="data-value" id="qr-url"></span></li>
+              <li><span class="data-key">Lleva a</span><span class="data-value" id="qr-destino"></span></li>
             </ul>
 
             <div class="dialogo-acciones">
@@ -333,7 +340,7 @@ import { supabaseConfigurado } from '../../lib/supabase';
 
   <script>
     import { getSupabase } from '../../lib/supabase';
-    import { generarQR, pngDeUrl, urlDeCodigo, PERFILES, type PerfilQR } from '../../lib/qr';
+    import { generarQR, pngDeUrl, urlDeCodigo, urlLegible, PERFILES, type PerfilQR } from '../../lib/qr';
 
     const vistaLogin  = document.getElementById('vista-login');
     const vistaSesion = document.getElementById('vista-sesion');
@@ -664,7 +671,12 @@ import { supabaseConfigurado } from '../../lib/supabase';
         const url = urlDeCodigo(qrCodigo);
 
         $('hint-perfil').textContent = PERFILES[perfil].consejo;
-        $('qr-url').textContent = url;
+
+        // Se codifica `url` (mayúsculas, símbolo más chico) y se enseña la
+        // legible. Las dos llevan al mismo sitio.
+        $('qr-url').textContent = urlLegible(qrCodigo);
+        $('qr-destino').textContent =
+          codigos.find((c) => c.codigo === qrCodigo)?.destino_url ?? '—';
 
         const r = await generarQR(url, { perfil });
         $('qr-vista').innerHTML = r.svg;
@@ -673,7 +685,7 @@ import { supabaseConfigurado } from '../../lib/supabase';
 
         $('hoja-titulo').textContent = qrCodigo;
         $('hoja-qr').innerHTML = r.svg;
-        $('hoja-url').textContent = url;
+        $('hoja-url').textContent = urlLegible(qrCodigo);
       }
 
       async function abrirQR(codigo: string) {

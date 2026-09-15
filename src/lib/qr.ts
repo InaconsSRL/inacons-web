@@ -239,6 +239,24 @@ export async function generarQR(url: string, opciones: OpcionesQR = {}): Promise
 }
 
 /**
+ * La misma URL, para que la lea y la teclee una persona.
+ *
+ * `urlDeCodigo` devuelve MAYÚSCULAS porque es lo que se codifica dentro del
+ * símbolo: habilita el modo alfanumérico y produce un QR más chico. Pero esa
+ * forma no se le enseña a nadie. En una pantalla parece un error, y en la hoja
+ * impresa es más incómoda de teclear justo cuando alguien recurre a ella
+ * porque el QR no escaneó.
+ *
+ * Las dos formas llevan al mismo sitio: el esquema y el host son insensibles a
+ * mayúsculas por estándar, y el código lo normaliza `resolver_qr()`.
+ *
+ * O sea: se codifica en mayúsculas, se muestra en minúsculas.
+ */
+export function urlLegible(codigo: string): string {
+  return `${DOMINIO}/r/${codigo}`.toLowerCase();
+}
+
+/**
  * SVG del código, como cadena.
  *
  * SVG y no PNG porque es la única forma de que el mismo QR sirva para una
