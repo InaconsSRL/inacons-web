@@ -2,7 +2,8 @@
 ErrorDocument 404 /404.html
 
 # ── URL corta para QR ───────────────────────────────────────────
-#  home.inacons.com.pe/r/CODIGO  →  home.inacons.com.pe/empresa/?c=CODIGO
+#  home.inacons.com.pe/r/CODIGO  →  public/r/index.php, que resuelve contra
+#  Supabase, registra el escaneo y hace el 302 al destino.
 #
 #  Usar SIEMPRE el host home.inacons.com.pe en el QR, nunca inacons.com.pe:
 #  el dominio principal hace 301 a home, así que entrar por él agrega un
@@ -10,12 +11,29 @@ ErrorDocument 404 /404.html
 #  redirecciones en vez de dos, sobre la wifi saturada de un pabellón.
 #
 #  Menos caracteres = menos módulos = QR más legible en pantalla y video.
-#    https://home.inacons.com.pe/r/e   → 31 caracteres → 25x25 módulos
-#  El destino sigue siendo editable desde /empresa/admin.php sin reimprimir
-#  ni volver a renderizar el video: esa es la razón de existir de esta capa.
+#  El destino sigue siendo editable sin reimprimir ni volver a renderizar el
+#  video: esa es la razón de existir de esta capa.
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^r/([A-Za-z0-9_-]+)/?$ https://home.inacons.com.pe/empresa/?c=$1 [R=302,L,NE]
+
+    #  Reescritura INTERNA, no redirección: el visitante no paga un salto de
+    #  más y la URL que ve sigue siendo /r/CODIGO.
+    #
+    #  El patrón no admite puntos, así que /r/index.php no se reescribe a sí
+    #  mismo. La condición !-f es el cinturón además del tirante.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^r/([A-Za-z0-9_-]{2,24})/?$ /r/index.php?c=$1 [L,QSA]
+
+    #  Compatibilidad con la forma larga. /recursos/ generó códigos con este
+    #  formato y alguno puede estar en un flyer o una presentación.
+    #
+    #  ── LEER ANTES DE TOCAR ───────────────────────────────────────────────
+    #  Hasta la Fase 2 la regla era la INVERSA: /r/X → /empresa/?c=X. Tener
+    #  las dos a la vez es un bucle infinito de redirecciones, y por eso la
+    #  vieja se borró en el mismo commit que entró esta. Si alguna vez hay que
+    #  revertir, se revierten las dos juntas o el sitio se cuelga.
+    RewriteCond %{QUERY_STRING} (?:^|&)c=([A-Za-z0-9_-]{2,24})(?:&|$) [NC]
+    RewriteRule ^empresa/?$ /r/%1? [R=301,L,NE]
 </IfModule>
 
 # ── Compresión Deflate/Gzip ─────────────────────────────────────────────────
