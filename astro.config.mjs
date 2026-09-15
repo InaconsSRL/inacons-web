@@ -2,6 +2,17 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
+// Secciones que no deben aparecer en el sitemap: internas, de administracion o
+// de campana terminada. Mantener en paralelo con public/robots.txt — una ruta
+// nueva que no deba indexarse va en los dos sitios.
+const SECCIONES_PRIVADAS = new Set([
+  'panel',
+  'empresa',
+  'recursos',
+  'formulario',
+  'expomina',
+]);
+
 // https://astro.build/config
 export default defineConfig({
   // El sitio se sirve desde home.inacons.com.pe. El dominio corto solo
@@ -11,9 +22,11 @@ export default defineConfig({
   site: 'https://home.inacons.com.pe',
   integrations: [
     sitemap({
-      // /recursos, /formulario y /expomina son internos o de campaña (noindex)
-      // — no deben aparecer en el sitemap público.
-      filter: (page) => !/\/(recursos|formulario|expomina)\/?/i.test(page),
+      // Se compara el PRIMER segmento de la ruta, no la URL entera. La version
+      // anterior buscaba la palabra en cualquier posicion, asi que una futura
+      // /proyectos/recursos-hidricos/ habria quedado fuera del sitemap sin que
+      // nadie lo notara: no hay error, solo una pagina que Google no encuentra.
+      filter: (page) => !SECCIONES_PRIVADAS.has(new URL(page).pathname.split('/')[1]),
     }),
   ],
 });
