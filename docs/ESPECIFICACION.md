@@ -493,11 +493,39 @@ Hecho en el repositorio:
 | Variables de entorno del build en el pipeline real | `.github/workflows/deploy.yml`, `.env.example` |
 | `/panel/` fuera del sitemap; filtro corregido a primer segmento | `astro.config.mjs` |
 
-**Pendiente, requiere acción en Supabase:** crear el proyecto, ejecutar las
-cuatro migraciones, desactivar el registro de usuarios, crear el usuario
-administrador e insertarlo en `administradores`. Hasta entonces `/panel/` se
-publica con el aviso de "sin configurar", que es el estado correcto: es preferible
-a un formulario de acceso que no puede funcionar.
+#### Comprobado contra el proyecto real (set 2026)
+
+Proyecto creado, las cuatro migraciones ejecutadas, registro de usuarios
+desactivado, usuario administrador creado y presente en `administradores`.
+
+| Prueba | Resultado |
+|---|---|
+| Lectura anónima sobre las 11 tablas | `401 / 42501` en todas |
+| Escritura anónima en `escaneos` | `401 / 42501` |
+| `resolver_qr()` con la clave pública | `401` — sin permiso, como quedó por diseño |
+| Login y sesión persistente en `/panel/` | Funciona |
+| `es_admin()` para el usuario administrador | `true` |
+
+El criterio de aceptación —"con la clave anónima, desde el navegador, no se puede
+leer ni escribir ninguna tabla sin sesión"— **se cumple**, verificado contra el
+proyecto real y no solo en local.
+
+Una nota sobre cómo se comprobó: el SQL Editor de Supabase responde `Success`
+igual cuando un `insert` inserta una fila que cuando no inserta ninguna, y hasta
+esta fase el panel no leía ninguna tabla, así que daba la bienvenida a cualquier
+usuario con sesión estuviera o no en la allowlist. Las dos señales que parecían
+confirmar el alta eran compatibles con que el `insert` no hubiera hecho nada. Por
+eso el panel ahora consulta `es_admin()` y lo dice explícitamente.
+
+**Pendiente para cerrar la fase:** el despliegue de `/panel/` por el pipeline real
+de GitHub Actions, que es parte del criterio y no está hecho. Requiere los secrets
+`PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_ANON_KEY` en el repositorio, y el merge a
+`main`.
+
+**Pendiente, con fecha límite:** rotar la clave `service_role` / `sb_secret_` del
+proyecto. Quedó expuesta durante la puesta en marcha. Hoy el riesgo es bajo porque
+la base solo tiene datos de prueba inventados; tiene que estar rotada **antes de la
+Fase 4**, que es cuando entran contactos de personas reales.
 
 #### Dos decisiones que se apartan de lo escrito arriba
 
