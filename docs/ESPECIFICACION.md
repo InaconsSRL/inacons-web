@@ -554,3 +554,59 @@ un aplazamiento, no una eliminación.
 
 Por la misma razón, `resolver_qr()` ya existe en el esquema pero sin permiso para
 el rol anónimo.
+
+### Fase 2 — completa en código, pendiente la prueba física (set 2026)
+
+| Qué | Dónde |
+|---|---|
+| Módulo único de QR: dos perfiles, SVG, modo alfanumérico | `src/lib/qr.ts` |
+| Logo opcional al centro, solo con ECC H | `src/lib/qr.ts` |
+| Redirector: allowlist, registro, 302, insensible a mayúsculas, origen | `public/r/index.php` |
+| Permiso de `resolver_qr()` al rol anónimo + validación de host | `supabase/migrations/0005_redirector.sql` |
+| Los cuatro códigos de MySQL, migrados con su nombre exacto | `supabase/migrations/0006_migrar_codigos.sql` |
+| `.htaccess`: regla nueva y borrado de la vieja, mismo commit | `public/.htaccess` |
+| `/recursos/` apuntado al módulo — cierra el bug de los 220 px | `src/pages/recursos/index.astro` |
+
+Verificado en producción: los cuatro códigos resuelven por `/r/CODIGO` y por la
+forma larga; la cadena es `301 → 302 → 200`, sin bucle; un código inexistente
+devuelve la página sobria con 404.
+
+#### Decisiones que se apartan de lo escrito
+
+**La allowlist anti open-redirect se movió de PHP a la base.** La sección 12
+decía portarla igual. Se conserva la protección, pero la lista pasó a
+`configuracion.hosts_permitidos`. Con la lista en PHP habría dos —la del
+servidor y la que el panel use al guardar— y el día que alguien agregue un
+dominio desde el panel, el redirector seguiría rechazándolo, con el síntoma
+"guardé el destino y no funciona" y ningún error que lo explique.
+
+Esa decisión ya evitó un fallo: `tickets_ti` apunta a `materen-ti.vercel.app`,
+que **no estaba** en la lista copiada de la plantilla del repositorio. El
+`config.php` real del servidor —ignorado por git, nunca visto— tenía una entrada
+más. Se detectó probando los cuatro códigos contra producción antes de migrar.
+
+**El redirector consulta en vivo, sin caché.** Medido desde el propio servidor:
+69–87 ms contra Supabase, la tercera parte del umbral que se había fijado. Una
+sola fuente de verdad y ninguna ventana en la que un destino recién cambiado
+siga mandando al sitio viejo.
+
+**El 301 de `/empresa/admin.php` a `/panel/` NO entró.** Se activa al final de la
+Fase 3, como dice la sección 11: desviarlo antes deja al administrador sin
+herramienta.
+
+#### Hallazgos que corrigieron el módulo
+
+- **El PNG exportado tenía módulos de ancho desigual.** 1200 px sobre un lienzo
+  de 41 módulos da 29,2683 px por módulo, así que el rasterizador reparte 29 a
+  unos y 30 a otros. El lado se ajusta ahora al múltiplo exacto.
+- **El logo consume la mitad del margen de corrección.** Medido pintando manchas
+  solo sobre datos y decodificando hasta el fallo: sin logo aguanta 12, con logo
+  al 0.20 aguanta 6. Por eso es opt-in y por defecto no se usa.
+- **Los códigos heredados llevan guión bajo**, que no está en el alfabeto
+  alfanumérico. Medido: a estas longitudes no cambia el tamaño del símbolo, así
+  que se conservan tal cual.
+
+#### Pendiente para cerrar la fase
+
+El criterio pide que **un QR en perfil impresión, impreso en A4, escanee
+correctamente**. Eso solo se comprueba imprimiendo y escaneando.
