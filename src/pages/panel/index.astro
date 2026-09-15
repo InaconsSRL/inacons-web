@@ -1,0 +1,447 @@
+---
+// PANEL DE ADMINISTRACIÓN — /panel/
+//
+// Fase 1: vacío pero autenticado. Todavía no administra nada; lo que tiene que
+// demostrar es que el camino completo funciona —build, deploy por FTP, login
+// contra Supabase, sesión que sobrevive a una recarga— antes de que haya datos
+// reales de por medio. Ver docs/ESPECIFICACION.md, Fase 1.
+//
+// Reemplaza a /empresa/admin.php, que sigue en pie hasta que este panel haga
+// lo mismo. El 301 se activa al final de la Fase 3, no antes.
+//
+// Sobre la autenticación en un sitio estático: no hay servidor propio que
+// proteja esta URL, así que el HTML es público. Eso no es un agujero. Este
+// archivo no contiene ni un dato: todo lo pide a Supabase con la sesión del
+// visitante, y quien decide si responde es RLS, del lado de la base. Esconder
+// el HTML no protegería nada, y no esconderlo no expone nada.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { supabaseConfigurado } from '../../lib/supabase';
+---
+
+<BaseLayout
+  title="Panel | INACONS"
+  description="Administración interna."
+  robots="noindex, nofollow"
+  minimalChrome={true}
+>
+
+  <style slot="head">
+    .pnl { min-height: 100vh; background: var(--c-bg-muted); padding: var(--sp-l1) var(--sp-5); }
+    .pnl-caja { width: 100%; max-width: 420px; margin: 0 auto; }
+    .pnl-ancho { width: 100%; max-width: 900px; margin: 0 auto; }
+
+    .pnl-marca { text-align: center; margin-bottom: var(--sp-7); }
+    .pnl-marca img { height: 38px; width: auto; }
+    .pnl-rotulo {
+      display: block;
+      margin-top: var(--sp-3);
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-text-muted);
+    }
+
+    .pnl-tarjeta {
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      padding: var(--sp-7);
+      box-shadow: var(--shadow-card);
+    }
+    .pnl-tarjeta + .pnl-tarjeta { margin-top: var(--sp-5); }
+    .pnl-tarjeta h2 { font-size: var(--fs-xl); color: var(--c-text-heading); margin-bottom: var(--sp-2); }
+    .pnl-tarjeta p  { font-size: var(--fs-base); color: var(--c-text-muted); line-height: 1.6; }
+
+    .pnl-campo { margin-bottom: var(--sp-5); }
+    .pnl-campo label {
+      display: block;
+      margin-bottom: var(--sp-2);
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-text-muted);
+    }
+    .pnl-campo input {
+      width: 100%;
+      padding: var(--sp-3) var(--sp-4);
+      font-family: var(--font-ui);
+      font-size: var(--fs-md);
+      color: var(--c-text-body);
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      transition: border-color var(--t);
+    }
+    .pnl-campo input:focus {
+      outline: none;
+      border-color: var(--c-secondary);
+      box-shadow: 0 0 0 1px var(--c-secondary);
+    }
+
+    /* 48px de alto: por encima del mínimo táctil de 44. El resto del sitio
+       todavía tiene botones de 37px y es una deuda abierta; no se hereda acá. */
+    .pnl-btn {
+      width: 100%;
+      min-height: 48px;
+      padding: var(--sp-3) var(--sp-5);
+      font-family: var(--font-ui);
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-text-white);
+      background: var(--c-secondary);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background var(--t);
+    }
+    .pnl-btn:hover:not(:disabled) { background: var(--c-primary); }
+    .pnl-btn:disabled { opacity: .55; cursor: progress; }
+
+    .pnl-btn--secundario {
+      width: auto;
+      min-height: 44px;
+      color: var(--c-text-body);
+      background: transparent;
+      border: 1px solid var(--c-border);
+    }
+    .pnl-btn--secundario:hover:not(:disabled) { background: var(--c-bg-muted); color: var(--c-text-heading); }
+
+    .pnl-aviso {
+      padding: var(--sp-4);
+      border-radius: var(--radius);
+      font-size: var(--fs-base);
+      line-height: 1.55;
+      margin-bottom: var(--sp-5);
+    }
+    .pnl-aviso--error { background: #fdeaea; color: #8c1d1d; border: 1px solid #f3c9c9; }
+    .pnl-aviso--ok    { background: #e9f6ee; color: #1c6b3c; border: 1px solid #c3e5d0; }
+
+    .pnl-barra {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-4);
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-5);
+    }
+    .pnl-sesion { font-size: var(--fs-sm); color: var(--c-text-muted); min-width: 0; word-break: break-word; }
+    .pnl-sesion strong { color: var(--c-text-heading); font-weight: var(--fw-semibold); }
+
+    /* auto-fit y no un número fijo de columnas: decide sola cuántas caben y
+       no hace falta un breakpoint. */
+    .pnl-modulos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--sp-4);
+      margin-top: var(--sp-5);
+    }
+    .pnl-modulo {
+      min-width: 0;
+      padding: var(--sp-5);
+      background: var(--c-bg-muted);
+      border: 1px dashed var(--c-border);
+      border-radius: var(--radius);
+    }
+    .pnl-modulo h3 { font-size: var(--fs-base); color: var(--c-text-heading); margin-bottom: var(--sp-1); }
+    .pnl-modulo span {
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-accent-ink);
+    }
+    .pnl-modulo p { font-size: var(--fs-xs); margin-top: var(--sp-2); }
+
+    .pnl-prueba { margin-top: var(--sp-4); font-size: var(--fs-sm); }
+    .pnl-prueba li {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      justify-content: space-between;
+      padding: var(--sp-2) 0;
+      border-bottom: 1px solid var(--c-border-light);
+    }
+    .pnl-prueba code { font-family: ui-monospace, monospace; color: var(--c-text-body); }
+    .pnl-ok     { color: #1c6b3c; font-weight: var(--fw-semibold); }
+    .pnl-mal    { color: #8c1d1d; font-weight: var(--fw-bold); }
+    .pnl-duda   { color: var(--c-accent-ink); font-weight: var(--fw-semibold); }
+
+    .pnl-pie { margin-top: var(--sp-6); text-align: center; font-size: var(--fs-xs); color: var(--c-text-muted); }
+    .pnl-pie a { color: var(--c-secondary); }
+
+    [hidden] { display: none !important; }
+  </style>
+
+  <div class="pnl">
+
+    {!supabaseConfigurado && (
+      <div class="pnl-caja">
+        <div class="pnl-marca">
+          <img src="/assets/imagenes/logos/logo_inacons.svg" alt="INACONS" width="140" height="38" />
+          <span class="pnl-rotulo">Panel</span>
+        </div>
+        <div class="pnl-tarjeta">
+          <h2>Panel sin configurar</h2>
+          <p>
+            Faltan <code>PUBLIC_SUPABASE_URL</code> y <code>PUBLIC_SUPABASE_ANON_KEY</code>
+            en el entorno de compilación. Este aviso se genera en el build, no en
+            el navegador: el panel no llegó a construirse con conexión a la base.
+          </p>
+          <p style="margin-top: var(--sp-4)">
+            En local se definen en <code>.env</code> (ver <code>.env.example</code>).
+            En el despliegue, en los <em>secrets</em> del repositorio de GitHub.
+          </p>
+        </div>
+      </div>
+    )}
+
+    {supabaseConfigurado && (
+      <>
+        <!-- ENTRAR -->
+        <div class="pnl-caja" id="vista-login">
+          <div class="pnl-marca">
+            <img src="/assets/imagenes/logos/logo_inacons.svg" alt="INACONS" width="140" height="38" />
+            <span class="pnl-rotulo">Panel</span>
+          </div>
+
+          <div class="pnl-tarjeta">
+            <div class="pnl-aviso pnl-aviso--error" id="login-error" hidden></div>
+
+            <form id="form-login" novalidate>
+              <div class="pnl-campo">
+                <label for="correo">Correo</label>
+                <input type="email" id="correo" name="correo" autocomplete="username" required />
+              </div>
+              <div class="pnl-campo">
+                <label for="clave">Contraseña</label>
+                <input type="password" id="clave" name="clave" autocomplete="current-password" required />
+              </div>
+              <button type="submit" class="pnl-btn" id="btn-entrar">Entrar</button>
+            </form>
+          </div>
+
+          <p class="pnl-pie">
+            Acceso restringido. <a href="/">Volver al sitio</a>
+          </p>
+        </div>
+
+        <!-- DENTRO -->
+        <div class="pnl-ancho" id="vista-sesion" hidden>
+          <div class="pnl-barra">
+            <div class="pnl-sesion">
+              Sesión iniciada como <strong id="sesion-correo"></strong>
+            </div>
+            <button type="button" class="pnl-btn pnl-btn--secundario" id="btn-salir">Cerrar sesión</button>
+          </div>
+
+          <div class="pnl-tarjeta">
+            <h2>Fase 1 completa</h2>
+            <p>
+              Hay sesión contra Supabase y esta página llegó al servidor por el
+              mismo camino que el resto del sitio. El panel todavía no administra
+              nada: eso empieza en la Fase 3.
+            </p>
+
+            <div class="pnl-modulos">
+              <div class="pnl-modulo">
+                <span>Fase 2</span>
+                <h3>Módulo QR y redirector</h3>
+                <p>Generación en SVG, perfiles de pantalla e impresión, y <code>/r/CODIGO</code>.</p>
+              </div>
+              <div class="pnl-modulo">
+                <span>Fase 3</span>
+                <h3>Códigos QR</h3>
+                <p>Alta, reasignación, exportación e histórico de escaneos.</p>
+              </div>
+              <div class="pnl-modulo">
+                <span>Fase 4</span>
+                <h3>Eventos y contactos</h3>
+                <p>Formulario único, estados de evento y exportación.</p>
+              </div>
+              <div class="pnl-modulo">
+                <span>Fase 5</span>
+                <h3>Empleados</h3>
+                <p>Tarjetas digitales, directorio y firmas de correo.</p>
+              </div>
+            </div>
+          </div>
+
+          <!--
+            La prueba que exige el criterio de aceptación de la Fase 1.
+
+            Está dentro del panel y no en un archivo suelto a propósito: una
+            comprobación de seguridad que hay que acordarse de correr a mano es
+            una que nadie corre. Acá queda a un clic, y se puede repetir el día
+            que se agregue una tabla o se toque una política.
+          -->
+          <div class="pnl-tarjeta">
+            <h2>Comprobar el aislamiento</h2>
+            <p>
+              Intenta leer cada tabla con la clave anónima y sin sesión, que es
+              exactamente lo que puede hacer cualquier persona que abra el código
+              fuente del sitio. Todas tienen que salir bloqueadas.
+            </p>
+            <button type="button" class="pnl-btn pnl-btn--secundario" id="btn-probar"
+                    style="margin-top: var(--sp-5)">Ejecutar la prueba</button>
+
+            <div class="pnl-aviso" id="prueba-resumen" hidden></div>
+            <ul class="pnl-prueba" id="prueba-lista" hidden></ul>
+          </div>
+
+          <p class="pnl-pie"><a href="/">Volver al sitio</a></p>
+        </div>
+      </>
+    )}
+
+  </div>
+
+  <script>
+    import { getSupabase, getSupabaseAnonimo, TABLAS } from '../../lib/supabase';
+
+    const vistaLogin  = document.getElementById('vista-login');
+    const vistaSesion = document.getElementById('vista-sesion');
+
+    // El aviso de "panel sin configurar" no renderiza ninguna de las dos vistas.
+    if (vistaLogin && vistaSesion) {
+      const supabase     = getSupabase();
+      const formLogin    = document.getElementById('form-login') as HTMLFormElement;
+      const btnEntrar    = document.getElementById('btn-entrar') as HTMLButtonElement;
+      const loginError   = document.getElementById('login-error')!;
+      const sesionCorreo = document.getElementById('sesion-correo')!;
+
+      function mostrar(sesion: { user: { email?: string } } | null) {
+        const dentro = Boolean(sesion);
+        vistaLogin!.hidden  = dentro;
+        vistaSesion!.hidden = !dentro;
+        if (sesion) sesionCorreo.textContent = sesion.user.email ?? '—';
+      }
+
+      function error(mensaje: string) {
+        loginError.textContent = mensaje;
+        loginError.hidden = false;
+      }
+
+      // Al cargar: puede haber sesión guardada de una visita anterior.
+      supabase.auth.getSession().then(({ data }) => mostrar(data.session));
+      supabase.auth.onAuthStateChange((_evento, sesion) => mostrar(sesion));
+
+      formLogin.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginError.hidden = true;
+        btnEntrar.disabled = true;
+        btnEntrar.textContent = 'Entrando…';
+
+        const correo = (document.getElementById('correo') as HTMLInputElement).value.trim();
+        const clave  = (document.getElementById('clave')  as HTMLInputElement).value;
+
+        const { error: err } = await supabase.auth.signInWithPassword({ email: correo, password: clave });
+
+        if (err) {
+          // Mensaje único para credenciales malas: decir cuál de las dos falló
+          // le confirma a quien prueba correos si una cuenta existe.
+          error(
+            err.message === 'Invalid login credentials'
+              ? 'Correo o contraseña incorrectos.'
+              : `No se pudo entrar: ${err.message}`
+          );
+        }
+
+        btnEntrar.disabled = false;
+        btnEntrar.textContent = 'Entrar';
+      });
+
+      document.getElementById('btn-salir')!.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+      });
+
+      // ── Prueba de aislamiento ──────────────────────────────────────────────
+      const btnProbar = document.getElementById('btn-probar') as HTMLButtonElement;
+      const resumen   = document.getElementById('prueba-resumen')!;
+      const lista     = document.getElementById('prueba-lista')!;
+
+      btnProbar.addEventListener('click', async () => {
+        btnProbar.disabled = true;
+        btnProbar.textContent = 'Probando…';
+        lista.innerHTML = '';
+        resumen.hidden = true;
+
+        const anonimo = getSupabaseAnonimo();
+        let expuestas = 0;
+        let dudosas = 0;
+
+        for (const tabla of TABLAS) {
+          const { data, error: err } = await anonimo.from(tabla).select('*').limit(1);
+
+          let clase = 'pnl-ok';
+          let texto = 'bloqueada';
+
+          if (!err && data && data.length > 0) {
+            // Devolvió filas sin sesión. Esto es una fuga.
+            clase = 'pnl-mal';
+            texto = 'EXPUESTA — devuelve datos';
+            expuestas++;
+          } else if (!err) {
+            // Sin error y sin filas: la lectura está permitida y hoy no hay nada
+            // visible. No es una fuga todavía, pero tampoco está cerrada.
+            clase = 'pnl-duda';
+            texto = 'lectura permitida, 0 filas';
+            dudosas++;
+          }
+
+          lista.insertAdjacentHTML(
+            'beforeend',
+            `<li><code>${tabla}</code><span class="${clase}">${texto}</span></li>`
+          );
+        }
+
+        // Escritura: insertar un escaneo sin sesión. Es la tabla que en la Fase 2
+        // sí va a aceptar inserciones anónimas, así que conviene saber desde
+        // cuándo se abre y que hoy está cerrada.
+        const { error: errEscritura } = await anonimo
+          .from('escaneos')
+          .insert({ qr_codigo: 'ZZPRUEBA', resultado: 'desconocido' });
+
+        const escrituraBloqueada = Boolean(errEscritura);
+        if (!escrituraBloqueada) expuestas++;
+
+        lista.insertAdjacentHTML(
+          'beforeend',
+          `<li><code>escaneos (escritura)</code><span class="${escrituraBloqueada ? 'pnl-ok' : 'pnl-mal'}">${
+            escrituraBloqueada ? 'bloqueada' : 'EXPUESTA — escribió una fila ZZPRUEBA'
+          }</span></li>`
+        );
+
+        lista.hidden = false;
+        resumen.hidden = false;
+
+        if (expuestas > 0) {
+          resumen.className = 'pnl-aviso pnl-aviso--error';
+          resumen.textContent =
+            `${expuestas} comprobación(es) fallaron. La base está accesible sin sesión: ` +
+            `revisar supabase/migrations/0002_rls.sql y volver a ejecutarlo.`;
+        } else if (dudosas > 0) {
+          resumen.className = 'pnl-aviso';
+          resumen.style.background = '#fdf3e6';
+          resumen.style.color = '#7a4a10';
+          resumen.style.border = '1px solid #f0dcc0';
+          resumen.textContent =
+            `Nada expuesto, pero ${dudosas} tabla(s) permiten la lectura y hoy están vacías. ` +
+            `Conviene cerrarlas antes de que tengan datos.`;
+        } else {
+          resumen.className = 'pnl-aviso pnl-aviso--ok';
+          resumen.textContent =
+            'Todo bloqueado. Sin sesión no se lee ni se escribe ninguna tabla: ' +
+            'el criterio de aceptación de la Fase 1 se cumple.';
+        }
+
+        btnProbar.disabled = false;
+        btnProbar.textContent = 'Ejecutar la prueba';
+      });
+    }
+  </script>
+
+</BaseLayout>

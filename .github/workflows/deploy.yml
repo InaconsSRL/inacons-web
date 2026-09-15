@@ -21,8 +21,19 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      # Astro inserta las variables PUBLIC_* dentro del JavaScript en el momento
+      # del build, no las lee en el servidor: el hosting es Apache, sin Node. Si
+      # faltan aqui, /panel/ se publica con el aviso de "sin configurar" en vez
+      # de con el formulario de acceso.
+      #
+      # Se guardan como secrets de GitHub por comodidad, no por secreto: la
+      # clave anon es publica por diseno y termina dentro del bundle igual. Lo
+      # que protege la base es RLS — ver supabase/migrations/0002_rls.sql.
       - name: Build
         run: npm run build
+        env:
+          PUBLIC_SUPABASE_URL:      ${{ secrets.PUBLIC_SUPABASE_URL }}
+          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
