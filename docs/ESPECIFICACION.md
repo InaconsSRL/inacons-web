@@ -477,3 +477,52 @@ Verificado tras el build: canonical, `og:image`, JSON-LD y sitemap apuntan a
 (exportar el histórico) y 3 (desplegar el interruptor). Hasta que eso ocurra, el
 criterio de aceptación de la Fase 0 **no se cumple**: el endpoint de amonestaciones
 sigue respondiendo con datos.
+
+### Fase 1 — preparada en el repositorio, pendiente de crear el proyecto (set 2026)
+
+Hecho en el repositorio:
+
+| Qué | Dónde |
+|---|---|
+| Esquema completo de la sección 6: 11 tablas, tipos, triggers y funciones | `supabase/migrations/0001_esquema.sql` |
+| RLS en todas las tablas, con verificación incluida | `supabase/migrations/0002_rls.sql` |
+| `escaneos_diarios` + tarea de `pg_cron` a las 03:00 de Lima | `supabase/migrations/0003_agregados.sql` |
+| Datos de prueba, con su bloque de borrado | `supabase/migrations/0004_datos_prueba.sql` |
+| Cliente único de Supabase | `src/lib/supabase.ts` |
+| `/panel/` con login, sesión persistente y prueba de aislamiento | `src/pages/panel/index.astro` |
+| Variables de entorno del build en el pipeline real | `.github/workflows/deploy.yml`, `.env.example` |
+| `/panel/` fuera del sitemap; filtro corregido a primer segmento | `astro.config.mjs` |
+
+**Pendiente, requiere acción en Supabase:** crear el proyecto, ejecutar las
+cuatro migraciones, desactivar el registro de usuarios, crear el usuario
+administrador e insertarlo en `administradores`. Hasta entonces `/panel/` se
+publica con el aviso de "sin configurar", que es el estado correcto: es preferible
+a un formulario de acceso que no puede funcionar.
+
+#### Dos decisiones que se apartan de lo escrito arriba
+
+**1. Tabla `administradores`, que la sección 6 no contempla.**
+
+La alternativa era que las políticas dijeran "cualquier usuario autenticado". Eso
+deja la base entera colgando de un interruptor del panel de Supabase
+(Authentication → Sign Ups). Si alguien lo activa por error, cualquier persona se
+registra sola, queda autenticada y con ello lee `contactos`: nombres, correos y
+teléfonos de personas reales. Bajo la Ley 29733 eso es una brecha con
+consecuencias, y el costo de evitarla es una tabla y una función.
+
+No contradice "sin sistema de roles" de la sección 3: no hay roles, hay una lista
+de quién entra. Sigue habiendo exactamente dos niveles.
+
+**2. Las políticas de inserción anónima sobre `escaneos` e `inscripciones` no se
+crean todavía.**
+
+La sección 6 las menciona, pero crearlas ahora choca de frente con el criterio de
+aceptación de esta fase —"sin sesión no se puede leer ni escribir ninguna tabla"—
+y dejaría dos puertas abiertas durante semanas sin nada detrás que las use.
+
+Se otorgan en la fase que trae el código que las necesita: `escaneos` en la Fase 2
+junto con el redirector, `inscripciones` en la Fase 4 junto con el formulario. Es
+un aplazamiento, no una eliminación.
+
+Por la misma razón, `resolver_qr()` ya existe en el esquema pero sin permiso para
+el rol anónimo.

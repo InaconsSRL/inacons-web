@@ -25,6 +25,9 @@ Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/
 | Proyectos / servicios / recursos | `src/content/<colección>/*.md` — nunca hardcodear en la página |
 | Schemas de las colecciones | `src/content.config.ts` |
 | Backends de formularios | `src/appscripts/*.js` (Google Apps Script) |
+| Cliente de Supabase | `src/lib/supabase.ts` — unico lugar que lo instancia |
+| Esquema y permisos de la base | `supabase/migrations/*.sql`, en orden |
+| Panel de administracion | `src/pages/panel/index.astro` |
 
 Detalle completo en [docs/arquitectura.md](docs/arquitectura.md).
 
@@ -59,6 +62,13 @@ pines desaparecen sin error. Ocultar por opacidad es seguro, por display no.
 **5. Apps Script: editar la implementación existente, nunca crear una nueva.** Crear una
 nueva cambia la URL `/exec` y el formulario deja de guardar sin error visible.
 Ver [docs/formularios.md](docs/formularios.md).
+
+**6. La clave `anon` de Supabase es publica; la `service_role` no existe en este repo.**
+La `anon` viaja dentro del JavaScript que descarga cualquier visitante: esconderla no
+protegeria nada. Lo unico que separa esa clave de la tabla de contactos es RLS, asi que
+**toda tabla nueva nace con RLS activo y sin politicas** y se abre despues lo justo. La
+`service_role` se salta RLS entera: no va en el repositorio, ni en un secret de build, ni
+en ninguna variable `PUBLIC_*`. Ver [docs/deploy.md](docs/deploy.md).
 
 ## Convenciones
 
