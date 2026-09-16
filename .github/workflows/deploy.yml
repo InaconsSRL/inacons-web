@@ -43,3 +43,18 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir:  ./dist/
           server-dir: /sites/home.inacons.com.pe/
+          # La lista REEMPLAZA los valores por defecto de la accion, asi que los
+          # tres primeros patrones son esos mismos y tienen que quedarse: sin
+          # ellos el deploy empezaria a subir .git y node_modules.
+          #
+          # empresa/config.php lleva las credenciales de MySQL y el hash del
+          # admin, y la copia buena solo existe en el servidor. Hoy el CI no lo
+          # genera: esta en .gitignore, el checkout no lo trae y el build no
+          # tiene que copiar a dist/. Esta linea es para el dia en que alguien
+          # lo fuerce con git add -f -- ahi el deploy subiria la version de
+          # valores vacios y tumbaria /empresa/ sin ningun error visible.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            empresa/config.php

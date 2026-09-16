@@ -27,5 +27,12 @@ pnpm-debug.log*
 # ── ARCHIVOS SENSIBLES PHP — NUNCA subir a Git ────────────────
 public/empresa/config.php
 public/empresa/setup.php
+
+# Copia local de config.php, fuera del arbol que Astro publica. Vive aqui y no
+# en public/ porque todo lo de public/ termina en dist/, y dist/ es lo que sube
+# el FTP: un despliegue manual pisaria el config real del servidor con este,
+# que tiene los getenv() vacios.
+_local/
+
 # reportes generados por unlighthouse — 32 MB de artefactos
 .unlighthouse/
