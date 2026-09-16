@@ -187,6 +187,23 @@ const pathname        = Astro.url.pathname;
                 Servicios
                 <svg class="nav-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
               </a>
+              <!--
+                ORDEN DEL NAV — decision de negocio, NO el `orden` del contenido.
+
+                Aqui van: obras-civiles, infraestructura, electromecanica,
+                paisajismo, mineria, consultoria. En src/content/servicios/ el
+                campo `orden` dice 1,2,3,4,5,6 para obras-civiles,
+                infraestructura, electromecanica, MINERIA, CONSULTORIA,
+                PAISAJISMO. Los tres ultimos no coinciden, y es a proposito:
+
+                  - el nav ordena por como se quiere presentar la empresa
+                  - `orden` ordena listados de contenido (/servicios/, el
+                    bloque "otros servicios" de cada ficha)
+
+                Si alguna vez tienen que coincidir, es una decision que se toma
+                y se escribe aqui. No es un descuido que alguien deba "arreglar"
+                igualando uno al otro.
+              -->
               <ul class="dropdown-menu">
                 <li><a href="/servicios/obras-civiles" aria-current={pathname === '/servicios/obras-civiles' ? 'page' : undefined}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M9 21V7l3-4 3 4v14"/><path d="M15 11h3v10"/><path d="M3 11h5v10H3z"/></svg>

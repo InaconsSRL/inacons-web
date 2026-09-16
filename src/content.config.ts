@@ -40,4 +40,23 @@ const recursos = defineCollection({
   }),
 });
 
-export const collections = { servicios, proyectos, recursos };
+const certificaciones = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: 'src/content/certificaciones' }),
+  schema: z.object({
+    norma:       z.string(),            // ISO 9001
+    titulo:      z.string(),            // que gestiona la norma
+    organismo:   z.string(),            // quien certifica
+    certificado: z.string(),            // el mismo PDF que enlaza /documentos/
+    orden:       z.number().optional(),
+
+    // Estos dos son la puerta: sin `sello` la norma no se pinta en ningun
+    // sitio. El sello es marca del organismo certificador y solo entra si el
+    // organismo lo autoriza, asi que ausente es el estado por defecto y no un
+    // error. Opcionales y no nullable a proposito: z.coerce.date() convierte
+    // null en 1970-01-01 sin quejarse, y una vigencia falsa es peor que ninguna.
+    sello:       z.string().optional(),
+    vigencia:    z.coerce.date().optional(),
+  }),
+});
+
+export const collections = { servicios, proyectos, recursos, certificaciones };

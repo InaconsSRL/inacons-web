@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
+import SellosCertificacion from '../components/SellosCertificacion.astro';
 ---
 
 <BaseLayout
@@ -161,6 +162,16 @@ import PageHero from '../components/PageHero.astro';
       </div>
     </div>
   </section>
+
+  <!--
+    Las certificaciones cierran la pagina: son la prueba de los cuatro
+    pilares de la seccion de arriba. Van despues de una seccion --muted,
+    asi que el componente pinta en --white y la alternancia sigue.
+
+    Mientras ninguna norma tenga sello autorizado esto no emite nada en
+    produccion; el hueco solo se ve en desarrollo.
+  -->
+  <SellosCertificacion />
 
   <!--
     NOTA: El contador animado (data-counter) ya lo maneja main.js

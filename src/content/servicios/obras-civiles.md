@@ -2,6 +2,7 @@
 titulo: Obras Civiles
 descripcion: Construcción de infraestructura urbana, industrial y minera
 imagen: /assets/imagenes/image_obra_civiles.webp
+orden: 1
 ---
 
 ## ¿Qué ofrecemos?
