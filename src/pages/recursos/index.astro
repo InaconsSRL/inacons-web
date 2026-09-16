@@ -86,12 +86,27 @@ const conteo: Record<string, number> = { todos: recursos.length };
 for (const r of recursos) {
   conteo[r.data.categoria] = (conteo[r.data.categoria] ?? 0) + 1;
 }
+
+/** Los filtros salen de lo que hay, no del enum.
+ *
+ *  El enum de `categoria` declara cuatro valores y hoy solo dos tienen
+ *  entradas: pintar los cuatro deja dos botones que muestran "0" y al pulsarlos
+ *  vacian la grilla. Un filtro que no filtra nada se lee como un fallo de la
+ *  pagina, no como una categoria sin contenido.
+ *
+ *  Derivarlo del conteo tambien evita el problema inverso: cuando entre el
+ *  primer flyer digital, su boton aparece solo. No hay una segunda lista que
+ *  alguien tenga que acordarse de actualizar.
+ *
+ *  "Todos" se queda siempre: es el estado inicial, no una categoria. */
+const categoriasVisibles = CATEGORIAS.filter(
+  (cat) => cat.id === 'todos' || (conteo[cat.id] ?? 0) > 0
+);
 ---
 
 <BaseLayout
-  title="Recursos de marca | INACONS"
-  description="Brand hub de INACONS — logos, flyers, documentos y materiales oficiales para uso interno y comunicaciones."
-  robots="noindex, follow"
+  title="Recursos | INACONS"
+  description="Logos, flyers, manuales y material de apoyo de INACONS, listos para ver y descargar."
 >
   <style slot="head">
     /* ─────────────────────────────────────────────────────────
@@ -481,8 +496,8 @@ for (const r of recursos) {
 
   <PageHero
     image="/assets/imagenes/image_heroprincipal.webp"
-    title="Recursos de<br>marca"
-    subtitle="Logos, flyers y documentos oficiales de INACONS para uso interno y comunicaciones."
+    title="Recursos y<br>material de apoyo"
+    subtitle="Logos, flyers, manuales y documentos oficiales, listos para ver y descargar."
     current="Recursos"
     size="sm"
   />
@@ -518,7 +533,7 @@ for (const r of recursos) {
         </p>
 
         <div class="filtros" role="tablist" aria-label="Filtrar por categoría">
-          {CATEGORIAS.map(cat => (
+          {categoriasVisibles.map(cat => (
             <button
               type="button"
               role="tab"

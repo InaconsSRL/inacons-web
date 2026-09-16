@@ -38,6 +38,23 @@ ErrorDocument 404 /404.html
     #  Compatibilidad con la forma larga. /recursos/ generó códigos con este
     #  formato y alguno puede estar en un flyer o una presentación.
     #
+    #  ── QUE DEPENDE DE ESTA REGLA, HOY, EN PAPEL ──────────────────────────
+    #  Los dos flyers A4 que publica /recursos/ llevan el QR con la forma
+    #  larga. Decodificados, no deducidos:
+    #
+    #    flyer_a4_canaldecomunicaciones.png -> /empresa/?c=canal_etico
+    #    flyer_a4_ticketsti.png             -> /empresa/?c=tickets_ti
+    #
+    #  Origen: los genero /empresa/admin.php, que codificaba BASE_URL."?c=".
+    #  Son src/content/recursos/canal-comunicacion.md y ticket-ti.md, y estan
+    #  pensados para imprimirse: hay copias fuera de nuestro alcance.
+    #
+    #  Quitar esta regla los mata a todos, en silencio -- el codigo existe, la
+    #  base responde, y el papel deja de funcionar. Se puede borrar el resto de
+    #  /empresa/ (el PHP no interviene: esto es mod_rewrite y actua antes de
+    #  mirar el disco), pero ESTAS DOS LINEAS se quedan hasta que no quede
+    #  material impreso con la forma larga.
+    #
     #  ── LEER ANTES DE TOCAR ───────────────────────────────────────────────
     #  Hasta la Fase 2 la regla era la INVERSA: /r/X → /empresa/?c=X. Tener
     #  las dos a la vez es un bucle infinito de redirecciones, y por eso la

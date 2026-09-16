@@ -8,7 +8,6 @@ Disallow: /panel/
 Disallow: /sistema/
 Disallow: /empresa/
 Disallow: /admin/
-Disallow: /recursos/
 Disallow: /formulario/
 
 Sitemap: https://home.inacons.com.pe/sitemap-index.xml

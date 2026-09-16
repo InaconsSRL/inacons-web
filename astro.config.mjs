@@ -9,7 +9,6 @@ const SECCIONES_PRIVADAS = new Set([
   'panel',
   'sistema',
   'empresa',
-  'recursos',
   'formulario',
   'expomina',
 ]);
