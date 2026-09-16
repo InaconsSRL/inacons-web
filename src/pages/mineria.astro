@@ -1,13 +1,42 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { generarQR } from '../lib/qr.ts';
 
 // Destinos de los CTA. Editar acá cuando se confirmen las URLs finales —
 // "Brochure" ya apunta al mismo destino que usa el resto del sitio (ver
 // src/pages/expomina.astro). "Contacto" no navega: abre el diálogo con las
 // personas de contacto (más abajo en este mismo archivo).
-const URL_BROCHURE  = '/assets/documentos/brochure_inacons.pdf';
-const URL_SITIO_WEB = '/';
+const URL_BROCHURE   = '/assets/documentos/brochure_inacons.pdf';
 const URL_DOCUMENTOS = '/documentos/';
+
+// URL pública de esta página, para el QR y el enlace para compartir.
+// Sale de `site` (astro.config.mjs), nunca escrita a mano.
+const URL_PAGINA = new URL('/mineria/', Astro.site).href;
+
+// El QR sale de src/lib/qr.ts — único lugar del repo que instancia una
+// librería de QR (ver la regla dura de CLAUDE.md). Se genera en build, no
+// en el navegador: la URL de esta página no cambia entre visitas.
+//
+// Esto NO pasa por urlDeCodigo()/svgDeCodigo(): esas funciones codifican en
+// MAYÚSCULAS a propósito, pero eso solo funciona para códigos que resuelve
+// `/r/` (insensible a mayúsculas por el [NC] de .htaccess). Esta es una ruta
+// real de Astro — /MINERIA/ no existe como archivo — así que va tal cual,
+// en minúsculas.
+const qr = await generarQR(URL_PAGINA, { perfil: 'pantalla' });
+// Perfil pantalla porque este QR se muestra en el propio diálogo o se
+// escanea desde otra pantalla, no se imprime.
+const qrSvg = qr.svg.replace(
+  '<svg ',
+  '<svg style="width:100%;height:auto;display:block" '
+);
+
+// Mensaje para WhatsApp y correo. El texto va delante del enlace: en
+// WhatsApp, un mensaje que empieza con la URL desnuda se ve igual de bien,
+// pero en el asunto/cuerpo del correo un enlace solo, sin contexto, parece
+// spam.
+const TEXTO_COMPARTIR = `INACONS en el sector minero — ${URL_PAGINA}`;
+const URL_WHATSAPP = `https://wa.me/?text=${encodeURIComponent(TEXTO_COMPARTIR)}`;
+const URL_CORREO = `mailto:?subject=${encodeURIComponent('INACONS en el sector minero')}&body=${encodeURIComponent(TEXTO_COMPARTIR)}`;
 
 // Foto de fondo — la del stand de Expomina.
 const IMG_FONDO = '/assets/imagenes/mineria_stand_expomina.webp';
@@ -21,6 +50,7 @@ const CONTACTOS = [
     email: 'hgodino@inacons.com.pe',
     telefono: '(+51) 931 145 199',
     telefonoHref: '+51931145199',
+    whatsapp: '51931145199',
   },
   {
     nombre: 'Freddy Godino Calisaya',
@@ -28,6 +58,7 @@ const CONTACTOS = [
     email: 'fgodino@inacons.com.pe',
     telefono: '(+51) 954 175 589',
     telefonoHref: '+51954175589',
+    whatsapp: '51954175589',
   },
   {
     nombre: 'Emili Gómez Echavigurín',
@@ -35,6 +66,7 @@ const CONTACTOS = [
     email: 'egomeze@inacons.com.pe',
     telefono: '(+51) 969 707 173',
     telefonoHref: '+51969707173',
+    whatsapp: '51969707173',
   },
 ];
 ---
@@ -46,7 +78,14 @@ const CONTACTOS = [
 >
 
   <style slot="head">
-    .mn-page {
+    /*  Antes .mn-page envolvía TODO (hero + franja de soluciones) en un
+        único bloque de min-height:100vh, así que ninguna de las dos
+        secciones llegaba a ocupar la pantalla completa por sí sola.
+        Ahora el hero es su propia pantalla completa y "Nuestras
+        soluciones" es una sección normal debajo, a la que se llega
+        scrolleando — ver docs/ESPECIFICACION.md, ya no hace falta que
+        todo entre en un solo viewport. */
+    .mn-hero-screen {
       position: relative;
       min-height: 100vh;
       min-height: 100dvh;
@@ -98,6 +137,29 @@ const CONTACTOS = [
     }
     .mn-back:hover { color: var(--c-text-white); border-color: currentColor; }
 
+    .mn-brand-right { display: flex; align-items: center; gap: var(--sp-4); }
+
+    .mn-share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      background: transparent;
+      border: 1px solid var(--c-border-dark-strong);
+      border-radius: var(--radius);
+      padding: var(--sp-2) var(--sp-3);
+      font-family: var(--font-ui);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-medium);
+      color: var(--c-on-dark-1);
+      cursor: pointer;
+      transition: background var(--t), border-color var(--t);
+    }
+    .mn-share-btn:hover { background: var(--c-border-dark); border-color: var(--c-border-dark-strong); }
+    .mn-share-btn span { display: none; }
+    @media (min-width: 480px) {
+      .mn-share-btn span { display: inline; }
+    }
+
     .mn-hero {
       position: relative;
       z-index: 2;
@@ -111,7 +173,7 @@ const CONTACTOS = [
       padding: 0 var(--sp-l1);
     }
 
-    .mn-copy { flex: 1 1 auto; min-width: 0; max-width: 560px; }
+    .mn-copy { flex: 0 1 560px; min-width: 0; }
 
     .mn-eyebrow {
       display: flex;
@@ -167,8 +229,7 @@ const CONTACTOS = [
        hace .hero-stat en el home, y se les da caja propia con filete de
        acento — la ficha de la referencia de Expomina. */
     .mn-badges {
-      flex: 0 0 auto;
-      width: 200px;
+      flex: 1 1 0;
       display: flex;
       flex-direction: column;
       gap: var(--sp-3);
@@ -178,14 +239,14 @@ const CONTACTOS = [
       background: var(--c-surface-dark-2);
       border-left: 3px solid var(--c-accent);
       border-radius: var(--radius);
-      padding: var(--sp-3) var(--sp-4);
+      padding: var(--sp-3) var(--sp-5);
     }
-    .mn-badge .stat-num { color: var(--c-text-white); font-size: var(--fs-xl); }
+    /* --fs-display: mismo tamaño que usa .hero-stat .stat-num en el home
+       para esta misma clase de cifra destacada — ver index.astro. */
+    .mn-badge .stat-num { color: var(--c-text-white); font-size: var(--fs-display); }
     .mn-badge .stat-label { color: var(--c-on-dark-3); margin-top: var(--sp-1); }
 
     .mn-solutions {
-      position: relative;
-      z-index: 2;
       background: var(--c-bg-white);
       padding: var(--sp-6) var(--sp-l1);
     }
@@ -202,10 +263,43 @@ const CONTACTOS = [
     }
 
     /* .feature-* ya vienen de design-system.css listos para fondo claro.
-       Acá solo se afina el color del ícono a --c-accent-ink: --c-accent
-       puro falla AA sobre blanco (2.93:1), la razón por la que el sistema
-       tiene ese segundo tono. */
-    .mn-solutions .feature-icon { color: var(--c-accent-ink); }
+       Acá se afina el color del ícono a --c-accent-ink (--c-accent puro
+       falla AA sobre blanco, 2.93:1) y se sube el tamaño de texto: en
+       esta franja, a ancho completo, el tamaño por defecto del
+       componente se veía chico. */
+    .mn-solutions .feature-icon {
+      width: 60px;
+      height: 60px;
+      color: var(--c-accent-ink);
+    }
+    .mn-solutions .feature-title { font-size: var(--fs-xl); }
+    .mn-solutions .feature-desc { font-size: var(--fs-base); line-height: 1.6; }
+
+    /* Dos columnas también en desktop (el sistema por defecto pone 4 en
+       una fila a este ancho — ver design-system.css). Acá se pidió
+       explícitamente dos filas de dos; el alto extra que eso agrega ya
+       no tiene que entrar en una sola pantalla, así que la página
+       scrollea a partir de acá y es intencional. */
+    @media (min-width: 1024px) {
+      .mn-solutions .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /*  Diálogo de compartir. El SVG del QR viaja ya con su propio
+        `style` inline (ver frontmatter): es HTML crudo insertado con
+        `set:html`, Astro no lo procesa como parte de la plantilla, así
+        que nunca recibe el atributo de scope — un selector de página
+        contra él no engancharía con nada (la Regla 1 de CLAUDE.md). */
+    .mn-compartir-qr {
+      width: 180px;
+      margin: 0 auto var(--sp-5);
+      padding: var(--sp-4);
+      background: #fff;
+      border: 1px solid var(--c-border-light);
+      border-radius: var(--radius);
+    }
+    .mn-compartir-link { display: flex; gap: var(--sp-2); }
+    .mn-compartir-link .form-input { flex: 1 1 auto; min-width: 0; }
+    .mn-compartir-redes { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-4); }
 
     /* Diálogo de contacto: .dialogo/.dialogo-caja vienen del sistema
        (design-system.css) — acá solo se define la lista de personas. */
@@ -239,11 +333,12 @@ const CONTACTOS = [
 
     @media (max-width: 1023.98px) {
       /*  El hero pasa a columna acá abajo, y eso pide más alto del que
-          entra en una pantalla. Sin este cambio, .mn-page se queda en
-          height:100vh + overflow:hidden y recorta todo lo que no entra
-          en lugar de dejarlo scrollear — se vio vacío en 768×1024 hasta
-          que se detectó probando, no leyendo. */
-      .mn-page { height: auto; overflow: visible; }
+          min-height:100vh da por sí solo. Con min-height (no height) el
+          bloque puede crecer más de una pantalla sin recortar nada, pero
+          se deja el reset explícito igual: ya costó una tarde encontrar
+          este mismo síntoma una vez (768×1024, contenido invisible) y es
+          más barato dejarlo escrito que confiar en la memoria. */
+      .mn-hero-screen { height: auto; overflow: visible; }
       .mn-hero {
         flex-direction: column;
         align-items: flex-start;
@@ -269,7 +364,7 @@ const CONTACTOS = [
     }
   </style>
 
-  <div class="mn-page">
+  <div class="mn-hero-screen">
     <div class="mn-bg" style={`background-image: url('${IMG_FONDO}')`}></div>
     <div class="mn-overlay"></div>
 
@@ -281,7 +376,13 @@ const CONTACTOS = [
         width="150"
         height="34"
       />
-      <a href="/" class="mn-back">home.inacons.com.pe</a>
+      <div class="mn-brand-right">
+        <a href="/" class="mn-back">inacons.com.pe</a>
+        <button type="button" class="mn-share-btn" data-abrir="dlg-compartir" aria-haspopup="dialog">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="10.51" y2="6.49"/><line x1="8.59" x2="15.42" y1="13.49" y2="17.51"/></svg>
+          <span>Compartir</span>
+        </button>
+      </div>
     </div>
 
     <div class="mn-hero">
@@ -291,21 +392,17 @@ const CONTACTOS = [
           INACONS presente en EXPOMINA 2026
         </h1>
         <p class="mn-sub" data-aos="fade-up" data-aos-delay="160">
-          Reafirmamos nuestra presencia y experiencia en la industria minera peruana.
+          Confianza construida, Operación Asegurada
         </p>
 
         <div class="mn-ctas" data-aos="fade-up" data-aos-delay="240">
-          <a class="btn btn-accent btn-lg" href={URL_BROCHURE} target="_blank" rel="noopener">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          <a class="btn btn-primary btn-lg" href={URL_BROCHURE} target="_blank" rel="noopener">
             Brochure
           </a>
           <button type="button" class="btn btn-primary btn-lg" data-abrir="dlg-contacto" aria-haspopup="dialog">
             Contacto
           </button>
-          <a class="btn btn-outline-light btn-lg" href={URL_SITIO_WEB}>
-            Sitio web
-          </a>
-          <a class="btn btn-outline-light btn-lg" href={URL_DOCUMENTOS}>
+          <a class="btn btn-primary btn-lg" href={URL_DOCUMENTOS}>
             Documentos
           </a>
         </div>
@@ -326,40 +423,40 @@ const CONTACTOS = [
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="mn-solutions">
-      <div class="mn-solutions-inner">
-        <p class="mn-solutions-label">Nuestras soluciones</p>
-        <div class="feature-grid">
+  <div class="mn-solutions">
+    <div class="mn-solutions-inner">
+      <p class="mn-solutions-label">Nuestras soluciones</p>
+      <div class="feature-grid">
           <div class="feature-item">
             <span class="feature-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3Z"/></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3Z"/></svg>
             </span>
             <h2 class="feature-title">Movimiento de Tierras</h2>
             <p class="feature-desc">Corte, relleno y nivelación de terrenos a gran escala</p>
           </div>
           <div class="feature-item">
             <span class="feature-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg>
             </span>
             <h2 class="feature-title">Campamentos Mineros</h2>
             <p class="feature-desc">Construcción de vías, redes sanitarias, eléctricas y edificaciones</p>
           </div>
           <div class="feature-item">
             <span class="feature-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             </span>
             <h2 class="feature-title">Obras Electromecánicas</h2>
             <p class="feature-desc">Bombeo, subestaciones e instrumentación, mantenimiento industrial</p>
           </div>
           <div class="feature-item">
             <span class="feature-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
             </span>
             <h2 class="feature-title">Ingeniería Digital</h2>
             <p class="feature-desc">BIM, drones y LIDAR para reducir tiempos y errores en obra</p>
           </div>
-        </div>
       </div>
     </div>
   </div>
@@ -387,9 +484,47 @@ const CONTACTOS = [
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2.84h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.09a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               {c.telefono}
             </a>
+            <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+              WhatsApp
+            </a>
           </div>
         </div>
       ))}
+    </div>
+  </div>
+
+  <!-- Diálogo de compartir — abre desde el botón "Compartir" del encabezado -->
+  <div class="dialogo" id="dlg-compartir" role="dialog" aria-modal="true" aria-labelledby="dlg-compartir-titulo" hidden>
+    <div class="dialogo-caja">
+      <button type="button" class="dialogo-cerrar" data-cerrar="dlg-compartir" aria-label="Cerrar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+
+      <h3 class="dialogo-titulo" id="dlg-compartir-titulo">Compartir esta página</h3>
+      <p class="dialogo-desc">Escanea el código o copia el enlace.</p>
+
+      <div class="mn-compartir-qr" set:html={qrSvg} />
+
+      <div class="mn-compartir-link">
+        <input type="text" class="form-input" id="mn-link-input" value={URL_PAGINA} readonly />
+        <button type="button" class="btn btn-primary" id="btn-copiar-link">Copiar</button>
+      </div>
+
+      <div class="mn-compartir-redes">
+        <a class="btn btn-outline btn-sm" href={URL_WHATSAPP} target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+          WhatsApp
+        </a>
+        <a class="btn btn-outline btn-sm" href={URL_CORREO}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Correo
+        </a>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-compartir-nativo" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="10.51" y2="6.49"/><line x1="8.59" x2="15.42" y1="13.49" y2="17.51"/></svg>
+          Más opciones
+        </button>
+      </div>
     </div>
   </div>
 
@@ -425,6 +560,38 @@ const CONTACTOS = [
       if (e.key !== 'Escape') return;
       document.querySelectorAll<HTMLElement>('.dialogo:not([hidden])').forEach((d) => cerrar(d.id));
     });
+
+    // ── Copiar enlace ──
+    const inputLink = document.getElementById('mn-link-input') as HTMLInputElement | null;
+    const btnCopiar = document.getElementById('btn-copiar-link');
+
+    btnCopiar?.addEventListener('click', async () => {
+      if (!inputLink) return;
+      const textoOriginal = btnCopiar.textContent;
+      try {
+        await navigator.clipboard.writeText(inputLink.value);
+        btnCopiar.textContent = 'Copiado';
+      } catch {
+        // Sin permiso de portapapeles (o sin HTTPS): seleccionar el texto
+        // deja a la persona copiarlo a mano con Ctrl/Cmd+C.
+        inputLink.select();
+        btnCopiar.textContent = 'Selecciona y copia';
+      }
+      setTimeout(() => { btnCopiar.textContent = textoOriginal; }, 2000);
+    });
+
+    // ── Compartir nativo ──
+    // El botón nace `hidden`: solo se muestra si el navegador soporta la
+    // Web Share API (móviles sobre todo). Ahí abre la hoja de compartir
+    // propia del sistema — Telegram, SMS, Instagram, lo que la persona
+    // tenga instalado — sin que este sitio tenga que conocer cada app.
+    const btnNativo = document.getElementById('btn-compartir-nativo') as HTMLButtonElement | null;
+    if (btnNativo && typeof navigator.share === 'function' && inputLink) {
+      btnNativo.hidden = false;
+      btnNativo.addEventListener('click', () => {
+        navigator.share({ title: 'INACONS en el sector minero', url: inputLink.value }).catch(() => {});
+      });
+    }
   </script>
 
 </BaseLayout>
