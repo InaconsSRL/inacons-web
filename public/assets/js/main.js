@@ -404,9 +404,15 @@ document.addEventListener('DOMContentLoaded', function () {
         var svg = container.querySelector('svg');
         if (!svg) return;
 
-        /* Limpiar atributos de tamaño — el CSS del contenedor lo controla */
+        /* El tamaño y la sombra van acá y no en el CSS de la página: Astro
+           le pega data-astro-cid al selector de la página, y este SVG,
+           inyectado en tiempo de ejecución, nunca lo lleva. */
         svg.removeAttribute('width');
         svg.removeAttribute('height');
+        svg.style.width = '100%';
+        svg.style.height = 'auto';
+        svg.style.display = 'block';
+        svg.style.filter = 'drop-shadow(0 8px 28px rgba(20,23,45,0.12))';
 
         /* Relleno base de todos los departamentos (inline style > clase CSS) */
         svg.querySelectorAll('.fil0').forEach(function(p) {

@@ -463,13 +463,9 @@ const servicios = [
       width: 100%;
       max-width: 280px;
     }
-    /* El SVG se inyecta vía JS — estilos de departamentos aplicados inline en main.js */
-    #peruMapContainer svg {
-      width: 100%;
-      height: auto;
-      display: block;
-      filter: drop-shadow(0 8px 28px rgba(20,23,45,0.12));
-    }
+    /* El SVG se inyecta vía JS — su tamaño y su sombra van con element.style
+       en main.js, no acá: Astro le pega data-astro-cid a este selector pero
+       el SVG inyectado nunca lo lleva, así que una regla acá nunca engancha. */
     .map-stats-title {
       font-size: var(--fs-xs);
       font-weight: var(--fw-semibold);

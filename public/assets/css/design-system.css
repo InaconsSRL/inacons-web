@@ -809,6 +809,69 @@ a.btn:active {
     margin-top: var(--sp-2);
 }
 
+/* ── Feature item: ícono + título + descripción ──
+   Fila de 3 o 4 características cortas, sin imagen. Pensada para
+   /mineria; queda acá y no en su página porque es exactamente el tipo
+   de bloque que otra página va a necesitar de nuevo. Default para
+   fondo claro; sobre fondo oscuro se sobreescribe color por color
+   desde la página, igual que .hero-stat .stat-num en index.astro —
+   no cambiar los tokens de acá para eso. */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-5);
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    transition: transform var(--t), border-color var(--t), background var(--t);
+}
+
+.feature-item:hover {
+    transform: translateY(-4px);
+    border-color: var(--c-border-light);
+    background: var(--c-bg-muted);
+}
+
+.feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--c-bg-muted);
+    color: var(--c-secondary);
+}
+
+.feature-title {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    line-height: 1.3;
+}
+
+.feature-desc {
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    line-height: 1.5;
+}
+
+@media (max-width: 1023.98px) {
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 639.98px) {
+    .feature-grid { grid-template-columns: 1fr; }
+}
+
 /* ══════════════════════════════════════════════════════════════
    7. COMPONENTE: PAGE HERO
    Compartido por todas las páginas internas.
