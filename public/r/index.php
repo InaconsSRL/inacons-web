@@ -187,15 +187,21 @@ function dispositivo(): string
     return 'escritorio';
 }
 
-/** Pais aproximado, si el hosting o un proxy lo aportan. Nunca se adivina. */
+/**
+ * Pais aproximado, solo si el propio servidor lo aporta. Nunca se adivina.
+ *
+ * Antes tambien leia HTTP_CF_IPCOUNTRY y HTTP_X_COUNTRY_CODE. Los dos son
+ * cabeceras HTTP, y este sitio no tiene Cloudflare delante (ver la cabecera
+ * del archivo): cualquiera que escanee el QR puede mandar
+ * `X-Country-Code: FR` en la peticion y esa mentira quedaba escrita en
+ * `escaneos.pais_aprox` como si fuera un dato. GEOIP_COUNTRY_CODE es distinto:
+ * lo pone el modulo de geolocalizacion del propio Apache, no algo que viaje
+ * en la peticion, asi que el visitante no lo puede falsificar.
+ */
 function pais(): ?string
 {
-    foreach (['HTTP_CF_IPCOUNTRY', 'GEOIP_COUNTRY_CODE', 'HTTP_X_COUNTRY_CODE'] as $cabecera) {
-        if (!empty($_SERVER[$cabecera])) {
-            return substr($_SERVER[$cabecera], 0, 2);
-        }
-    }
-    return null;
+    $valor = $_SERVER['GEOIP_COUNTRY_CODE'] ?? '';
+    return preg_match('/^[A-Z]{2}$/', $valor) ? $valor : null;
 }
 
 /**

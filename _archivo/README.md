@@ -6,31 +6,20 @@ de ahí en lugar de quedarse con un flag.
 
 Nada de esta carpeta debe volver a `src/` sin revisar por qué salió.
 
-## `formulario-amonestaciones/`
+Hoy no hay nada archivado aquí — ver más abajo lo que se retiró y por qué.
 
-Prueba descartada de un flujo de memorandos y amonestaciones. Retirada en la Fase 0
-(set 2026). Dos archivos: la página Astro y el backend de Google Apps Script.
+## `formulario-amonestaciones/` — borrado, no archivado (set 2026)
 
-**Se retiró porque exponía datos laborales sin autenticación real.** Tres cosas a la vez:
+Prueba descartada de un flujo de memorandos y amonestaciones. Se movió aquí en la
+Fase 0 y se borró del todo en la limpieza posterior: exponía datos laborales sin
+autenticación real —el PIN de acceso quedó en el JavaScript del cliente sin cambiar
+del ejemplo (`1234`/`5678`/`9012`), y no protegía nada porque `doGet(?action=get)`
+devolvía **todas** las filas —nombre del trabajador, tipo de sanción, descripciones,
+faltas graves— sin comprobar sesión.
 
-1. Los PIN de acceso eran los de ejemplo (`1234`, `5678`, `9012`), en JavaScript del
-   cliente, visibles en el código fuente de la página publicada. El propio comentario
-   decía "cambiar antes de publicar" y nunca se cambió.
-2. El PIN no protegía nada, porque los datos no pasaban por él: `doGet(?action=get)`
-   devolvía **todas** las filas —nombre del trabajador, tipo de sanción, descripciones,
-   faltas graves— sin comprobar sesión. El PIN solo vivía en el navegador.
-3. La URL `/exec` del backend estaba en el código fuente de la página pública.
-
-Cualquiera que abriera el HTML obtenía la URL y con un `GET` se llevaba el historial
-disciplinario completo.
-
-### Mover estos archivos NO cerró el endpoint
-
-El Web App vive en Google, no en este repositorio. Mientras su implementación siga
-activa, la URL `/exec` responde aunque aquí no quede rastro.
-
-Cerrarlo es una acción manual en el editor de Apps Script:
-**Implementar → Administrar implementaciones → archivar la implementación.**
-
-Comparar con `src/appscripts/expomina.js`, donde el mismo patrón se resolvió bien: su
-`doGet` devuelve solo un conteo, nunca las filas.
+**Borrar el archivo del repositorio no cierra el endpoint.** El Web App vive en
+Google, no aquí. Mientras su implementación siga activa, la URL `/exec` —que estuvo
+en el código fuente de este archivo, y por lo tanto en el historial de git— sigue
+respondiendo con los mismos datos. Cerrarlo es una acción manual en el editor de
+Apps Script: **Implementar → Administrar implementaciones → archivar la
+implementación.** Registro de si ya se hizo: `docs/ESPECIFICACION.md` §14.

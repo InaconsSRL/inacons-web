@@ -1,13 +1,24 @@
 -- ============================================================================
---  0004 — DATOS DE PRUEBA
---  Ejecutar al final. Existen para poder comprobar que las politicas dejan
---  pasar al administrador y frenan a todo lo demas: sin filas, una consulta
---  que devuelve vacio no distingue "no hay datos" de "RLS me esta bloqueando".
+--  DATOS DE PRUEBA — semilla, no migracion
 --
---  Todos los nombres son inventados. Nada de esto es informacion de personas
---  reales y se puede borrar entero con el bloque del final.
+--  Vivio como 0004_datos_prueba.sql dentro de supabase/migrations/ hasta que
+--  se saco de ahi a proposito (set 2026): estaba en la misma carpeta, con el
+--  mismo aspecto, que las nueve migraciones reales que SI hay que aplicar en
+--  produccion. Reejecutar esto contra la base viva mete cuatro codigos QR
+--  falsos y sesenta escaneos inventados en un sistema con papel impreso
+--  circulando — sin que nada lo impida salvo este comentario.
 --
---  La migracion real de qr_links desde MySQL es de la Fase 2.
+--  No se borra porque sigue sirviendo igual que el primer dia: comprobar que
+--  las politicas de RLS dejan pasar al administrador y frenan a todo lo demas.
+--  Sin filas, una consulta que devuelve vacio no distingue "no hay datos" de
+--  "RLS me esta bloqueando".
+--
+--  Como usarlo: a mano, en un proyecto de prueba o local, nunca contra
+--  produccion. Requiere 0001 y 0002 ya aplicados. Todos los nombres son
+--  inventados; nada de esto es informacion de personas reales, y se puede
+--  borrar entero con el bloque del final del archivo.
+--
+--  La migracion real de qr_links desde MySQL fue 0006_migrar_codigos.sql.
 -- ============================================================================
 
 -- Todo el archivo va en una sola transaccion: si algo falla a la mitad, no

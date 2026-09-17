@@ -62,7 +62,15 @@ export function getSupabaseAnonimo(): SupabaseClient {
   });
 }
 
-/** Tablas que la prueba de RLS recorre. Es el esquema completo de la seccion 6. */
+/**
+ * Tablas que la prueba de RLS recorre.
+ *
+ * Se escribe a mano y no se deriva del catalogo de Postgres: eso es una
+ * debilidad conocida, no un descuido. `latidos` (0010) nacio con RLS activo y
+ * quedo fuera de esta lista durante un tiempo porque nada obligaba a tocar
+ * este archivo al agregar una tabla. La proxima tabla nueva tiene el mismo
+ * riesgo — anadirla aqui en el mismo commit que la crea.
+ */
 export const TABLAS = [
   'administradores',
   'configuracion',
@@ -75,6 +83,7 @@ export const TABLAS = [
   'contactos',
   'inscripciones',
   'leads',
+  'latidos',
 ] as const;
 
 /**

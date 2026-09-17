@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
 
+# Dos push seguidos sin esto lanzan dos despliegues FTP en paralelo contra el
+# mismo directorio del servidor, compartiendo el archivo de estado que la
+# acción usa para decidir qué subir. `cancel-in-progress: false` porque un
+# deploy a medio subir no se cancela: se espera y se deja correr el segundo
+# después, no se corta el primero a la mitad.
+concurrency:
+  group: deploy-produccion
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -34,6 +43,19 @@ jobs:
         env:
           PUBLIC_SUPABASE_URL:      ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
+
+      # Hasta ahora, lo único que "recordaba" un build era lo que ya estaba
+      # subido al servidor. Sin esto, saber qué había publicado el día X, o
+      # volver a la versión anterior, significaba reconstruir un commit viejo
+      # a mano y esperar otro ciclo completo de build + FTP. Con esto, la
+      # versión exacta que se intentó subir queda descargable durante 90 días
+      # desde la pestaña Actions de este run, aunque el FTP de después falle.
+      - name: Guardar dist/ como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 90
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

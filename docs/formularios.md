@@ -165,18 +165,21 @@ la mano, y un fallo de red le sumaría un segundo problema al que ya tiene.
 
 ## Formularios
 
-### Apps Script — cerrado
+### Apps Script — retirado del repositorio (set 2026)
 
-Los formularios guardaban en Google Sheets a través de Google Apps Script. **Los backends
-están cerrados** (Fase 0) y el código queda en `src/appscripts/` solo como histórico: no
-se compila ni se despliega con el sitio.
+Los formularios guardaban en Google Sheets a través de Google Apps Script. El código —
+`src/appscripts/expomina.js` y `expomina-avisos.js` — se borró del repositorio en la
+limpieza posterior a la Fase 0: ya no se guarda como histórico, se retiró entero.
 
-`expomina.js` lleva `CAPTURA_ABIERTA = false` y su `doPost` responde `{ok:false}`. El
-formulario salió de la página porque `enviar()` solo miraba el status HTTP, y Apps Script
-responde 200 aunque el cuerpo diga que no: quien lo enviara vería la pantalla de gracias
-y su registro se descartaría en silencio.
+**Borrar el código del repositorio no cierra el Web App.** Vive en Google, no aquí. La
+implementación de `expomina.js` tenía `CAPTURA_ABIERTA = false` y su `doPost` respondía
+`{ok:false}` — pero mientras la implementación siga publicada, la URL `/exec` sigue
+respondiendo. Cerrarla es una acción manual: Apps Script → Implementar → Administrar
+implementaciones → archivar. Ver `docs/ESPECIFICACION.md` §14 para el registro de si ya
+se hizo, tanto para Expomina como para el endpoint de amonestaciones (más grave: ese
+devolvía datos sin autenticación — ver `_archivo/README.md`).
 
-Si alguna vez hay que volver a tocar un Web App, la trampa que más cuesta es esta:
+Si algún día se vuelve a necesitar un Web App, la trampa que más cuesta es esta:
 **guardar con Ctrl+S no actualiza la URL `/exec`**, que sirve la última *versión
 publicada*. Hay que ir a Administrar implementaciones → lápiz → Nueva versión. Y **nunca
 crear una implementación nueva para actualizar**: cambia la URL y el formulario deja de

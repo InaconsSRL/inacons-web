@@ -36,7 +36,6 @@ Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/
 | Schemas de las colecciones | `src/content.config.ts` |
 | Generación de códigos QR | `src/lib/qr.ts` — **único** lugar que instancia una librería de QR |
 | Resolución de `/r/CODIGO` | `public/r/index.php` |
-| Backends de formularios | `src/appscripts/*.js` — cerrados, solo histórico |
 | Cliente de Supabase | `src/lib/supabase.ts` — unico lugar que lo instancia |
 | Esquema y permisos de la base | `supabase/migrations/*.sql`, en orden |
 | Panel de administracion | `src/pages/panel/index.astro` |

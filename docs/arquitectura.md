@@ -42,16 +42,13 @@ web-astro/
 │   │   ├── CtaBand.astro      # banda CTA oscura con 2 botones
 │   │   └── PageHero.astro     # cabecera de páginas interiores + breadcrumb
 │   ├── pages/                 # ver tabla de rutas abajo
-│   ├── content/
-│   │   ├── proyectos/         # 2 entradas
-│   │   ├── servicios/         # 6 entradas
-│   │   └── recursos/          # 3 entradas
-│   └── appscripts/            # backends Apps Script — CERRADOS, solo histórico
-│       ├── expomina.js
-│       └── expomina-avisos.js
+│   └── content/
+│       ├── proyectos/         # 2 entradas
+│       ├── servicios/         # 6 entradas
+│       └── recursos/          # 3 entradas
 ├── supabase/
 │   └── migrations/            # se ejecutan a mano en el SQL Editor, en orden
-├── _archivo/                  # código despublicado que no se borra
+├── _archivo/                  # código despublicado que no se borra — hoy vacío
 └── public/
     ├── .htaccess              # QR corto, gzip, caché, cabeceras de seguridad
     ├── robots.txt
@@ -95,9 +92,11 @@ El filtro del sitemap compara el **primer segmento** de la ruta, no la URL enter
 versión anterior buscaba la palabra en cualquier posición, así que una futura
 `/proyectos/recursos-hidricos/` habría quedado fuera sin que nadie lo notara.
 
-`/formulario/amonestaciones` ya no existe: se despublicó en la Fase 0 y su código está en
-`_archivo/`. Tenía PIN en el cliente y un endpoint que devolvía todos los registros
-disciplinarios sin autenticación.
+`/formulario/amonestaciones` ya no existe: se despublicó en la Fase 0 y su código se
+borró del todo en la limpieza posterior (set 2026) — tenía PIN en el cliente y un
+endpoint que devolvía todos los registros disciplinarios sin autenticación. Borrar el
+código no cierra el endpoint de Apps Script, que vive en Google: ver
+`docs/ESPECIFICACION.md` §14.
 
 ## CSS
 

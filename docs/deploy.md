@@ -86,15 +86,21 @@ orden**, una sola vez:
 | `0001_esquema.sql` | Tablas, tipos, triggers y funciones |
 | `0002_rls.sql` | Row Level Security. **Sin esto la base está abierta** |
 | `0003_agregados.sql` | `escaneos_diarios` + tarea de `pg_cron` |
-| `0004_datos_prueba.sql` | Filas de ejemplo, borrables |
 | `0005_redirector.sql` | Permiso de `resolver_qr()` al rol anónimo + validación de host |
 | `0006_migrar_codigos.sql` | Los cuatro códigos de MySQL, con su nombre exacto |
 | `0007_codigo_tolerante.sql` | El guión bajo y el medio son el mismo código |
 | `0008_codigo_existe.sql` | Comprobación sin registrar escaneo — la usa el build |
 | `0009_panel.sql` | `reasignar_qr()` y permisos del panel |
 | `0010_latido.sql` | Tabla y función del latido |
+| `0011_saneamiento_escaneos.sql` | `resolver_qr()` deja de guardar user-agent/referrer en escaneos que no son `ok` + purga de `escaneos` a 90 días |
 
 Entre `0001` y `0002` las tablas existen sin protección. Se ejecutan seguidos.
+
+Los datos de ejemplo que antes eran `0004_datos_prueba.sql` viven ahora en
+`supabase/semillas/datos_prueba.sql`, fuera de esta carpeta a propósito: no es una
+migración, es una semilla para verificar RLS a mano en un proyecto de prueba, y
+reejecutarla contra producción mete códigos QR falsos en un sistema con papel
+circulando. Ver el encabezado del archivo.
 
 Cada archivo va en **una sola transacción**: el SQL Editor ejecuta sentencia por
 sentencia, así que sin eso un error a la mitad deja la base en un estado intermedio que
@@ -139,10 +145,18 @@ lo dice; sin eso la primera señal sería la pausa.
 
 ### Comprobar que RLS funciona
 
-`/panel/`, ya con sesión, tiene un botón que intenta leer y escribir cada tabla
-con la clave anónima y sin sesión. Todas tienen que salir bloqueadas. Es el
-criterio de aceptación de la Fase 1 y conviene repetirlo cada vez que se agregue
-una tabla o se toque una política.
+`/panel/`, ya con sesión, tiene un botón ("Probar aislamiento (RLS)") que intenta
+leer cada tabla de `TABLAS` (`src/lib/supabase.ts`) con un cliente **sin sesión**,
+usando la clave anónima. Todas tienen que salir bloqueadas. Solo prueba lectura, y
+alcanza: con RLS activo y cero políticas, Postgres niega **todo** comando sobre esa
+tabla, no solo el que se prueba — bloquear el `SELECT` ya certifica que
+`INSERT`/`UPDATE`/`DELETE` están igual de cerrados.
+
+Es el criterio de aceptación de la Fase 1 y conviene repetirlo cada vez que se
+agregue una tabla o se toque una política — y agregar la tabla nueva a `TABLAS` en
+el mismo commit que la crea: esta lista se escribe a mano, no se deriva del
+catálogo de Postgres, y ya pasó una vez que una tabla (`latidos`, 0010) se quedó
+fuera sin que nada lo señalara.
 
 ## public/.htaccess
 

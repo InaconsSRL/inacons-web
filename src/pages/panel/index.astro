@@ -175,6 +175,31 @@ import { supabaseConfigurado } from '../../lib/supabase';
           -->
           <div class="notice" id="aviso-admin" hidden></div>
 
+          <!--
+            docs/deploy.md y docs/ESPECIFICACION.md llevaban meses describiendo
+            este botón como si existiera. TABLAS y getSupabaseAnonimo() estaban
+            escritos en src/lib/supabase.ts exactamente para esto, y nada los
+            importaba: el criterio de aceptación de la Fase 1 ("con la clave
+            anónima, sin sesión, no se puede leer ni escribir ninguna tabla")
+            se verificó a mano una vez, con curl, y no quedó nada que lo repita.
+          -->
+          <div class="panel panel--raised pnl-espacio">
+            <div class="pnl-encabezado">
+              <div>
+                <h2 class="panel-title">Seguridad</h2>
+                <p class="panel-desc">
+                  Prueba, con la clave anónima y sin sesión, que ninguna tabla
+                  responde. Conviene repetirlo cada vez que se agregue una
+                  tabla o se toque una política.
+                </p>
+              </div>
+              <div class="pnl-herramientas">
+                <button type="button" class="btn btn-outline btn-sm" id="btn-rls">Probar aislamiento (RLS)</button>
+              </div>
+            </div>
+            <ul class="data-list" id="rls-resultados" hidden></ul>
+          </div>
+
           <div class="panel panel--raised pnl-espacio">
             <div class="pnl-encabezado">
               <div>
@@ -339,8 +364,8 @@ import { supabaseConfigurado } from '../../lib/supabase';
   </div>
 
   <script>
-    import { getSupabase } from '../../lib/supabase';
-    import { generarQR, pngDeUrl, urlDeCodigo, urlLegible, PERFILES, type PerfilQR } from '../../lib/qr';
+    import { getSupabase, getSupabaseAnonimo, TABLAS } from '../../lib/supabase';
+    import { generarQR, pngDeUrl, urlDeCodigo, urlLegible, metadatosGeneracion, PERFILES, type PerfilQR } from '../../lib/qr';
 
     const vistaLogin  = document.getElementById('vista-login');
     const vistaSesion = document.getElementById('vista-sesion');
@@ -414,6 +439,49 @@ import { supabaseConfigurado } from '../../lib/supabase';
       });
 
       $('btn-salir').addEventListener('click', () => supabase.auth.signOut());
+
+      // ── Prueba de aislamiento (RLS) ────────────────────────────────────────
+      //
+      // Con un cliente SIN sesión, distinto del de este panel, para no arrastrar
+      // el token de quien está logueado. Por cada tabla se pide una fila con
+      // `head: true`: la cabecera dice si la fila existe sin que el cuerpo de la
+      // respuesta la traiga — así, si una política queda mal escrita y el error
+      // no aparece, esta prueba tampoco descarga los datos reales que expuso.
+      //
+      // Con RLS activo y cero políticas, Postgres niega TODO comando sobre esa
+      // tabla, no solo el que se prueba: bloquear el SELECT ya certifica que
+      // INSERT/UPDATE/DELETE están igual de cerrados. Por eso alcanza con leer.
+      $('btn-rls').addEventListener('click', async () => {
+        const btn = $('btn-rls') as HTMLButtonElement;
+        const lista = $('rls-resultados');
+        btn.disabled = true;
+        lista.hidden = false;
+        lista.innerHTML = '<li><span class="data-key">Probando…</span></li>';
+
+        const anon = getSupabaseAnonimo();
+        const filas: string[] = [];
+
+        for (const tabla of TABLAS) {
+          try {
+            const { error, count } = await anon
+              .from(tabla)
+              .select('*', { count: 'exact', head: true });
+
+            filas.push(
+              error
+                ? `<li><span class="data-key">${tabla}</span><span class="data-value status-ok">Bloqueada ✓</span></li>`
+                : `<li><span class="data-key">${tabla}</span><span class="data-value status-error">¡Expuesta! (${count ?? '?'} fila(s) visibles)</span></li>`
+            );
+          } catch {
+            filas.push(
+              `<li><span class="data-key">${tabla}</span><span class="data-value status-warn">No se pudo probar</span></li>`
+            );
+          }
+        }
+
+        lista.innerHTML = filas.join('');
+        btn.disabled = false;
+      });
 
       // ── Diálogos ─────────────────────────────────────────────────────────
       let ultimoFoco: HTMLElement | null = null;
@@ -705,10 +773,30 @@ import { supabaseConfigurado } from '../../lib/supabase';
         URL.revokeObjectURL(a.href);
       }
 
+      /**
+       * Deja constancia de con qué parámetros salió el QR que se acaba de
+       * exportar o imprimir. Existe para que no se repita lo del PNG de
+       * Expomina: generado con una herramienta externa, sin rastro de su
+       * configuración, y hoy nadie puede regenerarlo igual.
+       *
+       * Best-effort: si falla, no debe impedir la descarga que el
+       * administrador ya tiene en la mano. Se registra en segundo plano.
+       */
+      function registrarGeneracion(perfil: PerfilQR) {
+        supabase
+          .from('qr_codes')
+          .update(metadatosGeneracion(perfil))
+          .eq('codigo', qrCodigo)
+          .then(({ error }) => {
+            if (error) console.warn(`No se pudo registrar la generación de ${qrCodigo}:`, error.message);
+          });
+      }
+
       $('btn-svg').addEventListener('click', async () => {
         const perfil = ($('f-perfil') as HTMLSelectElement).value as PerfilQR;
         const r = await generarQR(urlDeCodigo(qrCodigo), { perfil });
         descargar(new Blob([r.svg], { type: 'image/svg+xml' }), `qr-${qrCodigo.toLowerCase()}.svg`);
+        registrarGeneracion(perfil);
       });
 
       $('btn-png').addEventListener('click', async () => {
@@ -718,12 +806,16 @@ import { supabaseConfigurado } from '../../lib/supabase';
           const perfil = ($('f-perfil') as HTMLSelectElement).value as PerfilQR;
           const r = await pngDeUrl(urlDeCodigo(qrCodigo), { perfil }, 1200);
           descargar(r.blob, `qr-${qrCodigo.toLowerCase()}-${r.lado}px.png`);
+          registrarGeneracion(perfil);
         } finally {
           btn.disabled = false;
         }
       });
 
-      $('btn-hoja').addEventListener('click', () => window.print());
+      $('btn-hoja').addEventListener('click', () => {
+        registrarGeneracion(($('f-perfil') as HTMLSelectElement).value as PerfilQR);
+        window.print();
+      });
     }
   </script>
 

@@ -460,23 +460,26 @@ Hecho en el repositorio:
 
 | # | Qué | Dónde |
 |---|---|---|
-| 1 | Formulario de amonestaciones despublicado y archivado | `_archivo/formulario-amonestaciones/` |
-| 3 | Interruptor `CAPTURA_ABIERTA = false` en el backend de Expomina | `src/appscripts/expomina.js` |
+| 1 | Formulario de amonestaciones despublicado y, en la limpieza posterior (set 2026), borrado del todo del repositorio | ya no está — ver `_archivo/README.md` |
+| 3 | Interruptor `CAPTURA_ABIERTA = false` desplegado en el backend de Expomina; el archivo fuente se borró del repositorio en la misma limpieza | ya no está — ver `docs/formularios.md` |
 | 4 | `.unlighthouse/` ignorado y sacado del índice (219 archivos, 32 MB) | `.gitignore` |
 | 5 | `dist/empresa/config.php` borrado del disco local | — |
 | 6 | Fallback del redirector derivado de `BASE_URL` | `public/empresa/index.php` |
 | 7 | Dominio unificado: `site` es la única fuente | `astro.config.mjs`, `BaseLayout.astro`, `PageHero.astro`, `recursos/index.astro`, `404.astro`, `expomina.astro` |
 | 8 | `robots.txt` bloquea `/panel/`, `/empresa/`, `/admin/`, `/recursos/`, `/formulario/` | `public/robots.txt` |
-| 9 | Rutas obsoletas corregidas en el encabezado | `src/appscripts/expomina.js` |
+| 9 | Rutas obsoletas corregidas en el encabezado | `src/appscripts/expomina.js` (archivo borrado del todo en la limpieza posterior, set 2026) |
 
 Verificado tras el build: canonical, `og:image`, JSON-LD y sitemap apuntan a
 `home.inacons.com.pe`; el dominio corto aparece en cero archivos del build;
 `/formulario/` no existe en `dist/`.
 
-**Pendiente, requiere acción en Google:** pasos 1 (archivar la implementación), 2
-(exportar el histórico) y 3 (desplegar el interruptor). Hasta que eso ocurra, el
-criterio de aceptación de la Fase 0 **no se cumple**: el endpoint de amonestaciones
-sigue respondiendo con datos.
+**Pendiente, requiere acción en Google — no se puede hacer desde el repositorio:**
+archivar la implementación de amonestaciones (paso 1) y confirmar que el histórico de
+Expomina quedó exportado (paso 2). El repositorio ya no tiene ni una línea de ese
+código, pero eso no cierra el Web App: vive en Google, no aquí. Hasta que se archive
+la implementación desde Apps Script → Administrar implementaciones, el criterio de
+aceptación de la Fase 0 **no se cumple**: el endpoint de amonestaciones puede seguir
+respondiendo con datos.
 
 ### Fase 1 — preparada en el repositorio, pendiente de crear el proyecto (set 2026)
 
@@ -487,7 +490,7 @@ Hecho en el repositorio:
 | Esquema completo de la sección 6: 11 tablas, tipos, triggers y funciones | `supabase/migrations/0001_esquema.sql` |
 | RLS en todas las tablas, con verificación incluida | `supabase/migrations/0002_rls.sql` |
 | `escaneos_diarios` + tarea de `pg_cron` a las 03:00 de Lima | `supabase/migrations/0003_agregados.sql` |
-| Datos de prueba, con su bloque de borrado | `supabase/migrations/0004_datos_prueba.sql` |
+| Datos de prueba, con su bloque de borrado — movida fuera de `migrations/` en set 2026, no es una migración | `supabase/semillas/datos_prueba.sql` |
 | Cliente único de Supabase | `src/lib/supabase.ts` |
 | `/panel/` con login, sesión persistente y prueba de aislamiento | `src/pages/panel/index.astro` |
 | Variables de entorno del build en el pipeline real | `.github/workflows/deploy.yml`, `.env.example` |
@@ -611,6 +614,27 @@ herramienta.
 El criterio pide que **un QR en perfil impresión, impreso en A4, escanee
 correctamente**. Eso solo se comprueba imprimiendo y escaneando.
 
+#### Endurecimiento posterior (set 2026)
+
+Una auditoría de arquitectura encontró que `resolver_qr()` acepta escritura anónima
+sin límite: cada llamada inserta en `escaneos` exista o no el código, y nada purga
+esa tabla. Sobre un plan gratuito con límite de tamaño, eso puede llenar la base y
+dejarla en solo lectura — momento en el que la propia función empieza a fallar y
+**todos** los QR impresos dejan de redirigir, no solo el que alguien haya abusado.
+
+`supabase/migrations/0011_saneamiento_escaneos.sql` ataca las dos puntas:
+
+- `resolver_qr()` ya no guarda `user_agent` ni `referrer` cuando el resultado no es
+  `ok` — son los campos más pesados de la fila (hasta 400 caracteres cada uno) y no
+  aportan nada quando el código no existe.
+- Purga programada: borra de `escaneos` lo que tenga más de 90 días.
+  `escaneos_diarios` ya conserva el total agregado por día, así que no se pierde la
+  serie histórica.
+
+No resuelve el límite de tasa por IP (`S4` de la auditoría de seguridad): eso sigue
+pendiente y requiere una decisión de diseño sobre dónde vive — el PHP o la función —
+que se deja para el análisis dedicado del sistema de QR.
+
 ### Fase 3 — a mitad (set 2026)
 
 Hecho:
@@ -624,6 +648,8 @@ Hecho:
 | Hoja de impresión con la URL legible debajo | `src/pages/panel/index.astro` |
 | Recálculo del agregado a demanda | `agregar_escaneos_diarios()` |
 | `.tabla` y `.dialogo` en el sistema de diseño | `design-system.css` |
+| Prueba de aislamiento (RLS): botón que intenta leer cada tabla con la clave anónima, sin sesión | `src/pages/panel/index.astro` |
+| Metadatos de generación del QR (perfil, versión del módulo, fecha) grabados al exportar SVG/PNG o imprimir | `src/pages/panel/index.astro`, `src/lib/qr.ts` |
 
 Falta: generación **masiva**, pantalla que muestre el **registro de auditoría**
 (hoy se escribe pero no se lee desde ningún sitio), **tablero** de escaneos por

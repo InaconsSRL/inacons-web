@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(function(text) {
         container.innerHTML = text;
         var svg = container.querySelector('svg');
-        if (!svg) return;
+        if (!svg) { console.warn('initCoverageMap: peru-depts.svg no trajo un <svg>.'); return; }
 
         /* El tamaño y la sombra van acá y no en el CSS de la página: Astro
            le pega data-astro-cid al selector de la página, y este SVG,
@@ -478,7 +478,11 @@ document.addEventListener('DOMContentLoaded', function () {
           pinsGroup.appendChild(g);
         });
       })
-      .catch(function() {});
+      /* Vacío no es lo mismo que silencioso: si el fetch del SVG falla o el
+         parseo no encuentra un nodo esperado, el mapa se queda sin pines y
+         nada más lo dice. Antes este catch no dejaba ni rastro en la consola;
+         ahora al menos queda uno para quien esté mirando cuando pase. */
+      .catch(function(err) { console.warn('initCoverageMap: no se pudo pintar el mapa.', err); });
   }
 
   /* ─── 12. SCROLL HINT ─── */
