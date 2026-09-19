@@ -238,6 +238,43 @@ import { supabaseConfigurado } from '../../lib/supabase';
             </p>
           </div>
 
+          <div class="panel panel--raised pnl-espacio">
+            <div class="pnl-encabezado">
+              <div>
+                <h2 class="panel-title">Empleados</h2>
+                <p class="panel-desc" id="resumen-empleados">Cargando…</p>
+              </div>
+              <div class="pnl-herramientas">
+                <button type="button" class="btn btn-primary btn-sm" id="btn-nuevo-empleado">Nuevo empleado</button>
+              </div>
+            </div>
+
+            <div class="notice" id="aviso-empleados" hidden></div>
+
+            <div class="tabla-scroll">
+              <table class="tabla">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Nombre</th>
+                    <th>Cargo</th>
+                    <th>Estado</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-empleados">
+                  <tr><td colspan="5" class="tabla-vacia">Cargando…</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="form-hint pnl-espacio">
+              De baja, no activo: la ficha y el directorio dejan de mostrar a la persona,
+              pero el registro se conserva. El QR de su credencial (si tiene uno en
+              "Códigos QR") no cambia solo — se reasigna al directorio desde ahí.
+            </p>
+          </div>
+
           <p class="pnl-pie"><a href="/">Volver al sitio</a></p>
         </div>
 
@@ -310,6 +347,112 @@ import { supabaseConfigurado } from '../../lib/supabase';
           </div>
         </div>
 
+        <!-- ════ DIÁLOGO: EMPLEADO ════ -->
+        <div class="dialogo" id="dlg-empleado" role="dialog" aria-modal="true" aria-labelledby="dlg-empleado-titulo" hidden>
+          <div class="dialogo-caja">
+            <button type="button" class="dialogo-cerrar" data-cerrar="dlg-empleado" aria-label="Cerrar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+
+            <h3 class="dialogo-titulo" id="dlg-empleado-titulo">Nuevo empleado</h3>
+            <p class="dialogo-desc" id="dlg-empleado-desc"></p>
+
+            <div class="notice notice--error" id="dlg-empleado-error" hidden></div>
+
+            <form id="form-empleado" novalidate>
+              <div class="form-group">
+                <label for="e-nombre">Nombre completo</label>
+                <input type="text" id="e-nombre" class="form-input" required />
+              </div>
+
+              <div class="form-group">
+                <label for="e-slug">Slug (para la URL)</label>
+                <input type="text" id="e-slug" class="form-input" spellcheck="false" placeholder="juan-perez" />
+                <span class="form-hint">
+                  Minúsculas, números y un guion entre palabras. Es la URL pública —
+                  <code>/empleados/SLUG/</code> — y no se puede cambiar después de crear.
+                </span>
+              </div>
+
+              <div class="form-group">
+                <label for="e-cargo">Cargo</label>
+                <input type="text" id="e-cargo" class="form-input" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="e-area">Área</label>
+                  <input type="text" id="e-area" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <label for="e-sede">Sede</label>
+                  <input type="text" id="e-sede" class="form-input" placeholder="Huancayo" />
+                  <span class="form-hint">Se muestra junto al área en la ficha: "Tecnología · Huancayo".</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="e-bio">Sobre mí</label>
+                <textarea id="e-bio" class="form-textarea" rows="3" placeholder="Una o dos frases de presentación."></textarea>
+                <span class="form-hint">Opcional — si se deja vacío, la ficha no muestra esta sección.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="e-foto">Foto</label>
+                <input type="file" id="e-foto" class="form-input" accept="image/jpeg,image/png,image/webp" />
+                <span class="form-hint">JPG, PNG o WebP, hasta 2 MB. Redonda al mostrarse: una foto cuadrada y centrada en la cara se ve mejor.</span>
+                <div id="e-foto-vista" class="pnl-espacio" hidden>
+                  <img id="e-foto-img" class="avatar" width="72" height="72" alt="" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="e-telefono">Teléfono</label>
+                  <input type="tel" id="e-telefono" class="form-input" placeholder="+51999999999" />
+                </div>
+                <div class="form-group">
+                  <label for="e-whatsapp">WhatsApp</label>
+                  <input type="tel" id="e-whatsapp" class="form-input" placeholder="+51999999999" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="e-email">Correo</label>
+                <input type="email" id="e-email" class="form-input" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="e-linkedin">LinkedIn</label>
+                  <input type="url" id="e-linkedin" class="form-input" placeholder="https://linkedin.com/in/…" />
+                </div>
+                <div class="form-group">
+                  <label for="e-instagram">Instagram</label>
+                  <input type="url" id="e-instagram" class="form-input" placeholder="https://instagram.com/…" />
+                </div>
+              </div>
+              <span class="form-hint">
+                Otras redes se pueden agregar directamente en la base — esto cubre las dos más comunes.
+              </span>
+
+              <div class="form-group pnl-espacio">
+                <label for="e-estado">Estado</label>
+                <select id="e-estado" class="form-select">
+                  <option value="activo">Activo — publicado</option>
+                  <option value="borrador">Borrador — no publicado todavía</option>
+                  <option value="inactivo">Inactivo — dado de baja</option>
+                </select>
+              </div>
+
+              <div class="dialogo-acciones">
+                <button type="button" class="btn btn-outline" data-cerrar="dlg-empleado">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="btn-guardar-empleado">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- ════ DIÁLOGO: QR ════ -->
         <div class="dialogo" id="dlg-qr" role="dialog" aria-modal="true" aria-labelledby="dlg-qr-titulo" hidden>
           <div class="dialogo-caja">
@@ -365,7 +508,7 @@ import { supabaseConfigurado } from '../../lib/supabase';
 
   <script>
     import { getSupabase, getSupabaseAnonimo, TABLAS } from '../../lib/supabase';
-    import { generarQR, pngDeUrl, urlDeCodigo, urlLegible, metadatosGeneracion, PERFILES, type PerfilQR } from '../../lib/qr';
+    import { generarQR, pngDeUrl, urlDeCodigo, urlLegible, metadatosGeneracion, PERFILES, DOMINIO, type PerfilQR } from '../../lib/qr';
 
     const vistaLogin  = document.getElementById('vista-login');
     const vistaSesion = document.getElementById('vista-sesion');
@@ -407,7 +550,7 @@ import { supabaseConfigurado } from '../../lib/supabase';
         vistaSesion!.hidden = !sesion;
         if (sesion) {
           $('sesion-correo').textContent = sesion.user.email ?? '—';
-          comprobarAdmin().then(cargarCodigos);
+          comprobarAdmin().then(() => { cargarCodigos(); cargarEmpleados(); });
         }
       }
 
@@ -730,6 +873,341 @@ import { supabaseConfigurado } from '../../lib/supabase';
         else { await cargarCodigos(); avisar('notice--ok', 'Escaneos recalculados.'); }
         btn.disabled = false;
       });
+
+      // ── Empleados ────────────────────────────────────────────────────────
+      type Empleado = {
+        id: string; slug: string; nombre: string; cargo: string | null; area: string | null;
+        sede: string | null; bio: string | null; telefono: string | null; whatsapp: string | null; email: string | null;
+        foto_url: string | null; redes: Record<string, string>; estado: string;
+      };
+
+      let empleados: Empleado[] = [];
+      const avisoEmpleados = $('aviso-empleados');
+
+      function avisarEmpleados(clase: string, texto: string) {
+        avisoEmpleados.className = `notice ${clase}`;
+        avisoEmpleados.textContent = texto;
+        avisoEmpleados.hidden = false;
+      }
+
+      function iniciales(nombre: string): string {
+        const partes = nombre.trim().split(/\s+/);
+        return ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase();
+      }
+
+      // Conteo de interacciones por empleado — que la analítica quede escrita
+      // y leída en el mismo lote, no como el registro de auditoría de QR,
+      // que se escribe y nadie lo mira desde ningún lado.
+      const ETIQUETAS_EVENTO: Record<string, string> = {
+        vista: 'Vistas', clic_llamar: 'Llamadas', clic_whatsapp: 'WhatsApp',
+        clic_correo: 'Correos', guardar_contacto: 'Contactos', compartir: 'Compartidos',
+      };
+      const eventosPorEmpleado = new Map<string, Record<string, number>>();
+
+      function resumenEventos(empleadoId: string): string {
+        const conteo = eventosPorEmpleado.get(empleadoId);
+        if (!conteo) return '';
+        return Object.entries(conteo)
+          .filter(([, n]) => n > 0)
+          .map(([evento, n]) => `${ETIQUETAS_EVENTO[evento] ?? evento} ${n}`)
+          .join(' · ');
+      }
+
+      async function cargarEmpleados() {
+        if (!esAdmin) return;
+
+        const [resEmpleados, resEventos] = await Promise.all([
+          supabase.from('empleados').select('*').order('nombre'),
+          supabase.from('tarjeta_eventos').select('empleado_id, evento'),
+        ]);
+
+        if (resEmpleados.error) {
+          avisarEmpleados('notice--error', `No se pudieron leer los empleados: ${resEmpleados.error.message}`);
+          return;
+        }
+        empleados = (resEmpleados.data ?? []) as Empleado[];
+
+        eventosPorEmpleado.clear();
+        for (const f of resEventos.data ?? []) {
+          const conteo = eventosPorEmpleado.get(f.empleado_id) ?? {};
+          conteo[f.evento] = (conteo[f.evento] ?? 0) + 1;
+          eventosPorEmpleado.set(f.empleado_id, conteo);
+        }
+
+        pintarTablaEmpleados();
+      }
+
+      function pintarTablaEmpleados() {
+        const cuerpo = $('tabla-empleados');
+
+        if (empleados.length === 0) {
+          cuerpo.innerHTML = '<tr><td colspan="5" class="tabla-vacia">Todavía no hay empleados.</td></tr>';
+          $('resumen-empleados').textContent = 'Ninguno todavía.';
+          return;
+        }
+
+        const activos = empleados.filter((e) => e.estado === 'activo').length;
+        $('resumen-empleados').textContent = `${empleados.length} en total, ${activos} publicado(s) en el directorio.`;
+
+        const ESTADOS: Record<string, string> = {
+          activo: '<span class="status-ok">Activo</span>',
+          borrador: '<span class="status-warn">Borrador</span>',
+          inactivo: '<span class="status-off">Dado de baja</span>',
+        };
+
+        cuerpo.innerHTML = empleados.map((emp) => `
+          <tr>
+            <td>${emp.foto_url
+              ? `<img class="avatar avatar--sm" src="${esc(emp.foto_url)}" alt="" width="56" height="56" loading="lazy">`
+              : `<div class="avatar avatar--sm avatar--placeholder">${esc(iniciales(emp.nombre))}</div>`}</td>
+            <td>
+              ${esc(emp.nombre)}
+              ${resumenEventos(emp.id) ? `<br><span class="form-hint">${esc(resumenEventos(emp.id))}</span>` : ''}
+            </td>
+            <td>${esc(emp.cargo ?? '—')}</td>
+            <td>${ESTADOS[emp.estado] ?? esc(emp.estado)}</td>
+            <td>
+              <div class="tabla-acciones">
+                <a class="btn btn-outline btn-sm" href="/empleados/${esc(emp.slug)}/" target="_blank" rel="noopener">Ver ficha</a>
+                <button type="button" class="btn btn-outline btn-sm" data-qr-empleado="${esc(emp.id)}">QR</button>
+                <button type="button" class="btn btn-outline btn-sm" data-editar-empleado="${esc(emp.id)}">Editar</button>
+                <button type="button" class="btn btn-outline btn-sm" data-estado-empleado="${esc(emp.id)}">${emp.estado === 'activo' ? 'Dar de baja' : 'Activar'}</button>
+              </div>
+            </td>
+          </tr>`).join('');
+
+        cuerpo.querySelectorAll('[data-qr-empleado]').forEach((b) =>
+          b.addEventListener('click', () => abrirQrDeEmpleado(b.getAttribute('data-qr-empleado')!)));
+        cuerpo.querySelectorAll('[data-editar-empleado]').forEach((b) =>
+          b.addEventListener('click', () => abrirEmpleado(b.getAttribute('data-editar-empleado')!)));
+        cuerpo.querySelectorAll('[data-estado-empleado]').forEach((b) =>
+          b.addEventListener('click', () => alternarEstadoEmpleado(b.getAttribute('data-estado-empleado')!)));
+      }
+
+      function traducirEmpleado(mensaje: string): string {
+        if (mensaje.includes('empleados_slug_key') || mensaje.includes('duplicate key'))
+          return 'Ya existe un empleado con ese slug.';
+        if (mensaje.includes('empleados_slug_check'))
+          return 'El slug solo admite minúsculas, números y un guion entre palabras.';
+        return mensaje;
+      }
+
+      /**
+       * Sube la foto al bucket `empleados-fotos` (0013_storage_fotos_empleados.sql)
+       * y devuelve la URL pública. El nombre lleva la hora en milisegundos para
+       * que reemplazar la foto cambie la URL: sin eso, un cache del navegador o
+       * de un CDN podría seguir sirviendo la imagen vieja bajo la misma ruta.
+       */
+      async function subirFoto(archivo: File, slug: string): Promise<string> {
+        const ext = archivo.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const ruta = `${slug}/${Date.now()}.${ext}`;
+
+        const { error } = await supabase.storage.from('empleados-fotos').upload(ruta, archivo, {
+          cacheControl: '31536000',
+          upsert: false,
+        });
+        if (error) throw new Error(`No se pudo subir la foto: ${error.message}`);
+
+        return supabase.storage.from('empleados-fotos').getPublicUrl(ruta).data.publicUrl;
+      }
+
+      let editandoEmpleado: Empleado | null = null;
+
+      function abrirEmpleado(id?: string) {
+        editandoEmpleado = id ? empleados.find((e) => e.id === id) ?? null : null;
+        $('dlg-empleado-error').hidden = true;
+
+        ($('e-nombre')   as HTMLInputElement).value = editandoEmpleado?.nombre   ?? '';
+        ($('e-cargo')    as HTMLInputElement).value = editandoEmpleado?.cargo    ?? '';
+        ($('e-area')     as HTMLInputElement).value = editandoEmpleado?.area     ?? '';
+        ($('e-sede')     as HTMLInputElement).value = editandoEmpleado?.sede     ?? '';
+        ($('e-bio')      as HTMLTextAreaElement).value = editandoEmpleado?.bio   ?? '';
+        ($('e-telefono') as HTMLInputElement).value = editandoEmpleado?.telefono ?? '';
+        ($('e-whatsapp') as HTMLInputElement).value = editandoEmpleado?.whatsapp ?? '';
+        ($('e-email')    as HTMLInputElement).value = editandoEmpleado?.email    ?? '';
+        ($('e-linkedin') as HTMLInputElement).value = editandoEmpleado?.redes?.linkedin  ?? '';
+        ($('e-instagram')as HTMLInputElement).value = editandoEmpleado?.redes?.instagram ?? '';
+        ($('e-estado')   as HTMLSelectElement).value = editandoEmpleado?.estado ?? 'activo';
+        ($('e-foto') as HTMLInputElement).value = '';
+
+        const campoSlug = $('e-slug') as HTMLInputElement;
+        campoSlug.value = editandoEmpleado?.slug ?? '';
+        campoSlug.readOnly = Boolean(editandoEmpleado);
+
+        const vista = $('e-foto-vista');
+        if (editandoEmpleado?.foto_url) {
+          ($('e-foto-img') as HTMLImageElement).src = editandoEmpleado.foto_url;
+          vista.hidden = false;
+        } else {
+          vista.hidden = true;
+        }
+
+        $('dlg-empleado-titulo').textContent = editandoEmpleado ? `Editar ${editandoEmpleado.nombre}` : 'Nuevo empleado';
+        $('dlg-empleado-desc').textContent = editandoEmpleado
+          ? 'El slug no se puede cambiar: es la URL que ya se pudo haber compartido.'
+          : 'El slug se genera a partir del nombre si lo dejas vacío.';
+
+        abrirDialogo('dlg-empleado');
+      }
+
+      $('btn-nuevo-empleado').addEventListener('click', () => abrirEmpleado());
+
+      // Autocompletar el slug desde el nombre, solo mientras es nuevo y el
+      // slug no se tocó a mano — igual de criterio que un formulario de blog.
+      //
+      // Mapa explícito de tildes en vez de normalize('NFD') + una clase de
+      // escape Unicode para las marcas diacríticas: quitan lo mismo, pero un
+      // escape de ese tipo se corrompe con facilidad al pasar por
+      // herramientas que reinterpretan barras invertidas seguidas de "u". Un
+      // mapa de caracteres literales no tiene ese problema.
+      const SIN_TILDE: Record<string, string> = {
+        á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u', ü: 'u', ñ: 'n',
+      };
+      function comoSlug(texto: string): string {
+        return texto
+          .trim().toLowerCase()
+          .split('').map((c) => SIN_TILDE[c] ?? c).join('')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      }
+
+      let slugTocado = false;
+      ($('e-slug') as HTMLInputElement).addEventListener('input', () => { slugTocado = true; });
+      ($('e-nombre') as HTMLInputElement).addEventListener('input', () => {
+        if (editandoEmpleado || slugTocado) return;
+        ($('e-slug') as HTMLInputElement).value = comoSlug(($('e-nombre') as HTMLInputElement).value);
+      });
+
+      ($('e-foto') as HTMLInputElement).addEventListener('change', () => {
+        const archivo = ($('e-foto') as HTMLInputElement).files?.[0];
+        if (!archivo) return;
+        ($('e-foto-img') as HTMLImageElement).src = URL.createObjectURL(archivo);
+        $('e-foto-vista').hidden = false;
+      });
+
+      ($('form-empleado') as HTMLFormElement).addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const error = $('dlg-empleado-error');
+        error.hidden = true;
+
+        const btn = $('btn-guardar-empleado') as HTMLButtonElement;
+        btn.disabled = true;
+
+        const nombre    = ($('e-nombre') as HTMLInputElement).value.trim();
+        const slug      = ($('e-slug') as HTMLInputElement).value.trim().toLowerCase();
+        const cargo     = ($('e-cargo') as HTMLInputElement).value.trim() || null;
+        const area      = ($('e-area') as HTMLInputElement).value.trim() || null;
+        const sede      = ($('e-sede') as HTMLInputElement).value.trim() || null;
+        const bio       = ($('e-bio') as HTMLTextAreaElement).value.trim() || null;
+        const telefono  = ($('e-telefono') as HTMLInputElement).value.trim() || null;
+        const whatsapp  = ($('e-whatsapp') as HTMLInputElement).value.trim() || null;
+        const email     = ($('e-email') as HTMLInputElement).value.trim() || null;
+        const linkedin  = ($('e-linkedin') as HTMLInputElement).value.trim();
+        const instagram = ($('e-instagram') as HTMLInputElement).value.trim();
+        const estado    = ($('e-estado') as HTMLSelectElement).value;
+        const archivo   = ($('e-foto') as HTMLInputElement).files?.[0] ?? null;
+
+        // Se parte de lo que ya había en `redes` para no borrar una clave que
+        // alguien haya cargado directo en la base (facebook, twitter, lo que
+        // sea) solo porque el formulario no la conoce.
+        const redes: Record<string, string> = { ...(editandoEmpleado?.redes ?? {}) };
+        if (linkedin) redes.linkedin = linkedin; else delete redes.linkedin;
+        if (instagram) redes.instagram = instagram; else delete redes.instagram;
+
+        try {
+          if (!nombre) throw new Error('El nombre es obligatorio.');
+          if (!editandoEmpleado && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
+            throw new Error('El slug admite minúsculas, números y un guion entre palabras.');
+          }
+
+          let foto_url = editandoEmpleado?.foto_url ?? null;
+          if (archivo) foto_url = await subirFoto(archivo, editandoEmpleado?.slug ?? slug);
+
+          const fila = { nombre, cargo, area, sede, bio, telefono, whatsapp, email, foto_url, redes, estado };
+
+          if (!editandoEmpleado) {
+            const { error: err } = await supabase.from('empleados').insert({ slug, ...fila });
+            if (err) throw new Error(traducirEmpleado(err.message));
+          } else {
+            const { error: err } = await supabase.from('empleados').update(fila).eq('id', editandoEmpleado.id);
+            if (err) throw new Error(traducirEmpleado(err.message));
+          }
+
+          cerrarDialogo('dlg-empleado');
+          await cargarEmpleados();
+          avisarEmpleados('notice--ok', editandoEmpleado ? `${nombre} actualizado.` : `${nombre} creado.`);
+        } catch (ex) {
+          error.textContent = (ex as Error).message;
+          error.hidden = false;
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      async function alternarEstadoEmpleado(id: string) {
+        const emp = empleados.find((e) => e.id === id);
+        if (!emp) return;
+
+        const activar = emp.estado !== 'activo';
+        if (!activar && !confirm(`${emp.nombre} dejará de aparecer en el directorio y en su ficha. ¿Continuar?`)) {
+          return;
+        }
+
+        const { error } = await supabase.from('empleados')
+          .update({ estado: activar ? 'activo' : 'inactivo' })
+          .eq('id', id);
+        if (error) { avisarEmpleados('notice--error', error.message); return; }
+
+        await cargarEmpleados();
+        avisarEmpleados('notice--ok', `${emp.nombre} ${activar ? 'activado' : 'dado de baja'}.`);
+      }
+
+      /**
+       * Abre el diálogo de QR (el mismo de "Códigos QR") para la credencial de
+       * un empleado. Si ya existe un código ligado a esta persona, lo reutiliza;
+       * si no, crea uno opaco antes de abrir el diálogo.
+       *
+       * "Ligado" es `destino_id = empleados.id` — no comparar por texto contra
+       * `destino_url`. El slug es inmutable después de crear (mismo criterio
+       * que el código QR), así que la URL no cambia sola, pero comparar por id
+       * es correcto igual y no depende de esa garantía para seguir sirviendo.
+       *
+       * Por qué pasa por `qr_codes` en vez de generar un QR directo a
+       * `/empleados/SLUG/`: la regla del sistema es que TODO QR impreso pasa
+       * por `/r/` — nunca se imprime uno que codifique la URL final (ver
+       * docs/formularios.md). Un código en `qr_codes` es reasignable, se puede
+       * dar de baja sin reimprimir nada, y queda en el mismo tablero que el
+       * resto de los códigos.
+       */
+      async function abrirQrDeEmpleado(id: string) {
+        const emp = empleados.find((e) => e.id === id);
+        if (!emp) return;
+
+        const { data: existentes, error: errBuscar } = await supabase
+          .from('qr_codes').select('codigo').eq('destino_id', emp.id).limit(1);
+
+        if (errBuscar) { avisarEmpleados('notice--error', errBuscar.message); return; }
+
+        let codigo = existentes?.[0]?.codigo as string | undefined;
+
+        if (!codigo) {
+          const { data: nuevo, error: errGenerar } = await supabase.rpc('generar_codigo_opaco', { p_largo: 5 });
+          if (errGenerar) { avisarEmpleados('notice--error', errGenerar.message); return; }
+          codigo = nuevo as string;
+
+          const { error: errCrear } = await supabase.from('qr_codes').insert({
+            codigo,
+            tipo: 'empleado',
+            destino_id: emp.id,
+            destino_url: `${DOMINIO}/empleados/${emp.slug}/`,
+            notas: `Credencial de ${emp.nombre}.`,
+          });
+          if (errCrear) { avisarEmpleados('notice--error', errCrear.message); return; }
+        }
+
+        await cargarCodigos();
+        abrirQR(codigo);
+      }
 
       // ── QR ───────────────────────────────────────────────────────────────
       let qrCodigo = '';

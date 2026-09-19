@@ -82,27 +82,18 @@ const relacionados = todosProyectos
 
         <!-- Ficha técnica -->
         <aside class="proyecto-aside">
-          <div class="aside-card" data-aos="fade-left">
-            <p class="aside-card-title">Ficha Técnica</p>
-            <div class="ficha">
-              <div class="ficha-item">
-                <span class="ficha-label">Ubicación</span>
-                <span class="ficha-value">{ubicacion}</span>
-              </div>
-              <div class="ficha-item">
-                <span class="ficha-label">Categoría</span>
-                <span class="ficha-value">{categoria}</span>
-              </div>
-              <div class="ficha-item">
-                <span class="ficha-label">Año</span>
-                <span class="ficha-value">{año}</span>
-              </div>
-            </div>
+          <div class="panel panel--sm panel--rail" data-aos="fade-left">
+            <p class="panel-label">Ficha Técnica</p>
+            <ul class="data-list">
+              <li><span class="data-key">Ubicación</span><span class="data-value">{ubicacion}</span></li>
+              <li><span class="data-key">Categoría</span><span class="data-value">{categoria}</span></li>
+              <li><span class="data-key">Año</span><span class="data-value">{año}</span></li>
+            </ul>
           </div>
 
           {relacionados.length > 0 && (
-            <div class="aside-card" data-aos="fade-left" data-aos-delay="100">
-              <p class="aside-card-title">Proyectos relacionados</p>
+            <div class="panel panel--sm panel--rail" data-aos="fade-left" data-aos-delay="100">
+              <p class="panel-label">Proyectos relacionados</p>
               <nav aria-label="Proyectos relacionados">
                 {relacionados.map((p) => (
                   <a href={`/proyectos/${p.id}`} class="related-link">
@@ -253,55 +244,10 @@ const relacionados = todosProyectos
     gap: var(--sp-1);
   }
 
-  .aside-card {
-    background: var(--c-bg-white);
-    border: 1px solid var(--c-border-light);
-    padding: var(--sp-6) var(--sp-6);
-    position: relative;
-  }
+  /*  El aside separa con gap, así que el margen de .panel + .panel
+      sobra: sumaría 20px a los 4 del gap. */
+  .proyecto-aside .panel + .panel { margin-top: 0; }
 
-  .aside-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 100%;
-    background: var(--c-secondary);
-  }
-
-  .aside-card-title {
-    font-size: var(--fs-2xs);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-label);
-    text-transform: uppercase;
-    color: var(--c-text-muted);
-    margin-bottom: var(--sp-4);
-  }
-
-  .ficha { display: flex; flex-direction: column; }
-
-  .ficha-item {
-    display: flex;
-    flex-direction: column;
-    padding: var(--sp-3) 0;
-    border-bottom: 1px solid var(--c-border-light);
-  }
-
-  .ficha-item:last-child { border-bottom: none; }
-
-  .ficha-label {
-    font-size: var(--fs-2xs);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-label);
-    text-transform: uppercase;
-    color: var(--c-text-muted);
-    margin-bottom: 2px;
-  }
-
-  .ficha-value {
-    font-size: var(--fs-base);
-    font-weight: var(--fw-semibold);
-    color: var(--c-text-heading);
-  }
 
   .related-link {
     display: flex;

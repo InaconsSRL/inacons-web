@@ -2,6 +2,9 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import PageHero from '../../components/PageHero.astro';
+import MediaCard from '../../components/MediaCard.astro';
 
 type Servicio = CollectionEntry<'servicios'>;
 
@@ -11,22 +14,15 @@ servicios.sort((a: Servicio, b: Servicio) =>
 );
 ---
 
-<BaseLayout title="Operaciones | INACONS" description="Soluciones integrales en ingeniería y construcción para los sectores público y privado a nivel nacional.">
+<BaseLayout title="Servicios | INACONS" description="Soluciones integrales en ingeniería y construcción para los sectores público y privado a nivel nacional.">
 
   <!-- HERO -->
-  <section class="page-hero page-hero--sm">
-    <div class="page-hero-bg" style="background-image: url('/assets/imagenes/image_infraestructura.webp');"></div>
-    <div class="page-hero-overlay"></div>
-    <div class="page-hero-content" data-aos="fade-up" data-aos-duration="800">
-      <nav class="breadcrumb">
-        <a href="/">Inicio</a>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-current">Operaciones</span>
-      </nav>
-      <h1 class="page-hero-title">Agregamos valor<br>en cada etapa</h1>
-      <p class="page-hero-subtitle">Soluciones integrales desde la planificación hasta la entrega final</p>
-    </div>
-  </section>
+  <PageHero
+    image="/assets/imagenes/image_infraestructura.webp"
+    title="Agregamos valor<br>en cada etapa"
+    subtitle="Soluciones integrales desde la planificación hasta la entrega final"
+    current="Servicios"
+  />
 
   <!-- GRID DE SERVICIOS -->
   <section class="sec sec--muted">
@@ -34,26 +30,25 @@ servicios.sort((a: Servicio, b: Servicio) =>
 
       <div class="sh sh--center sh--medium" data-aos="fade-up">
         <p class="sh-label">Lo que hacemos</p>
-        <h2 class="sh-title">Nuestras Operaciones</h2>
+        <h2 class="sh-title">Nuestros Servicios</h2>
         <p class="sh-desc">
           Ofrecemos servicios especializados que cubren todas las etapas de construcción, desde la planificación hasta la ejecución final.
         </p>
       </div>
 
-      <div class="services-grid">
+      <div class="cards-row">
         {servicios.map((servicio: Servicio) => (
-          <a href={`/servicios/${servicio.id}`} class="service-item">
-            <div class="service-img">
-              <img src={servicio.data.imagen} alt={servicio.data.titulo} loading="lazy" />
-            </div>
-            <div class="service-info">
-              <h2>{servicio.data.titulo}</h2>
-              <p>{servicio.data.descripcion}</p>
-              <span class="btn btn-outline-light btn-sm">
-                Ver más <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              </span>
-            </div>
-          </a>
+          <MediaCard
+            href={`/servicios/${servicio.id}/`}
+            image={servicio.data.imagen}
+            alt={servicio.data.titulo}
+            title={servicio.data.titulo}
+            desc={servicio.data.descripcion}
+            cta="Ver más"
+            ratio="1/1"
+            ratioMobile="4/3"
+            width={640} height={640}
+          />
         ))}
       </div>
 
@@ -69,25 +64,25 @@ servicios.sort((a: Servicio, b: Servicio) =>
         <p class="sh-desc">Cada proyecto sigue un proceso riguroso de cuatro etapas que garantiza calidad, cumplimiento de plazos y satisfacción total del cliente.</p>
       </div>
       <div class="process-grid">
-        <div class="process-step" data-aos="fade-up" data-aos-delay="80">
-          <div class="process-num">01</div>
-          <h3 class="process-title">Descubrimiento</h3>
-          <p class="process-desc">Analizamos a fondo las necesidades del proyecto, realizamos estudios de factibilidad y evaluamos todos los aspectos técnicos y normativos.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="80">
+          <div class="feature-num" aria-hidden="true">01</div>
+          <h3 class="feature-title">Descubrimiento</h3>
+          <p class="feature-desc">Analizamos a fondo las necesidades del proyecto, realizamos estudios de factibilidad y evaluamos todos los aspectos técnicos y normativos.</p>
         </div>
-        <div class="process-step" data-aos="fade-up" data-aos-delay="160">
-          <div class="process-num">02</div>
-          <h3 class="process-title">Planificación y Diseño</h3>
-          <p class="process-desc">Desarrollamos planos detallados, cronogramas de trabajo y especificaciones técnicas, asegurando coordinación perfecta antes de la ejecución.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="160">
+          <div class="feature-num" aria-hidden="true">02</div>
+          <h3 class="feature-title">Planificación y Diseño</h3>
+          <p class="feature-desc">Desarrollamos planos detallados, cronogramas de trabajo y especificaciones técnicas, asegurando coordinación perfecta antes de la ejecución.</p>
         </div>
-        <div class="process-step" data-aos="fade-up" data-aos-delay="240">
-          <div class="process-num">03</div>
-          <h3 class="process-title">Ejecución</h3>
-          <p class="process-desc">Implementamos el proyecto con equipos especializados, supervisión constante y control de calidad en cada etapa, con los más altos estándares.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="240">
+          <div class="feature-num" aria-hidden="true">03</div>
+          <h3 class="feature-title">Ejecución</h3>
+          <p class="feature-desc">Implementamos el proyecto con equipos especializados, supervisión constante y control de calidad en cada etapa, con los más altos estándares.</p>
         </div>
-        <div class="process-step" data-aos="fade-up" data-aos-delay="320">
-          <div class="process-num">04</div>
-          <h3 class="process-title">Entrega y Seguimiento</h3>
-          <p class="process-desc">Realizamos pruebas finales, entregamos la obra completamente funcional y brindamos soporte post-entrega para garantizar la satisfacción total.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="320">
+          <div class="feature-num" aria-hidden="true">04</div>
+          <h3 class="feature-title">Entrega y Seguimiento</h3>
+          <p class="feature-desc">Realizamos pruebas finales, entregamos la obra completamente funcional y brindamos soporte post-entrega para garantizar la satisfacción total.</p>
         </div>
       </div>
     </div>
@@ -126,82 +121,19 @@ servicios.sort((a: Servicio, b: Servicio) =>
     </div>
   </section>
 
+  <CtaBand
+    label="¿Qué necesitas ejecutar?"
+    title="Armamos la propuesta del servicio que buscas"
+    description="Contanos el alcance y nuestro equipo técnico prepara una cotización."
+    primaryHref="/contacto/"
+    primaryLabel="Solicitar cotización"
+    secondaryHref="/proyectos/"
+    secondaryLabel="Ver proyectos"
+  />
+
 </BaseLayout>
 
-<style is:global>
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--sp-1);
-  }
-
-  .service-item {
-    position: relative;
-    height: 420px;
-    overflow: hidden;
-    text-decoration: none;
-    display: block;
-  }
-
-  .service-img {
-    position: absolute;
-    inset: 0;
-  }
-
-  .service-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .service-item:hover .service-img img {
-    transform: scale(1.05);
-  }
-
-  /* La tarjeta entera es el enlace, asi que el boton responde al hover
-     de la tarjeta y no solo al suyo: de lo contrario la imagen hace
-     zoom mientras el boton se queda inerte a un centimetro del cursor.
-     Mismos valores que .btn-outline-light:hover del sistema. */
-  .service-item:hover .btn-outline-light {
-    background: var(--c-border-dark);
-    border-color: rgba(255, 255, 255, 0.75);
-  }
-
-  .service-img::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(20,23,45,0.2) 0%,
-      rgba(20,23,45,0.88) 100%
-    );
-  }
-
-  .service-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: var(--sp-7) var(--sp-6);
-    z-index: 2;
-  }
-
-  .service-info h2 {
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    color: #fff;
-    margin-bottom: var(--sp-2);
-  }
-
-  .service-info p {
-    font-size: var(--fs-base);
-    color: var(--c-on-dark-2);
-    line-height: 1.6;
-    margin-bottom: var(--sp-5);
-  }
-
+<style>
   /* Proceso */
   .process-grid {
     display: grid;
@@ -210,41 +142,10 @@ servicios.sort((a: Servicio, b: Servicio) =>
     margin-top: var(--sp-l2);
   }
 
-  .process-step {
-    padding: var(--sp-l1) var(--sp-6);
-    background: var(--c-bg-muted);
-    border: 1px solid var(--c-border-light);
-    position: relative;
-  }
+  /*  Sobre una sección blanca las tarjetas se despegan mejor en plomo.
+      Es una decisión de contexto de esta página, no otra tarjeta. */
+  .process-grid .feature-item--card { background: var(--c-bg-muted); }
 
-  .process-step::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 3px;
-    background: var(--c-secondary);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform .3s ease;
-  }
-
-  .process-step:hover::before { transform: scaleX(1); }
-
-  .process-num {
-    font-size: 3.5rem; font-weight: var(--fw-display);
-    color: rgba(20,23,45,0.06);
-    line-height: 1; margin-bottom: var(--sp-4);
-    letter-spacing: var(--ls-tight);
-  }
-
-  .process-title {
-    font-size: var(--fs-md); font-weight: var(--fw-bold);
-    color: var(--c-text-heading); margin-bottom: var(--sp-3);
-  }
-
-  .process-desc {
-    font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.75;
-  }
 
   /* Tecnología */
   .tech-grid {
@@ -289,14 +190,11 @@ servicios.sort((a: Servicio, b: Servicio) =>
   }
 
   @media (max-width: 1023.98px) {
-    .services-grid { grid-template-columns: repeat(2, 1fr); }
     .process-grid { grid-template-columns: repeat(2, 1fr); }
     .tech-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 639.98px) {
-    .services-grid { grid-template-columns: 1fr; }
-    .service-item  { height: 320px; }
     .process-grid { grid-template-columns: 1fr; }
   }
 </style>

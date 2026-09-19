@@ -1,26 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
 ---
 
 <BaseLayout title="Canal Ético | INACONS" description="Canal ético y de cumplimiento de INACONS — reporte confidencial y seguro">
 
   <style slot="head">
     .guarantees-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-1); margin-top: var(--sp-l2); }
-    .guarantee-item {
-      background: var(--c-bg-white); border: 1px solid var(--c-border-light);
-      padding: var(--sp-6) var(--sp-6); display: flex; align-items: flex-start; gap: var(--sp-4);
-      transition: box-shadow .22s, border-color .22s;
-    }
-    .guarantee-item:hover { border-color: var(--c-secondary); box-shadow: var(--shadow-card); }
-    .guarantee-icon {
-      width: 44px; height: 44px; background: var(--c-bg-muted);
-      border-radius: 2px; display: flex; align-items: center; justify-content: center;
-      color: var(--c-secondary); flex-shrink: 0;
-      transition: background .22s, color .22s;
-    }
-    .guarantee-item:hover .guarantee-icon { background: var(--c-secondary); color: #fff; }
-    .guarantee-title { font-size: var(--fs-base); font-weight: var(--fw-bold); color: var(--c-text-heading); margin-bottom: var(--sp-1); }
-    .guarantee-desc { font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.65; }
     .terms-wrap { max-width: 800px; margin: 0 auto; }
     .terms-box {
       border: 1.5px solid var(--c-border); border-radius: 2px;
@@ -62,37 +48,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .terms-accept:has(input:checked) .check-label { color: var(--c-secondary); }
     #channelsSection { display: none; }
     .channels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-1); }
-    .channel-card {
-      background: var(--c-bg-white); border: 1px solid var(--c-border-light);
-      padding: var(--sp-7) var(--sp-6); display: flex; flex-direction: column;
-      position: relative; overflow: hidden;
-      transition: box-shadow .25s, transform .25s;
-    }
-    .channel-card::before {
-      content: ''; position: absolute; top: 0; left: 0; width: 0; height: 3px;
-      background: var(--c-secondary); transition: width .35s ease;
-    }
-    .channel-card:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-4px); }
-    .channel-card:hover::before { width: 100%; }
-    .channel-icon-wrap {
-      width: 52px; height: 52px; background: var(--c-bg-muted); border-radius: 2px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--c-secondary); margin-bottom: var(--sp-4);
-      transition: background .25s, color .25s;
-    }
-    .channel-card:hover .channel-icon-wrap { background: var(--c-secondary); color: #fff; }
-    .channel-name { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--c-text-heading); margin-bottom: var(--sp-2); line-height: 1.3; }
-    .channel-desc { font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.75; flex: 1; margin-bottom: var(--sp-6); }
-    .channel-btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
-      padding: var(--sp-3) var(--sp-5);
-      font-family: 'Montserrat', sans-serif;
-      font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: 0.8px; text-transform: uppercase;
-      text-decoration: none;
-      border: 1.5px solid var(--c-secondary); color: var(--c-secondary);
-      border-radius: 2px; transition: background .22s, color .22s; margin-top: auto;
-    }
-    .channel-btn:hover { background: var(--c-secondary); color: #fff; }
     @media (max-width: 767.98px) {
       .guarantees-grid { grid-template-columns: 1fr; }
       .channels-grid { grid-template-columns: 1fr; }
@@ -103,19 +58,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </style>
 
   <!-- HERO -->
-  <section class="page-hero page-hero--sm">
-    <div class="page-hero-bg" style="background-image: url('/assets/imagenes/home_about.webp')"></div>
-    <div class="page-hero-overlay"></div>
-    <div class="page-hero-content" data-aos="fade-up" data-aos-duration="800">
-      <nav class="breadcrumb">
-        <a href="/">Inicio</a>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-current">Canal Ético</span>
-      </nav>
-      <h1 class="page-hero-title">Canal Ético y<br>de Cumplimiento</h1>
-      <p class="page-hero-subtitle">Tu voz es segura — integridad no negociable</p>
-    </div>
-  </section>
+  <PageHero
+    image="/assets/imagenes/home_about.webp"
+    title="Canal Ético y<br>de Cumplimiento"
+    subtitle="Tu voz es segura — integridad no negociable"
+    current="Canal Ético"
+  />
 
   <!-- ① GARANTÍAS -->
   <section class="sec sec--muted">
@@ -126,25 +74,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <p class="sh-desc">En INACONS S.R.L, nuestra integridad no es negociable. Este canal está diseñado para que colaboradores, clientes y proveedores puedan reportar cualquier actividad que vulnere nuestra ética.</p>
       </div>
       <div class="guarantees-grid">
-        <div class="guarantee-item" data-aos="fade-up" data-aos-delay="80">
-          <div class="guarantee-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg></div>
+        <div class="feature-item feature-item--card feature-item--fila" data-aos="fade-up" data-aos-delay="80">
+          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg></div>
           <div>
-            <p class="guarantee-title">Anonimato Total</p>
-            <p class="guarantee-desc">Puedes reportar de forma completamente anónima. Tu identidad nunca será revelada sin tu consentimiento explícito.</p>
+            <p class="feature-title">Anonimato Total</p>
+            <p class="feature-desc">Puedes reportar de forma completamente anónima. Tu identidad nunca será revelada sin tu consentimiento explícito.</p>
           </div>
         </div>
-        <div class="guarantee-item" data-aos="fade-up" data-aos-delay="160">
-          <div class="guarantee-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div class="feature-item feature-item--card feature-item--fila" data-aos="fade-up" data-aos-delay="160">
+          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
           <div>
-            <p class="guarantee-title">Protección contra Represalias</p>
-            <p class="guarantee-desc">Queda terminantemente prohibida cualquier represalia contra quien use este canal de buena fe.</p>
+            <p class="feature-title">Protección contra Represalias</p>
+            <p class="feature-desc">Queda terminantemente prohibida cualquier represalia contra quien use este canal de buena fe.</p>
           </div>
         </div>
-        <div class="guarantee-item" data-aos="fade-up" data-aos-delay="240">
-          <div class="guarantee-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="feature-item feature-item--card feature-item--fila" data-aos="fade-up" data-aos-delay="240">
+          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <div>
-            <p class="guarantee-title">Comité Especializado</p>
-            <p class="guarantee-desc">Todas las comunicaciones son gestionadas por un Comité de Investigación independiente y especializado.</p>
+            <p class="feature-title">Comité Especializado</p>
+            <p class="feature-desc">Todas las comunicaciones son gestionadas por un Comité de Investigación independiente y especializado.</p>
           </div>
         </div>
       </div>
@@ -190,51 +138,51 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <p class="sh-desc">Elige la opción que mejor se ajuste a tu reporte. Todos los canales son confidenciales.</p>
       </div>
       <div class="channels-grid">
-        <div class="channel-card" data-aos="fade-up" data-aos-delay="80">
-          <div class="channel-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
-          <h3 class="channel-name">Canal de Consultas</h3>
-          <p class="channel-desc">Tu tranquilidad es nuestra prioridad. Espacio diseñado para absolver dudas de colaboradores y socios estratégicos.</p>
-          <a href="https://formularios-inacons.bitrix24.site/canal-consulta/" target="_blank" class="channel-btn">
+        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="80">
+          <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
+          <h3 class="feature-title">Canal de Consultas</h3>
+          <p class="feature-desc">Tu tranquilidad es nuestra prioridad. Espacio diseñado para absolver dudas de colaboradores y socios estratégicos.</p>
+          <a href="https://formularios-inacons.bitrix24.site/canal-consulta/" target="_blank" class="btn btn-outline btn-sm">
             Ingresar al formulario <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           </a>
         </div>
-        <div class="channel-card" data-aos="fade-up" data-aos-delay="140">
-          <div class="channel-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
-          <h3 class="channel-name">Canal de Denuncias</h3>
-          <p class="channel-desc">Tolerancia cero al soborno. Si detectas cualquier acto que comprometa nuestra integridad, repórtalo aquí.</p>
-          <a href="https://formularios-inacons.bitrix24.site/canal-denuncia/" target="_blank" class="channel-btn">
+        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="140">
+          <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+          <h3 class="feature-title">Canal de Denuncias</h3>
+          <p class="feature-desc">Tolerancia cero al soborno. Si detectas cualquier acto que comprometa nuestra integridad, repórtalo aquí.</p>
+          <a href="https://formularios-inacons.bitrix24.site/canal-denuncia/" target="_blank" class="btn btn-outline btn-sm">
             Ingresar al formulario <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           </a>
         </div>
-        <div class="channel-card" data-aos="fade-up" data-aos-delay="200">
-          <div class="channel-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></div>
-          <h3 class="channel-name">Canal de Sugerencias</h3>
-          <p class="channel-desc">Crecemos juntos. Valoramos tus ideas para fortalecer nuestra mejora continua.</p>
-          <a href="https://formularios-inacons.bitrix24.site/canal-sugerencia/" target="_blank" class="channel-btn">
+        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="200">
+          <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></div>
+          <h3 class="feature-title">Canal de Sugerencias</h3>
+          <p class="feature-desc">Crecemos juntos. Valoramos tus ideas para fortalecer nuestra mejora continua.</p>
+          <a href="https://formularios-inacons.bitrix24.site/canal-sugerencia/" target="_blank" class="btn btn-outline btn-sm">
             Ingresar al formulario <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           </a>
         </div>
-        <div class="channel-card" data-aos="fade-up" data-aos-delay="260">
-          <div class="channel-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg></div>
-          <h3 class="channel-name">Reporte de Buenas Prácticas</h3>
-          <p class="channel-desc">Reconocemos el valor de cuidar lo nuestro. Reporta acciones que preservan nuestros recursos.</p>
-          <a href="https://formularios-inacons.bitrix24.site/reporte-buenas-practicas/" target="_blank" class="channel-btn">
+        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="260">
+          <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></svg></div>
+          <h3 class="feature-title">Reporte de Buenas Prácticas</h3>
+          <p class="feature-desc">Reconocemos el valor de cuidar lo nuestro. Reporta acciones que preservan nuestros recursos.</p>
+          <a href="https://formularios-inacons.bitrix24.site/reporte-buenas-practicas/" target="_blank" class="btn btn-outline btn-sm">
             Ingresar al formulario <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           </a>
         </div>
-        <div class="channel-card" data-aos="fade-up" data-aos-delay="320">
-          <div class="channel-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-          <h3 class="channel-name">Reporte de Quejas</h3>
-          <p class="channel-desc">Tu satisfacción nos importa. Si algo no cumple con nuestros estándares, utiliza este canal.</p>
-          <a href="https://formularios-inacons.bitrix24.site/reporte-quejas/" target="_blank" class="channel-btn">
+        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="320">
+          <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3 class="feature-title">Reporte de Quejas</h3>
+          <p class="feature-desc">Tu satisfacción nos importa. Si algo no cumple con nuestros estándares, utiliza este canal.</p>
+          <a href="https://formularios-inacons.bitrix24.site/reporte-quejas/" target="_blank" class="btn btn-outline btn-sm">
             Ingresar al formulario <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           </a>
         </div>
-        <div class="channel-card" data-aos="fade-up" data-aos-delay="380">
-          <div class="channel-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15V9a8 8 0 0 1 16 0v6"/></svg></div>
-          <h3 class="channel-name">Actos y Condiciones Subestándar</h3>
-          <p class="channel-desc">Seguridad ante todo. Reporta cualquier condición física o acción que represente un riesgo de accidente.</p>
-          <a href="https://formularios-inacons.bitrix24.site/reporte-actos-subestandar/" target="_blank" class="channel-btn">
+        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="380">
+          <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15V9a8 8 0 0 1 16 0v6"/></svg></div>
+          <h3 class="feature-title">Actos y Condiciones Subestándar</h3>
+          <p class="feature-desc">Seguridad ante todo. Reporta cualquier condición física o acción que represente un riesgo de accidente.</p>
+          <a href="https://formularios-inacons.bitrix24.site/reporte-actos-subestandar/" target="_blank" class="btn btn-outline btn-sm">
             Ingresar al formulario <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
           </a>
         </div>

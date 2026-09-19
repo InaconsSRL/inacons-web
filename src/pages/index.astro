@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
 import MediaCard from '../components/MediaCard.astro';
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
@@ -90,14 +91,7 @@ const servicios = [
     }
     .hero-stat { white-space: nowrap; text-align: left; }
 
-    .hero-stat .stat-num {
-      font-size: var(--fs-display);
-      color: var(--c-text-white);
-    }
-    .hero-stat .stat-label {
-      color: var(--c-on-dark-3);
-      margin-top: var(--sp-1);
-    }
+    .hero-stat .stat-label { margin-top: var(--sp-1); }
 
     /*  Entre 768 y 1024 no hay ancho para las dos columnas: el titular
         a 4.3vw ya ocupa casi todo el contenedor y las cifras al costado
@@ -649,19 +643,19 @@ const servicios = [
 
       <!-- data-counter es el contrato con initCounters() de main.js -->
       <div class="hero-stats">
-        <div class="hero-stat card--stat">
+        <div class="hero-stat card--stat card--stat-lg card--stat-oscuro">
           <span class="stat-num" data-counter="15" data-suffix="+">15+</span>
           <span class="stat-label">Años de experiencia</span>
         </div>
-        <div class="hero-stat card--stat">
+        <div class="hero-stat card--stat card--stat-lg card--stat-oscuro">
           <span class="stat-num" data-counter="150" data-suffix="+">150+</span>
           <span class="stat-label">km² construidos</span>
         </div>
-        <div class="hero-stat card--stat">
+        <div class="hero-stat card--stat card--stat-lg card--stat-oscuro">
           <span class="stat-num" data-counter="100" data-suffix="M+">100M+</span>
           <span class="stat-label">Inversión gestionada</span>
         </div>
-        <div class="hero-stat card--stat">
+        <div class="hero-stat card--stat card--stat-lg card--stat-oscuro">
           <span class="stat-num" data-counter="100" data-suffix="+">100+</span>
           <span class="stat-label">Profesionales</span>
         </div>
@@ -895,5 +889,15 @@ const servicios = [
       </div>
     </div>
   </section>
+
+  <CtaBand
+    label="¿Empezamos?"
+    title="Cuéntanos qué necesitas construir"
+    description="Revisamos el alcance y te respondemos con una propuesta técnica y un plazo."
+    primaryHref="/contacto/"
+    primaryLabel="Solicitar propuesta"
+    secondaryHref="/proyectos/"
+    secondaryLabel="Ver proyectos"
+  />
 
 </BaseLayout>

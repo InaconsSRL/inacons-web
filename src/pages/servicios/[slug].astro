@@ -37,7 +37,7 @@ const otrosServicios = todosServicios
     image={imagen}
     title={titulo}
     subtitle={descripcion}
-    parent={{ label: 'Operaciones', href: '/servicios' }}
+    parent={{ label: 'Servicios', href: '/servicios/' }}
     current={titulo}
     size="md"
   />
@@ -69,8 +69,8 @@ const otrosServicios = todosServicios
         <!-- Aside -->
         <aside class="service-aside">
           <!-- Descarga del brochure -->
-          <div class="aside-card">
-            <p class="aside-card-title">Descargas</p>
+          <div class="panel panel--sm panel--rail">
+            <p class="panel-label">Descargas</p>
             <div class="download-list">
               <a href="/assets/documentos/brochure_inacons.pdf" target="_blank" rel="noopener" class="download-item">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
@@ -80,8 +80,8 @@ const otrosServicios = todosServicios
           </div>
 
           <!-- Otros servicios -->
-          <div class="aside-card">
-            <p class="aside-card-title">Otros servicios</p>
+          <div class="panel panel--sm panel--rail">
+            <p class="panel-label">Otros servicios</p>
             <nav class="other-services" aria-label="Otros servicios">
               {otrosServicios.map((s) => (
                 <a href={`/servicios/${s.id}`} class="other-service-link">
@@ -168,29 +168,10 @@ const otrosServicios = todosServicios
     gap: var(--sp-1);
   }
 
-  .aside-card {
-    background: var(--c-bg-white);
-    border: 1px solid var(--c-border-light);
-    padding: var(--sp-7) var(--sp-6);
-    position: relative;
-  }
-
-  .aside-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 100%;
-    background: var(--c-secondary);
-  }
-
-  .aside-card-title {
-    font-size: var(--fs-2xs);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-label);
-    text-transform: uppercase;
-    color: var(--c-text-muted);
-    margin-bottom: var(--sp-5);
-  }
+  /*  El aside separa con gap, así que el margen de .panel + .panel
+      sobra: sumaría 20px a los 4 del gap, y en la rejilla de tablet
+      empujaría la segunda tarjeta dentro de su celda. */
+  .service-aside .panel + .panel { margin-top: 0; }
 
   .download-list { display: flex; flex-direction: column; gap: var(--sp-2); }
 

@@ -9,6 +9,7 @@
 //
 // Interna: noindex, fuera del sitemap y bloqueada en robots.txt.
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import MediaCard from '../../components/MediaCard.astro';
 import { generarQR, urlDeCodigo, PERFILES } from '../../lib/qr';
 
 // Se generan en el build con el modulo real. Son escaneables desde la
@@ -79,10 +80,69 @@ const codigoPanel = `<div class="panel panel--raised">
   <p class="panel-desc">Descripción.</p>
 </div>`;
 
+const codigoTarjeta = `<div class="feature-grid">
+  <a class="feature-item feature-item--card feature-item--accion">
+    <span class="feature-num feature-num--marca" aria-hidden="true">9001</span>
+    <div class="feature-icon">…svg…</div>
+    <p class="panel-label">ISO 9001</p>
+    <h3 class="feature-title">Gestión de Calidad</h3>
+    <p class="feature-desc">Descripción.</p>
+    <span class="btn btn-outline btn-sm">Descargar</span>
+  </a>
+</div>`;
+
+const codigoAside = `<aside class="proyecto-aside">
+  <div class="panel panel--sm panel--rail">
+    <p class="panel-label">Ficha técnica</p>
+    <ul class="data-list">…</ul>
+  </div>
+</aside>`;
+
 const codigoLista = `<ul class="data-list">
   <li><span class="data-key">Código</span><span class="data-value">A7F3K</span></li>
   <li><span class="data-key">Estado</span><span class="status-ok">Activo</span></li>
 </ul>`;
+
+const codigoPersona = `<div class="credencial">
+  <div class="credencial-top">
+    <img class="credencial-logo" src="…logo_inacons.svg…" alt="INACONS" />
+    <div class="credencial-top-acciones">
+      <span class="credencial-id-tag">Credencial digital</span>
+      <button class="credencial-rapida" aria-label="Guardar contacto">…icono…</button>
+    </div>
+  </div>
+  <div class="credencial-perfil">
+    <div><div class="credencial-foto--placeholder">MG</div></div>
+    <div class="credencial-perfil-info">
+      <p class="credencial-nombre">María Gómez</p>
+      <p class="credencial-cargo">Gerente de Proyectos</p>
+      <div class="credencial-meta"><span>…icono… Operaciones</span> <span>…icono… Lima</span></div>
+      <span class="chip credencial-estado">…icono… Empleado INACONS</span>
+      <p class="credencial-bio">…</p>
+    </div>
+  </div>
+  <div class="credencial-divisor"></div>
+  <ul class="credencial-datos">
+    <li><a class="credencial-dato" href="tel:…">…icono…
+      <span><span class="credencial-dato-label">Teléfono</span><span class="credencial-dato-valor">+51 999 999 999</span></span>
+    </a></li>
+  </ul>
+  <div class="credencial-acciones">
+    <button class="btn btn-accent btn-block">Guardar contacto</button>
+    <div class="credencial-compartir">
+      <button class="btn btn-outline btn-block">Compartir</button>
+      <div class="credencial-compartir-menu" hidden>…</div>
+    </div>
+  </div>
+  <div class="credencial-identidad">
+    <div class="credencial-identidad-info">
+      <p class="credencial-identidad-titulo">Identidad digital</p>
+      <p class="credencial-identidad-estado">…punto… Empleado verificado</p>
+      <button class="credencial-identidad-url">…url…</button>
+    </div>
+    <div class="credencial-qr"><!-- generarQR() de src/lib/qr.ts, perfil "pantalla" --></div>
+  </div>
+</div>`;
 ---
 
 <BaseLayout
@@ -234,11 +294,13 @@ const codigoLista = `<ul class="data-list">
           <a href="#espaciado">Espaciado</a>
           <a href="#botones">Botones</a>
           <a href="#superficies">Superficies</a>
+          <a href="#tarjetas">Tarjetas</a>
           <a href="#formularios">Formularios</a>
           <a href="#avisos">Avisos</a>
           <a href="#listas">Listas y estados</a>
           <a href="#encabezados">Encabezados</a>
           <a href="#qr">Códigos QR</a>
+          <a href="#persona">Tarjeta de persona</a>
         </nav>
       </header>
 
@@ -358,6 +420,116 @@ const codigoLista = `<ul class="data-list">
         <div class="ds-codigo"><pre>{codigoBotones}</pre></div>
       </section>
 
+      <!-- ── TARJETAS ────────────────────────────────────────── -->
+      <section class="ds-seccion" id="tarjetas">
+        <h2>Tarjetas</h2>
+        <p>
+          <code>.feature-item</code> es <strong>la</strong> tarjeta de contenido del sitio:
+          ícono (o número) + título + descripción. Estaba reescrita seis veces con seis
+          nombres — <code>.cert-card</code>, <code>.channel-card</code>,
+          <code>.ods-card</code>, <code>.guarantee-item</code>, <code>.pillar-card</code>,
+          <code>.process-step</code> — con cuatro tamaños de ícono, tres de título y cuatro
+          interlineados. Si necesitás una variante que no está acá, se agrega acá.
+        </p>
+
+        <p class="ds-grupo">Los cinco modificadores</p>
+        <div class="ds-demo">
+          <div class="feature-grid" style="grid-template-columns: repeat(3, 1fr)">
+            <div class="feature-item feature-item--card feature-item--centrado">
+              <div class="feature-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <p class="feature-title">--card --centrado</p>
+              <p class="feature-desc">Superficie propia y texto centrado. Para una fila de cuatro.</p>
+            </div>
+
+            <div class="feature-item feature-item--card feature-item--fila">
+              <div class="feature-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+              </div>
+              <div>
+                <p class="feature-title">--fila</p>
+                <p class="feature-desc">Ícono al costado. El título y la descripción van dentro de un <code>&lt;div&gt;</code>.</p>
+              </div>
+            </div>
+
+            <a href="#tarjetas" class="feature-item feature-item--card feature-item--accion">
+              <span class="feature-num feature-num--marca" aria-hidden="true">01</span>
+              <p class="panel-label">Rótulo</p>
+              <p class="feature-title">--accion</p>
+              <p class="feature-desc">La descripción se estira para que el botón quede al pie en toda la fila.</p>
+              <span class="btn btn-outline btn-sm">Descargar</span>
+            </a>
+          </div>
+        </div>
+
+        <p class="ds-grupo">Tarjeta numerada</p>
+        <p>
+          <code>.feature-num</code> ocupa el lugar del ícono. Lleva
+          <strong>siempre</strong> <code>aria-hidden</code>: usa
+          <code>--c-ink-ghost</code>, que es textura y no texto — el orden ya lo da el DOM.
+          Con <code>--marca</code> pasa a marca de agua en la esquina.
+        </p>
+        <div class="ds-demo">
+          <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr)">
+            <div class="feature-item feature-item--card">
+              <div class="feature-num" aria-hidden="true">01</div>
+              <p class="feature-title">En el flujo</p>
+              <p class="feature-desc">El número encabeza la tarjeta.</p>
+            </div>
+            <div class="feature-item feature-item--card">
+              <span class="feature-num feature-num--marca" aria-hidden="true">02</span>
+              <p class="feature-title">--marca</p>
+              <p class="feature-desc">El número se va al fondo, en la esquina.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoTarjeta}</pre></div>
+
+        <p class="ds-grupo">Tarjeta de medio — <code>MediaCard</code></p>
+        <p>
+          Foto a sangre con el texto encima. Es la del home, la de <code>/servicios/</code>
+          y la de <code>/proyectos/</code> — antes eran tres implementaciones.
+          La proporción viaja como custom property (<code>ratio</code>,
+          <code>ratioMobile</code>) porque el <code>&lt;style&gt;</code> de una página no
+          alcanza al markup del componente.
+        </p>
+        <div class="ds-nota">
+          <strong>Dos reglas que no son cosméticas.</strong> El título va a
+          <code>-webkit-line-clamp: 3</code> y el cuerpo lleva <em>fondo propio</em>, no
+          solo el velo de la foto. Sin lo primero, un título de obra pública de 158
+          caracteres desbordaba la tarjeta y <code>overflow:hidden</code> se comía 56px
+          en silencio. Sin lo segundo, el texto subía hasta donde el velo vale 0.11 y el
+          blanco caía a 1.68:1 sobre un cielo. Con las dos, el contraste es 14.7:1 sea
+          cual sea la foto.
+        </div>
+        <div class="ds-demo">
+          <div class="cards-row" style="max-width: 720px; margin: 0 auto">
+            <MediaCard
+              href="/proyectos/"
+              image="/assets/imagenes/hero_project.webp"
+              alt="Ejemplo de tarjeta de proyecto"
+              tag="Obras Civiles"
+              title="Mejoramiento y ampliación de los servicios de agua potable del centro poblado de San Juan de Yanamuclo, Jauja"
+              meta="Castilla, Piura · 2025"
+              ratio="4/5"
+              width={640} height={800}
+            />
+            <MediaCard
+              href="/servicios/"
+              image="/assets/imagenes/image_obra_civiles.webp"
+              alt="Ejemplo de tarjeta de servicio"
+              title="Obras Civiles"
+              desc="Infraestructura urbana, vial e industrial con metodología BIM."
+              cta="Ver más"
+              ratio="1/1"
+              width={640} height={640}
+            />
+          </div>
+        </div>
+      </section>
+
       <!-- ── SUPERFICIES ─────────────────────────────────────── -->
       <section class="ds-seccion" id="superficies">
         <h2>Superficies</h2>
@@ -383,6 +555,33 @@ const codigoLista = `<ul class="data-list">
         </div>
 
         <div class="ds-codigo"><pre>{codigoPanel}</pre></div>
+
+        <p class="ds-grupo">Módulo de barra lateral</p>
+        <p>
+          <code>.panel--sm</code> ajusta el padding a una columna angosta y
+          <code>.panel--rail</code> pone el filete en el borde izquierdo: al costado de un
+          cuerpo de texto que ya tiene titular, el filete superior compite con él.
+          El rótulo es <code>.panel-label</code>, no <code>.panel-title</code> — un módulo
+          lateral no encabeza, nombra lo que tiene dentro.
+        </p>
+
+        <div class="ds-demo">
+          <div style="max-width: 300px">
+            <div class="panel panel--sm panel--rail">
+              <p class="panel-label">Ficha técnica</p>
+              <ul class="data-list">
+                <li><span class="data-key">Ubicación</span><span class="data-value">Castilla, Piura</span></li>
+                <li><span class="data-key">Año</span><span class="data-value">2025</span></li>
+              </ul>
+            </div>
+            <div class="panel panel--sm panel--rail" style="margin-top: var(--sp-1)">
+              <p class="panel-label">Descargas</p>
+              <p class="panel-desc">Brochure general</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoAside}</pre></div>
       </section>
 
       <!-- ── FORMULARIOS ─────────────────────────────────────── -->
@@ -509,6 +708,48 @@ const codigoLista = `<ul class="data-list">
               <span class="stat-num">6</span>
               <span class="stat-label">Departamentos</span>
             </div>
+            <div class="card--stat card--stat-sm">
+              <span class="stat-num">ISO 14001</span>
+              <span class="stat-label">.card--stat-sm</span>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          Tres variantes: <code>--sm</code> para una tira densa donde el valor es un
+          código y no una cifra; <code>--lg</code> para la cifra destacada del hero;
+          <code>--oscuro</code> para fondo oscuro. Las tres existen porque el home y
+          <code>/mineria</code> reescribían los mismos dos colores y el mismo tamaño,
+          cada una en su página.
+        </p>
+        <div class="ds-demo ds-demo--oscuro">
+          <div class="ds-fila" style="gap: var(--sp-l1)">
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">15+</span>
+              <span class="stat-label">Años de experiencia</span>
+            </div>
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">100M+</span>
+              <span class="stat-label">Inversión gestionada</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="ds-grupo">Chip</p>
+        <p>
+          Un ícono y dos o tres palabras. Si necesita una descripción debajo ya no es un
+          chip: es un <code>.feature-item</code>.
+        </p>
+        <div class="ds-demo">
+          <div class="ds-fila">
+            <div class="chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+              Cero Accidentes
+            </div>
+            <div class="chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+              Reconocimientos
+            </div>
           </div>
         </div>
         <p style="font-size: var(--fs-sm); color: var(--c-text-muted); line-height:1.6">
@@ -571,6 +812,124 @@ const codigoLista = `<ul class="data-list">
                 <span class="data-value" style="font-weight:var(--fw-normal); text-align:right; max-width:46ch">{p.consejo}</span>
               </li>
             ))}
+          </ul>
+        </div>
+      </section>
+
+      <!-- ── PERSONA ─────────────────────────────────────────── -->
+      <section class="ds-seccion" id="persona">
+        <h2>Tarjeta de persona</h2>
+        <p>
+          Para <code>/empleados/</code>: la ficha individual y el directorio. No existía
+          ningún patrón de foto de persona en el sistema — las fotos que ya había
+          (clientes, servicios) son a sangre con velo (<code>.card--media</code>),
+          pensadas para vender, no para una cara.
+        </p>
+
+        <p class="ds-grupo">Avatar — foto o iniciales</p>
+        <div class="ds-demo" style="gap: var(--sp-4); align-items: center;">
+          <div class="avatar avatar--sm avatar--placeholder">JP</div>
+          <div class="avatar avatar--placeholder">MG</div>
+          <div class="avatar avatar--lg avatar--placeholder">AR</div>
+        </div>
+        <p style="font-size: var(--fs-sm); color: var(--c-text-muted); margin-top: var(--sp-2)">
+          Las iniciales no son un placeholder de contenido: son el propio dato, para
+          cuando todavía no hay foto cargada. <code>.avatar</code> a secas espera un
+          <code>&lt;img&gt;</code>; <code>.avatar--placeholder</code> es el respaldo.
+        </p>
+
+        <p class="ds-grupo">
+          Credencial — <code>/empleados/SLUG/</code>, rediseño set 2026 v3: una
+          pieza con dos composiciones. En escritorio es horizontal (foto a la
+          izquierda, identidad a la derecha, datos en rejilla
+          <code>auto-fit</code>); por debajo de 768px se centra y se apila. Cuatro
+          fronteras: base, <code>1023.98</code>, <code>767.98</code> y una propia
+          del componente en <code>389.98</code>. El panel "Identidad digital" es la
+          única sección en <code>--c-primary</code>: es la que valida a la persona,
+          no contenido editorial sobre ella.
+        </p>
+        <div class="ds-demo" style="padding: var(--sp-6); background: var(--c-bg-muted);">
+          <div class="credencial">
+            <div class="credencial-top">
+              <img class="credencial-logo" src="/assets/imagenes/logos/logo_inacons.svg" alt="INACONS" />
+              <div class="credencial-top-acciones">
+                <span class="credencial-id-tag">Credencial digital</span>
+                <button class="credencial-rapida" aria-label="Guardar contacto">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="credencial-perfil">
+              <div><div class="credencial-foto--placeholder">MG</div></div>
+              <div class="credencial-perfil-info">
+                <p class="credencial-nombre">María Gómez</p>
+                <p class="credencial-cargo">Gerente de Proyectos</p>
+                <div class="credencial-meta">
+                  <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Operaciones</span>
+                  <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Lima</span>
+                </div>
+                <span class="chip credencial-estado">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                  Empleado INACONS
+                </span>
+                <p class="credencial-bio">Diecisiete años en obra civil y edificación. Lleva los proyectos de habilitación urbana de la zona sur.</p>
+              </div>
+            </div>
+            <div class="credencial-divisor"></div>
+            <ul class="credencial-datos">
+              <li><a class="credencial-dato" href="tel:+51999999999">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2.84h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.09a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span><span class="credencial-dato-label">Teléfono</span><span class="credencial-dato-valor">+51 999 999 999</span></span>
+              </a></li>
+              <li><a class="credencial-dato" href="#">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                <span><span class="credencial-dato-label">WhatsApp</span><span class="credencial-dato-valor">+51 999 999 999</span></span>
+              </a></li>
+              <li><a class="credencial-dato" href="#">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <span><span class="credencial-dato-label">Correo corporativo</span><span class="credencial-dato-valor">maria.gomez@inacons.com.pe</span></span>
+              </a></li>
+            </ul>
+            <div class="credencial-acciones">
+              <button class="btn btn-accent btn-block">Guardar contacto</button>
+              <div class="credencial-compartir">
+                <button class="btn btn-outline btn-block">Compartir</button>
+              </div>
+            </div>
+            <div class="credencial-identidad">
+              <div class="credencial-identidad-info">
+                <p class="credencial-identidad-titulo">Identidad digital</p>
+                <p class="credencial-identidad-estado"><span class="credencial-identidad-punto"></span> Empleado verificado</p>
+                <span class="credencial-identidad-url">inacons.com.pe/empleados/maria-gomez/</span>
+              </div>
+              <div class="credencial-qr">
+                <div class="credencial-qr-lienzo" set:html={muestrasQR[0].r.svg} />
+              </div>
+            </div>
+            <div class="credencial-pie"><strong>INACONS S.R.L.</strong> · Ingeniería y Construcción</div>
+          </div>
+        </div>
+        <p style="font-size: var(--fs-sm); color: var(--c-text-muted); margin-top: var(--sp-2)">
+          <code>.btn-whatsapp</code> es la única excepción de color de todo el
+          sistema: verde de marca (<code>#25d366</code>), no un azul o naranja de
+          INACONS — es un botón que actúa sobre una plataforma externa, en su
+          propio color reconocible. Una fila de <code>.credencial-datos</code> con
+          WhatsApp la usa igual que <code>tarjetas/index.astro</code>.
+        </p>
+        <div class="ds-codigo"><pre>{codigoPersona}</pre></div>
+
+        <p class="ds-grupo">Fila de directorio</p>
+        <div class="ds-demo">
+          <ul class="directorio-lista" style="width: 100%; max-width: 420px;">
+            <li>
+              <a class="directorio-fila" href="#">
+                <div class="avatar avatar--sm avatar--placeholder">MG</div>
+                <div>
+                  <p class="directorio-fila-nombre">María Gómez</p>
+                  <p class="directorio-fila-cargo">Gerente de Proyectos</p>
+                </div>
+              </a>
+            </li>
           </ul>
         </div>
       </section>

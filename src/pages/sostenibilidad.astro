@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import PageHero from '../components/PageHero.astro';
 ---
 
 <BaseLayout title="Sostenibilidad | INACONS" description="Responsabilidad social, seguridad y desarrollo sostenible en cada proyecto de INACONS">
@@ -17,63 +19,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .split-right .split-img { order: 2; }
     .split-right .split-text { order: 1; }
     .safety-chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-6); }
-    .safety-chip {
-      display: inline-flex; align-items: center; gap: var(--sp-2);
-      padding: var(--sp-2) var(--sp-4);
-      border: 1.5px solid var(--c-border);
-      border-radius: 2px;
-      font-size: var(--fs-sm); font-weight: var(--fw-semibold);
-      color: var(--c-text-heading);
-      background: var(--c-bg-white);
-      transition: border-color .22s, background .22s, color .22s;
-    }
-    .safety-chip:hover { border-color: var(--c-secondary); background: rgba(27,82,120,0.05); color: var(--c-secondary); }
-    .safety-chip i { color: var(--c-secondary); }
-    .ods-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-6); margin-top: var(--sp-l2); }
-    .ods-card {
-      background: var(--c-bg-white);
-      border: 1px solid var(--c-border-light);
-      border-radius: 2px; padding: var(--sp-7) var(--sp-6); text-align: center;
-      transition: box-shadow .24s, transform .24s, border-color .24s;
-    }
-    .ods-card:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-4px); border-color: var(--c-secondary); }
-    .ods-icon {
-      width: 56px; height: 56px;
-      background: var(--c-bg-muted); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--c-secondary); margin: 0 auto var(--sp-4);
-      transition: background .24s, color .24s;
-    }
-    .ods-card:hover .ods-icon { background: var(--c-secondary); color: #fff; }
-    .ods-title { font-size: var(--fs-base); font-weight: var(--fw-bold); color: var(--c-text-heading); margin-bottom: var(--sp-2); }
-    .ods-desc { font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.7; }
     @media (max-width: 767.98px) {
       .split-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
       .split-img { height: 260px; }
       .split-right .split-img, .split-right .split-text { order: 0; }
-      .ods-grid { grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); }
     }
     @media (min-width: 768px) and (max-width: 1023.98px) {
       .split-grid { gap: var(--sp-l2); }
       .split-img { height: 360px; }
-      .ods-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 
   <!-- HERO -->
-  <section class="page-hero">
-    <div class="page-hero-bg" style="background-image: url('/assets/imagenes/sostenibilidad.webp')"></div>
-    <div class="page-hero-overlay"></div>
-    <div class="page-hero-content" data-aos="fade-up" data-aos-duration="800">
-      <nav class="breadcrumb">
-        <a href="/">Inicio</a>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-current">Sostenibilidad</span>
-      </nav>
-      <h1 class="page-hero-title">Construyendo<br>un futuro mejor</h1>
-      <p class="page-hero-subtitle">Responsabilidad social, seguridad y desarrollo sostenible en cada proyecto</p>
-    </div>
-  </section>
+  <PageHero
+    image="/assets/imagenes/sostenibilidad.webp"
+    title="Construyendo<br>un futuro mejor"
+    subtitle="Responsabilidad social, seguridad y desarrollo sostenible en cada proyecto"
+    current="Sostenibilidad"
+    size="md"
+  />
 
   <!-- ① COMPROMISO SOCIAL -->
   <section class="sec sec--white">
@@ -112,10 +76,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <p class="sh-desc">En INACONS aplicamos una política de cero accidentes, asegurando la seguridad y bienestar de cada colaborador. Desarrollamos iniciativas de reconocimiento, orden en obra y participación de todas las áreas en la prevención.</p>
           </div>
           <div class="safety-chips">
-            <div class="safety-chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> Cero Accidentes</div>
-            <div class="safety-chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Cultura Preventiva</div>
-            <div class="safety-chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg> Reconocimientos</div>
-            <div class="safety-chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Orden en Obra</div>
+            <div class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg> Cero Accidentes</div>
+            <div class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Cultura Preventiva</div>
+            <div class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg> Reconocimientos</div>
+            <div class="chip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg> Orden en Obra</div>
           </div>
         </div>
       </div>
@@ -130,30 +94,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h2 class="sh-title">Objetivos de Desarrollo Sostenible</h2>
         <p class="sh-desc">Nuestras operaciones están alineadas con los ODS de las Naciones Unidas, integrando sostenibilidad en cada etapa de nuestros proyectos.</p>
       </div>
-      <div class="ods-grid">
-        <div class="ods-card" data-aos="fade-up" data-aos-delay="100">
-          <div class="ods-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg></div>
-          <p class="ods-title">Industria e Infraestructura</p>
-          <p class="ods-desc">Construimos infraestructura resiliente que impulsa el desarrollo económico.</p>
+      <div class="feature-grid" style="margin-top: var(--sp-l2)">
+        <div class="feature-item feature-item--card feature-item--centrado" data-aos="fade-up" data-aos-delay="100">
+          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg></div>
+          <p class="feature-title">Industria e Infraestructura</p>
+          <p class="feature-desc">Construimos infraestructura resiliente que impulsa el desarrollo económico.</p>
         </div>
-        <div class="ods-card" data-aos="fade-up" data-aos-delay="180">
-          <div class="ods-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
-          <p class="ods-title">Acción por el Clima</p>
-          <p class="ods-desc">Reducimos el impacto ambiental incorporando prácticas sostenibles en obra.</p>
+        <div class="feature-item feature-item--card feature-item--centrado" data-aos="fade-up" data-aos-delay="180">
+          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
+          <p class="feature-title">Acción por el Clima</p>
+          <p class="feature-desc">Reducimos el impacto ambiental incorporando prácticas sostenibles en obra.</p>
         </div>
-        <div class="ods-card" data-aos="fade-up" data-aos-delay="260">
-          <div class="ods-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div class="feature-item feature-item--card feature-item--centrado" data-aos="fade-up" data-aos-delay="260">
+          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <p class="ods-title">Trabajo Decente</p>
-          <p class="ods-desc">Generamos empleo digno y seguro para comunidades locales en cada proyecto.</p>
+          <p class="feature-title">Trabajo Decente</p>
+          <p class="feature-desc">Generamos empleo digno y seguro para comunidades locales en cada proyecto.</p>
         </div>
-        <div class="ods-card" data-aos="fade-up" data-aos-delay="340">
-          <div class="ods-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/></svg></div>
-          <p class="ods-title">Reducción de Desigualdades</p>
-          <p class="ods-desc">Apoyamos comunidades vulnerables a través de programas de responsabilidad social.</p>
+        <div class="feature-item feature-item--card feature-item--centrado" data-aos="fade-up" data-aos-delay="340">
+          <div class="feature-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/></svg></div>
+          <p class="feature-title">Reducción de Desigualdades</p>
+          <p class="feature-desc">Apoyamos comunidades vulnerables a través de programas de responsabilidad social.</p>
         </div>
       </div>
     </div>
   </section>
+
+  <CtaBand
+    label="Obra responsable"
+    title="¿Tu proyecto exige estándares de seguridad y ambiente?"
+    description="Ejecutamos con ISO 45001 y 14001 en obra, no solo en el papel."
+    primaryHref="/contacto/"
+    primaryLabel="Contáctenos"
+    secondaryHref="/servicios/"
+    secondaryLabel="Ver servicios"
+  />
 
 </BaseLayout>

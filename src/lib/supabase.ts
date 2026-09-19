@@ -84,6 +84,7 @@ export const TABLAS = [
   'inscripciones',
   'leads',
   'latidos',
+  'tarjeta_eventos',
 ] as const;
 
 /**
@@ -120,4 +121,117 @@ export async function codigoExiste(codigo: string): Promise<boolean | null> {
   } catch {
     return null;
   }
+}
+
+/** Lo que devuelve `tarjeta_empleado()` — ver 0012_tarjetas_empleados.sql. */
+export interface DatosTarjetaEmpleado {
+  nombre: string;
+  cargo: string | null;
+  area: string | null;
+  sede: string | null;
+  bio: string | null;
+  telefono: string | null;
+  whatsapp: string | null;
+  email: string | null;
+  foto_url: string | null;
+  redes: Record<string, string>;
+}
+
+/**
+ * Ficha pública de UN empleado activo, por slug. Para `src/pages/tarjetas/`.
+ *
+ * Mismo motivo que `codigoExiste()` para usar `fetch` y no el cliente: es una
+ * pregunta de una sola vez, sin sesión que mantener, y esta llamada corre en
+ * el navegador de quien acaba de escanear una credencial — no hace falta
+ * cargar el SDK completo para eso.
+ *
+ * `null` cubre dos casos a propósito y no se distinguen: el slug no existe, o
+ * el empleado está de baja. `tarjeta_empleado()` ya los trata igual en la
+ * base — acá solo se respeta esa decisión.
+ */
+export async function tarjetaEmpleado(slug: string): Promise<DatosTarjetaEmpleado | null> {
+  if (!supabaseConfigurado) return null;
+
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/tarjeta_empleado`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ p_slug: slug }),
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return null;
+    const filas = await r.json();
+    return Array.isArray(filas) && filas.length > 0 ? filas[0] : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Una fila de `directorio_empleados()` — ver 0012_tarjetas_empleados.sql. */
+export interface FilaDirectorio {
+  slug: string;
+  nombre: string;
+  cargo: string | null;
+  foto_url: string | null;
+}
+
+/**
+ * Directorio público de empleados activos, para `src/pages/empleados/`.
+ *
+ * `null` significa que no se pudo consultar (red caída, Supabase pausado);
+ * un array vacío significa "consultó bien, todavía no hay nadie publicado".
+ * La página tiene que distinguir las dos cosas para no decirle a un visitante
+ * "no hay empleados" cuando en realidad Supabase no respondió.
+ */
+export async function directorioEmpleados(): Promise<FilaDirectorio[] | null> {
+  if (!supabaseConfigurado) return null;
+
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/directorio_empleados`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({}),
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return null;
+    const filas = await r.json();
+    return Array.isArray(filas) ? filas : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Eventos medibles dentro de una ficha. Ver 0015_analitica_tarjetas.sql. */
+export type EventoTarjeta =
+  | 'vista' | 'clic_llamar' | 'clic_whatsapp' | 'clic_correo'
+  | 'guardar_contacto' | 'compartir';
+
+/**
+ * Registra un evento de interacción con la ficha de un empleado.
+ *
+ * "Fire-and-forget" a propósito: a quien está viendo la ficha no le importa
+ * si esto se registró o no, y no debe esperar por ello ni ver un error si
+ * falla. `registrar_evento_tarjeta()` ya es silenciosa del lado de la base
+ * (no revela si el slug existe); acá el mismo criterio, sin relanzar nunca.
+ */
+export function registrarEventoTarjeta(slug: string, evento: EventoTarjeta): void {
+  if (!supabaseConfigurado) return;
+
+  fetch(`${SUPABASE_URL}/rest/v1/rpc/registrar_evento_tarjeta`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+    body: JSON.stringify({ p_slug: slug, p_evento: evento, p_referrer: document.referrer || null }),
+  }).catch(() => {});
 }

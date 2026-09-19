@@ -46,6 +46,14 @@ interface Props {
   meta?: string;
   /** Etiqueta sobre el titulo — categoria del proyecto */
   tag?: string;
+  /**
+   * Texto de un pseudo-boton al pie del cuerpo. La tarjeta entera ya es
+   * un enlace, asi que esto no es un control: es la senal de que se puede
+   * hacer clic, que en una tarjeta de 400px de alto no siempre se lee. Va
+   * como <span>, nunca como <a> ni <button> — un control dentro de un
+   * enlace es markup invalido y un blanco de tabulacion duplicado.
+   */
+  cta?: string;
   /** Proporcion de la tarjeta. Por defecto 4/3 */
   ratio?: string;
   /** Proporcion por debajo de 768px. Por defecto, la misma que ratio */
@@ -63,6 +71,7 @@ const {
   desc,
   meta,
   tag,
+  cta,
   ratio,
   ratioMobile,
   width,
@@ -95,5 +104,11 @@ const ratioVars = [
     <h3 class="card-media-title">{title}</h3>
     {desc && <p class="card-media-desc">{desc}</p>}
     {meta && <p class="card-media-meta">{meta}</p>}
+    {cta && (
+      <span class="btn btn-outline-light btn-sm card-media-cta">
+        {cta}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </span>
+    )}
   </div>
 </a>

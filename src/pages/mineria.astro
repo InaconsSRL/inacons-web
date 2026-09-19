@@ -243,8 +243,7 @@ const CONTACTOS = [
     }
     /* --fs-display: mismo tamaño que usa .hero-stat .stat-num en el home
        para esta misma clase de cifra destacada — ver index.astro. */
-    .mn-badge .stat-num { color: var(--c-text-white); font-size: var(--fs-display); }
-    .mn-badge .stat-label { color: var(--c-on-dark-3); margin-top: var(--sp-1); }
+    .mn-badge .stat-label { margin-top: var(--sp-1); }
 
     .mn-solutions {
       background: var(--c-bg-white);
@@ -409,15 +408,15 @@ const CONTACTOS = [
       </div>
 
       <div class="mn-badges" data-aos="fade-left" data-aos-delay="200">
-        <div class="mn-badge card--stat">
+        <div class="mn-badge card--stat card--stat-lg card--stat-oscuro">
           <span class="stat-num" data-counter="15" data-suffix="+">15+</span>
           <span class="stat-label">Años de trayectoria</span>
         </div>
-        <div class="mn-badge card--stat">
+        <div class="mn-badge card--stat card--stat-lg card--stat-oscuro">
           <span class="stat-num" data-counter="4" data-suffix="+">4+</span>
           <span class="stat-label">ISOs certificadas</span>
         </div>
-        <div class="mn-badge card--stat">
+        <div class="mn-badge card--stat card--stat-lg card--stat-oscuro">
           <span class="stat-num" data-counter="200" data-suffix="+">200+</span>
           <span class="stat-label">Profesionales</span>
         </div>

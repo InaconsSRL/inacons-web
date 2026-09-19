@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
 import PageHero from '../components/PageHero.astro';
 import SellosCertificacion from '../components/SellosCertificacion.astro';
 ---
@@ -81,25 +82,25 @@ import SellosCertificacion from '../components/SellosCertificacion.astro';
             <p class="mvv-label">Valores</p>
             <h3 class="mvv-title">Lo que nos define como equipo</h3>
             <div class="valores-list">
-              <div class="valor-item">
-                <span class="valor-name">Confianza</span>
-                <p class="valor-desc">El pilar de nuestras relaciones.</p>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Confianza</span>
+                <p class="feature-desc">El pilar de nuestras relaciones.</p>
               </div>
-              <div class="valor-item">
-                <span class="valor-name">Innovación</span>
-                <p class="valor-desc">Evolución constante en procesos y tecnología.</p>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Innovación</span>
+                <p class="feature-desc">Evolución constante en procesos y tecnología.</p>
               </div>
-              <div class="valor-item">
-                <span class="valor-name">Trascender</span>
-                <p class="valor-desc">Dejar un legado de calidad en cada obra.</p>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Trascender</span>
+                <p class="feature-desc">Dejar un legado de calidad en cada obra.</p>
               </div>
-              <div class="valor-item">
-                <span class="valor-name">Lealtad</span>
-                <p class="valor-desc">Compromiso recíproco a largo plazo.</p>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Lealtad</span>
+                <p class="feature-desc">Compromiso recíproco a largo plazo.</p>
               </div>
-              <div class="valor-item">
-                <span class="valor-name">Identidad</span>
-                <p class="valor-desc">Comprometerse con los objetivos de la organización, asumiéndolos como propios.</p>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Identidad</span>
+                <p class="feature-desc">Comprometerse con los objetivos de la organización, asumiéndolos como propios.</p>
               </div>
             </div>
           </div>
@@ -139,25 +140,25 @@ import SellosCertificacion from '../components/SellosCertificacion.astro';
         <p class="sh-desc">Cuatro pilares que definen nuestra forma de trabajar y nos distinguen como líderes en el sector de la construcción e ingeniería.</p>
       </div>
       <div class="pillars-grid">
-        <div class="pillar-card" data-aos="fade-up" data-aos-delay="80">
-          <div class="pillar-num">01</div>
-          <h3 class="pillar-title">Experiencia</h3>
-          <p class="pillar-desc">Más de 15 años de trayectoria nos respaldan como líderes en el sector, desarrollando proyectos innovadores y sostenibles a lo largo de todo el Perú.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="80">
+          <div class="feature-num" aria-hidden="true">01</div>
+          <h3 class="feature-title">Experiencia</h3>
+          <p class="feature-desc">Más de 15 años de trayectoria nos respaldan como líderes en el sector, desarrollando proyectos innovadores y sostenibles a lo largo de todo el Perú.</p>
         </div>
-        <div class="pillar-card" data-aos="fade-up" data-aos-delay="160">
-          <div class="pillar-num">02</div>
-          <h3 class="pillar-title">Innovación y Sostenibilidad</h3>
-          <p class="pillar-desc">Implementamos las últimas tecnologías y prácticas sostenibles para crear espacios que respeten el medio ambiente y mejoren la calidad de vida.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="160">
+          <div class="feature-num" aria-hidden="true">02</div>
+          <h3 class="feature-title">Innovación y Sostenibilidad</h3>
+          <p class="feature-desc">Implementamos las últimas tecnologías y prácticas sostenibles para crear espacios que respeten el medio ambiente y mejoren la calidad de vida.</p>
         </div>
-        <div class="pillar-card" data-aos="fade-up" data-aos-delay="240">
-          <div class="pillar-num">03</div>
-          <h3 class="pillar-title">Orientación al Cliente</h3>
-          <p class="pillar-desc">Nuestro compromiso es superar las expectativas de cada cliente, brindando soluciones personalizadas y un servicio de excelencia en cada proyecto.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="240">
+          <div class="feature-num" aria-hidden="true">03</div>
+          <h3 class="feature-title">Orientación al Cliente</h3>
+          <p class="feature-desc">Nuestro compromiso es superar las expectativas de cada cliente, brindando soluciones personalizadas y un servicio de excelencia en cada proyecto.</p>
         </div>
-        <div class="pillar-card" data-aos="fade-up" data-aos-delay="320">
-          <div class="pillar-num">04</div>
-          <h3 class="pillar-title">Equipo Humano</h3>
-          <p class="pillar-desc">Contamos con un equipo multicultural que se adapta a cualquier contexto y tiene la experiencia para enfrentar todo tipo de retos con excelencia.</p>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="320">
+          <div class="feature-num" aria-hidden="true">04</div>
+          <h3 class="feature-title">Equipo Humano</h3>
+          <p class="feature-desc">Contamos con un equipo multicultural que se adapta a cualquier contexto y tiene la experiencia para enfrentar todo tipo de retos con excelencia.</p>
         </div>
       </div>
     </div>
@@ -178,6 +179,16 @@ import SellosCertificacion from '../components/SellosCertificacion.astro';
     con IntersectionObserver. No necesitas el <script is:inline> que
     había antes — lo puedes eliminar.
   -->
+
+  <CtaBand
+    label="Trabajemos juntos"
+    title="¿Buscas un contratista con respaldo?"
+    description="Quince años de obra ejecutada y un sistema de gestión certificado."
+    primaryHref="/contacto/"
+    primaryLabel="Contáctenos"
+    secondaryHref="/proyectos/"
+    secondaryLabel="Ver proyectos"
+  />
 
 </BaseLayout>
 
@@ -275,28 +286,6 @@ import SellosCertificacion from '../components/SellosCertificacion.astro';
     margin-top: var(--sp-2);
   }
 
-  .valor-item {
-    padding: var(--sp-2) var(--sp-3);
-    border: 1px solid var(--c-border-light);
-    border-radius: 2px;
-    background: var(--c-bg-white);
-  }
-
-  .valor-name {
-    display: block;
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
-    letter-spacing: 0.4px;
-    color: var(--c-text-heading);
-    margin-bottom: var(--sp-1);
-  }
-
-  .valor-desc {
-    font-size: var(--fs-sm);
-    color: var(--c-text-muted);
-    line-height: 1.55;
-    margin: 0;
-  }
 
   /* Video institucional */
   .video-inst-sec .video-inst-sh {
@@ -335,32 +324,6 @@ import SellosCertificacion from '../components/SellosCertificacion.astro';
     margin-top: var(--sp-l2);
   }
 
-  .pillar-card {
-    padding: var(--sp-l1) var(--sp-6);
-    background: var(--c-bg-white);
-    border: 1px solid var(--c-border-light);
-    position: relative;
-  }
-
-  .pillar-card::before {
-    content: '';
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 3px;
-    background: var(--c-border-light);
-    transition: background .25s;
-  }
-
-  .pillar-card:hover::before { background: var(--c-secondary); }
-
-  .pillar-num {
-    font-size: var(--fs-display); font-weight: var(--fw-display);
-    color: rgba(20,23,45,0.05);
-    line-height: 1; margin-bottom: var(--sp-5);
-    letter-spacing: var(--ls-tight);
-  }
-
-  .pillar-title { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--c-text-heading); margin-bottom: var(--sp-3); }
-  .pillar-desc { font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.75; }
 
   @media (max-width: 1023.98px) {
     .about-intro-grid { grid-template-columns: 1fr; gap: var(--sp-l1); }

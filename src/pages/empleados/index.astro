@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+---
+
+<BaseLayout
+  title="Nuestro Equipo | INACONS"
+  description="Directorio de INACONS: encuentra a la persona correcta y contáctala directamente desde su tarjeta."
+>
+
+  <PageHero
+    image="/assets/imagenes/about_team.webp"
+    title="Nuestro Equipo"
+    subtitle="Encuentra a la persona correcta y contáctala directamente"
+    current="Equipo"
+  />
+
+  <section class="sec sec--white">
+    <div class="container" style="max-width: 640px;">
+      <div class="notice notice--error" id="directorio-error" hidden>
+        No se pudo cargar el directorio. Intenta de nuevo en unos segundos.
+      </div>
+      <p class="panel-desc" id="directorio-vacio" hidden>
+        Todavía no hay nadie publicado en el directorio.
+      </p>
+      <ul class="directorio-lista" id="directorio-lista" aria-live="polite">
+        <li class="panel-desc">Cargando…</li>
+      </ul>
+    </div>
+  </section>
+
+  <script>
+    import { directorioEmpleados } from '../../lib/supabase';
+
+    const $ = (id: string) => document.getElementById(id)!;
+
+    // Misma razon que en el panel: los datos vienen de Supabase, no del
+    // contenido versionado en el repo, asi que se escapan antes de entrar
+    // por innerHTML aunque hoy solo un administrador pueda escribirlos.
+    const esc = (t: string) =>
+      t.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]!));
+
+    function iniciales(nombre: string): string {
+      const partes = nombre.trim().split(/\s+/);
+      return ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase();
+    }
+
+    async function cargar() {
+      const lista = $('directorio-lista');
+      const filas = await directorioEmpleados();
+
+      // null y [] no son lo mismo: uno es "no se pudo preguntar", el otro es
+      // "se preguntó bien y todavía no hay nadie". Confundirlos le dice a un
+      // visitante "no hay equipo" cuando el problema fue de red.
+      if (filas === null) {
+        lista.hidden = true;
+        $('directorio-error').hidden = false;
+        return;
+      }
+      if (filas.length === 0) {
+        lista.hidden = true;
+        $('directorio-vacio').hidden = false;
+        return;
+      }
+
+      lista.innerHTML = filas.map((f) => `
+        <li>
+          <a class="directorio-fila" href="/empleados/${esc(f.slug)}/">
+            ${f.foto_url
+              ? `<img class="avatar avatar--sm" src="${esc(f.foto_url)}" alt="" width="56" height="56" loading="lazy">`
+              : `<div class="avatar avatar--sm avatar--placeholder">${esc(iniciales(f.nombre))}</div>`}
+            <div>
+              <p class="directorio-fila-nombre">${esc(f.nombre)}</p>
+              ${f.cargo ? `<p class="directorio-fila-cargo">${esc(f.cargo)}</p>` : ''}
+            </div>
+          </a>
+        </li>
+      `).join('');
+    }
+
+    cargar();
+  </script>
+
+</BaseLayout>

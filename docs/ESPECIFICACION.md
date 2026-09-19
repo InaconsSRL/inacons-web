@@ -324,6 +324,25 @@ Estado activo / inactivo. Al pasar a inactivo, la tarjeta deja de estar publicad
 QR impreso en la credencial lleva al directorio con un mensaje sobrio. Definirlo ahora
 y no el día que alguien renuncie.
 
+### Identificadores permanentes, datos variables
+
+**El slug, la URL pública y el código QR de un empleado son permanentes. Cargo,
+teléfono, WhatsApp, correo, sede y foto son datos, y se editan libremente sin tocar
+ninguno de los tres.** Es la regla que hace que actualizar a alguien en el panel nunca
+signifique reimprimir su credencial.
+
+Ya es así por construcción, no por convención que dependa de que alguien la recuerde:
+
+- `tarjeta_empleado(slug)` resuelve **en vivo** contra la fila actual de `empleados`
+  en cada visita — no hay ninguna copia de los datos guardada en la URL ni en el QR.
+- El slug es inmutable después de crear (mismo criterio que el código de un QR):
+  el panel bloquea el campo al editar.
+- El QR de la credencial se liga al empleado por `destino_id` (su UUID), no por una
+  URL literal congelada en el momento de imprimir.
+
+Consecuencia práctica: si mañana cambia el cargo, el teléfono, la sede o la foto de
+alguien, se edita en el panel y listo — el mismo QR, la misma URL, siguen sirviendo.
+
 ---
 
 ## 9. Notificaciones
@@ -631,9 +650,17 @@ dejarla en solo lectura — momento en el que la propia función empieza a falla
   `escaneos_diarios` ya conserva el total agregado por día, así que no se pierde la
   serie histórica.
 
-No resuelve el límite de tasa por IP (`S4` de la auditoría de seguridad): eso sigue
-pendiente y requiere una decisión de diseño sobre dónde vive — el PHP o la función —
-que se deja para el análisis dedicado del sistema de QR.
+**Límite de tasa por IP, resuelto en `public/r/index.php` (set 2026).** La decisión de
+dónde vive: en el PHP, no en la función de Postgres — así una IP que abusa ni siquiera
+gasta la llamada a Supabase, que es exactamente el costo que `S4` señalaba. 30
+peticiones por IP cada 60 segundos, contadas en un archivo por IP en el directorio
+temporal del sistema — no APCu ni Redis, porque no hay forma de confirmar desde el
+repositorio que el cPanel compartido los tenga habilitados. Si el directorio temporal
+no fuera escribible, se deja pasar la petición: negarle el paso a todo el mundo por no
+poder contar sería peor que el riesgo que esto evita.
+
+No resuelve el límite de tasa de forma distribuida (dos servidores no comparten
+contador), pero este sitio corre en un único servidor de cPanel, así que no aplica hoy.
 
 ### Fase 3 — a mitad (set 2026)
 
@@ -704,3 +731,111 @@ De paso: `text/css` estaba declarado a un año y `design-system.css` tiene
 nombre fijo. Si esa regla hubiera llegado a aplicarse, un arreglo de estilos no
 habría llegado durante un año a quien ya visitó el sitio. Los que sí se cachean
 para siempre son los de `/_astro/`, que llevan hash en el nombre.
+
+### Fase 5 — arrancada fuera de orden, solo la parte pública (set 2026)
+
+Se adelantó sobre la Fase 4 porque la necesidad era esa: tarjetas digitales de
+empleado. Lo que sigue es la mitad de la sección 8 — la ficha y el directorio.
+Leads desde la tarjeta y el generador de firmas de correo quedan pendientes:
+capturar un lead requiere la misma política de escritura anónima que el
+formulario de contacto todavía no tiene resuelta (`docs/formularios.md`).
+
+Hecho:
+
+| Qué | Dónde |
+|---|---|
+| `tarjeta_empleado(slug)`: ficha de un empleado activo, sin abrir `empleados` a lectura pública | `supabase/migrations/0012_tarjetas_empleados.sql` |
+| `directorio_empleados()`: lista pública, sin teléfono/whatsapp/correo — eso solo se ve ficha por ficha | idem |
+| Ficha individual: foto o iniciales, botones de llamar/WhatsApp/correo (solo si el dato existe), descarga `.vcf`, redes sociales | `src/pages/tarjetas/index.astro` |
+| Directorio público | `src/pages/empleados/index.astro` |
+| `.avatar`, `.ficha-persona`, `.directorio-*` en el sistema de diseño | `design-system.css`, referencia en `/sistema/#persona` |
+| Reescritura de `/empleados/SLUG/` a la plantilla, sin `[NC]` — a diferencia de `/r/`, esta URL nunca sale de un QR impreso | `public/.htaccess` |
+
+**Decisión de arquitectura, y por qué no es la obvia.** La lectura evidente
+para "publicar `empleados` sin abrir la tabla entera" es una política de RLS
+que solo deje ver filas `estado = 'activo'`. No se hizo así: es exactamente el
+tipo de política amplia que este esquema evitó en cada tabla desde `0001`
+(`qr_codes` nunca tuvo una política de SELECT para `anon`; `resolver_qr()` y
+`codigo_existe()` son funciones angostas por la misma razón). Con una política
+de fila, cualquiera que sepa hacer un `SELECT *` por la API REST se lleva la
+tabla completa —incluido teléfono y correo de cada persona— filtrada por
+`anon`, pero completa. Con dos funciones que contestan una pregunta concreta
+—una persona por slug, un directorio sin contacto directo— la única manera de
+juntar datos es pedirlos uno por uno, con la misma fricción que recolectar
+tarjetas de presentación a mano.
+
+**Por qué la ficha es una plantilla única y no una página por persona.** El
+sitio compila en modo `static` (`astro.config.mjs`): una página por empleado
+necesitaría enumerar los slugs en el build, y ese dato cambiaría de vigencia
+en cuanto alguien entrara o saliera de la empresa hasta el próximo despliegue.
+En cambio, `src/pages/tarjetas/index.astro` es un solo archivo que lee el
+slug de la URL en el navegador y pregunta en el momento — mismo principio que
+`/r/`, sin necesitar PHP porque no hace falta un 302: alcanza con pintar HTML.
+
+**Pendiente, y a propósito no es un problema de seguridad:** el directorio se
+pinta enteramente en el navegador, así que un buscador que no ejecute
+JavaScript ve la página vacía en la primera carga. `directorio_empleados()` ya
+excluye todo dato sensible, así que sería seguro traerlo también en el build
+para que el directorio indexe bien — es un fast-follow, no se hizo en este
+lote porque no se pidió optimizar el SEO de esta página todavía.
+
+**Verificado end-to-end (set 2026):** ya hay un empleado real publicado
+(Alejandro Guevara Martínez) — la ficha, el directorio, la subida de foto y el
+alta desde el panel se probaron contra el proyecto real, no solo contra el
+estado "no encontrado".
+
+**Además de la ficha y el directorio, se construyó el CRUD completo en el panel**
+(no estaba en el alcance original de este corte, pero sin él no había forma de
+cargar un empleado salvo por SQL a mano):
+
+| Qué | Dónde |
+|---|---|
+| Alta, edición y baja de empleados — nunca se borra, mismo criterio que los códigos QR | `src/pages/panel/index.astro`, sección "Empleados" |
+| Subida de foto a Supabase Storage, bucket público con límite de 2 MB | `supabase/migrations/0013_storage_fotos_empleados.sql` |
+| QR de credencial ligado al empleado por `destino_id` — se crea o se reutiliza desde el botón "QR" de su fila, sin escribir la URL a mano | `src/pages/panel/index.astro` (`abrirQrDeEmpleado`) |
+| Prueba de aislamiento (RLS) real en el panel — hasta esta fase estaba solo documentada, nunca construida | `src/pages/panel/index.astro`, `src/lib/supabase.ts` (`TABLAS`) |
+
+**Segundo lote (set 2026), sobre una revisión de una propuesta externa de
+diseño** — se adoptaron cuatro mejoras funcionales, se rechazó el resto de la
+propuesta (radios de borde, grises nuevos, cambio de URL) por inconsistente con
+el sistema de diseño y la arquitectura ya construidos:
+
+| Qué | Dónde |
+|---|---|
+| Campo `sede` (ciudad/oficina), mostrado junto al área en la ficha | `supabase/migrations/0014_sede_empleado.sql` |
+| WhatsApp con mensaje precargado + botón Compartir (`navigator.share`, con copiar enlace de respaldo) | `src/pages/tarjetas/index.astro` |
+| Confirmación visual al descargar el `.vcf` — el botón cambia a "✓ Contacto guardado" un par de segundos | idem |
+| Analítica de interacción: vistas, clics en llamar/WhatsApp/correo, guardar contacto, compartir — función angosta, mismo patrón que `resolver_qr()`, resumen legible por empleado en el panel para que no quede escrita y sin leer | `supabase/migrations/0015_analitica_tarjetas.sql`, `src/pages/panel/index.astro` |
+
+**Tercer lote (set 2026), rediseño visual completo sobre un mockup enviado por
+el usuario** — hero oscuro con foto, QR propio en la ficha, dos columnas en
+desktop, sección "Sobre mí", menú de compartir con cuatro opciones. Dos
+decisiones puntuales, confirmadas antes de construir:
+
+- **`--radius: 2px` se mantiene en toda la ficha.** El mockup traía esquinas
+  redondeadas, igual que la propuesta anterior; se rechazó otra vez por el
+  mismo motivo — es el lenguaje visual angular que el resto del sitio ya
+  tiene a propósito, no hay una segunda pieza con radio distinto.
+- **El botón de WhatsApp es la única excepción de color de todo el sistema**:
+  verde de marca (`#25d366`, clase `.btn-whatsapp`), no un azul/naranja de
+  INACONS. Es a propósito y es la única — un botón que actúa sobre una
+  plataforma externa, en el color con el que esa plataforma ya se reconoce en
+  cualquier sitio.
+
+| Qué | Dónde |
+|---|---|
+| Campo `bio` ("Sobre mí"), opcional — sin la sección si está vacío | `supabase/migrations/0016_bio_empleado.sql` |
+| QR propio de la ficha, perfil pantalla (negro, ECC M) — nunca pasa por `/r/`, es la misma URL que ya se está viendo, no una credencial para imprimir | `src/pages/tarjetas/index.astro`, reutiliza `generarQR()` de `src/lib/qr.ts` |
+| Menú de compartir con cuatro opciones (WhatsApp, copiar enlace, otra app — solo si `navigator.share` existe, correo) | idem |
+| `.btn-whatsapp`, `.credencial`, `.credencial-identidad`, `.credencial-compartir-menu` y el resto de la sección 18 del sistema de diseño | `design-system.css` |
+
+**Cuarto lote (set 2026), ajustes de layout sobre el rediseño del tercer
+lote** — la ficha pasó de tarjeta flotante a ocupar toda la ventana, y la
+columna "Información profesional" desapareció por completo:
+
+| Qué | Dónde |
+|---|---|
+| `.ficha` ocupa todo el viewport (ancho y alto) — sin `max-width`, borde ni sombra; el fondo blanco/oscuro llega a los cuatro bordes de la ventana | `design-system.css` (`.ficha`, `.tj-wrap`) |
+| El contenido de lectura (marca del hero, hero-cuerpo, cuerpo, acciones, pie) se limita a `max-width: 1200px` centrado — mismo valor que `.container` — para que el texto no se estire de borde a borde en monitores anchos | `design-system.css` (sección 18) |
+| Empresa y Área salieron de "Información profesional": Empresa es fija (no aporta repetida en cada ficha) y Área ya se ve junto al cargo, en `.ficha-persona-meta` | `src/pages/tarjetas/index.astro` |
+| La columna "Información profesional" se eliminó por completo: Sede ya se mostraba también en Contacto, y "Sobre mí" (bio) y los íconos de redes se retiraron de la vista pública — la ficha queda en una sola columna (Contacto). El campo `bio` sigue en la base de datos y en el formulario del panel, solo dejó de renderizarse en la ficha | `src/pages/tarjetas/index.astro`, `design-system.css` (se quitaron `.ficha-bio` y `.ficha-persona-redes`) |

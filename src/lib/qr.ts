@@ -76,7 +76,11 @@ const ZONA_SILENCIO = 4;
 
 // `import.meta.env` solo existe dentro de Vite. El encadenamiento opcional deja
 // que este modulo tambien corra en Node suelto, que es como se prueba.
-const DOMINIO = import.meta.env?.SITE ?? 'https://home.inacons.com.pe';
+//
+// Exportado para que quien necesite el dominio del sitio en el navegador (el
+// panel, al armar la URL de la ficha de un empleado) lo lea de aca y no
+// escriba una copia mas de 'https://home.inacons.com.pe' a mano.
+export const DOMINIO = import.meta.env?.SITE ?? 'https://home.inacons.com.pe';
 
 /**
  * URL corta de un código, lista para codificar.

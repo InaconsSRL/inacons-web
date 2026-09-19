@@ -36,6 +36,14 @@
     /* Antes #6b7494 → 4.15:1 sobre --c-bg-muted, fallaba AA.
        #5a6280 da 6.01:1 sobre blanco y 5.40:1 sobre muted. */
 
+    --c-ink-ghost: rgba(20, 23, 45, 0.06);
+    /* Tinta fantasma: el número gigante detrás de una tarjeta numerada,
+       y nada más. No es texto — es textura, y por eso NO tiene que pasar
+       contraste: lo que lleva va siempre con aria-hidden y su información
+       la da el orden del DOM. Si algo tiene que leerse, no usa esto.
+       Estaba escrito cuatro veces (0.04, 0.045, 0.05, 0.06) en cuatro
+       páginas, que es como se pierde de vista que era decorativo. */
+
     --c-text-placeholder: #b0b6c8;
     /* Deliberadamente por debajo de AA, y por eso con una regla atada:
        el placeholder NUNCA lleva informacion necesaria. Si se sube a un
@@ -697,6 +705,17 @@ a.btn:active {
             rgba(20, 23, 45, 0.18) 100%);
 }
 
+/*  El velo degradado de arriba NO garantiza contraste: es un degradado
+    sobre una foto, y lo que vale depende de cuanto texto haya.
+
+    Medido a 375px con un titulo de obra publica real de 236 caracteres:
+    el cuerpo crecia hasta 315px dentro de una tarjeta de 320 y su borde
+    superior quedaba donde el velo vale 0.11 — blanco a 1.68:1 sobre un
+    cielo, 2.29:1 sobre hormigon. Ilegible, y un caracter mas lo
+    recortaba en silencio.
+
+    Este fondo es del cuerpo, no de la tarjeta: crece con el texto y no
+    depende de que foto haya detras. */
 .card-media-body {
     position: absolute;
     bottom: 0;
@@ -704,8 +723,21 @@ a.btn:active {
     right: 0;
     z-index: 2;
     padding: var(--sp-6);
+    background: linear-gradient(to top,
+            rgba(20, 23, 45, 0.92) 0%,
+            rgba(20, 23, 45, 0.92) 72%,
+            transparent 100%);
 }
 
+/*  Tres lineas, y despues puntos suspensivos.
+
+    Sin esto un titulo real recortaba la tarjeta: medido en el home a
+    375px, un titulo de 158 caracteres daba un cuerpo de 279px dentro de
+    una tarjeta de 223 — 56px de titulo desaparecian por arriba, sin
+    error y sin aviso, porque .card--media tiene overflow:hidden.
+
+    Hoy los dos proyectos se llaman "Habilitacion Urbana Pucusana" y no
+    pasa. Pasa el dia que entre el tercero. */
 .card-media-title {
     font-size: var(--fs-lg);
     font-weight: var(--fw-semibold);
@@ -713,6 +745,10 @@ a.btn:active {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 0 var(--sp-1);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .card-media-desc {
@@ -728,13 +764,26 @@ a.btn:active {
     margin: 0;
 }
 
+/*  El pseudo-boton del pie. margin-top y no un gap en el cuerpo porque
+    el resto de las partes van pegadas entre si a proposito; lo unico
+    que se despega es la accion. */
+.card-media-cta {
+    margin-top: var(--sp-4);
+}
+
+/*  Blanco, no --c-accent. El token garantiza 6.03:1 "sobre --c-primary",
+    pero el fondo real de esta etiqueta no es --c-primary: es una foto con
+    un velo encima. Medido, la etiqueta cae donde el velo vale ~0.72, y
+    ahi el naranja da 2.77:1 sobre un cielo y 3.05:1 sobre arena — a 11px
+    el umbral es 4.5. La garantia del token se calculo contra un fondo
+    plano que este componente no tiene. */
 .card-media-tag {
     display: inline-block;
     font-size: var(--fs-2xs);
     font-weight: var(--fw-semibold);
     text-transform: uppercase;
     letter-spacing: var(--ls-label);
-    color: var(--c-accent);
+    color: var(--c-text-white);
     border: 1px solid var(--c-border-dark-strong);
     padding: var(--sp-1) var(--sp-2);
     margin-bottom: var(--sp-2);
@@ -809,6 +858,57 @@ a.btn:active {
     margin-top: var(--sp-2);
 }
 
+/*  Tira densa: cinco o seis datos en una fila, y el valor no es una
+    cifra corta sino un código — "ISO 14001" a --fs-2xl se parte en dos
+    líneas. */
+.card--stat-sm .stat-num {
+    font-size: var(--fs-lg);
+}
+
+/*  Cifra destacada: el hero del home y la banda de /mineria. Las dos
+    pedían --fs-display escribiéndolo cada una en su página. */
+.card--stat-lg .stat-num {
+    font-size: var(--fs-display);
+}
+
+/*  Sobre fondo oscuro. Son los mismos dos colores que .hero-stat y
+    .mn-badge reescribían a mano, cada una por su lado, para el mismo
+    componente. */
+.card--stat-oscuro .stat-num {
+    color: var(--c-text-white);
+}
+
+.card--stat-oscuro .stat-label {
+    color: var(--c-on-dark-3);
+}
+
+/* ── Chip ──
+   Etiqueta con borde: un ícono y dos o tres palabras, nada más. Si
+   necesita una descripción debajo ya no es un chip, es un
+   .feature-item. */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-4);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    transition: border-color var(--t), background var(--t), color var(--t);
+}
+
+.chip svg {
+    color: var(--c-secondary);
+    flex-shrink: 0;
+}
+
+.chip:hover {
+    border-color: var(--c-secondary);
+    color: var(--c-secondary);
+}
+
 /* ── Feature item: ícono + título + descripción ──
    Fila de 3 o 4 características cortas, sin imagen. Pensada para
    /mineria; queda acá y no en su página porque es exactamente el tipo
@@ -831,12 +931,88 @@ a.btn:active {
     border: 1px solid transparent;
     border-radius: var(--radius);
     transition: transform var(--t), border-color var(--t), background var(--t);
+    /*  La tarjeta entera puede ser un <a> —las de /documentos y
+        /canal-etico lo son—. Sin esto, el navegador subraya el título,
+        la descripción y el rótulo, los tres. */
+    text-decoration: none;
 }
 
 .feature-item:hover {
     transform: translateY(-4px);
     border-color: var(--c-border-light);
     background: var(--c-bg-muted);
+}
+
+/*  Sobre superficie propia. El .feature-item base es transparente y se
+    apoya en el fondo de su sección; este se sostiene solo. Es lo que
+    eran .ods-card, .guarantee-item, .cert-card y .channel-card — cuatro
+    veces la misma caja blanca con cuatro paddings distintos. */
+.feature-item--card {
+    position: relative;
+    background: var(--c-bg-white);
+    border-color: var(--c-border-light);
+    padding: var(--sp-7) var(--sp-6);
+}
+
+/*  El gap gobierna la separación entre las partes de la tarjeta: un
+    margen de un hijo se le suma y descuadra la pila. Esto permite
+    además reusar .panel-label acá, que sí lleva margen porque vive en
+    flujo normal dentro de .panel. */
+.feature-item > * {
+    margin-block: 0;
+}
+
+.feature-item--card:hover {
+    background: var(--c-bg-white);
+    border-color: var(--c-secondary);
+    box-shadow: var(--shadow-card-hover);
+}
+
+/*  El ícono se rellena al pasar el cursor. Va sobre --card y no sobre
+    la base porque el ícono suelto, sin caja que lo contenga, no tiene
+    contra qué destacarse. */
+.feature-item--card:hover .feature-icon {
+    background: var(--c-secondary);
+    color: var(--c-text-white);
+}
+
+/*  Tarjeta que termina en una acción. La descripción se estira para que
+    el botón quede al pie en todas las tarjetas de la fila, tengan el
+    texto que tengan, y el botón se rellena al pasar por la tarjeta
+    entera — no solo por encima del botón. */
+.feature-item--accion {
+    height: 100%;
+}
+
+.feature-item--accion .feature-desc {
+    flex: 1;
+}
+
+.feature-item--accion:hover .btn-outline {
+    background: var(--c-secondary);
+    color: var(--c-text-white);
+}
+
+/* Ícono arriba, texto centrado. */
+.feature-item--centrado {
+    align-items: center;
+    text-align: center;
+}
+
+/*  Ícono al costado. El título y la descripción van envueltos en un
+    <div>: así el gap separa ícono de texto, y no título de
+    descripción. */
+.feature-item--fila {
+    flex-direction: row;
+    gap: var(--sp-4);
+}
+
+/*  Compacta: dos líneas en una caja chica, para una lista de valores o
+    atributos. Misma razón que .panel--sm — el padding por defecto está
+    pensado para una tarjeta de rejilla, no para una ficha de dos
+    renglones. */
+.feature-item--sm {
+    padding: var(--sp-3) var(--sp-4);
 }
 
 .feature-icon {
@@ -851,6 +1027,30 @@ a.btn:active {
     color: var(--c-secondary);
 }
 
+/*  Número de orden. Ocupa el lugar del ícono en una tarjeta numerada:
+    "01 · Descubrimiento". Va siempre con aria-hidden — ver --c-ink-ghost.
+
+    Estaba escrito dos veces, con dos tamaños (--fs-display y 3.5rem) y
+    dos alfas, para la misma tarjeta de proceso en /servicios y /nosotros. */
+.feature-num {
+    font-size: var(--fs-display);
+    font-weight: var(--fw-display);
+    line-height: 1;
+    letter-spacing: var(--ls-tight);
+    color: var(--c-ink-ghost);
+}
+
+/*  Marca de agua: el número al fondo de la tarjeta, en la esquina, en
+    vez de en el flujo. Es lo que hacía .cert-bg-num con un 4.5rem
+    suelto; acá el tamaño sale de --fs-display para que siga la escala
+    en vez de ser un número más. */
+.feature-num--marca {
+    position: absolute;
+    top: var(--sp-3);
+    right: var(--sp-4);
+    font-size: calc(var(--fs-display) * 1.5);
+}
+
 .feature-title {
     font-size: var(--fs-base);
     font-weight: var(--fw-semibold);
@@ -858,10 +1058,14 @@ a.btn:active {
     line-height: 1.3;
 }
 
+/*  --fs-sm y no --fs-xs: 12px a 1.5 estaba calibrado para las cuatro
+    features cortas de /mineria, que además sobreescriben este valor.
+    Las tarjetas que absorbe --card llevan dos o tres líneas de prosa
+    real y a 12px apretado no se leen. */
 .feature-desc {
-    font-size: var(--fs-xs);
+    font-size: var(--fs-sm);
     color: var(--c-text-muted);
-    line-height: 1.5;
+    line-height: 1.65;
 }
 
 @media (max-width: 1023.98px) {
@@ -896,10 +1100,21 @@ a.btn:active {
     overflow: hidden;
 }
 
-/* Variante compacta para páginas de menor jerarquía */
+/*  Variante compacta para páginas de menor jerarquía.
+
+    Declaraba exactamente los mismos valores que .page-hero, en los dos
+    breakpoints: era un modificador muerto y la prop `size` de PageHero
+    no producía ninguna diferencia. Con 80vh, en un portátil de 900px
+    son 720px de foto y frase de marca antes del primer dato útil — y
+    lo llevaban las cinco páginas interiores por igual, incluida
+    /contacto, donde el formulario quedaba bajo el pliegue.
+
+    80vh se reserva para las páginas donde el hero ES el mensaje
+    (/nosotros, /sostenibilidad, las fichas). Un listado o un
+    formulario usa --sm. */
 .page-hero--sm {
-    height: 80vh;
-    min-height: 480px;
+    height: 58vh;
+    min-height: 380px;
 }
 
 .page-hero-bg {
@@ -2051,6 +2266,28 @@ body.menu-open {
     box-shadow: var(--shadow-card);
 }
 
+/*  Filete lateral izquierdo. Es el mismo acento de 3px que --accent,
+    en el otro borde, y existe por una razón de composición: un módulo
+    de barra lateral va al costado de un cuerpo de texto que ya tiene
+    su propio titular arriba, y ahí el filete superior compite con él.
+    En el borde izquierdo acompaña la columna en vez de cortarla.
+
+    Es `border-left` y no un ::before absoluto —que es como estaba
+    escrito en las dos páginas— para que quede simétrico con --accent
+    y sin pseudo-elemento. Con box-sizing: border-box el ancho total
+    no cambia. */
+.panel--rail {
+    border-left: 3px solid var(--c-secondary);
+}
+
+/*  Panel compacto. El padding por defecto es --sp-7, que está pensado
+    para un panel a ancho de contenido. En una barra lateral de ~300px
+    son 64px de aire sobre 300 de ancho: el contenido se queda con la
+    mitad de la columna. */
+.panel--sm {
+    padding: var(--sp-6);
+}
+
 /*  Borde punteado: esto todavía no existe. Se usa para un módulo
     anunciado pero no construido, nunca para contenido real. */
 .panel--ghost {
@@ -2063,6 +2300,24 @@ body.menu-open {
     font-size: var(--fs-xl);
     color: var(--c-text-heading);
     margin-bottom: var(--sp-2);
+}
+
+/*  Rótulo de panel: 11px en caja alta y apagado. No es .panel-title
+    con otro tamaño — es otra cosa. Un módulo de barra lateral no
+    encabeza nada, nombra lo que tiene dentro: "Ficha técnica",
+    "Descargas". Con .panel-title (22px) el rótulo pesa más que el
+    dato que rotula.
+
+    Es el mismo tratamiento que la etiqueta de un campo de formulario,
+    que era el tercer sitio donde aparecía escrito a mano. .sh-label no
+    sirve acá: lleva el guión naranja de cabecera de sección. */
+.panel-label {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    margin-bottom: var(--sp-4);
 }
 
 .panel-desc {
@@ -2446,8 +2701,8 @@ body.menu-open {
     }
 
     .page-hero--sm {
-        height: 60vh;
-        min-height: 360px;
+        height: 46vh;
+        min-height: 280px;
     }
 
     .page-hero-content {
@@ -2513,5 +2768,745 @@ body.menu-open {
 
     .menu-toggle {
         display: none;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   18. COMPONENTE: TARJETA DE PERSONA  (.avatar, .credencial-*, .directorio-*)
+══════════════════════════════════════════════════════════════ */
+/*
+   Para /empleados/: la credencial individual de cada persona y el directorio
+   publico. No existia ningun patron de foto de persona en el sistema — las
+   fotos que ya hay (clientes, servicios) son a sangre con velo
+   (.card--media, sección 6), pensadas para vender, no para una cara.
+*/
+
+/* ── Avatar: foto circular, o iniciales si todavia no hay foto ───────────
+   "Todavia" es literal: no todos los empleados tienen foto cargada el dia
+   que se publica su ficha. Las iniciales no son un placeholder de
+   contenido — son el propio dato (el nombre), solo que sin foto. */
+.avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    flex-shrink: 0;
+}
+
+.avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-secondary);
+    color: var(--c-text-white);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-tight);
+}
+
+.avatar--sm {
+    width: 56px;
+    height: 56px;
+    font-size: var(--fs-base);
+}
+
+.avatar--lg {
+    width: 140px;
+    height: 140px;
+    font-size: var(--fs-2xl);
+}
+
+/* ── Credencial: tarjeta de identificación digital ───────────────────────
+   Una pieza, dos composiciones. En escritorio es horizontal -- foto a la
+   izquierda, identidad a la derecha, datos en rejilla como la ficha técnica
+   de un plano -- y en teléfono se centra y se apila. No es la misma maqueta
+   escalada: a 760px una sola columna centrada deja dos ríos de aire a los
+   costados y la credencial se ve como una pantalla de móvil estirada.
+
+   Lo que NO cambia entre las dos: el borde propio, el radio --radius (2px),
+   el orden de lectura (marca → persona → contacto → acción → verificación)
+   y el eje de alineación. Todo bloque arranca en el mismo borde izquierdo
+   que el logo; por eso el padding horizontal de .credencial-datos está
+   descontado en --sp-2, que es lo que .credencial-dato agrega de su lado
+   para poder pintar el fondo del hover sin desalinear la columna.
+
+   Escritorio es la base y los tamaños chicos van con max-width, que es la
+   convención del archivo (ver BREAKPOINTS, sección 1).
+
+   El borde y el ancho acotado se mantienen en TODOS los tamaños, teléfono
+   incluido -- no "a sangre": una ficha que llena el viewport de punta a
+   punta se confunde con cualquier página móvil; una tarjeta con borde
+   propio se lee como una pieza, que es justo lo que es.
+
+   Sin sombra, y con --c-border en vez de --c-border-light. Es la regla del
+   presupuesto de ornamento (sección 1) aplicada al pie de la letra: lo que
+   no flota no lleva elevación, lleva contraste o borde. Una sombra difusa
+   sobre un fondo tintado se ve turbia, y acá además era redundante -- el
+   salto de blanco a --c-bg-muted ya recorta la pieza contra el fondo. Al
+   sacarla, el borde tiene que subir un paso: --c-border-light contra el
+   gris del fondo no se distingue por sí solo. */
+.credencial {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--c-bg-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+/* ── Encabezado ───────────────────────────────────────────────────────────
+   Logo a la izquierda; rótulo y guardado rápido juntos a la derecha, porque
+   responden a la misma pregunta -- qué es esto y qué puedo hacer con ello.
+   Repartidos en tres bloques sueltos, el rótulo quedaba flotando en el
+   centro sin dueño.
+
+   El azul corporativo ya no cruza la pieza entera: queda como un tramo
+   corto sobre la línea de borde, alineado con el logo. Es la marca de eje
+   de un plano y no compite con el nombre, que es lo que tiene que dominar
+   la mitad de arriba. */
+.credencial-top {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-5) var(--sp-7);
+    border-bottom: 1px solid var(--c-border-light);
+}
+
+.credencial-top::after {
+    content: '';
+    position: absolute;
+    left: var(--sp-7);
+    bottom: -1px;
+    width: 56px;
+    height: 2px;
+    background: var(--c-secondary);
+}
+
+.credencial-top-acciones {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+}
+
+.credencial-logo {
+    height: 22px;
+    width: auto;
+    display: block;
+}
+
+.credencial-id-tag {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+}
+
+/* Ícono suelto, sin caja: "discreto" es literal -- un botón lleno acá
+   competiría con "Guardar contacto", que es la acción principal de
+   verdad y vive más abajo con todo su peso visual. */
+.credencial-rapida {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    color: var(--c-text-muted);
+    cursor: pointer;
+    transition: color var(--t);
+}
+
+.credencial-rapida:hover { color: var(--c-secondary); }
+
+/* ── Perfil ───────────────────────────────────────────────────────────────
+   Rejilla de dos columnas con la foto fija: el nombre arranca a la altura
+   del borde superior de la foto y todo lo demás cuelga de ese mismo eje. La
+   bio va DENTRO de la columna de texto y no debajo de las dos, para no
+   abrir una tercera alineación en un bloque que ya tiene dos. */
+.credencial-perfil {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: var(--sp-6);
+    padding: var(--sp-7) var(--sp-7) var(--sp-6);
+}
+
+.credencial-perfil-info { min-width: 0; }
+
+/* Retrato 4:5 y rectangular, no el círculo de una red social: es la
+   proporción de una foto de carné y el mismo lenguaje anguloso del resto de
+   la pieza. object-fit recorta lo que sobre cuando la foto cargada es
+   cuadrada, que es el caso habitual. */
+.credencial-foto,
+.credencial-foto--placeholder {
+    width: 160px;
+    height: 200px;
+    border-radius: var(--radius);
+    border: 1px solid var(--c-border);
+    object-fit: cover;
+    display: block;
+}
+
+.credencial-foto--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-primary);
+    color: var(--c-text-white);
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-tight);
+}
+
+/* El elemento tipográfico dominante de la pieza: es lo único que alguien
+   tiene que poder leer de un vistazo, antes que nada más. */
+.credencial-nombre {
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    line-height: 1.15;
+    letter-spacing: var(--ls-tight);
+    color: var(--c-text-heading);
+    margin-bottom: var(--sp-2);
+}
+
+.credencial-cargo {
+    font-size: var(--fs-md);
+    color: var(--c-text-body);
+    margin-bottom: var(--sp-3);
+}
+
+.credencial-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    margin-bottom: var(--sp-4);
+}
+
+.credencial-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+}
+
+/* Variante de tamaño de .chip (sección 9), no un componente nuevo: un
+   rótulo de estado en caja alta, más chico que el chip de navegación. Sin
+   reacción al hover, porque no es un control: el .chip base cambia de color
+   al pasar el cursor y acá eso prometería un clic que no existe. */
+.credencial-estado {
+    font-size: var(--fs-xs);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    padding: var(--sp-1) var(--sp-3);
+}
+
+.credencial-estado:hover {
+    border-color: var(--c-border);
+    color: var(--c-text-heading);
+}
+
+.credencial-bio {
+    max-width: 56ch;
+    margin-top: var(--sp-4);
+    font-size: var(--fs-sm);
+    color: var(--c-text-body);
+    line-height: 1.65;
+}
+
+/* ── Divisor ──────────────────────────────────────────────────────────────
+   El único naranja de cierto tamaño en toda la pieza: 48×2px, arrancando en
+   el eje del logo. Marca la transición de "quién es" a "cómo contactarla"
+   sin cruzar la tarjeta -- una línea de borde a borde la partiría en dos
+   objetos distintos. */
+.credencial-divisor {
+    width: 48px;
+    height: 2px;
+    background: var(--c-accent);
+    margin-left: var(--sp-7);
+}
+
+/* ── Datos de contacto ────────────────────────────────────────────────────
+   Ficha técnica: rótulo arriba, valor abajo, ícono outline al costado. En
+   escritorio van en rejilla de columnas que se acomodan solas (auto-fit),
+   así que con tres canales entran en una fila y con uno solo no queda una
+   columna huérfana al lado.
+
+   Sin caja ni regla por dato: cada dato en su propia tarjeta convierte tres
+   teléfonos en tres objetos y la credencial en un tablero. Las reglas finas
+   vuelven más abajo, cuando la rejilla cae a una sola columna y hace falta
+   algo que guíe el salto de un dato al siguiente.
+
+   Cada fila con un canal real es además el enlace que lo activa
+   (tel:/wa.me/mailto:) -- no hace falta un botón aparte para "Llamar"
+   cuando la fila entera ya actúa. */
+.credencial-datos {
+    list-style: none;
+    margin: 0;
+    padding: var(--sp-6) var(--sp-6) var(--sp-7);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--sp-4) var(--sp-5);
+}
+
+.credencial-datos li { margin: 0; }
+
+.credencial-dato {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2);
+    border-radius: var(--radius);
+    color: inherit;
+    text-decoration: none;
+    transition: background var(--t);
+}
+
+a.credencial-dato:hover { background: var(--c-bg-muted); }
+
+.credencial-dato svg { flex-shrink: 0; color: var(--c-text-muted); }
+
+.credencial-dato-label {
+    display: block;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    margin-bottom: 2px;
+}
+
+.credencial-dato-valor {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-medium);
+    color: var(--c-text-heading);
+    word-break: break-word;
+}
+
+.credencial-dato-preview {
+    display: block;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-normal);
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--c-text-muted);
+    margin-top: var(--sp-1);
+}
+
+/* ── Acciones ─────────────────────────────────────────────────────────────
+   Las dos en una fila y con ancho acotado: a 760px un botón de borde a
+   borde deja de parecer un botón y parece una franja. La jerarquía la dan
+   el color (naranja lleno contra contorno) y el reparto de ancho, 1.5 a 1
+   -- no hacen falta además dos tamaños distintos de botón. */
+.credencial-acciones {
+    display: flex;
+    gap: var(--sp-3);
+    max-width: 520px;
+    padding: 0 var(--sp-7) var(--sp-7);
+}
+
+.credencial-acciones > .btn { flex: 1.5; }
+
+/* ── WhatsApp: única excepción de color del sistema ──────────────────────
+   Verde de marca de WhatsApp, no un color de INACONS. Es a propósito y es
+   la única excepción: un botón que actúa sobre una plataforma externa, en
+   el color con el que esa plataforma ya se reconoce en todos lados — no es
+   un color nuevo compitiendo con --c-accent, es una convención ajena. */
+.btn-whatsapp {
+    background: #25d366;
+    border-color: #25d366;
+    color: #fff;
+}
+
+.btn-whatsapp:hover {
+    background: #1ebe59;
+    border-color: #1ebe59;
+}
+
+.credencial-compartir { position: relative; flex: 1; }
+
+/* min-width: en escritorio el botón "Compartir" se queda con el ancho que
+   sobra (~160px) y el menú, anclado a sus dos bordes, heredaba ese ancho:
+   "Compartir en otra app" se partía en dos líneas. Con el piso, el menú crece
+   hacia la derecha y todavía le sobran 200px hasta el borde de la pieza, así
+   que el overflow:hidden de .credencial no lo recorta. */
+.credencial-compartir-menu {
+    position: absolute;
+    bottom: calc(100% + var(--sp-2));
+    left: 0;
+    right: 0;
+    min-width: 220px;
+    z-index: 5;
+    background: var(--c-bg-white);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card-hover);
+    padding: var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+}
+
+.credencial-compartir-menu button {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    width: 100%;
+    padding: var(--sp-2) var(--sp-3);
+    border: none;
+    background: none;
+    border-radius: var(--radius);
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    color: var(--c-text-body);
+    text-align: left;
+    cursor: pointer;
+}
+
+.credencial-compartir-menu button:hover {
+    background: var(--c-bg-muted);
+    color: var(--c-text-heading);
+}
+
+.credencial-compartir-menu svg { color: var(--c-text-muted); flex-shrink: 0; }
+
+/* ── Identidad digital ────────────────────────────────────────────────────
+   Azul noche -- el color estructural de la marca -- para la única sección
+   que es, literalmente, una función del sistema (validar a la persona), no
+   contenido editorial sobre ella. El quiebre de color es lo que la separa
+   del resto de la tarjeta como "esto no es una foto ni un dato, es el
+   mecanismo de verificación".
+
+   La regla vertical separa la afirmación (a la izquierda) del instrumento
+   con el que se comprueba (el QR): son dos cosas distintas, y pegadas sin
+   nada en medio se leían como un bloque de texto con una imagen al lado.
+
+   "Empleado verificado" no es un texto suelto: tarjeta_empleado()
+   (0016_bio_empleado.sql) solo devuelve fila para estado = 'activo', así
+   que si la credencial llegó a pintarse, el dato ya está verificado del
+   lado de la base -- no hay nada que consultar de más. */
+.credencial-identidad {
+    display: flex;
+    align-items: stretch;
+    gap: var(--sp-6);
+    padding: var(--sp-6) var(--sp-7);
+    background: var(--c-primary);
+    color: var(--c-text-white);
+    /* Cuadrícula de plano técnico, casi imperceptible -- mismo criterio que
+       --c-ink-ghost sobre fondo claro (sección 1), pero acá el fondo es
+       oscuro. Es CSS, no una imagen: no hay un asset de "isotipo" que
+       exportar ni mantener. */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+    background-size: 18px 18px;
+}
+
+.credencial-identidad-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-right: var(--sp-6);
+    border-right: 1px solid var(--c-border-dark);
+}
+
+.credencial-identidad-titulo {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-on-dark-3);
+    margin-bottom: var(--sp-3);
+}
+
+.credencial-identidad-estado {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+    color: var(--c-on-dark-1);
+    margin-bottom: var(--sp-2);
+}
+
+.credencial-identidad-punto {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--c-accent);
+}
+
+.credencial-identidad-url {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: var(--font-ui);
+    font-size: var(--fs-2xs);
+    color: var(--c-on-dark-3);
+    text-align: left;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.credencial-identidad-url:hover { color: var(--c-on-dark-1); }
+
+/* ── QR: visor de escaneo ─────────────────────────────────────────────────
+   Cuatro esquinas finas sobre el blanco, no un marco cerrado: es el gesto
+   del visor de una cámara y dice qué parte de la pieza se escanea. Van en
+   el background (ocho tramos de 12×2px) y no en elementos aparte porque no
+   son contenido: no hay nada que anunciarle a un lector de pantalla. Los
+   tramos miden 2px de grosor, así que caen enteros dentro del padding y
+   nunca tocan los módulos del código.
+
+   Perfil "pantalla" (negro, ECC M — src/lib/qr.ts): esto se lee de pantalla
+   a pantalla, nunca se imprime, y nunca pasa por /r/ -- es la misma URL que
+   ya se está viendo, para compartirla — ver docs/formularios.md. */
+.credencial-qr {
+    --visor: linear-gradient(var(--c-accent), var(--c-accent));
+    flex-shrink: 0;
+    align-self: center;
+    width: 124px;
+    height: 124px;
+    padding: var(--sp-3);
+    background:
+        var(--visor) top left / 12px 2px no-repeat,
+        var(--visor) top left / 2px 12px no-repeat,
+        var(--visor) top right / 12px 2px no-repeat,
+        var(--visor) top right / 2px 12px no-repeat,
+        var(--visor) bottom left / 12px 2px no-repeat,
+        var(--visor) bottom left / 2px 12px no-repeat,
+        var(--visor) bottom right / 12px 2px no-repeat,
+        var(--visor) bottom right / 2px 12px no-repeat,
+        var(--c-bg-white);
+}
+
+.credencial-qr-lienzo {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ── Pie ──────────────────────────────────────────────────────────────── */
+.credencial-pie {
+    padding: var(--sp-4) var(--sp-7);
+    background: var(--c-bg-muted);
+    border-top: 1px solid var(--c-border-light);
+    font-size: var(--fs-2xs);
+    letter-spacing: var(--ls-wide);
+    color: var(--c-text-muted);
+    line-height: 1.5;
+}
+
+.credencial-pie strong { color: var(--c-text-heading); }
+
+/* ── Tablet: se angosta la pieza y los datos caen a una columna ───────────
+   A 600px dos columnas de datos dejan cada valor con menos de 250px y un
+   correo corporativo largo empieza a partirse; una sola columna con reglas
+   finas lee mejor que dos apretadas. */
+@media (max-width: 1023.98px) {
+    .credencial { max-width: 600px; }
+
+    .credencial-top { padding: var(--sp-4) var(--sp-6); }
+    .credencial-top::after { left: var(--sp-6); }
+
+    .credencial-perfil { gap: var(--sp-5); padding: var(--sp-6) var(--sp-6) var(--sp-5); }
+
+    .credencial-foto,
+    .credencial-foto--placeholder { width: 136px; height: 170px; }
+
+    .credencial-divisor { margin-left: var(--sp-6); }
+
+    .credencial-datos {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: var(--sp-5) var(--sp-4) var(--sp-6);
+    }
+
+    .credencial-dato {
+        padding: var(--sp-3) var(--sp-2);
+        border-radius: 0;
+        border-bottom: 1px solid var(--c-border-light);
+    }
+
+    .credencial-datos li:last-child .credencial-dato { border-bottom: none; }
+
+    .credencial-acciones { max-width: none; padding: 0 var(--sp-6) var(--sp-6); }
+
+    .credencial-identidad { gap: var(--sp-5); padding: var(--sp-5) var(--sp-6); }
+    .credencial-identidad-info { padding-right: var(--sp-5); }
+    .credencial-qr { width: 112px; height: 112px; }
+
+    .credencial-pie { padding: var(--sp-4) var(--sp-6); }
+}
+
+/* ── Teléfono: composición centrada ───────────────────────────────────────
+   La foto deja de ser columna y pasa a ser lo primero que se ve, con el
+   nombre justo debajo. En una pantalla de 400px la fila foto+texto deja el
+   nombre en ~18px y la credencial deja de identificar a nadie de un
+   vistazo; apilado, el nombre se lleva el ancho entero. */
+@media (max-width: 767.98px) {
+    /* A sangre: sin borde, sin radio y sin ancho máximo. En escritorio el
+       borde es lo que hace que la credencial se lea como un objeto apoyado
+       sobre el fondo; en un teléfono la pantalla ES la credencial, y el
+       mismo borde a 20px de cada canto se ve como una tarjeta encerrada en
+       un cuadro. El fondo de .tj-wrap pasa a blanco en este tramo para que
+       no quede ninguna franja gris al costado ni debajo. */
+    .credencial {
+        max-width: none;
+        border: none;
+        border-radius: 0;
+    }
+
+    .credencial-top { padding: var(--sp-3) var(--sp-5); }
+    .credencial-top::after { left: var(--sp-5); width: 40px; }
+    .credencial-logo { height: 20px; }
+
+    /* El tracking de rótulo (0.14em) no entra en una línea al lado del logo
+       y el atajo de guardar; partido en dos ensucia justo la zona que tiene
+       que estar más limpia de toda la pieza. */
+    .credencial-id-tag { letter-spacing: var(--ls-wide); }
+
+    .credencial-perfil {
+        display: block;
+        text-align: center;
+        padding: var(--sp-5) var(--sp-5) var(--sp-4);
+    }
+
+    .credencial-foto,
+    .credencial-foto--placeholder {
+        width: 112px;
+        height: 140px;
+        margin: 0 auto var(--sp-4);
+    }
+
+    .credencial-nombre { font-size: var(--fs-xl); margin-bottom: var(--sp-1); }
+    .credencial-cargo { font-size: var(--fs-base); margin-bottom: var(--sp-2); }
+    .credencial-meta { justify-content: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .credencial-bio { margin: var(--sp-3) auto 0; }
+
+    .credencial-divisor { width: 40px; margin: 0 auto; }
+
+    .credencial-datos { padding: var(--sp-4) var(--sp-3) var(--sp-5); }
+    .credencial-dato-valor { font-size: var(--fs-sm); }
+
+    .credencial-acciones { flex-direction: column; padding: 0 var(--sp-5) var(--sp-5); }
+    .credencial-acciones > .btn,
+    .credencial-compartir { flex: none; }
+
+    .credencial-identidad { gap: var(--sp-4); padding: var(--sp-5); }
+    .credencial-identidad-info { padding-right: var(--sp-4); }
+    .credencial-identidad-titulo { margin-bottom: var(--sp-2); }
+    .credencial-identidad-estado { font-size: var(--fs-sm); margin-bottom: var(--sp-1); }
+    .credencial-qr { width: 104px; height: 104px; padding: var(--sp-2); }
+
+    .credencial-pie { padding: var(--sp-4) var(--sp-5); text-align: center; }
+}
+
+/* ── Teléfono chico ───────────────────────────────────────────────────────
+   Frontera propia del componente, por debajo de las cuatro del sistema (ver
+   BREAKPOINTS, sección 1). Se justifica acá y en ninguna otra parte: esta
+   es la única pieza del sitio que se abre casi siempre desde un teléfono
+   —se llega escaneando un QR— y es donde la diferencia entre 360 y 430px
+   decide si el QR y los botones entran sin apretarse. */
+@media (max-width: 389.98px) {
+    .credencial-top { padding: var(--sp-3) var(--sp-4); }
+    .credencial-top::after { left: var(--sp-4); }
+
+    .credencial-perfil { padding: var(--sp-4) var(--sp-4) var(--sp-3); }
+
+    .credencial-foto,
+    .credencial-foto--placeholder {
+        width: 96px;
+        height: 120px;
+        margin-bottom: var(--sp-3);
+    }
+
+    .credencial-datos { padding: var(--sp-4) var(--sp-2) var(--sp-4); }
+    .credencial-acciones { padding: 0 var(--sp-4) var(--sp-4); }
+
+    .credencial-identidad { gap: var(--sp-3); padding: var(--sp-4); }
+    .credencial-identidad-info { padding-right: var(--sp-3); }
+    .credencial-qr { width: 96px; height: 96px; }
+
+    .credencial-pie { padding: var(--sp-3) var(--sp-4); }
+}
+
+/* ── Estado vacio: cargando, de baja, o el slug no existe ────────────────
+   Mismo tono que 404.astro: decir la verdad sin culpar a quien llego. Un QR
+   de credencial que apunta aca porque la persona ya no trabaja en la
+   empresa no es un error de quien escaneo. */
+.credencial-vacia {
+    max-width: 440px;
+    margin: 0 auto;
+    text-align: center;
+    padding: var(--sp-l2) var(--sp-6);
+    color: var(--c-text-muted);
+}
+
+.credencial-vacia .btn {
+    margin-top: var(--sp-5);
+}
+
+/* Reutiliza .credencial-nombre (color --c-text-heading): mismo peso
+   tipográfico que el nombre de una persona real, para un estado que
+   también es, en el fondo, un título de página. */
+.credencial-vacia .credencial-nombre {
+    margin-bottom: var(--sp-2);
+}
+
+/* ── Directorio: filas con foto chica + nombre + cargo ───────────────────
+   Filas, no la grilla a sangre de .card--media: esto es una lista para
+   escanear nombres rapido, no una vitrina. */
+.directorio-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+
+.directorio-fila {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-4);
+    background: var(--c-bg-white);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.directorio-fila:hover {
+    border-color: var(--c-border);
+    box-shadow: var(--shadow-card);
+}
+
+.directorio-fila-nombre {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+}
+
+.directorio-fila-cargo {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+}
+
+@media (max-width: 480px) {
+    .ficha-persona {
+        padding: var(--sp-l1) var(--sp-4);
     }
 }

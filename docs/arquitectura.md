@@ -80,6 +80,8 @@ web-astro/
 | `/documentos` | `documentos.astro` | ✅ |
 | `/404` | `404.astro` | — |
 | `/recursos` | `recursos/index.astro` | ❌ noindex |
+| `/empleados` | `empleados/index.astro` | ✅ directorio público — lee `directorio_empleados()` en el navegador |
+| `/empleados/SLUG` | reescrita a `tarjetas/index.astro` (ver `.htaccess`) | ❌ noindex — datos de contacto de una persona |
 | `/expomina` | `expomina.astro` | ❌ noindex (campaña terminada) |
 | `/panel` | `panel/index.astro` | ❌ noindex — administración |
 | `/sistema` | `sistema/index.astro` | ❌ noindex — referencia de componentes |

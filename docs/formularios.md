@@ -162,6 +162,12 @@ la mano, y un fallo de red le sumaría un segundo problema al que ya tiene.
   lista en dos sitios, el día que alguien agregue un dominio desde el panel el redirector
   seguiría rechazándolo, con el síntoma "guardé el destino y no funciona" y ningún error
   que lo explique.
+- **Límite de tasa: 30 peticiones por IP cada 60 segundos**, en `public/r/index.php`
+  antes de llamar a Supabase. Existe porque `resolver_qr()` inserta un escaneo en cada
+  llamada exista el código o no; sin límite, un bucle de peticiones podía llenar
+  `escaneos` hasta poner el proyecto en solo lectura, y ahí deja de resolver para
+  **todos**, no solo para quien abusó. El contador es un archivo por IP en el directorio
+  temporal del sistema — no depende de que el hosting tenga APCu o Redis habilitado.
 
 ## Formularios
 

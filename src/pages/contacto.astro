@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
 ---
 
 <BaseLayout title="Contacto | INACONS" description="Contáctate con INACONS para iniciar tu proyecto de construcción e ingeniería">
@@ -36,6 +37,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .c-info-value { font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--c-text-heading); line-height: 1.5; }
     .c-info-value a { color: var(--c-text-heading); text-decoration: none; transition: color .2s; }
     .c-info-value a:hover { color: var(--c-secondary); }
+    /*  Estado inicial del aviso de exito: lo muestra el script al enviar.
+        Es comportamiento, no estilo — el aspecto lo da .notice--ok. */
+    #formSuccess { display: none; text-align: center; }
+
     .contact-social { display: flex; gap: var(--sp-2); margin-top: var(--sp-6); }
     .contact-social a {
       width: 40px; height: 40px;
@@ -50,60 +55,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       color: var(--c-secondary);
       background: rgba(27,82,120,0.05);
     }
-    .contact-form-wrap {
-      background: var(--c-bg-white);
-      border: 1px solid var(--c-border-light);
-      border-top: 3px solid var(--c-secondary);
-      padding: var(--sp-l1);
-    }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
-    .form-group { margin-bottom: var(--sp-4); }
-    .form-group label {
-      display: block; font-size: var(--fs-2xs); font-weight: var(--fw-semibold);
-      letter-spacing: var(--ls-label); text-transform: uppercase;
-      color: var(--c-text-muted); margin-bottom: var(--sp-2);
-    }
-    .form-input, .form-textarea, .form-select {
-      width: 100%;
-      border: 1.5px solid var(--c-border);
-      border-radius: 2px;
-      padding: var(--sp-3) var(--sp-3);
-      font-family: 'Montserrat', sans-serif;
-      font-size: var(--fs-base);
-      color: var(--c-text-heading);
-      background: var(--c-bg-muted);
-      outline: none;
-      transition: border-color .22s, box-shadow .22s, background .22s;
-      -webkit-appearance: none;
-    }
-    .form-input:focus, .form-textarea:focus, .form-select:focus {
-      border-color: var(--c-secondary);
-      background: #fff;
-      box-shadow: 0 0 0 3px rgba(27,82,120,0.09);
-    }
-    .form-input::placeholder, .form-textarea::placeholder { color: #b0b6c8; }
-    .form-textarea { resize: vertical; min-height: 130px; }
-    .form-submit {
-      width: 100%; padding: var(--sp-3);
-      background: var(--c-secondary); color: #fff;
-      border: none; border-radius: 2px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: var(--fs-sm); font-weight: var(--fw-semibold);
-      letter-spacing: 1px; text-transform: uppercase;
-      cursor: pointer;
-      transition: background .22s, transform .22s;
-      display: flex; align-items: center; justify-content: center; gap: var(--sp-2);
-    }
-    .form-submit:hover { background: var(--c-primary); transform: translateY(-1px); }
-    .form-submit:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
-    .form-success {
-      display: none;
-      text-align: center;
-      padding: var(--sp-l1) var(--sp-5);
-    }
-    .form-success svg { color: #27ae60; margin-bottom: var(--sp-4); }
-    .form-success h3 { font-size: var(--fs-lg); color: var(--c-primary); margin-bottom: var(--sp-2); }
-    .form-success p { font-size: var(--fs-base); color: var(--c-text-muted); }
     .location-grid {
       display: grid;
       grid-template-columns: 1fr 1.8fr;
@@ -156,27 +107,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .map-wrap { height: 280px; }
       .form-row { grid-template-columns: 1fr; }
       .channel-features { grid-template-columns: 1fr; }
-      .contact-form-wrap { padding: var(--sp-6) var(--sp-5); }
-      .form-submit {
-    margin-bottom: var(--sp-4);
-  }
     }
   </style>
 
   <!-- HERO -->
-  <section class="page-hero page-hero--sm">
-    <div class="page-hero-bg" style="background-image: url('/assets/imagenes/image_heroprincipal.webp')"></div>
-    <div class="page-hero-overlay"></div>
-    <div class="page-hero-content" data-aos="fade-up" data-aos-duration="800">
-      <nav class="breadcrumb">
-        <a href="/">Inicio</a>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-current">Contacto</span>
-      </nav>
-      <h1 class="page-hero-title">¿Listo para tu<br>próximo proyecto?</h1>
-      <p class="page-hero-subtitle">Estamos aquí para ayudarte a materializar cada idea</p>
-    </div>
-  </section>
+  <PageHero
+    image="/assets/imagenes/image_heroprincipal.webp"
+    title="¿Listo para tu<br>próximo proyecto?"
+    subtitle="Estamos aquí para ayudarte a materializar cada idea"
+    current="Contacto"
+  />
 
   <!-- ① FORMULARIO + INFO -->
   <section class="sec sec--white">
@@ -250,7 +190,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <!-- Columna derecha: formulario -->
         <div data-aos="fade-left" data-aos-duration="800">
-          <div class="contact-form-wrap">
+          <div class="panel panel--accent panel--raised">
             <div class="sh sh--left" style="margin-bottom:28px;">
               <p class="sh-label">Formulario de Contacto</p>
               <h2 class="sh-title" style="font-size:1.3rem;">Cuéntanos sobre tu proyecto</h2>
@@ -258,7 +198,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
 
             <!-- Mensaje de éxito (oculto hasta que envíe) -->
-            <div class="form-success" id="formSuccess">
+            <div class="notice notice--ok" id="formSuccess">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
               <h3>¡Listo!</h3>
               <p>Se abrió tu cliente de correo con el mensaje preparado. Complétalo y envíalo a <strong>ventas@inacons.com.pe</strong>.<br>Si no ves la ventana, revisa bloqueadores o escríbenos directamente a ese correo.</p>
@@ -300,7 +240,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               </div>
               <input type="text" name="company_url" tabindex="-1" autocomplete="off"
        aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0;">
-              <button type="submit" class="form-submit" id="formSubmit">
+              <button type="submit" class="btn btn-primary btn-block" id="formSubmit">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                 Enviar Mensaje
               </button>
@@ -448,9 +388,5 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       successMsg.style.display = 'block';
     });
   </script>
-
-  <style is:global>
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
 
 </BaseLayout>

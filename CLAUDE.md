@@ -40,6 +40,8 @@ Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/
 | Esquema y permisos de la base | `supabase/migrations/*.sql`, en orden |
 | Panel de administracion | `src/pages/panel/index.astro` |
 | Referencia visual de componentes | `src/pages/sistema/index.astro` (`/sistema/`) |
+| Directorio y ficha de empleado | `src/pages/empleados/index.astro` (directorio), `src/pages/tarjetas/index.astro` (plantilla única, leída via `.htaccess` desde `/empleados/SLUG/`) |
+| Datos publicos de empleados | `supabase/migrations/0012_tarjetas_empleados.sql` — funciones angostas, `empleados` sigue sin política de SELECT para `anon` |
 
 Detalle completo en [docs/arquitectura.md](docs/arquitectura.md).
 
@@ -99,6 +101,17 @@ devuelve 404 antes de que el PHP se ejecute. Todo lo tecleado en minúsculas sig
 funcionando, así que el fallo solo aparece al escanear de verdad. Se codifica en
 mayúsculas y **se muestra en minúsculas** (`urlLegible`).
 Ver [docs/formularios.md](docs/formularios.md).
+
+**8. `/contacto` no va en el menubar principal.** El menú nombra lo que la empresa
+*es* —quiénes somos, qué hacemos, qué hemos construido—; contactar es una acción, y
+mezclarla ahí le quita jerarquía a las dos cosas. Vive en la píldora del top-bar, en el
+menú móvil y en el pie.
+
+Esa regla deja un hueco que hay que tapar en otro sitio, porque el top-bar se oculta al
+primer píxel de scroll (`initHeaderScroll`, main.js): **toda página de cara al cliente
+cierra con `<CtaBand>`**. Si una página nueva no tiene banda de cierre, el visitante de
+escritorio se queda sin ninguna salida a contacto salvo el pie. Ese es el precio de la
+regla y es la condición para mantenerla.
 
 ## Convenciones
 

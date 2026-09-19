@@ -93,6 +93,11 @@ orden**, una sola vez:
 | `0009_panel.sql` | `reasignar_qr()` y permisos del panel |
 | `0010_latido.sql` | Tabla y función del latido |
 | `0011_saneamiento_escaneos.sql` | `resolver_qr()` deja de guardar user-agent/referrer en escaneos que no son `ok` + purga de `escaneos` a 90 días |
+| `0012_tarjetas_empleados.sql` | `tarjeta_empleado()` y `directorio_empleados()` — lectura pública de `empleados`, sin abrir la tabla |
+| `0013_storage_fotos_empleados.sql` | Bucket público `empleados-fotos` (2 MB, JPG/PNG/WebP) + políticas de escritura solo para administradores |
+| `0014_sede_empleado.sql` | Columna `sede` en `empleados`, incluida en `tarjeta_empleado()` |
+| `0015_analitica_tarjetas.sql` | Tabla `tarjeta_eventos` + `registrar_evento_tarjeta()` — vistas y clics dentro de la ficha, función angosta igual que `resolver_qr()` |
+| `0016_bio_empleado.sql` | Columna `bio` en `empleados` — sección "Sobre mí" de la ficha, opcional |
 
 Entre `0001` y `0002` las tablas existen sin protección. Se ejecutan seguidos.
 

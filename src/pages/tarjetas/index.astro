@@ -1,0 +1,346 @@
+---
+/**
+ * Plantilla única de la ficha de empleado.
+ *
+ * Es UN solo archivo compilado — no una página por persona. public/.htaccess
+ * reescribe la URL bonita `/empleados/SLUG/` hacia este archivo con el slug
+ * en la query string; el script de abajo lo lee del navegador y le pregunta
+ * a Supabase por esa persona en el momento, con la clave pública. Así la
+ * ficha muestra el dato de ahorita sin depender de un redeploy — algo que
+ * en modo static (astro.config.mjs) ninguna ruta dinámica real puede hacer.
+ *
+ * noindex a propósito: es el teléfono y el correo de una persona. No tiene
+ * nada que buscar en Google, y el que la visita llega por un enlace directo
+ * o por el QR de una credencial (que nunca codifica esta URL — ver
+ * public/.htaccess y docs/formularios.md: todo QR impreso pasa por /r/).
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Tarjeta de contacto | INACONS"
+  description="Tarjeta de contacto de un colaborador de INACONS."
+  robots="noindex, follow"
+  minimalChrome={true}
+>
+
+  <style slot="head">
+    /* El fondo detrás de la credencial (--c-bg-muted) es lo que la hace leer
+       como objeto centrado y no como una página a secas -- ver el
+       componente .credencial en design-system.css. min-height, no height:
+       si el contenido es más largo que la pantalla (foto + bio larga), la
+       página crece hacia abajo en vez de recortarse. */
+    .tj-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--c-bg-muted);
+      padding: var(--sp-l2) var(--sp-6);
+    }
+    #tj-cargando, #tj-vacia {
+      width: 100%;
+    }
+
+    /* En teléfono la credencial va a sangre (ver .credencial en
+       design-system.css): sin aire alrededor y con el fondo en blanco, para
+       que no quede ninguna franja gris al costado ni debajo de la pieza.
+       align-items: stretch hace que el blanco llegue hasta abajo cuando el
+       contenido no alcanza a llenar la pantalla. */
+    @media (max-width: 767.98px) {
+      .tj-wrap {
+        padding: 0;
+        background: var(--c-bg-white);
+        align-items: stretch;
+      }
+    }
+  </style>
+
+  <div class="tj-wrap">
+      <div id="tj-cargando" class="credencial-vacia">Cargando…</div>
+
+      <div id="tj-vacia" class="credencial-vacia" hidden>
+        <p class="credencial-nombre">No encontramos esta tarjeta</p>
+        <p>El enlace puede estar mal escrito, o la persona ya no está en INACONS.</p>
+        <a class="btn btn-outline" href="/empleados/">Ver el directorio</a>
+      </div>
+
+      <div id="tj-ficha" class="credencial" hidden>
+
+        <div class="credencial-top">
+          <img class="credencial-logo" src="/assets/imagenes/logos/logo_inacons.svg" alt="INACONS" width="110" height="22" />
+          <div class="credencial-top-acciones">
+            <span class="credencial-id-tag">Credencial digital</span>
+            <button type="button" class="credencial-rapida" id="tj-guardar-rapido" aria-label="Guardar contacto"></button>
+          </div>
+        </div>
+
+        <div class="credencial-perfil">
+          <div id="tj-avatar"></div>
+          <div class="credencial-perfil-info">
+            <p class="credencial-nombre" id="tj-nombre"></p>
+            <p class="credencial-cargo" id="tj-cargo" hidden></p>
+            <div class="credencial-meta" id="tj-meta" hidden></div>
+            <span class="chip credencial-estado">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              Empleado INACONS
+            </span>
+            <p class="credencial-bio" id="tj-bio" hidden></p>
+          </div>
+        </div>
+
+        <div class="credencial-divisor" aria-hidden="true"></div>
+
+        <ul class="credencial-datos" id="tj-contacto-lista"></ul>
+
+        <div class="credencial-acciones">
+          <button type="button" class="btn btn-accent btn-block" id="tj-vcf"></button>
+          <div class="credencial-compartir">
+            <button type="button" class="btn btn-outline btn-block" id="tj-compartir"></button>
+            <div class="credencial-compartir-menu" id="tj-compartir-menu" hidden></div>
+          </div>
+        </div>
+
+        <div class="credencial-identidad">
+          <div class="credencial-identidad-info">
+            <p class="credencial-identidad-titulo">Identidad digital</p>
+            <p class="credencial-identidad-estado">
+              <span class="credencial-identidad-punto" aria-hidden="true"></span>
+              Empleado verificado
+            </p>
+            <button type="button" class="credencial-identidad-url" id="tj-url"></button>
+          </div>
+          <div class="credencial-qr">
+            <div class="credencial-qr-lienzo" id="tj-qr"></div>
+          </div>
+        </div>
+
+        <div class="credencial-pie">
+          <strong>INACONS S.R.L.</strong> · Ingeniería y Construcción
+        </div>
+      </div>
+  </div>
+
+  <script>
+    import { tarjetaEmpleado, registrarEventoTarjeta, type DatosTarjetaEmpleado, type EventoTarjeta } from '../../lib/supabase';
+    import { generarQR, DOMINIO } from '../../lib/qr';
+
+    const $ = (id: string) => document.getElementById(id)!;
+
+    const esc = (t: string) =>
+      t.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]!));
+
+    function iniciales(nombre: string): string {
+      const partes = nombre.trim().split(/\s+/);
+      return ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase();
+    }
+
+    /** Solo dígitos y un `+` inicial opcional — lo que aceptan tel:/wa.me. */
+    function soloDigitos(t: string): string {
+      return t.trim().replace(/(?!^\+)[^\d]/g, '');
+    }
+
+    /**
+     * vCard 3.0, generada en el navegador. Sin nombre y apellido por
+     * separado en el esquema (`empleados.nombre` es un solo campo), así que
+     * `N` repite el nombre completo — es lo que ya hacen la mayoría de los
+     * lectores de tarjetas cuando falta el desglose, y el campo que de
+     * verdad importa para mostrar el contacto es `FN`, no `N`. Se agrega
+     * `URL` con la ficha misma: quien importe el contacto puede volver.
+     */
+    function vcard(d: DatosTarjetaEmpleado, url: string): string {
+      const lineas = ['BEGIN:VCARD', 'VERSION:3.0', `N:${d.nombre};;;;`, `FN:${d.nombre}`, 'ORG:INACONS S.R.L.'];
+      if (d.cargo) lineas.push(`TITLE:${d.cargo}`);
+      if (d.telefono) lineas.push(`TEL;TYPE=WORK,VOICE:${d.telefono}`);
+      if (d.whatsapp) lineas.push(`TEL;TYPE=CELL:${d.whatsapp}`);
+      if (d.email) lineas.push(`EMAIL;TYPE=WORK:${d.email}`);
+      lineas.push(`URL:${url}`, 'END:VCARD');
+      return lineas.join('\r\n');
+    }
+
+    function descargarVcf(d: DatosTarjetaEmpleado, url: string) {
+      const blob = new Blob([vcard(d, url)], { type: 'text/vcard;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${d.nombre.toLowerCase().replace(/\s+/g, '-')}.vcf`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    const ICONOS = {
+      telefono: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2.84h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.09a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
+      whatsapp: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+      correo: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+      descargar: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="3" y2="15"/>',
+      enlace: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+      compartir: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+      ok: '<path d="M20 6 9 17l-5-5"/>',
+      maletin: '<rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+      pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+      copiar: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+    };
+
+    /** Mensaje precargado al abrir WhatsApp: menos fricción que un número pelado. */
+    const MENSAJE_WHATSAPP = 'Hola, te contacto desde tu tarjeta digital de INACONS.';
+
+    function icono(path: string, tamano = 18): string {
+      return `<svg width="${tamano}" height="${tamano}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+    }
+
+    /**
+     * Cambia el contenido de un botón unos segundos y lo vuelve a dejar como
+     * estaba. Se usa para "✓ Contacto guardado" y "Enlace copiado" — una
+     * confirmación breve, no un estado permanente.
+     */
+    function confirmarBoton(btn: HTMLButtonElement, textoOk: string) {
+      const original = btn.innerHTML;
+      btn.innerHTML = `${icono(ICONOS.ok)} ${textoOk}`;
+      btn.disabled = true;
+      setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 2000);
+    }
+
+    async function copiarEnlace(url: string, btn: HTMLButtonElement, textoOk = 'Enlace copiado') {
+      try {
+        await navigator.clipboard.writeText(url);
+        confirmarBoton(btn, textoOk);
+      } catch {
+        // Sin permiso de portapapeles: no hay nada más que ofrecer acá.
+      }
+    }
+
+    function pintar(d: DatosTarjetaEmpleado, slug: string) {
+      // Siempre la URL canónica, con el dominio real -- no `location.href`,
+      // que en desarrollo local es la forma fea `/tarjetas/?slug=...` y no
+      // la que de verdad se comparte (ver public/.htaccess).
+      const url = `${DOMINIO}/empleados/${slug}/`;
+
+      $('tj-avatar').innerHTML = d.foto_url
+        ? `<img class="credencial-foto" src="${esc(d.foto_url)}" alt="${esc(d.nombre)}" width="160" height="200">`
+        : `<div class="credencial-foto--placeholder">${esc(iniciales(d.nombre))}</div>`;
+
+      $('tj-nombre').textContent = d.nombre;
+      if (d.cargo) { $('tj-cargo').textContent = d.cargo; $('tj-cargo').hidden = false; }
+
+      const meta: string[] = [];
+      if (d.area) meta.push(`<span>${icono(ICONOS.maletin, 14)} ${esc(d.area)}</span>`);
+      if (d.sede) meta.push(`<span>${icono(ICONOS.pin, 14)} ${esc(d.sede)}</span>`);
+      if (meta.length > 0) { $('tj-meta').innerHTML = meta.join(''); $('tj-meta').hidden = false; }
+
+      if (d.bio) { $('tj-bio').textContent = d.bio; $('tj-bio').hidden = false; }
+
+      // ── QR propio: perfil pantalla (negro, ECC M) — se lee de pantalla a
+      // pantalla, nunca se imprime. No pasa por /r/: es la misma URL que ya
+      // se está viendo, para compartirla — ver docs/formularios.md.
+      generarQR(url, { perfil: 'pantalla' }).then((r) => { $('tj-qr').innerHTML = r.svg; });
+      $('tj-url').innerHTML = `${esc(url.replace(/^https?:\/\//, ''))} ${icono(ICONOS.copiar, 13)}`;
+      $('tj-url').addEventListener('click', () => copiarEnlace(url, $('tj-url') as HTMLButtonElement));
+
+      // ── Datos de contacto: cada fila con un canal real es también el
+      // enlace que lo activa (tel:/wa.me/mailto:) -- no hace falta un botón
+      // aparte para "Llamar" cuando la fila entera ya actúa.
+      const filas: string[] = [];
+      if (d.telefono) {
+        filas.push(`<li><a class="credencial-dato" data-evento="clic_llamar" href="tel:${esc(soloDigitos(d.telefono))}">
+          ${icono(ICONOS.telefono, 16)}
+          <span><span class="credencial-dato-label">Teléfono</span><span class="credencial-dato-valor">${esc(d.telefono)}</span></span>
+        </a></li>`);
+      }
+      if (d.whatsapp) {
+        const numero = esc(soloDigitos(d.whatsapp).replace('+', ''));
+        const texto = encodeURIComponent(MENSAJE_WHATSAPP);
+        filas.push(`<li><a class="credencial-dato" data-evento="clic_whatsapp" href="https://wa.me/${numero}?text=${texto}" target="_blank" rel="noopener">
+          ${icono(ICONOS.whatsapp, 16)}
+          <span><span class="credencial-dato-label">WhatsApp</span><span class="credencial-dato-valor">${esc(d.whatsapp)}<span class="credencial-dato-preview">${esc(MENSAJE_WHATSAPP)}</span></span></span>
+        </a></li>`);
+      }
+      if (d.email) {
+        filas.push(`<li><a class="credencial-dato" data-evento="clic_correo" href="mailto:${esc(d.email)}">
+          ${icono(ICONOS.correo, 16)}
+          <span><span class="credencial-dato-label">Correo corporativo</span><span class="credencial-dato-valor">${esc(d.email)}</span></span>
+        </a></li>`);
+      }
+      $('tj-contacto-lista').innerHTML = filas.join('');
+      $('tj-contacto-lista').querySelectorAll<HTMLElement>('[data-evento]').forEach((el) =>
+        el.addEventListener('click', () => registrarEventoTarjeta(slug, el.dataset.evento as EventoTarjeta))
+      );
+
+      // ── Guardar contacto (principal) + acceso rápido del encabezado ────
+      const btnVcf = $('tj-vcf') as HTMLButtonElement;
+      btnVcf.innerHTML = `${icono(ICONOS.descargar)} Guardar contacto`;
+      btnVcf.addEventListener('click', () => {
+        descargarVcf(d, url);
+        registrarEventoTarjeta(slug, 'guardar_contacto');
+        confirmarBoton(btnVcf, 'Contacto guardado');
+      });
+
+      const btnRapido = $('tj-guardar-rapido') as HTMLButtonElement;
+      btnRapido.innerHTML = icono(ICONOS.descargar, 16);
+      btnRapido.addEventListener('click', () => {
+        descargarVcf(d, url);
+        registrarEventoTarjeta(slug, 'guardar_contacto');
+        const original = btnRapido.innerHTML;
+        btnRapido.innerHTML = icono(ICONOS.ok, 16);
+        btnRapido.disabled = true;
+        setTimeout(() => { btnRapido.innerHTML = original; btnRapido.disabled = false; }, 2000);
+      });
+
+      const btnCompartir = $('tj-compartir') as HTMLButtonElement;
+      const menu = $('tj-compartir-menu');
+      btnCompartir.innerHTML = `${icono(ICONOS.compartir)} Compartir`;
+
+      const opciones: { texto: string; icono: string; accion: () => void }[] = [
+        {
+          texto: 'Compartir en WhatsApp', icono: ICONOS.whatsapp,
+          accion: () => window.open(`https://wa.me/?text=${encodeURIComponent(`Tarjeta de contacto de ${d.nombre} — ${url}`)}`, '_blank'),
+        },
+        { texto: 'Copiar enlace', icono: ICONOS.copiar, accion: () => copiarEnlace(url, btnCompartir, 'Enlace copiado') },
+        {
+          texto: 'Enviar por correo', icono: ICONOS.correo,
+          accion: () => { location.href = `mailto:?subject=${encodeURIComponent('Tarjeta de contacto — ' + d.nombre)}&body=${encodeURIComponent(url)}`; },
+        },
+      ];
+      // "Compartir en otra app" solo si el navegador de verdad tiene panel
+      // nativo -- en desktop casi nunca, y un botón que no hace nada es peor
+      // que no tenerlo.
+      if (navigator.share) {
+        opciones.splice(2, 0, {
+          texto: 'Compartir en otra app', icono: ICONOS.enlace,
+          accion: () => { navigator.share({ title: d.nombre, url }).catch(() => {}); },
+        });
+      }
+
+      menu.innerHTML = opciones.map((o, i) => `<button type="button" data-op="${i}">${icono(o.icono, 16)} ${o.texto}</button>`).join('');
+      menu.querySelectorAll<HTMLButtonElement>('[data-op]').forEach((b) =>
+        b.addEventListener('click', () => {
+          opciones[Number(b.dataset.op)].accion();
+          registrarEventoTarjeta(slug, 'compartir');
+          menu.hidden = true;
+        })
+      );
+
+      btnCompartir.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden;
+      });
+      document.addEventListener('click', (e) => {
+        if (!menu.hidden && !$('tj-compartir').contains(e.target as Node)) menu.hidden = true;
+      });
+
+      $('tj-ficha').hidden = false;
+      registrarEventoTarjeta(slug, 'vista');
+    }
+
+    async function iniciar() {
+      const slug = new URLSearchParams(location.search).get('slug');
+      const datos = slug ? await tarjetaEmpleado(slug) : null;
+
+      $('tj-cargando').hidden = true;
+
+      if (datos && slug) pintar(datos, slug);
+      else $('tj-vacia').hidden = false;
+    }
+
+    iniciar();
+  </script>
+
+</BaseLayout>

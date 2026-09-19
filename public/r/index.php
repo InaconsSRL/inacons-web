@@ -49,6 +49,20 @@ $codigo = $_GET['c'] ?? '';
 $codigo = preg_replace('/[^A-Za-z0-9_-]/', '', $codigo);
 $codigo = substr($codigo, 0, 24);
 
+/* ── Limite de tasa ─────────────────────────────────────────────────────────
+   Antes de gastar la llamada a Supabase, no despues: resolver_qr() inserta un
+   escaneo en CADA llamada, exista el codigo o no (0007), y nada mas lo
+   frenaba. Un bucle de peticiones podia llenar `escaneos` hasta poner el
+   proyecto en solo lectura -- y ahi resolver_qr() empieza a fallar para
+   TODOS, no solo para quien abuso. La purga de 0011 bajo el dano; esto ataca
+   la causa: la peticion ni siquiera llega a Supabase. */
+if (limiteExcedido(ipVisitante())) {
+    http_response_code(429);
+    header('Retry-After: 60');
+    paginaSobria('Demasiadas solicitudes', 'Espera un momento',
+        'Se hicieron muchas peticiones desde tu conexion en poco tiempo. Vuelve a intentarlo en un minuto.', '429');
+}
+
 if ($codigo === '') {
     http_response_code(404);
     paginaSobria('Enlace incompleto', 'Falta el codigo',
@@ -128,6 +142,69 @@ paginaSobria(
 
 
 /* ── Funciones ──────────────────────────────────────────────────────────── */
+
+/**
+ * IP real del visitante.
+ *
+ * Solo REMOTE_ADDR: no hay Cloudflare ni proxy delante de este servidor (ver
+ * la cabecera del archivo), asi que una cabecera tipo X-Forwarded-For la pone
+ * el propio visitante y no hay nadie confiable adelante que la reescriba.
+ * Confiar en ella seria dejar que cualquiera elija bajo que IP lo limitan.
+ */
+function ipVisitante(): string
+{
+    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+}
+
+/**
+ * Limite de tasa por IP: MAX_PETICIONES cada LIMITE_VENTANA segundos.
+ *
+ * Un archivo por IP en el directorio temporal del sistema, no APCu ni Redis:
+ * este es un cPanel compartido y no hay forma de confirmar desde aqui que
+ * APCu este habilitado. sys_get_temp_dir() esta garantizado donde corre PHP,
+ * sin depender de una extension que puede faltar.
+ *
+ * flock() evita que dos peticiones simultaneas de la misma IP lean el mismo
+ * contador viejo y las dos escriban "1" en vez de "1" y "2".
+ *
+ * Si el directorio temporal no fuera escribible, se deja pasar la peticion:
+ * negarle el paso a todo el mundo por no poder contar seria un dano mayor que
+ * el que este limite trata de evitar.
+ */
+const LIMITE_PETICIONES = 30;
+const LIMITE_VENTANA    = 60; // segundos
+
+function limiteExcedido(string $ip): bool
+{
+    $ruta = sys_get_temp_dir() . '/inacons_qr_rl_' . hash('sha256', $ip) . '.json';
+
+    $fp = @fopen($ruta, 'c+');
+    if ($fp === false) {
+        return false;
+    }
+
+    flock($fp, LOCK_EX);
+
+    $contenido = stream_get_contents($fp);
+    $datos = $contenido !== false && $contenido !== '' ? json_decode($contenido, true) : null;
+
+    $ahora = time();
+    if (!is_array($datos) || !isset($datos['inicio'], $datos['total']) || ($ahora - $datos['inicio']) >= LIMITE_VENTANA) {
+        $datos = ['inicio' => $ahora, 'total' => 0];
+    }
+
+    $datos['total']++;
+    $excedido = $datos['total'] > LIMITE_PETICIONES;
+
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode($datos));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
+
+    return $excedido;
+}
 
 /**
  * Llama a una funcion de Postgres por la API REST.

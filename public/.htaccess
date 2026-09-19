@@ -35,6 +35,28 @@ ErrorDocument 404 /404.html
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^r/([A-Za-z0-9_-]{2,24})/?$ /r/index.php?c=$1 [L,QSA,NC]
 
+    #  ── Ficha de empleado: /empleados/SLUG/ → la plantilla estática ────────
+    #
+    #  A diferencia de /r/, esta URL NUNCA se codifica en un QR impreso — esa
+    #  regla sigue intacta (ver docs/formularios.md): el QR de una credencial
+    #  siempre apunta a /r/CODIGO, y ese código se reasigna desde el panel el
+    #  día que la persona cambie o deje la empresa. Esta URL bonita es para
+    #  compartir por chat o correo, así que va sin [NC] a propósito: el slug
+    #  nace en minúsculas (empleados.slug lo exige) y nunca sale de un QR en
+    #  mayúsculas.
+    #
+    #  Es una reescritura hacia un archivo ESTÁTICO con la respuesta ya
+    #  compilada — no hay PHP nuevo aquí. src/pages/tarjetas/index.astro lee
+    #  `slug` de la query string en el navegador y le pregunta a
+    #  tarjeta_empleado() con la clave pública, igual que ya hace /panel/.
+    #
+    #  El patrón replica el check de la tabla (minúsculas, dígitos, un guion
+    #  entre grupos): `^[a-z0-9]+(-[a-z0-9]+)*$`. Con eso, /empleados/ solo
+    #  (sin nada después) no entra por esta regla — sigue siendo el
+    #  directorio, un archivo real, y !-f lo deja pasar de largo.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^empleados/([a-z0-9]+(?:-[a-z0-9]+)*)/?$ /tarjetas/index.html?slug=$1 [L,QSA]
+
     #  Compatibilidad con la forma larga. /recursos/ generó códigos con este
     #  formato y alguno puede estar en un flyer o una presentación.
     #

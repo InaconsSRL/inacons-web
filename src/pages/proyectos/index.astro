@@ -2,6 +2,9 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import PageHero from '../../components/PageHero.astro';
+import MediaCard from '../../components/MediaCard.astro';
 
 type Proyecto = CollectionEntry<'proyectos'>;
 
@@ -13,19 +16,12 @@ proyectos.sort((a: Proyecto, b: Proyecto) =>
 
 <BaseLayout title="Proyectos | INACONS" description="Proyectos ejecutados por INACONS a nivel nacional">
 
-  <section class="page-hero page-hero--sm">
-    <div class="page-hero-bg" style="background-image: url('/assets/imagenes/hero_project.webp')"></div>
-    <div class="page-hero-overlay"></div>
-    <div class="page-hero-content" data-aos="fade-up" data-aos-duration="800">
-      <nav class="breadcrumb">
-        <a href="/">Inicio</a>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-current">Proyectos</span>
-      </nav>
-      <h1 class="page-hero-title">En toda superficie<br>y condición</h1>
-      <p class="page-hero-subtitle">Más de 150 proyectos ejecutados a lo largo de todo el Perú</p>
-    </div>
-  </section>
+  <PageHero
+    image="/assets/imagenes/hero_project.webp"
+    title="En toda superficie<br>y condición"
+    subtitle="Más de 150 proyectos ejecutados a lo largo de todo el Perú"
+    current="Proyectos"
+  />
 
   <section class="sec sec--muted">
     <div class="container">
@@ -38,107 +34,33 @@ proyectos.sort((a: Proyecto, b: Proyecto) =>
         </p>
       </div>
 
-      <div class="proyectos-grid">
+      <div class="cards-row">
         {proyectos.map((proyecto: Proyecto) => (
-          <a href={`/proyectos/${proyecto.id}`} class="proyecto-card">
-            <div class="proyecto-img">
-              <img src={proyecto.data.imagen} alt={proyecto.data.titulo} loading="lazy" />
-            </div>
-            <div class="proyecto-info">
-              <span class="proyecto-cat">{proyecto.data.categoria}</span>
-              <h2>{proyecto.data.titulo}</h2>
-              <p>{proyecto.data.ubicacion} — {proyecto.data.año}</p>
-            </div>
-          </a>
+          <MediaCard
+            href={`/proyectos/${proyecto.id}/`}
+            image={proyecto.data.imagen}
+            alt={proyecto.data.titulo}
+            tag={proyecto.data.categoria}
+            title={proyecto.data.titulo}
+            meta={`${proyecto.data.ubicacion} · ${proyecto.data.año}`}
+            ratio="4/5"
+            width={640} height={800}
+          />
         ))}
       </div>
 
     </div>
   </section>
 
+  <CtaBand
+    label="Tu próxima obra"
+    title="¿Tienes un proyecto en marcha?"
+    description="Contamos con el equipo y la metodología para llevarlo al mismo estándar."
+    primaryHref="/contacto/"
+    primaryLabel="Solicitar propuesta"
+    secondaryHref="/servicios/"
+    secondaryLabel="Ver servicios"
+  />
+
 </BaseLayout>
 
-<style is:global>
-  .proyectos-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--sp-1);
-  }
-
-  .proyecto-card {
-    position: relative;
-    height: 420px;
-    overflow: hidden;
-    text-decoration: none;
-    display: block;
-  }
-
-  .proyecto-img {
-    position: absolute;
-    inset: 0;
-  }
-
-  .proyecto-img img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .proyecto-card:hover .proyecto-img img {
-    transform: scale(1.05);
-  }
-
-  .proyecto-img::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(20,23,45,0.10) 0%,
-      rgba(20,23,45,0.90) 100%
-    );
-  }
-
-  .proyecto-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: var(--sp-6) var(--sp-6);
-    z-index: 2;
-  }
-
-  .proyecto-cat {
-    display: inline-block;
-    font-size: var(--fs-2xs);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-label);
-    text-transform: uppercase;
-    color: var(--c-on-dark-3);
-    margin-bottom: var(--sp-2);
-  }
-
-  .proyecto-info h2 {
-    font-size: var(--fs-lg);
-    font-weight: var(--fw-bold);
-    color: #fff;
-    margin-bottom: var(--sp-1);
-    line-height: 1.3;
-  }
-
-  .proyecto-info p {
-    font-size: var(--fs-sm);
-    color: var(--c-on-dark-3);
-    margin: 0;
-  }
-
-  @media (max-width: 1023.98px) {
-    .proyectos-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  @media (max-width: 639.98px) {
-    .proyectos-grid { grid-template-columns: 1fr; }
-    .proyecto-card  { height: 320px; }
-  }
-</style>
