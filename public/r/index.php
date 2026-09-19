@@ -176,34 +176,46 @@ const LIMITE_VENTANA    = 60; // segundos
 
 function limiteExcedido(string $ip): bool
 {
-    $ruta = sys_get_temp_dir() . '/inacons_qr_rl_' . hash('sha256', $ip) . '.json';
+    // Todo el cuerpo va en un try/catch: el comentario de arriba ya dice que
+    // un directorio temporal no escribible no debe tumbar el redirector para
+    // TODO el mundo, pero eso solo cubria el caso esperado (fopen devuelve
+    // false). Un cPanel compartido puede fallar de formas menos limpias --
+    // una funcion deshabilitada por el hosting, un limite de recursos -- y
+    // esas SI son errores fatales de PHP. Sin este catch, cualquiera de ellas
+    // tumbaba con un 500 en blanco el escaneo de CUALQUIER QR, no solo el que
+    // gasto la cuota: justo lo que este limite existe para evitar.
+    try {
+        $ruta = sys_get_temp_dir() . '/inacons_qr_rl_' . hash('sha256', $ip) . '.json';
 
-    $fp = @fopen($ruta, 'c+');
-    if ($fp === false) {
+        $fp = @fopen($ruta, 'c+');
+        if ($fp === false) {
+            return false;
+        }
+
+        flock($fp, LOCK_EX);
+
+        $contenido = stream_get_contents($fp);
+        $datos = $contenido !== false && $contenido !== '' ? json_decode($contenido, true) : null;
+
+        $ahora = time();
+        if (!is_array($datos) || !isset($datos['inicio'], $datos['total']) || ($ahora - $datos['inicio']) >= LIMITE_VENTANA) {
+            $datos = ['inicio' => $ahora, 'total' => 0];
+        }
+
+        $datos['total']++;
+        $excedido = $datos['total'] > LIMITE_PETICIONES;
+
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($datos));
+        fflush($fp);
+        flock($fp, LOCK_UN);
+        fclose($fp);
+
+        return $excedido;
+    } catch (\Throwable $e) {
         return false;
     }
-
-    flock($fp, LOCK_EX);
-
-    $contenido = stream_get_contents($fp);
-    $datos = $contenido !== false && $contenido !== '' ? json_decode($contenido, true) : null;
-
-    $ahora = time();
-    if (!is_array($datos) || !isset($datos['inicio'], $datos['total']) || ($ahora - $datos['inicio']) >= LIMITE_VENTANA) {
-        $datos = ['inicio' => $ahora, 'total' => 0];
-    }
-
-    $datos['total']++;
-    $excedido = $datos['total'] > LIMITE_PETICIONES;
-
-    ftruncate($fp, 0);
-    rewind($fp);
-    fwrite($fp, json_encode($datos));
-    fflush($fp);
-    flock($fp, LOCK_UN);
-    fclose($fp);
-
-    return $excedido;
 }
 
 /**
