@@ -330,8 +330,34 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       registrarEventoTarjeta(slug, 'vista');
     }
 
+    /*  El slug sale del PATH, no de la query.
+
+        `.htaccess` reescribe /empleados/SLUG/ hacia este archivo con
+        ?slug=SLUG, pero esa query la ve el servidor y nadie más: la
+        reescritura es interna y el navegador se queda en la URL bonita,
+        sin query string. `location.search` llega vacío en producción y la
+        ficha nunca se pinta — sin error de red, sin nada en consola, solo
+        el estado vacío diciendo "No encontramos esta tarjeta" para una
+        persona que sí está en la base.
+
+        Toma el segmento tal cual en vez de validarlo contra el patrón del
+        slug: ese patrón ya vive en el check de `empleados.slug` y en la
+        regla de Apache, y copiarlo acá haría una tercera versión que hay
+        que acordarse de mover con las otras dos. Si el segmento no es un
+        slug real, `tarjeta_empleado()` devuelve null y cae en el estado
+        vacío, que es la respuesta correcta de todos modos — la base es la
+        autoridad sobre qué slug existe, no una expresión regular.
+
+        La query string se queda como respaldo del desarrollo local, donde
+        no hay Apache y la página se abre como /tarjetas/?slug=... */
+    function slugDeLaUrl(): string | null {
+      const partes = location.pathname.split('/').filter(Boolean);
+      if (partes[0] === 'empleados' && partes.length === 2) return partes[1];
+      return new URLSearchParams(location.search).get('slug');
+    }
+
     async function iniciar() {
-      const slug = new URLSearchParams(location.search).get('slug');
+      const slug = slugDeLaUrl();
       const datos = slug ? await tarjetaEmpleado(slug) : null;
 
       $('tj-cargando').hidden = true;
