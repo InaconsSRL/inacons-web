@@ -1296,7 +1296,7 @@ a.btn:active {
     gap: var(--sp-2);
 }
 
-/*  Pildoras de acceso rapido del topbar: Intranet y Contactenos.
+/*  Pildoras de acceso rapido del topbar: Intranet, Proveedores y Contactenos.
     "Canal Etico" salio de aca y vive en el pie, donde tiene su propio
     boton de acento — no era un tercer enlace mas de esta fila. */
 .top-bar-pill {

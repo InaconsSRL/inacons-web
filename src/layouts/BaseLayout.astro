@@ -39,7 +39,7 @@ const ruta      = Astro.url.pathname.replace(/\/$/, '') || '/';
 const actual    = (href: string) => (ruta === href.replace(/\/$/, '') ? 'page' : undefined);
 const seccion   = (href: string) => (ruta.startsWith(href.replace(/\/$/, '')) ? 'page' : undefined);
 const servicios = await serviciosPorMenu();
-const { correoVentas, telefono, whatsapp, redes, intranet } = CONTACTO;
+const { correoVentas, telefono, whatsapp, redes, intranet, proveedores } = CONTACTO;
 ---
 
 <html lang="es" class:list={{ 'layout-minimal': minimalChrome }}>
@@ -140,6 +140,7 @@ const { correoVentas, telefono, whatsapp, redes, intranet } = CONTACTO;
               <span class="tb-sep" aria-hidden="true">|</span>
               <div class="top-bar-links">
                 <a href={intranet} class="top-bar-pill" target="_blank" rel="noopener">Intranet</a>
+                <a href={proveedores} class="top-bar-pill" target="_blank" rel="noopener">Proveedores</a>
                 <a href="/contacto/" class="top-bar-pill top-bar-pill--accent">Contáctenos</a>
               </div>
             </div>

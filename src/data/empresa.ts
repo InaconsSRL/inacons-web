@@ -23,6 +23,7 @@ export const CONTACTO = {
     linkedin: 'https://pe.linkedin.com/company/inacons',
   },
   intranet: 'https://kapo.com.pe',
+  proveedores: 'https://kapo-proveedores-portal.vercel.app/proveedor/login',
   sedes: [
     { nombre: 'Oficina Principal — Lima', direccion: 'Av. Las Casuarinas 256', zona: 'Pucusana, Lima — Perú' },
     { nombre: 'Oficina Regional — Huancayo', direccion: 'Calle Casuarinas 112', zona: 'El Tambo, Huancayo — Perú' },
