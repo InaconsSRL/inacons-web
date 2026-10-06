@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import PageHero from '../../components/PageHero.astro';
+import MediaCard from '../../components/MediaCard.astro';
+
+import imagenHero from '../../assets/imagenes/hero_project.webp';
+
+const proyectos = (await getCollection('proyectos'))
+  .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99));
+---
+
+<BaseLayout title="Proyectos | INACONS" description="Proyectos ejecutados por INACONS a nivel nacional">
+
+  <PageHero
+    image={imagenHero}
+    title="En toda superficie<br>y condición"
+    subtitle="Calidad comprobada, seguridad garantizada en cada proyecto"
+    current="Proyectos"
+  />
+
+  <section class="sec sec--muted">
+    <div class="container">
+
+      <div class="sh sh--center sh--medium" data-aos="fade-up">
+        <p class="sh-label">Portafolio</p>
+        <h2 class="sh-title">Experiencia construida en cada obra</h2>
+        <p class="sh-desc">
+          Desarrollamos proyectos en los terrenos más desafiantes del Perú, desde la costa hasta la sierra, adaptando nuestras soluciones a cada geografía y condición climática.
+        </p>
+      </div>
+
+      <div class="cards-row">
+        {proyectos.map((p) => (
+          <MediaCard
+            href={`/proyectos/${p.id}/`}
+            image={p.data.imagen}
+            alt=""
+            tag={p.data.categoria}
+            title={p.data.titulo}
+            meta={`${p.data.ubicacion} · ${p.data.año}`}
+            ratio="4/5"
+          />
+        ))}
+      </div>
+
+    </div>
+  </section>
+
+  <CtaBand
+    label="Tu próxima obra"
+    title="¿Tienes un proyecto en marcha?"
+    description="Contamos con el equipo y la metodología para llevarlo al mismo estándar."
+    primaryHref="/contacto/"
+    primaryLabel="Solicitar propuesta"
+    secondaryHref="/servicios/"
+    secondaryLabel="Ver servicios"
+  />
+
+</BaseLayout>
+

@@ -1,0 +1,706 @@
+---
+// SISTEMA DE DISEÑO — /sistema/
+//
+// Referencia viva: cada ejemplo de esta página se pinta con
+// src/styles/design-system.css, el mismo archivo que usa el sitio. No
+// hay copias de los estilos acá. Si un componente cambia, esta página cambia
+// con él; si alguien la ve desactualizada, es que el componente cambió y nadie
+// lo notó, que es exactamente la señal que se busca.
+//
+// Interna: noindex, fuera del sitemap y bloqueada en robots.txt.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MediaCard from '../../components/MediaCard.astro';
+import Icono from '../../components/Icono.astro';
+import imagenProyecto from '../../assets/imagenes/hero_project.webp';
+import imagenServicio from '../../assets/imagenes/image_obra_civiles.webp';
+
+// Los tokens de color, con su razón de ser. El texto de contraste sale de los
+// comentarios del propio design-system.css, no de una medición nueva.
+const colores = [
+  { grupo: 'Paleta', items: [
+    { token: '--c-primary',      valor: '#14172d', nota: 'Azul marino profundo. Identidad y fondos oscuros.' },
+    { token: '--c-secondary',    valor: '#1b5278', nota: 'Azul medio. Acciones y enlaces.' },
+    { token: '--c-accent',       valor: '#d9822b', nota: 'Naranja. SOLO sobre fondo oscuro: sobre claro da 2.93:1.' },
+    { token: '--c-accent-ink',   valor: '#96530f', nota: 'Naranja oscurecido, para fondo claro. 5.93:1 sobre blanco.' },
+  ]},
+  { grupo: 'Fondos', items: [
+    { token: '--c-bg-white',     valor: '#ffffff', nota: 'Superficies y secciones claras.' },
+    { token: '--c-bg-muted',     valor: '#f0f3f7', nota: 'Plomo azulado. Alterna con el blanco y es el fondo de los campos.' },
+  ]},
+  { grupo: 'Texto sobre claro', items: [
+    { token: '--c-text-heading', valor: '#14172d', nota: 'Titulares.' },
+    { token: '--c-text-body',    valor: '#3d4460', nota: 'Cuerpo de texto.' },
+    { token: '--c-text-muted',   valor: '#5a6280', nota: '6.01:1 sobre blanco, 5.40:1 sobre muted.' },
+  ]},
+];
+
+const tipografia = [
+  { token: '--fs-2xs',     px: '11px',    uso: 'Rótulos en caja alta' },
+  { token: '--fs-xs',      px: '12px',    uso: 'Metadatos, pies de foto' },
+  { token: '--fs-sm',      px: '13px',    uso: 'Texto secundario' },
+  { token: '--fs-base',    px: '14px',    uso: 'Cuerpo en tarjetas' },
+  { token: '--fs-md',      px: '16px',    uso: 'Cuerpo principal' },
+  { token: '--fs-lg',      px: '18px',    uso: 'Párrafo destacado' },
+  { token: '--fs-xl',      px: '22px',    uso: 'h3' },
+  { token: '--fs-2xl',     px: '24–32px', uso: 'h2, cifras' },
+  { token: '--fs-display', px: '32–48px', uso: 'h1 de páginas interiores' },
+];
+
+const espaciado = ['--sp-1', '--sp-2', '--sp-3', '--sp-4', '--sp-5', '--sp-6', '--sp-7', '--sp-l1', '--sp-l2', '--sp-l3'];
+
+const codigoBotones = `<button class="btn btn-primary">Guardar</button>
+<button class="btn btn-outline">Cancelar</button>
+<button class="btn btn-primary btn-block">Entrar</button>`;
+
+const codigoFormulario = `<div class="form-row">
+  <div class="form-group">
+    <label for="nombre">Nombre</label>
+    <input type="text" id="nombre" class="form-input" />
+  </div>
+  <div class="form-group">
+    <label for="correo">Correo</label>
+    <input type="email" id="correo" class="form-input" />
+    <span class="form-hint">Nunca se comparte.</span>
+  </div>
+</div>`;
+
+const codigoAviso = `<div class="notice notice--ok">Se guardaron los cambios.</div>
+<div class="notice notice--error">No se pudo guardar.</div>`;
+
+const codigoPanel = `<div class="panel panel--raised">
+  <h2 class="panel-title">Título</h2>
+  <p class="panel-desc">Descripción.</p>
+</div>`;
+
+const codigoTarjeta = `<div class="feature-grid">
+  <a class="feature-item feature-item--card feature-item--accion">
+    <span class="feature-num feature-num--marca" aria-hidden="true">9001</span>
+    <div class="feature-icon">…svg…</div>
+    <p class="panel-label">ISO 9001</p>
+    <h3 class="feature-title">Gestión de Calidad</h3>
+    <p class="feature-desc">Descripción.</p>
+    <span class="btn btn-outline btn-sm">Descargar</span>
+  </a>
+</div>`;
+
+const codigoAside = `<aside class="proyecto-aside">
+  <div class="panel panel--sm panel--rail">
+    <p class="panel-label">Ficha técnica</p>
+    <ul class="data-list">…</ul>
+  </div>
+</aside>`;
+
+const codigoLista = `<ul class="data-list">
+  <li><span class="data-key">Ubicación</span><span class="data-value">Castilla, Piura</span></li>
+  <li><span class="data-key">Certificado</span><span class="status-ok">Vigente</span></li>
+</ul>`;
+
+---
+
+<BaseLayout
+  title="Sistema de diseño | INACONS"
+  description="Referencia interna de componentes."
+  robots="noindex, nofollow"
+  minimalChrome={true}
+>
+
+  <style slot="head">
+    .ds { background: var(--c-bg-muted); min-height: 100vh; padding: var(--sp-l1) var(--sp-5) var(--sp-l4); }
+    .ds-wrap { max-width: 900px; margin: 0 auto; }
+
+    .ds-head { margin-bottom: var(--sp-l2); }
+    .ds-head h1 { font-size: var(--fs-display); color: var(--c-text-heading); letter-spacing: var(--ls-tight); }
+    .ds-head p  { font-size: var(--fs-md); color: var(--c-text-body); line-height: 1.7; margin-top: var(--sp-4); max-width: 62ch; }
+
+    .ds-indice {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      margin-top: var(--sp-6);
+    }
+    .ds-indice a {
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-secondary);
+      text-decoration: none;
+      padding: var(--sp-2) var(--sp-3);
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+    }
+    .ds-indice a:hover { background: var(--c-secondary); color: #fff; border-color: var(--c-secondary); }
+
+    .ds-seccion { margin-top: var(--sp-l3); scroll-margin-top: var(--sp-5); }
+    .ds-seccion > h2 {
+      font-size: var(--fs-2xl);
+      color: var(--c-text-heading);
+      letter-spacing: var(--ls-tight);
+      padding-bottom: var(--sp-3);
+      border-bottom: 2px solid var(--c-accent);
+      margin-bottom: var(--sp-5);
+    }
+    .ds-seccion > p {
+      font-size: var(--fs-base);
+      color: var(--c-text-body);
+      line-height: 1.7;
+      max-width: 68ch;
+      margin-bottom: var(--sp-6);
+    }
+
+    .ds-demo {
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      padding: var(--sp-6);
+      margin-bottom: var(--sp-4);
+    }
+    .ds-demo--oscuro { background: var(--c-primary); }
+
+    .ds-fila { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+
+    .ds-codigo {
+      background: var(--c-primary);
+      border-radius: var(--radius);
+      padding: var(--sp-4) var(--sp-5);
+      overflow-x: auto;
+      margin-bottom: var(--sp-6);
+    }
+    .ds-codigo pre {
+      margin: 0;
+      font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: var(--fs-xs);
+      line-height: 1.7;
+      color: var(--c-on-dark-1);
+      white-space: pre;
+    }
+
+    /* Color */
+    .ds-colores { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--sp-4); }
+    .ds-color { min-width: 0; border: 1px solid var(--c-border); border-radius: var(--radius); overflow: hidden; background: var(--c-bg-white); }
+    .ds-muestra { height: 64px; }
+    .ds-color-info { padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+    .ds-color-info code { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--c-text-heading); }
+    .ds-color-info small { display: block; margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--c-text-muted); }
+    .ds-color-info em { display: block; margin-top: var(--sp-2); font-size: var(--fs-xs); color: var(--c-text-muted); font-style: normal; line-height: 1.5; }
+    .ds-grupo { font-size: var(--fs-2xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--c-text-muted); margin: var(--sp-6) 0 var(--sp-3); }
+    .ds-grupo:first-of-type { margin-top: 0; }
+
+    /* Tipografía y espaciado */
+    .ds-tipo { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-4); padding: var(--sp-4) 0; border-bottom: 1px solid var(--c-border-light); }
+    .ds-tipo:last-child { border-bottom: none; }
+    .ds-tipo-meta { min-width: 180px; flex-shrink: 0; }
+    .ds-tipo-meta code { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--c-text-heading); }
+    .ds-tipo-meta small { display: block; font-size: var(--fs-xs); color: var(--c-text-muted); margin-top: 2px; }
+    .ds-tipo-ej { color: var(--c-text-heading); min-width: 0; }
+
+    .ds-sp { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-2) 0; }
+    .ds-sp code { font-size: var(--fs-xs); color: var(--c-text-muted); min-width: 80px; flex-shrink: 0; }
+    .ds-sp-barra { height: 14px; background: var(--c-secondary); border-radius: 1px; }
+
+    .ds-nota {
+      border-left: 3px solid var(--c-accent);
+      padding: var(--sp-3) 0 var(--sp-3) var(--sp-4);
+      margin: var(--sp-5) 0;
+      font-size: var(--fs-base);
+      color: var(--c-text-body);
+      line-height: 1.65;
+      max-width: 68ch;
+    }
+  </style>
+
+  <div class="ds">
+    <div class="ds-wrap">
+
+      <header class="ds-head">
+        <h1>Sistema de diseño</h1>
+        <p>
+          Todo lo que sigue se pinta con <code>src/styles/design-system.css</code>,
+          el mismo archivo que usa el sitio. No hay copias de los estilos en esta
+          página: si un componente cambia, esto cambia con él.
+        </p>
+
+        <div class="ds-nota">
+          <strong>La regla es una sola:</strong> una pantalla nueva no inventa estilos.
+          Si el componente que necesitás está acá, se usa tal cual. Si no está, se
+          agrega <em>al sistema</em> y después se usa — nunca dentro del
+          <code>&lt;style&gt;</code> de una página.
+          <br /><br />
+          Antes de esta regla el sitio tenía 65 tamaños de fuente distintos, 106 valores
+          de padding y 122 <code>rgba()</code> inventados en el punto de uso. De ahí
+          salieron los fallos de contraste: nadie los revisaba porque no había un lugar
+          donde revisarlos.
+        </div>
+
+        <nav class="ds-indice">
+          <a href="#color">Color</a>
+          <a href="#tipografia">Tipografía</a>
+          <a href="#espaciado">Espaciado</a>
+          <a href="#botones">Botones</a>
+          <a href="#superficies">Superficies</a>
+          <a href="#tarjetas">Tarjetas</a>
+          <a href="#formularios">Formularios</a>
+          <a href="#avisos">Avisos</a>
+          <a href="#listas">Listas y estados</a>
+          <a href="#encabezados">Encabezados</a>
+        </nav>
+      </header>
+
+      <!-- ── COLOR ───────────────────────────────────────────── -->
+      <section class="ds-seccion" id="color">
+        <h2>Color</h2>
+        <p>
+          Un color que no sale de un token es un bug. La restricción importante:
+          el naranja <code>--c-accent</code> solo va sobre fondo oscuro — sobre
+          claro da 2.93:1 y no pasa AA. Para naranja sobre claro existe
+          <code>--c-accent-ink</code>.
+        </p>
+
+        {colores.map((g) => (
+          <>
+            <p class="ds-grupo">{g.grupo}</p>
+            <div class="ds-colores">
+              {g.items.map((c) => (
+                <div class="ds-color">
+                  <div class="ds-muestra" style={`background: ${c.valor}`}></div>
+                  <div class="ds-color-info">
+                    <code>{c.token}</code>
+                    <small>{c.valor}</small>
+                    <em>{c.nota}</em>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ))}
+
+        <p class="ds-grupo">Texto sobre oscuro</p>
+        <div class="ds-demo ds-demo--oscuro">
+          <p style="color: var(--c-on-dark-1); font-size: var(--fs-md); margin-bottom: var(--sp-3)">
+            <code style="color:inherit">--c-on-dark-1</code> — 14.95:1, titulares y texto principal
+          </p>
+          <p style="color: var(--c-on-dark-2); font-size: var(--fs-md); margin-bottom: var(--sp-3)">
+            <code style="color:inherit">--c-on-dark-2</code> — 9.52:1, texto de apoyo
+          </p>
+          <p style="color: var(--c-on-dark-3); font-size: var(--fs-md)">
+            <code style="color:inherit">--c-on-dark-3</code> — 7.37:1, metadatos y rótulos. Es el mínimo permitido.
+          </p>
+        </div>
+      </section>
+
+      <!-- ── TIPOGRAFÍA ──────────────────────────────────────── -->
+      <section class="ds-seccion" id="tipografia">
+        <h2>Tipografía</h2>
+        <p>
+          Una sola familia, <code>--font-ui</code> (Montserrat), y nueve pasos. Los
+          pesos son cinco y no se usan otros: el sitio llegó a tener 700 en 77 lugares,
+          y cuando casi todo es bold no hay jerarquía, hay volumen parejo.
+        </p>
+
+        <div class="ds-demo">
+          {tipografia.map((t) => (
+            <div class="ds-tipo">
+              <div class="ds-tipo-meta">
+                <code>{t.token}</code>
+                <small>{t.px} · {t.uso}</small>
+              </div>
+              <div class="ds-tipo-ej" style={`font-size: var(${t.token})`}>Construimos confianza</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── ESPACIADO ───────────────────────────────────────── -->
+      <section class="ds-seccion" id="espaciado">
+        <h2>Espaciado</h2>
+        <p>
+          Escala de 4px: siete pasos de componente y cuatro de layout. Incluye 20px
+          aunque rompa la serie redonda, porque sin ese paso 45 declaraciones caían a
+          16px y el layout se movía sin ninguna ganancia.
+        </p>
+
+        <div class="ds-demo">
+          {espaciado.map((sp) => (
+            <div class="ds-sp">
+              <code>{sp}</code>
+              <div class="ds-sp-barra" style={`width: var(${sp})`}></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── BOTONES ─────────────────────────────────────────── -->
+      <section class="ds-seccion" id="botones">
+        <h2>Botones</h2>
+        <p>
+          <code>.btn</code> siempre, más una variante. <code>.btn-outline-light</code>
+          es para fondo oscuro; usar <code>.btn-outline</code> ahí lo vuelve ilegible.
+        </p>
+
+        <div class="ds-demo">
+          <div class="ds-fila">
+            <button class="btn btn-primary">Primario</button>
+            <button class="btn btn-outline">Outline</button>
+            <button class="btn btn-accent">Accent</button>
+            <button class="btn btn-primary btn-sm">Pequeño</button>
+            <button class="btn btn-primary" disabled>Deshabilitado</button>
+          </div>
+        </div>
+
+        <div class="ds-demo ds-demo--oscuro">
+          <div class="ds-fila">
+            <button class="btn btn-primary">Primario</button>
+            <button class="btn btn-outline-light">Outline claro</button>
+            <button class="btn btn-accent">Accent</button>
+          </div>
+        </div>
+
+        <div class="ds-demo">
+          <button class="btn btn-primary btn-block">Bloque — ancho completo, 44px de alto</button>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoBotones}</pre></div>
+      </section>
+
+      <!-- ── TARJETAS ────────────────────────────────────────── -->
+      <section class="ds-seccion" id="tarjetas">
+        <h2>Tarjetas</h2>
+        <p>
+          <code>.feature-item</code> es <strong>la</strong> tarjeta de contenido del sitio:
+          ícono (o número) + título + descripción. Estaba reescrita seis veces con seis
+          nombres — <code>.cert-card</code>, <code>.channel-card</code>,
+          <code>.ods-card</code>, <code>.guarantee-item</code>, <code>.pillar-card</code>,
+          <code>.process-step</code> — con cuatro tamaños de ícono, tres de título y cuatro
+          interlineados. Si necesitás una variante que no está acá, se agrega acá.
+        </p>
+
+        <p class="ds-grupo">Los cinco modificadores</p>
+        <div class="ds-demo">
+          <div class="feature-grid" style="grid-template-columns: repeat(3, 1fr)">
+            <div class="feature-item feature-item--card feature-item--centrado">
+              <div class="feature-icon">
+                <Icono nombre="escudo" tam={22} />
+              </div>
+              <p class="feature-title">--card --centrado</p>
+              <p class="feature-desc">Superficie propia y texto centrado. Para una fila de cuatro.</p>
+            </div>
+
+            <div class="feature-item feature-item--card feature-item--fila">
+              <div class="feature-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+              </div>
+              <div>
+                <p class="feature-title">--fila</p>
+                <p class="feature-desc">Ícono al costado. El título y la descripción van dentro de un <code>&lt;div&gt;</code>.</p>
+              </div>
+            </div>
+
+            <a href="#tarjetas" class="feature-item feature-item--card feature-item--accion">
+              <span class="feature-num feature-num--marca" aria-hidden="true">01</span>
+              <p class="panel-label">Rótulo</p>
+              <p class="feature-title">--accion</p>
+              <p class="feature-desc">La descripción se estira para que el botón quede al pie en toda la fila.</p>
+              <span class="btn btn-outline btn-sm">Descargar</span>
+            </a>
+          </div>
+        </div>
+
+        <p class="ds-grupo">Tarjeta numerada</p>
+        <p>
+          <code>.feature-num</code> ocupa el lugar del ícono. Lleva
+          <strong>siempre</strong> <code>aria-hidden</code>: usa
+          <code>--c-ink-ghost</code>, que es textura y no texto — el orden ya lo da el DOM.
+          Con <code>--marca</code> pasa a marca de agua en la esquina.
+        </p>
+        <div class="ds-demo">
+          <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr)">
+            <div class="feature-item feature-item--card">
+              <div class="feature-num" aria-hidden="true">01</div>
+              <p class="feature-title">En el flujo</p>
+              <p class="feature-desc">El número encabeza la tarjeta.</p>
+            </div>
+            <div class="feature-item feature-item--card">
+              <span class="feature-num feature-num--marca" aria-hidden="true">02</span>
+              <p class="feature-title">--marca</p>
+              <p class="feature-desc">El número se va al fondo, en la esquina.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoTarjeta}</pre></div>
+
+        <p class="ds-grupo">Tarjeta de medio — <code>MediaCard</code></p>
+        <p>
+          Foto a sangre con el texto encima. Es la del home, la de <code>/servicios/</code>
+          y la de <code>/proyectos/</code> — antes eran tres implementaciones.
+          La proporción viaja como custom property (<code>ratio</code>,
+          <code>ratioMobile</code>) porque el <code>&lt;style&gt;</code> de una página no
+          alcanza al markup del componente.
+        </p>
+        <div class="ds-nota">
+          <strong>Dos reglas que no son cosméticas.</strong> El título va a
+          <code>-webkit-line-clamp: 3</code> y el cuerpo lleva <em>fondo propio</em>, no
+          solo el velo de la foto. Sin lo primero, un título de obra pública de 158
+          caracteres desbordaba la tarjeta y <code>overflow:hidden</code> se comía 56px
+          en silencio. Sin lo segundo, el texto subía hasta donde el velo vale 0.11 y el
+          blanco caía a 1.68:1 sobre un cielo. Con las dos, el contraste es 14.7:1 sea
+          cual sea la foto.
+        </div>
+        <div class="ds-demo">
+          <div class="cards-row" style="max-width: 720px; margin: 0 auto">
+            <MediaCard
+              href="/proyectos/"
+              image={imagenProyecto}
+              alt="Ejemplo de tarjeta de proyecto"
+              tag="Obras Civiles"
+              title="Mejoramiento y ampliación de los servicios de agua potable del centro poblado de San Juan de Yanamuclo, Jauja"
+              meta="Castilla, Piura · 2025"
+              ratio="4/5"
+            />
+            <MediaCard
+              href="/servicios/"
+              image={imagenServicio}
+              alt="Ejemplo de tarjeta de servicio"
+              title="Obras Civiles"
+              desc="Infraestructura urbana, vial e industrial con metodología BIM."
+              cta="Ver más"
+              ratio="1/1"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SUPERFICIES ─────────────────────────────────────── -->
+      <section class="ds-seccion" id="superficies">
+        <h2>Superficies</h2>
+        <p>
+          <code>.panel</code> contiene; <code>.card</code> se clickea y por eso levanta
+          al pasar el cursor. No mezclarlos: el movimiento de la tarjeta promete una
+          acción, y en una superficie que solo contiene texto esa promesa es falsa.
+        </p>
+
+        <div class="ds-demo">
+          <div class="panel panel--raised">
+            <h3 class="panel-title">.panel .panel--raised</h3>
+            <p class="panel-desc">Superficie con sombra. La caja por defecto de un panel.</p>
+          </div>
+          <div class="panel panel--accent" style="margin-top: var(--sp-4)">
+            <h3 class="panel-title">.panel--accent</h3>
+            <p class="panel-desc">Filete superior. Señala dónde está la acción principal de la pantalla.</p>
+          </div>
+          <div class="panel--ghost" style="margin-top: var(--sp-4)">
+            <h3 class="panel-title" style="font-size: var(--fs-base)">.panel--ghost</h3>
+            <p class="panel-desc">Borde punteado: esto todavía no existe. Nunca para contenido real.</p>
+          </div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoPanel}</pre></div>
+
+        <p class="ds-grupo">Módulo de barra lateral</p>
+        <p>
+          <code>.panel--sm</code> ajusta el padding a una columna angosta y
+          <code>.panel--rail</code> pone el filete en el borde izquierdo: al costado de un
+          cuerpo de texto que ya tiene titular, el filete superior compite con él.
+          El rótulo es <code>.panel-label</code>, no <code>.panel-title</code> — un módulo
+          lateral no encabeza, nombra lo que tiene dentro.
+        </p>
+
+        <div class="ds-demo">
+          <div style="max-width: 300px">
+            <div class="panel panel--sm panel--rail">
+              <p class="panel-label">Ficha técnica</p>
+              <ul class="data-list">
+                <li><span class="data-key">Ubicación</span><span class="data-value">Castilla, Piura</span></li>
+                <li><span class="data-key">Año</span><span class="data-value">2025</span></li>
+              </ul>
+            </div>
+            <div class="panel panel--sm panel--rail" style="margin-top: var(--sp-1)">
+              <p class="panel-label">Descargas</p>
+              <p class="panel-desc">Brochure general</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoAside}</pre></div>
+      </section>
+
+      <!-- ── FORMULARIOS ─────────────────────────────────────── -->
+      <section class="ds-seccion" id="formularios">
+        <h2>Formularios</h2>
+        <p>
+          La etiqueta es obligatoria y visible, nunca reemplazada por el placeholder:
+          el placeholder desaparece al escribir, así que quien vuelve a un formulario
+          a medio llenar pierde la referencia de qué iba en cada casilla. Y es lo único
+          que un lector de pantalla anuncia de forma fiable.
+        </p>
+
+        <div class="ds-demo">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ds-nombre">Nombre</label>
+              <input type="text" id="ds-nombre" class="form-input" placeholder="Ej. María Quispe" />
+            </div>
+            <div class="form-group">
+              <label for="ds-correo">Correo</label>
+              <input type="email" id="ds-correo" class="form-input" aria-describedby="ds-correo-hint" />
+              <span class="form-hint" id="ds-correo-hint">Nunca se comparte con terceros.</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-select">Tipo de código</label>
+            <select id="ds-select" class="form-select">
+              <option>Evento</option>
+              <option>Empleado</option>
+              <option>Recurso</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-mensaje">Mensaje</label>
+            <textarea id="ds-mensaje" class="form-textarea"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-error">Campo con error</label>
+            <input type="text" id="ds-error" class="form-input" style="border-color:#c0392b" value="valor inválido" />
+            <span class="form-error">Este código ya existe.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="ds-off">Deshabilitado</label>
+            <input type="text" id="ds-off" class="form-input" value="No editable" disabled />
+          </div>
+
+          <button class="btn btn-primary btn-block">Guardar</button>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoFormulario}</pre></div>
+      </section>
+
+      <!-- ── AVISOS ──────────────────────────────────────────── -->
+      <section class="ds-seccion" id="avisos">
+        <h2>Avisos</h2>
+        <p>
+          Un solo componente para los cuatro estados. Verde significa lo mismo acá que
+          en <code>.status-ok</code>: son la misma paleta a propósito.
+        </p>
+
+        <div class="ds-demo">
+          <div class="notice notice--ok">Se guardaron los cambios.</div>
+          <div class="notice notice--error">No se pudo guardar: el código ya existe.</div>
+          <div class="notice notice--warn">Aviso de advertencia: algo requiere atención antes de seguir.</div>
+          <div class="notice notice--info">Los cambios se publican en el sitio en uno o dos minutos.</div>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoAviso}</pre></div>
+      </section>
+
+      <!-- ── LISTAS Y ESTADOS ────────────────────────────────── -->
+      <section class="ds-seccion" id="listas">
+        <h2>Listas y estados</h2>
+        <p>
+          <code>.data-list</code> para pares de clave y valor. Las filas envuelven en
+          pantallas angostas en vez de comprimir la etiqueta hasta partirla letra por
+          letra.
+        </p>
+
+        <div class="ds-demo">
+          <ul class="data-list">
+            <li><span class="data-key">Ubicación</span><span class="data-value">Castilla, Piura</span></li>
+            <li><span class="data-key">Categoría</span><span class="data-value">Obras Civiles</span></li>
+            <li><span class="data-key">Certificado</span><span class="status-ok">Vigente</span></li>
+            <li><span class="data-key">Renovación</span><span class="status-warn">Próxima a vencer</span></li>
+            <li><span class="data-key">Versión anterior</span><span class="status-off">Reemplazada</span></li>
+            <li><span class="data-key">Descarga</span><span class="status-error">No disponible</span></li>
+          </ul>
+        </div>
+
+        <div class="ds-codigo"><pre>{codigoLista}</pre></div>
+      </section>
+
+      <!-- ── ENCABEZADOS ─────────────────────────────────────── -->
+      <section class="ds-seccion" id="encabezados">
+        <h2>Encabezados de sección</h2>
+        <p>
+          <code>.sh</code> es el encabezado de las secciones del sitio público.
+          Modificadores de ancho: <code>--narrow</code>, <code>--medium</code>,
+          <code>--wide</code>. De alineación: <code>--left</code>,
+          <code>--center</code>, <code>--right</code>.
+        </p>
+
+        <div class="ds-demo">
+          <div class="sh sh--medium">
+            <p class="sh-label">Rótulo</p>
+            <h2 class="sh-title">Construimos los proyectos que mueven al Perú</h2>
+            <p class="sh-desc">Descripción opcional, para cuando el titular necesita contexto.</p>
+          </div>
+        </div>
+
+        <p class="ds-grupo">Card de dato</p>
+        <div class="ds-demo">
+          <div class="ds-fila" style="gap: var(--sp-l1)">
+            <div class="card--stat">
+              <span class="stat-num">+50</span>
+              <span class="stat-label">Proyectos en Huancayo</span>
+            </div>
+            <div class="card--stat">
+              <span class="stat-num">4</span>
+              <span class="stat-label">Normas ISO</span>
+            </div>
+            <div class="card--stat card--stat-sm">
+              <span class="stat-num">ISO 14001</span>
+              <span class="stat-label">.card--stat-sm</span>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          Tres variantes: <code>--sm</code> para una tira densa donde el valor es un
+          código y no una cifra; <code>--lg</code> para la cifra destacada del hero;
+          <code>--oscuro</code> para fondo oscuro. Las tres existen porque el home y
+          <code>/mineria</code> reescribían los mismos dos colores y el mismo tamaño,
+          cada una en su página.
+        </p>
+        <div class="ds-demo ds-demo--oscuro">
+          <div class="ds-fila" style="gap: var(--sp-l1)">
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">+15</span>
+              <span class="stat-label">Años de experiencia</span>
+            </div>
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">+100MM</span>
+              <span class="stat-label">De soles en proyectos</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="ds-grupo">Chip</p>
+        <p>
+          Un ícono y dos o tres palabras. Si necesita una descripción debajo ya no es un
+          chip: es un <code>.feature-item</code>.
+        </p>
+        <div class="ds-demo">
+          <div class="ds-fila">
+            <div class="chip">
+              <Icono nombre="escudo-check" />
+              Cero Accidentes
+            </div>
+            <div class="chip">
+              <Icono nombre="premio" />
+              Reconocimientos
+            </div>
+          </div>
+        </div>
+        <p style="font-size: var(--fs-sm); color: var(--c-text-muted); line-height:1.6">
+          El número lleva <code>data-counter</code> (y <code>data-suffix</code> opcional):
+          es un contrato con <code>initCounters()</code> de <code>src/scripts/main.ts</code>, que lo
+          anima al entrar en pantalla, con <code>data-prefix</code> y <code>data-suffix</code> opcionales. Las cifras reales salen de <code>src/data/empresa.ts</code>.
+        </p>
+      </section>
+
+    </div>
+  </div>
+
+</BaseLayout>

@@ -1,0 +1,273 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import PageHero from '../components/PageHero.astro';
+import Icono from '../components/Icono.astro';
+import type { NombreIcono } from '../lib/iconos';
+import imagenHero from '../assets/imagenes/home_about.webp';
+
+const certificaciones = (await getCollection('certificaciones'))
+  .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99));
+
+// El icono es markup, no contenido: no viaja en el .md, que describe la norma y
+// no como se dibuja. La norma elige el simbolo, y hay uno detras por defecto
+// para que una norma nueva salga pintada aunque nadie le haya elegido icono.
+const ICONO_POR_NORMA: Record<string, NombreIcono> = {
+  'ISO 9001':  'premio',
+  'ISO 14001': 'hoja',
+  'ISO 45001': 'escudo-check',
+  'ISO 37001': 'balanza',
+};
+const ICONO_POR_DEFECTO: NombreIcono = 'premio';
+---
+
+<BaseLayout title="Documentos | INACONS" description="Certificaciones ISO y documentos corporativos de INACONS — transparencia y compromiso con la calidad">
+
+  <style slot="head">
+    /* Pestañas */
+    .tabs-wrap {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--c-border-light);
+      margin-bottom: var(--sp-l2);
+    }
+    .tab-btn {
+      padding: var(--sp-4) var(--sp-7);
+      font-family: 'Montserrat', sans-serif;
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn:hover { color: var(--c-text-heading); }
+    .tab-btn.active {
+      color: var(--c-secondary);
+      border-bottom-color: var(--c-secondary);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Intro de sección */
+    .docs-intro {
+      max-width: 640px;
+      margin-bottom: var(--sp-l2);
+    }
+    .docs-intro p {
+      font-size: var(--fs-md);
+      color: var(--c-text-muted);
+      line-height: 1.85;
+    }
+
+    /* Cards */
+    .cert-grid .feature-item:nth-child(4) { grid-column: 1; }
+    .cert-grid .feature-item:nth-child(5) { grid-column: 2; }
+
+    /* Banda de normas */
+    .norms-band {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 0;
+      margin-top: var(--sp-l2);
+      border: 1px solid var(--c-border-light); border-radius: var(--radius); overflow: hidden;
+    }
+    .norm-item {
+      flex: 1; min-width: 160px;
+      display: flex; flex-direction: column; align-items: center;
+      padding: var(--sp-6) var(--sp-5);
+      border-right: 1px solid var(--c-border-light);
+      text-align: center; transition: background .22s;
+    }
+    .norm-item:last-child { border-right: none; }
+    .norm-item:hover { background: rgba(27,82,120,0.04); }
+
+    /* Responsive */
+    @media (max-width: 767.98px) {
+      .cert-grid .feature-item:nth-child(4),
+      .cert-grid .feature-item:nth-child(5) { grid-column: 1; }
+      .norms-band { flex-direction: column; }
+      .norm-item { border-right: none; border-bottom: 1px solid var(--c-border-light); }
+      .norm-item:last-child { border-bottom: none; }
+      .tab-btn { padding: var(--sp-3) var(--sp-4); font-size: var(--fs-xs); }
+    }
+    @media (min-width: 768px) and (max-width: 1023.98px) {
+      .cert-grid .feature-item:nth-child(4),
+      .cert-grid .feature-item:nth-child(5) { grid-column: auto; }
+    }
+  </style>
+
+  <!-- HERO -->
+  <PageHero
+    image={imagenHero}
+    title="Transparencia en<br>cada proceso"
+    subtitle="Certificaciones y políticas que respaldan nuestra forma de trabajar"
+    current="Documentos"
+    bgPosition="center top"
+  />
+
+  <!-- CONTENIDO CON PESTAÑAS -->
+  <section class="sec sec--white">
+    <div class="container">
+
+      <!-- Intro -->
+      <div class="docs-intro" data-aos="fade-up">
+        <div class="sh">
+          <p class="sh-label">Gestión y Calidad</p>
+          <h2 class="sh-title">Nuestro Sistema Integrado</h2>
+        </div>
+        <p>INACONS opera bajo un Sistema Integrado de Gestión que articula calidad, medio ambiente, seguridad y anticorrupción en cada proyecto. Aquí encontrarás los certificados que acreditan nuestros estándares y los documentos corporativos que rigen nuestra conducta.</p>
+      </div>
+
+      <!-- Pestañas -->
+      <div class="tabs-wrap" role="tablist" aria-label="Tipo de documento" data-aos="fade-up">
+        <button type="button" class="tab-btn active" role="tab" id="tabbtn-certificaciones" aria-selected="true" aria-controls="tab-certificaciones">
+          Certificaciones ISO
+        </button>
+        <button type="button" class="tab-btn" role="tab" id="tabbtn-politicas" aria-selected="false" aria-controls="tab-politicas" tabindex="-1">
+          Políticas Corporativas
+        </button>
+      </div>
+
+      <!-- Panel: Certificaciones -->
+      <div class="tab-panel active" id="tab-certificaciones" role="tabpanel" aria-labelledby="tabbtn-certificaciones">
+        <div class="cert-grid grid-3">
+          {/*
+            Las cuatro normas salen de src/content/certificaciones/. Antes
+            estaban escritas a mano aqui teniendo la coleccion con los mismos
+            datos, que es justo lo que prohibe la regla 3 de CLAUDE.md: el PDF
+            del certificado aparecia en dos sitios y el dia que cambiara uno,
+            el otro se quedaba apuntando al viejo sin que nada fallara.
+
+            El retardo de la animacion se calcula por posicion. La tarjeta de
+            INCE-489, que va debajo, sigue escrita a mano y cierra la serie con
+            400: no es una norma ISO ni esta en la coleccion.
+          */}
+          {certificaciones.map((c, i) => (
+            <a href={c.data.certificado} target="_blank" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay={String((i + 1) * 80)}>
+              <span class="feature-num feature-num--marca" aria-hidden="true">{c.data.norma.replace('ISO ', '')}</span>
+              <div class="feature-icon"><Icono nombre={ICONO_POR_NORMA[c.data.norma] ?? ICONO_POR_DEFECTO} tam={24} /></div>
+              <p class="panel-label">{c.data.norma}</p>
+              <h3 class="feature-title">{c.data.encabezado ?? c.data.titulo}</h3>
+              <p class="feature-desc">{c.data.descripcion}</p>
+              <span class="btn btn-outline btn-sm">
+                <Icono nombre="descarga" tam={14} /> Descargar
+              </span>
+            </a>
+          ))}
+          <a href="/assets/documentos/certificado_ince_489.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="400">
+            <span class="feature-num feature-num--marca" aria-hidden="true">INCE</span>
+            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <p class="panel-label">INCE-489</p>
+            <h3 class="feature-title">Certificado de Capacidad Técnica</h3>
+            <p class="feature-desc">Acredita nuestra capacidad técnica y experiencia comprobada en la ejecución de proyectos.</p>
+            <span class="btn btn-outline btn-sm">
+              <Icono nombre="descarga" tam={14} /> Descargar
+            </span>
+          </a>
+        </div>
+        <div class="norms-band" data-aos="fade-up">
+          {certificaciones.map((c) => (
+            <div class="card--stat card--stat-sm norm-item"><span class="stat-num">{c.data.norma}</span><span class="stat-label">{c.data.etiqueta ?? c.data.titulo}</span></div>
+          ))}
+          <div class="card--stat card--stat-sm norm-item"><span class="stat-num">INCE-489</span><span class="stat-label">Cap. Técnica</span></div>
+        </div>
+      </div>
+
+      <!-- Panel: Políticas -->
+      <div class="tab-panel" id="tab-politicas" role="tabpanel" aria-labelledby="tabbtn-politicas">
+        <div class="cert-grid grid-3">
+          <a href="/assets/documentos/politica_alcohol_drogas.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+            <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
+            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></div>
+            <p class="panel-label">Política</p>
+            <h3 class="feature-title">Alcohol y Drogas</h3>
+            <p class="feature-desc">Normativa sobre prevención y control del consumo de sustancias en el entorno de trabajo.</p>
+            <span class="btn btn-outline btn-sm">
+              <Icono nombre="descarga" tam={14} /> Ver documento
+            </span>
+          </a>
+          <a href="/assets/documentos/politica_negativa_trabajo_inseguro.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+            <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
+            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m14.5 9.5-5 5"/><path d="m9.5 9.5 5 5"/></svg></div>
+            <p class="panel-label">Política</p>
+            <h3 class="feature-title">Negativa al Trabajo Inseguro</h3>
+            <p class="feature-desc">Derecho de los trabajadores a rechazar actividades que pongan en riesgo su seguridad.</p>
+            <span class="btn btn-outline btn-sm">
+              <Icono nombre="descarga" tam={14} /> Ver documento
+            </span>
+          </a>
+          <a href="/assets/documentos/politica_sig.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+            <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
+            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg></div>
+            <p class="panel-label">Política</p>
+            <h3 class="feature-title">Sistema Integrado de Gestión</h3>
+            <p class="feature-desc">Política del Sistema Integrado de Gestión de Calidad, Medio Ambiente y Seguridad.</p>
+            <span class="btn btn-outline btn-sm">
+              <Icono nombre="descarga" tam={14} /> Ver documento
+            </span>
+          </a>
+          <a href="/assets/documentos/politica_antisoborno.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+            <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
+            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+            </div>
+            <p class="panel-label">Política</p>
+            <h3 class="feature-title">Antisoborno</h3>
+            <p class="feature-desc">Compromiso con la integridad y prevención de prácticas corruptas en todas las operaciones.</p>
+            <span class="btn btn-outline btn-sm">
+              <Icono nombre="descarga" tam={14} /> Ver documento
+            </span>
+          </a>
+          <a href="/assets/documentos/otros_alcance_sig.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+            <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
+            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></div>
+            <p class="panel-label">Documento</p>
+            <h3 class="feature-title">Alcance del SIG</h3>
+            <p class="feature-desc">Documentación complementaria sobre el alcance de nuestro Sistema Integrado de Gestión.</p>
+            <span class="btn btn-outline btn-sm">
+              <Icono nombre="descarga" tam={14} /> Ver documento
+            </span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <CtaBand
+    label="¿Falta algún documento?"
+    title="Te enviamos lo que necesites para tu expediente"
+    description="Certificados, pólizas y constancias para procesos de homologación o licitación."
+    primaryHref="/contacto/"
+    primaryLabel="Solicitar documento"
+  />
+
+</BaseLayout>
+
+<script>
+  // Pestañas con el patrón ARIA: clic o flechas izquierda/derecha.
+  const pestanas = [...document.querySelectorAll<HTMLButtonElement>('.tab-btn')];
+
+  const activar = (activa: HTMLButtonElement) => {
+    for (const p of pestanas) {
+      const elegida = p === activa;
+      p.classList.toggle('active', elegida);
+      p.setAttribute('aria-selected', String(elegida));
+      p.tabIndex = elegida ? 0 : -1;
+      document.getElementById(p.getAttribute('aria-controls') ?? '')?.classList.toggle('active', elegida);
+    }
+    activa.focus();
+  };
+
+  pestanas.forEach((p, i) => {
+    p.addEventListener('click', () => activar(p));
+    p.addEventListener('keydown', (e) => {
+      const paso = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (paso) activar(pestanas[(i + paso + pestanas.length) % pestanas.length]);
+    });
+  });
+</script>

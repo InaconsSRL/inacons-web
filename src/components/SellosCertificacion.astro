@@ -1,0 +1,204 @@
+---
+/**
+ * SellosCertificacion.astro
+ * ─────────────────────────────────────────────────────────────
+ * Franja de sellos de las certificaciones ISO. Los PDF siguen viviendo en
+ * /documentos/, que es la vitrina documental; esto es la cara visible, y
+ * cada sello enlaza a su propio certificado.
+ *
+ * ── NO PINTA NADA MIENTRAS NO HAYA UN SELLO AUTORIZADO ──────────────────
+ *
+ * El sello de una norma es marca del organismo certificador, no de INACONS,
+ * y se usa bajo las reglas de ese organismo. Bajarlo de una búsqueda de
+ * imágenes es exactamente lo que no se puede hacer. Por eso `sello` es
+ * opcional en el schema y esta sección se comporta así:
+ *
+ *   producción  → solo las normas que ya tienen `sello`. Si no hay ninguna,
+ *                 la sección entera no se emite: ni un hueco, ni un cartel
+ *                 de "pendiente" en la web pública.
+ *   desarrollo  → además, las que faltan con su recuadro punteado y un
+ *                 aviso que dice cuáles son. El andamio se ve mientras se
+ *                 trabaja y no se escapa al sitio publicado.
+ *
+ * Para activar una norma hacen falta dos cosas, y las dos vienen del
+ * organismo certificador:
+ *   1. el archivo del sello, en /assets/imagenes/certificaciones/
+ *   2. la fecha de vigencia del certificado
+ * Con eso, se descomentan `sello` y `vigencia` en
+ * src/content/certificaciones/<norma>.md y la norma aparece sola.
+ *
+ * Uso en nosotros.astro:
+ *   <SellosCertificacion />
+ */
+import { getCollection } from 'astro:content';
+
+const certs = (await getCollection('certificaciones'))
+  .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99));
+
+const conSello = certs.filter((c) => c.data.sello);
+const sinSello = certs.filter((c) => !c.data.sello);
+
+// El andamio se ve mientras se trabaja y nunca en el sitio publicado.
+const enDesarrollo = import.meta.env.DEV;
+const hayQuePintar = conSello.length > 0 || (enDesarrollo && sinSello.length > 0);
+
+// `timeZone: 'UTC'` importa: una fecha sin hora se parsea como medianoche UTC,
+// y en Lima (UTC-5) eso se muestra como el día anterior. Una vigencia corrida
+// un día es justo el tipo de error que nadie revisa.
+const fmtVigencia = new Intl.DateTimeFormat('es-PE', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+---
+
+{hayQuePintar && (
+  <section class="sec sec--white">
+    <div class="container">
+      <div class="sh sh--center sh--medium" data-aos="fade-up">
+        <p class="sh-label">Certificaciones</p>
+        <h2 class="sh-title">Sistemas de gestión certificados</h2>
+        <p class="sh-desc">
+          Auditados y certificados por un organismo independiente. Cada sello
+          abre el certificado completo.
+        </p>
+      </div>
+
+      <ul class="sellos-grid" data-aos="fade-up" data-aos-delay="80">
+        {conSello.map((c) => (
+          <li class="sello">
+            <a class="sello-caja" href={c.data.certificado} target="_blank" rel="noopener">
+              <img
+                class="sello-img"
+                src={c.data.sello}
+                alt={`${c.data.norma} — ${c.data.titulo}, certificado por ${c.data.organismo}`}
+                width="160"
+                height="160"
+                loading="lazy"
+              />
+              <span class="sello-norma">{c.data.norma}</span>
+              <span class="sello-titulo">{c.data.titulo}</span>
+              {c.data.vigencia && (
+                <span class="sello-dato">Vigente hasta {fmtVigencia.format(c.data.vigencia)}</span>
+              )}
+            </a>
+          </li>
+        ))}
+
+        {enDesarrollo && sinSello.map((c) => (
+          <li class="sello sello--pendiente">
+            <div class="sello-caja">
+              <div class="sello-hueco" aria-hidden="true">{c.data.norma.replace('ISO ', '')}</div>
+              <span class="sello-norma">{c.data.norma}</span>
+              <span class="sello-titulo">{c.data.titulo}</span>
+              <span class="sello-dato">Sello pendiente</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {enDesarrollo && sinSello.length > 0 && (
+        <div class="notice notice--warn sellos-aviso">
+          <p>
+            <strong>Solo visible en desarrollo.</strong> Faltan {sinSello.length} de {certs.length} sellos:
+            {' '}{sinSello.map((c) => c.data.norma).join(', ')}. Mientras falten, esta sección no se
+            publica. Cada uno necesita el archivo autorizado por el organismo certificador y la
+            fecha de vigencia del certificado.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  .sellos-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-6);
+  }
+
+  .sello-caja {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    height: 100%;
+    padding: var(--sp-6) var(--sp-5);
+    text-align: center;
+    text-decoration: none;
+    background: var(--c-bg-white);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--radius);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  a.sello-caja:hover {
+    border-color: var(--c-border);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* El contain evita que un sello con otra proporción salga deformado: los
+     cuatro organismos no entregan el mismo lienzo. */
+  .sello-img {
+    width: 100%;
+    max-width: 160px;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: contain;
+  }
+
+  .sello-norma {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-bold);
+    color: var(--c-text-heading);
+  }
+
+  .sello-titulo {
+    font-size: var(--fs-sm);
+    color: var(--c-text-body);
+  }
+
+  .sello-dato {
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+  }
+
+  /* Hueco de la norma sin sello. Solo existe en desarrollo: en producción
+     estas tarjetas no se emiten. */
+  .sello--pendiente .sello-caja {
+    background: var(--c-bg-muted);
+    border-style: dashed;
+  }
+
+  .sello-hueco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 160px;
+    aspect-ratio: 1;
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-bold);
+    color: var(--c-text-placeholder);
+    border: 2px dashed var(--c-border);
+    border-radius: var(--radius);
+  }
+
+  .sellos-aviso {
+    margin-top: var(--sp-7);
+  }
+
+  @media (max-width: 1023.98px) {
+    .sellos-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 520px) {
+    .sellos-grid { grid-template-columns: 1fr; }
+  }
+</style>

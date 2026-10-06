@@ -1,0 +1,2777 @@
+/* ══════════════════════════════════════════════════════════════
+   1. TOKENS
+══════════════════════════════════════════════════════════════ */
+/*
+  Los tokens son la única fuente de verdad. Si un valor de tipografía,
+  espaciado o color no sale de acá, es un bug: significa que alguien
+  volvió a decidir a mano algo que ya estaba decidido.
+
+  Antes de este bloque el sitio tenía 65 tamaños de fuente distintos,
+  106 de padding y 122 rgba() inventados en el punto de uso. De ahí
+  salieron los fallos de contraste: nadie los revisaba porque no había
+  un lugar donde revisarlos.
+*/
+:root {
+    /* ── PALETA CORPORATIVA ──────────────────────────────────── */
+    --c-primary: #14172d;
+    /* Azul marino profundo — identidad */
+    --c-secondary: #1b5278;
+    /* Azul medio — soporte */
+    --c-accent: #d9822b;
+    /* Naranja — énfasis. Solo sobre fondo OSCURO: sobre claro da
+       2.93:1 y no pasa AA. Para naranja sobre claro usar --c-accent-ink. */
+    --c-accent-hover: #c2711e;
+    --c-accent-ink: #96530f;
+    /* Naranja oscurecido — 5.93:1 sobre blanco, 5.33:1 sobre muted */
+
+    /* ── FONDOS ──────────────────────────────────────────────── */
+    --c-bg-white: #ffffff;
+    --c-bg-muted: #f0f3f7;
+    /* Plomo azulado muy suave */
+
+    /* ── TEXTO SOBRE CLARO ───────────────────────────────────── */
+    --c-text-heading: #14172d;
+    --c-text-body: #3d4460;
+    --c-text-muted: #5a6280;
+    /* Antes #6b7494 → 4.15:1 sobre --c-bg-muted, fallaba AA.
+       #5a6280 da 6.01:1 sobre blanco y 5.40:1 sobre muted. */
+
+    --c-ink-ghost: rgba(20, 23, 45, 0.06);
+    /* Tinta fantasma: el número gigante detrás de una tarjeta numerada,
+       y nada más. No es texto — es textura, y por eso NO tiene que pasar
+       contraste: lo que lleva va siempre con aria-hidden y su información
+       la da el orden del DOM. Si algo tiene que leerse, no usa esto.
+       Estaba escrito cuatro veces (0.04, 0.045, 0.05, 0.06) en cuatro
+       páginas, que es como se pierde de vista que era decorativo. */
+
+    --c-text-placeholder: #b0b6c8;
+    /* Deliberadamente por debajo de AA, y por eso con una regla atada:
+       el placeholder NUNCA lleva informacion necesaria. Si se sube a un
+       valor que pase contraste, deja de distinguirse de un campo lleno y
+       la gente cree haber respondido lo que no respondio. Lo que tiene
+       que decir el campo va en su <label>, que es obligatoria. */
+
+    /* ── TEXTO SOBRE OSCURO ──────────────────────────────────── */
+    /* Tres niveles, los tres verificados contra --c-primary.
+       No inventar alfas nuevas: si hace falta otro nivel, se agrega acá. */
+    --c-on-dark-1: rgba(255, 255, 255, 0.92);
+    /* 14.95:1 — titulares y texto principal */
+    --c-on-dark-2: rgba(255, 255, 255, 0.72);
+    /*  9.52:1 — texto de apoyo */
+    --c-on-dark-3: rgba(255, 255, 255, 0.62);
+    /*  7.37:1 — metadatos, rótulos. Es el mínimo permitido. */
+    --c-on-dark-icono: rgba(255, 255, 255, 0.28);
+    /*  Solo para iconografia decorativa sobre oscuro. NO usar en texto: a este
+        contraste no se lee, y por eso no esta en la escala de los tres de
+        arriba, que si son para contenido. */
+
+    --c-text-white: #ffffff;
+
+    /* ── SUPERFICIES Y BORDES SOBRE OSCURO ───────────────────── */
+    --c-surface-dark-1: rgba(255, 255, 255, 0.05);
+    --c-surface-dark-2: rgba(255, 255, 255, 0.08);
+    --c-border-dark: rgba(255, 255, 255, 0.12);
+    --c-border-dark-strong: rgba(255, 255, 255, 0.22);
+
+    /* ── BORDES SOBRE CLARO ──────────────────────────────────── */
+    --c-border: #dce1ea;
+    --c-border-light: #edf0f5;
+
+    /* ── TIPOGRAFÍA ──────────────────────────────────────────── */
+    --font-ui: 'Montserrat', sans-serif;
+
+    /*  Escala de texto — 8 pasos.
+        Calibrada sobre el uso real: los pasos caen donde ya había masa,
+        salvo en el extremo chico, que sube. El sitio tenía 29 tamaños
+        distintos entre 9.3px y 16px; el más repetido de todos era 12.5px
+        y el rótulo de sección estaba en 10.4px en caja alta. Demasiado
+        chico para el público que lee esto. */
+    --fs-2xs: 0.6875rem;
+    /* 11px — rótulos en caja alta (antes 10.4px) */
+    --fs-xs: 0.75rem;
+    /* 12px — metadatos, pies de foto */
+    --fs-sm: 0.8125rem;
+    /* 13px — texto secundario */
+    --fs-base: 0.875rem;
+    /* 14px — cuerpo en tarjetas */
+    --fs-md: 1rem;
+    /* 16px — cuerpo principal (antes 14.4–15.6px) */
+    --fs-lg: 1.125rem;
+    /* 18px — párrafo destacado */
+    --fs-xl: 1.375rem;
+    /* 22px — h3 */
+    --fs-2xl: clamp(1.5rem, 2.6vw, 2rem);
+    /* 24–32px — h2 */
+
+    /*  Display — fuera de la escala de texto, siempre fluido. */
+    --fs-display: clamp(2rem, 4vw, 3rem);
+    /* 32–48px — h1 de páginas interiores */
+    --fs-hero: clamp(1rem, 4.3vw, 3.1rem);
+    /* 16–50px — h1 del home. Era clamp(1.05rem, 5.2vw, 3.8rem), un 18%
+       mas grande: seis palabras en caja alta a 61px se comian la
+       pantalla y, con las cifras al costado, empujaban el titular a
+       partirse antes de tiempo.
+
+       El minimo sigue siendo bajo a proposito: la linea mas larga es
+       "CONSTRUIMOS CONFIANZA" y en un telefono de 360px tiene que
+       entrar sin recortarse. */
+
+    /*  Pesos. El sitio usaba 700 en 77 lugares y 300/400/500 en 10:
+        cuando casi todo es bold, no hay jerarquía, hay volumen parejo.
+        Estos cuatro cubren todo; no usar otros. */
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    --fw-display: 800;
+
+    /*  Tracking. Antes había 28 valores distintos. En em, no en px,
+        para que escale con el tamaño de fuente. */
+    --ls-tight: -0.02em;
+    /* titulares grandes */
+    --ls-label: 0.14em;
+    /* rótulos en caja alta, tamaños 11–14px */
+    --ls-wide: 0.03em;
+    /* caja alta a tamaño display. NO usar --ls-label acá: 0.14em sobre
+       una palabra de 60px son 8.5px por carácter y revienta el ancho
+       de la línea. El tracking en caja alta tiene que aflojar a medida
+       que el tamaño sube, no mantenerse proporcional. */
+
+    /* ── ESPACIADO ───────────────────────────────────────────── */
+    /*  Escala de 4px. Siete pasos de componente + cuatro de layout.
+        Antes: 106 valores de padding, 29 de gap, 24 de margin-bottom.
+
+        Incluye 20px aunque rompa la serie "redonda": sin ese paso,
+        45 declaraciones existentes caían a 16px y el layout se movía
+        en media docena de componentes sin ninguna ganancia. */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-7: 32px;
+
+    /* Pasos de layout: separaciones entre bloques y respiración de sección.
+       Se incluye 40px a propósito — es el gutter del contenedor y un gap
+       muy usado; forzarlo a 32 o a 48 movía el layout sin necesidad. */
+    --sp-l1: 40px;
+    --sp-l2: 48px;
+    --sp-l3: 64px;
+    --sp-l4: 96px;
+
+    /*  Respiración vertical de sección.
+
+        Eran 96px en escritorio y 60 en móvil. Con seis secciones
+        alternando claro y oscuro, ese aire no alcanzaba: el contraste
+        de fondo marca el corte, pero sin margen suficiente las
+        secciones se leen pegadas y el cambio de color parece una
+        franja más que un respiro.
+
+        --section-py-sm llevaba declarado desde el inicio con CERO
+        usos. Ahora tiene su trabajo: es la variante de móvil. */
+    --section-py: 128px;
+    --section-py-sm: 80px;
+
+    /* ── PRESUPUESTO DE ORNAMENTO ────────────────────────────── */
+    /*  Estos cuatro valores son el techo, no una sugerencia.
+
+        El sitio tenia 25 sombras distintas contra estos 2 tokens, 9
+        radios contra 1, y 25 duraciones de transicion. Trece de esas
+        sombras estaban dentro de ESTE archivo: cada componente del
+        chrome se habia inventado su propia elevacion, con cuatro
+        familias de color de sombra (navy, azul, naranja, verde).
+
+        Reglas:
+        · Elevacion: --shadow-card y --shadow-card-hover. Nada mas.
+          Si algo necesita destacarse y no es una superficie que flota,
+          no lleva sombra: lleva contraste, borde o espacio.
+        · Radio: --radius. Unicas excepciones, 50% para circulos y el
+          1px del anillo de foco.
+        · Movimiento: --t para cambios de estado, --t-slow SOLO para
+          el zoom de imagen en tarjetas. Dos duraciones honestas baten
+          a una sola mentirosa: forzar 240ms sobre un zoom de foto lo
+          vuelve un tiron.
+        · Excepciones nombradas, y son estas tres: el Ken Burns de 8s
+          del page-hero, los 80ms de .btn:active y el max-height del
+          acordeon movil. */
+    --t: 240ms ease;
+    --t-slow: 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    --shadow-card: 0 2px 16px rgba(20, 23, 45, 0.07);
+    --shadow-card-hover: 0 8px 32px rgba(20, 23, 45, 0.13);
+
+    --radius: 2px;
+
+    --z-topbar: 1001;
+    --z-header: 1000;
+    --z-mobile-menu: 1002;
+    --z-float: 999;
+}
+
+/*
+  BREAKPOINTS — cuatro fronteras, y un solo par por frontera.
+
+     sm    640px  → teléfono grande
+     md    768px  → frontera móvil / escritorio (nav a hamburguesa)
+     lg   1024px  → escritorio
+     xl   1100px  → nav condensado en portátiles
+
+  El par es siempre max-width:(N - 0.02px) / min-width:N.
+
+     sm →  max-width:  639.98px  /  min-width:  640px
+     md →  max-width:  767.98px  /  min-width:  768px
+     lg →  max-width: 1023.98px  /  min-width: 1024px
+
+  Este bloque describía justamente eso y NADA lo usaba. El código
+  real tenía max-width:768px junto a min-width:768.02px, y
+  max-width:1023px junto a min-width:1023.02px — dos huecos de 0.02px
+  en 768.01 y 1023.01 donde no aplicaba ninguna de las dos reglas. En
+  768.01px reaparecía el topbar y --section-py daba un salto entero.
+  No es teórico: innerWidth fraccional es normal con DPI fraccional en
+  Windows y en cualquier nivel de zoom del navegador.
+
+  Además main.ts decide escritorio con innerWidth >= 768. Con
+  max-width:768px, en exactamente 768px el CSS ocultaba el topbar
+  mientras el JS lo daba por visible. Con 767.98px coinciden.
+
+  1100px se conserva y se declara como cuarta frontera en vez de
+  plegarla a 1024: entre 1024 y 1100 el nav lleva seis elementos
+  incluido el botón CTA, y es la combinación más apretada del sitio.
+  Mejor cuatro fronteras honestas que romper portátiles por llegar a
+  un número redondo.
+
+  OJO: var() no funciona dentro de @media, y este proyecto no tiene
+  PostCSS (astro.config.mjs solo carga el sitemap). Esto es una
+  convención escrita, no una variable. Quien escriba
+  @media (max-width: var(--bp-md)) no va a matchear nunca, en silencio.
+*/
+
+/* ══════════════════════════════════════════════════════════════
+   2. RESET & BASE
+══════════════════════════════════════════════════════════════ */
+/*
+  El atributo `hidden` gana SIEMPRE.
+
+  Por defecto `hidden` solo vale `display: none` en la hoja del navegador, asi
+  que cualquier regla de autor que fije `display` lo anula -- y lo anula en
+  silencio, porque el atributo sigue ahi en el HTML y todo parece correcto.
+
+  Paso con `.dialogo`, que declara `display: flex`: los dos dialogos del panel
+  se pintaban apilados sobre la pagina y no se podia usar nada. El componente
+  llevaba escrito en su propio comentario que se mostraba con `hidden`.
+
+  Con esto, `hidden` vuelve a significar oculto para todo componente presente y
+  futuro, y ocultar deja de depender de que nadie declare `display` despues.
+*/
+[hidden] {
+    display: none !important;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-ui);
+    color: var(--c-text-body);
+    background: var(--c-bg-white);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-ui);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+    color: var(--c-text-heading);
+    margin: 0 0 var(--sp-4);
+}
+
+p {
+    margin: 0 0 var(--sp-4);
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a {
+    color: inherit;
+}
+
+ul,
+ol {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+button {
+    font-family: var(--font-ui);
+}
+
+/*
+  Anillo de foco de doble contorno.
+
+  El anterior era un solo trazo en --c-secondary. Sobre el navy del
+  topbar, el header, el menú móvil y el footer daba 2.12:1 — por debajo
+  del 3:1 que pide WCAG 1.4.11. Justo en la navegación, que es donde
+  más se usa el teclado.
+
+  Dos anillos resuelven los dos fondos con una sola regla:
+  el blanco se ve sobre oscuro (17.64:1) y el azul sobre claro (8.32:1).
+*/
+:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 0;
+    box-shadow: 0 0 0 4px var(--c-secondary);
+    border-radius: 1px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3. SECCIONES
+   Uso: <section class="sec sec--white|sec--muted|sec--dark">
+══════════════════════════════════════════════════════════════ */
+.sec {
+    padding: var(--section-py) 0;
+    width: 100%;
+}
+
+.sec--white {
+    background: var(--c-bg-white);
+}
+
+.sec--muted {
+    background: var(--c-bg-muted);
+}
+
+.sec--dark {
+    background: var(--c-primary);
+    color: var(--c-text-white);
+}
+
+/* Adaptaciones de texto en sección oscura */
+.sec--dark .sh-label {
+    color: var(--c-on-dark-3);
+}
+
+.sec--dark .sh-label::before,
+.sec--dark .sh-label::after {
+    background: var(--c-border-dark-strong);
+}
+
+.sec--dark .sh-title {
+    color: var(--c-text-white);
+}
+
+.sec--dark .sh-desc {
+    color: var(--c-on-dark-2);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4. COMPONENTE: SECTION HEADER  (.sh-*)
+
+   <div class="sh  sh--left | sh--center  sh--narrow | sh--medium">
+     <p  class="sh-label">Etiqueta</p>
+     <h2 class="sh-title">Título</h2>
+     <p  class="sh-desc">Descripción</p>
+   </div>
+══════════════════════════════════════════════════════════════ */
+.sh {
+    margin-bottom: var(--sp-l2);
+}
+
+.sh--narrow {
+    max-width: 520px;
+}
+
+.sh--medium {
+    max-width: 720px;
+}
+
+/* Etiqueta */
+.sh-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-secondary);
+    margin-bottom: var(--sp-3);
+    line-height: 1;
+}
+
+/*  Un solo guion, siempre delante. Antes el rotulo centrado llevaba
+    ademas un ::after simetrico: doce guiones en el home, dos por cada
+    cabecera de seccion. Con seis secciones usando el mismo patron de
+    rotulo + titulo + descripcion, la cinta decorativa era justo lo que
+    hacia que ninguna destacara. El transition no animaba nada: nada
+    cambiaba el width. */
+.sh-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--c-accent);
+    flex-shrink: 0;
+}
+
+/* Título */
+.sh-title {
+    font-size: clamp(1.65rem, 2.8vw, 2.6rem);
+    font-weight: var(--fw-display);
+    color: var(--c-text-heading);
+    line-height: 1.15;
+    margin-bottom: var(--sp-4);
+    letter-spacing: var(--ls-tight);
+}
+
+/* Descripción */
+.sh-desc {
+    font-size: var(--fs-md);
+    font-weight: var(--fw-normal);
+    line-height: 1.82;
+    color: var(--c-text-muted);
+    margin-bottom: 0;
+}
+
+/* — Alineación — */
+.sh--left,
+.sh:not(.sh--center) {
+    text-align: left;
+}
+
+.sh--left .sh-label,
+.sh:not(.sh--center) .sh-label {
+    justify-content: flex-start;
+}
+
+.sh--center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sh--center .sh-label {
+    justify-content: center;
+    width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   5. BOTONES
+══════════════════════════════════════════════════════════════ */
+.btn,
+a.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-6);
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all var(--t);
+    white-space: nowrap;
+    line-height: 1;
+}
+
+/* Primario */
+.btn-primary,
+.btn.btn-primary {
+    background: var(--c-secondary);
+    color: #fff;
+    border-color: var(--c-secondary);
+}
+
+/*  Sin sombra: el boton ya cambia de color y sube 1px. Una sombra
+    encima de eso es el tercer aviso del mismo evento. */
+.btn-primary:hover,
+.btn.btn-primary:hover {
+    background: var(--c-primary);
+    border-color: var(--c-primary);
+    transform: translateY(-1px);
+}
+
+/* Outline */
+.btn-outline,
+.btn.btn-outline {
+    background: transparent;
+    color: var(--c-secondary);
+    border-color: var(--c-secondary);
+}
+
+.btn-outline:hover,
+.btn.btn-outline:hover {
+    background: var(--c-secondary);
+    color: #fff;
+}
+
+/* Outline claro — sobre fondos oscuros */
+.btn-outline-light,
+.btn.btn-outline-light {
+    background: transparent;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.40);
+}
+
+.btn-outline-light:hover,
+.btn.btn-outline-light:hover {
+    background: var(--c-border-dark);
+    border-color: rgba(255, 255, 255, 0.75);
+}
+
+/* Accent — CTAs muy específicos.
+   Texto oscuro y no blanco: blanco sobre --c-accent da 2.93:1 y no pasa AA;
+   --c-primary sobre el mismo naranja da 6.03:1. */
+.btn-accent,
+.btn.btn-accent {
+    background: var(--c-accent);
+    color: var(--c-primary);
+    border-color: var(--c-accent);
+}
+
+.btn-accent:hover,
+.btn.btn-accent:hover {
+    background: var(--c-accent-hover);
+    border-color: var(--c-accent-hover);
+    color: var(--c-primary);
+    transform: translateY(-1px);
+}
+
+/* Press tactile */
+.btn:active,
+a.btn:active {
+    transform: translateY(1px) scale(0.98) !important;
+    transition-duration: 80ms !important;
+}
+
+/* Tamaños */
+.btn-sm {
+    padding: var(--sp-2) var(--sp-4);
+    font-size: var(--fs-xs);
+}
+
+.btn-lg {
+    padding: var(--sp-4) var(--sp-l1);
+    font-size: var(--fs-base);
+    letter-spacing: 0.9px;
+}
+
+/*  Boton a ancho completo, para formularios y paneles.
+
+    Lleva min-height 44px, que es el minimo tactil recomendado, y .btn
+    base se queda en 37. No se corrige .btn aca porque cambiar su altura
+    mueve el layout de todas las paginas del sitio a la vez; queda
+    registrado como pendiente en docs/performance.md. En un formulario el
+    boton es el objetivo mas importante de la pantalla, asi que este si
+    lo cumple. */
+.btn-block {
+    width: 100%;
+    min-height: 44px;
+}
+
+/*  El sistema no tenia estado deshabilitado. Cualquier boton que dispare
+    una peticion lo necesita: sin el se puede pulsar dos veces y mandar el
+    formulario duplicado. `progress` y no `not-allowed` porque el caso
+    normal es "esperando respuesta", no "no podes hacer esto". */
+.btn:disabled,
+.btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: progress;
+    transform: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. CARDS — base
+══════════════════════════════════════════════════════════════ */
+.card {
+    background: var(--c-bg-white);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    transition: transform var(--t), box-shadow var(--t);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+}
+
+/* ── Card de medio: imagen a sangre + velo + cuerpo anclado abajo ──
+   Es el mismo objeto en el home (servicios y proyectos), en
+   /servicios y en /proyectos: quince instancias del mismo markup de
+   tres nodos escrito cuatro veces, con dos velos distintos y otros
+   dos para el hover. Doce paradas de color para una tarjeta.
+
+   Aca hay UN velo y UN hover. La proporcion se pasa por instancia:
+     <a class="card card--media" style="--card-ratio: 4/5">
+
+   Markup: ver src/components/MediaCard.astro */
+.card--media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: var(--card-ratio, 4/3);
+    text-decoration: none;
+    background: var(--c-primary);
+    border: none;
+    box-shadow: none;
+}
+
+/*  La proporcion movil viaja como custom property y no como selector
+    de pagina a proposito: el <style> de una pagina Astro esta scopeado
+    y no alcanza a los elementos que renderiza MediaCard. Lo que la
+    pagina puede pasar es una variable inline, y eso si atraviesa. */
+@media (max-width: 767.98px) {
+    .card--media {
+        aspect-ratio: var(--card-ratio-mobile, var(--card-ratio, 4/3));
+    }
+
+    .card-media-body {
+        padding: var(--sp-4);
+    }
+
+    .card-media-title {
+        font-size: var(--fs-sm);
+    }
+
+    /*  La descripcion se queda visible: ocultarla dejaba la tarjeta en
+        una imagen con una palabra encima, justo en el dispositivo donde
+        esta la mayor parte del trafico. Se acorta a dos lineas para que
+        la tarjeta no crezca de mas. */
+    .card-media-desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+.card--media:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.card-media-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--t-slow);
+}
+
+.card--media:hover .card-media-img {
+    transform: scale(1.05);
+}
+
+.card-media-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to top,
+            rgba(20, 23, 45, 0.94) 0%,
+            rgba(20, 23, 45, 0.55) 50%,
+            rgba(20, 23, 45, 0.18) 100%);
+}
+
+/*  El velo degradado de arriba NO garantiza contraste: es un degradado
+    sobre una foto, y lo que vale depende de cuanto texto haya.
+
+    Medido a 375px con un titulo de obra publica real de 236 caracteres:
+    el cuerpo crecia hasta 315px dentro de una tarjeta de 320 y su borde
+    superior quedaba donde el velo vale 0.11 — blanco a 1.68:1 sobre un
+    cielo, 2.29:1 sobre hormigon. Ilegible, y un caracter mas lo
+    recortaba en silencio.
+
+    Este fondo es del cuerpo, no de la tarjeta: crece con el texto y no
+    depende de que foto haya detras. */
+.card-media-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    padding: var(--sp-6);
+    background: linear-gradient(to top,
+            rgba(20, 23, 45, 0.92) 0%,
+            rgba(20, 23, 45, 0.92) 72%,
+            transparent 100%);
+}
+
+/*  Tres lineas, y despues puntos suspensivos.
+
+    Sin esto un titulo real recortaba la tarjeta: medido en el home a
+    375px, un titulo de 158 caracteres daba un cuerpo de 279px dentro de
+    una tarjeta de 223 — 56px de titulo desaparecian por arriba, sin
+    error y sin aviso, porque .card--media tiene overflow:hidden.
+
+    Hoy los dos proyectos se llaman "Habilitacion Urbana Pucusana" y no
+    pasa. Pasa el dia que entre el tercero. */
+.card-media-title {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-white);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 var(--sp-1);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-media-desc {
+    font-size: var(--fs-sm);
+    color: var(--c-on-dark-2);
+    line-height: 1.55;
+    margin: 0;
+}
+
+.card-media-meta {
+    font-size: var(--fs-2xs);
+    color: var(--c-on-dark-3);
+    margin: 0;
+}
+
+/*  El pseudo-boton del pie. margin-top y no un gap en el cuerpo porque
+    el resto de las partes van pegadas entre si a proposito; lo unico
+    que se despega es la accion. */
+.card-media-cta {
+    margin-top: var(--sp-4);
+}
+
+/*  Blanco, no --c-accent. El token garantiza 6.03:1 "sobre --c-primary",
+    pero el fondo real de esta etiqueta no es --c-primary: es una foto con
+    un velo encima. Medido, la etiqueta cae donde el velo vale ~0.72, y
+    ahi el naranja da 2.77:1 sobre un cielo y 3.05:1 sobre arena — a 11px
+    el umbral es 4.5. La garantia del token se calculo contra un fondo
+    plano que este componente no tiene. */
+.card-media-tag {
+    display: inline-block;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
+    color: var(--c-text-white);
+    border: 1px solid var(--c-border-dark-strong);
+    padding: var(--sp-1) var(--sp-2);
+    margin-bottom: var(--sp-2);
+}
+
+/* ── Fila de tarjetas iguales ──
+   Envuelve N tarjetas del mismo ancho y las centra cuando la ultima
+   fila queda incompleta (util cuando hay 2 proyectos destacados y la
+   rejilla es de 3).
+
+     <div class="cards-row"> … </div>
+
+   Tres por fila en escritorio, dos en tablet, una en movil.
+
+   ESTO TIENE QUE VIVIR ACA Y NO EN EL <style> DE LA PAGINA.
+   El selector es "> *" y los hijos son instancias de MediaCard.
+   Astro scopea el CSS de una pagina anadiendo su data-astro-cid al
+   ultimo selector, y un componente sin <style> propio no lleva NINGUN
+   cid: ".cards-row > *" compila a ".cards-row[cid] > [cid]" y no
+   engancha con nada. Las tarjetas se quedan sin ancho, y como la
+   imagen va en position:absolute, colapsan a cero y desaparecen
+   —sin error, sin aviso. */
+.cards-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--sp-1);
+}
+
+.cards-row > * {
+    flex: 0 1 calc((100% - 2 * var(--sp-1)) / 3);
+}
+
+@media (max-width: 1023.98px) {
+    .cards-row > * {
+        flex-basis: calc((100% - var(--sp-1)) / 2);
+    }
+}
+
+@media (max-width: 639.98px) {
+    .cards-row > * {
+        flex-basis: 100%;
+    }
+}
+
+/* ── Rejilla de tres ──
+   Tres columnas en escritorio, dos en tablet, una en movil.
+
+     <div class="grid-3"> … </div>
+
+   Diferencia con .cards-row, que tambien reparte de tres en tres: esto
+   es grid y las columnas son fijas, asi que una fila incompleta deja el
+   hueco donde esta. .cards-row es flex y centra los sobrantes. Cuando
+   las tarjetas se ordenan solas —una galeria, un listado— el hueco
+   estorba; cuando son dos destacados de tres, centrarlos se ve mejor.
+
+   Estaba escrita tres veces con tres nombres: .channels-grid en
+   /canal-etico, .cert-grid en /documentos y una tercera en la galeria
+   de proyecto, con los mismos dos breakpoints copiados a mano en cada
+   una. La galeria se quedo fuera a proposito: colapsa a dos columnas y
+   nunca a una, que para miniaturas es otra decision, no un descuido. */
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-1);
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Botones de reproducir/pausar ──
+   `.icon-pause` y `.icon-play` son un contrato con main.ts: initHeroVideo() e
+   initClientsCarousel() alternan los dos simbolos escribiendo `style.display`.
+   El estado de partida es "reproduciendo", asi que el play nace oculto.
+
+   Tiene que estar aca y no en el <style> del home, aunque el home sea el unico
+   que los use: los dos simbolos los pinta <Icono>, y un selector escrito en la
+   pagina se compila con su data-astro-cid, que el svg del componente no lleva.
+
+   Antes esto era un `style="display:none"` en linea, y solo en uno de los dos
+   botones: el del hero parpadeaba —el play visible hasta que main.ts corria— y
+   el del carrusel no. */
+.icon-play {
+    display: none;
+}
+
+/* ── Card de dato ──
+   El numero lleva data-counter (+ data-suffix opcional): es un
+   contrato con initCounters() de main.ts, que lo anima al entrar en
+   viewport. Sin ese atributo el numero se queda quieto, que tambien
+   es valido. NO usar data-target: main.ts no lo busca. */
+.card--stat {
+    text-align: center;
+}
+
+.stat-num {
+    display: block;
+    font-family: var(--font-ui);
+    font-size: var(--fs-2xl);
+    font-weight: var(--fw-display);
+    color: var(--c-text-heading);
+    letter-spacing: var(--ls-tight);
+    line-height: 1;
+}
+
+.stat-label {
+    display: block;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
+    color: var(--c-text-muted);
+    margin-top: var(--sp-2);
+}
+
+/*  Tira densa: cinco o seis datos en una fila, y el valor no es una
+    cifra corta sino un código — "ISO 14001" a --fs-2xl se parte en dos
+    líneas. */
+.card--stat-sm .stat-num {
+    font-size: var(--fs-lg);
+}
+
+/*  Cifra destacada: el hero del home y la banda de /mineria. Las dos
+    pedían --fs-display escribiéndolo cada una en su página. */
+.card--stat-lg .stat-num {
+    font-size: var(--fs-display);
+}
+
+/*  Sobre fondo oscuro. Son los mismos dos colores que .hero-stat y
+    .mn-badge reescribían a mano, cada una por su lado, para el mismo
+    componente. */
+.card--stat-oscuro .stat-num {
+    color: var(--c-text-white);
+}
+
+.card--stat-oscuro .stat-label {
+    color: var(--c-on-dark-3);
+}
+
+/* ── Chip ──
+   Etiqueta con borde: un ícono y dos o tres palabras, nada más. Si
+   necesita una descripción debajo ya no es un chip, es un
+   .feature-item. */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-4);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    transition: border-color var(--t), background var(--t), color var(--t);
+}
+
+.chip svg {
+    color: var(--c-secondary);
+    flex-shrink: 0;
+}
+
+.chip:hover {
+    border-color: var(--c-secondary);
+    color: var(--c-secondary);
+}
+
+/* ── Feature item: ícono + título + descripción ──
+   Fila de 3 o 4 características cortas, sin imagen. Pensada para
+   /mineria; queda acá y no en su página porque es exactamente el tipo
+   de bloque que otra página va a necesitar de nuevo. Default para
+   fondo claro; sobre fondo oscuro se sobreescribe color por color
+   desde la página, igual que .hero-stat .stat-num en index.astro —
+   no cambiar los tokens de acá para eso. */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-5);
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    transition: transform var(--t), border-color var(--t), background var(--t);
+    /*  La tarjeta entera puede ser un <a> —las de /documentos y
+        /canal-etico lo son—. Sin esto, el navegador subraya el título,
+        la descripción y el rótulo, los tres. */
+    text-decoration: none;
+}
+
+.feature-item:hover {
+    transform: translateY(-4px);
+    border-color: var(--c-border-light);
+    background: var(--c-bg-muted);
+}
+
+/*  Sobre superficie propia. El .feature-item base es transparente y se
+    apoya en el fondo de su sección; este se sostiene solo. Es lo que
+    eran .ods-card, .guarantee-item, .cert-card y .channel-card — cuatro
+    veces la misma caja blanca con cuatro paddings distintos. */
+.feature-item--card {
+    position: relative;
+    background: var(--c-bg-white);
+    border-color: var(--c-border-light);
+    padding: var(--sp-7) var(--sp-6);
+}
+
+/*  El gap gobierna la separación entre las partes de la tarjeta: un
+    margen de un hijo se le suma y descuadra la pila. Esto permite
+    además reusar .panel-label acá, que sí lleva margen porque vive en
+    flujo normal dentro de .panel. */
+.feature-item > * {
+    margin-block: 0;
+}
+
+.feature-item--card:hover {
+    background: var(--c-bg-white);
+    border-color: var(--c-secondary);
+    box-shadow: var(--shadow-card-hover);
+}
+
+/*  El ícono se rellena al pasar el cursor. Va sobre --card y no sobre
+    la base porque el ícono suelto, sin caja que lo contenga, no tiene
+    contra qué destacarse. */
+.feature-item--card:hover .feature-icon {
+    background: var(--c-secondary);
+    color: var(--c-text-white);
+}
+
+/*  Tarjeta que termina en una acción. La descripción se estira para que
+    el botón quede al pie en todas las tarjetas de la fila, tengan el
+    texto que tengan, y el botón se rellena al pasar por la tarjeta
+    entera — no solo por encima del botón. */
+.feature-item--accion {
+    height: 100%;
+}
+
+.feature-item--accion .feature-desc {
+    flex: 1;
+}
+
+.feature-item--accion:hover .btn-outline {
+    background: var(--c-secondary);
+    color: var(--c-text-white);
+}
+
+/* Ícono arriba, texto centrado. */
+.feature-item--centrado {
+    align-items: center;
+    text-align: center;
+}
+
+/*  Ícono al costado. El título y la descripción van envueltos en un
+    <div>: así el gap separa ícono de texto, y no título de
+    descripción. */
+.feature-item--fila {
+    flex-direction: row;
+    gap: var(--sp-4);
+}
+
+/*  Compacta: dos líneas en una caja chica, para una lista de valores o
+    atributos. Misma razón que .panel--sm — el padding por defecto está
+    pensado para una tarjeta de rejilla, no para una ficha de dos
+    renglones. */
+.feature-item--sm {
+    padding: var(--sp-3) var(--sp-4);
+}
+
+.feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--c-bg-muted);
+    color: var(--c-secondary);
+}
+
+/*  Número de orden. Ocupa el lugar del ícono en una tarjeta numerada:
+    "01 · Descubrimiento". Va siempre con aria-hidden — ver --c-ink-ghost.
+
+    Estaba escrito dos veces, con dos tamaños (--fs-display y 3.5rem) y
+    dos alfas, para la misma tarjeta de proceso en /servicios y /nosotros. */
+.feature-num {
+    font-size: var(--fs-display);
+    font-weight: var(--fw-display);
+    line-height: 1;
+    letter-spacing: var(--ls-tight);
+    color: var(--c-ink-ghost);
+}
+
+/*  Marca de agua: el número al fondo de la tarjeta, en la esquina, en
+    vez de en el flujo. Es lo que hacía .cert-bg-num con un 4.5rem
+    suelto; acá el tamaño sale de --fs-display para que siga la escala
+    en vez de ser un número más. */
+.feature-num--marca {
+    position: absolute;
+    top: var(--sp-3);
+    right: var(--sp-4);
+    font-size: calc(var(--fs-display) * 1.5);
+}
+
+.feature-title {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    line-height: 1.3;
+}
+
+/*  --fs-sm y no --fs-xs: 12px a 1.5 estaba calibrado para las cuatro
+    features cortas de /mineria, que además sobreescriben este valor.
+    Las tarjetas que absorbe --card llevan dos o tres líneas de prosa
+    real y a 12px apretado no se leen. */
+.feature-desc {
+    font-size: var(--fs-sm);
+    color: var(--c-text-muted);
+    line-height: 1.65;
+}
+
+@media (max-width: 1023.98px) {
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 639.98px) {
+    .feature-grid { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7. COMPONENTE: PAGE HERO
+   Compartido por todas las páginas internas.
+   La imagen de fondo se define en cada página con .page-hero-bg.
+
+   <section class="page-hero">
+     <div class="page-hero-bg"></div>
+     <div class="page-hero-overlay"></div>
+     <div class="page-hero-content">
+       <nav class="breadcrumb">…</nav>
+       <h1 class="page-hero-title">Título</h1>
+       <p class="page-hero-subtitle">Subtítulo</p>
+     </div>
+   </section>
+══════════════════════════════════════════════════════════════ */
+.page-hero {
+    position: relative;
+    height: 80vh;
+    min-height: 480px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+/*  Variante compacta para páginas de menor jerarquía.
+
+    Declaraba exactamente los mismos valores que .page-hero, en los dos
+    breakpoints: era un modificador muerto y la prop `size` de PageHero
+    no producía ninguna diferencia. Con 80vh, en un portátil de 900px
+    son 720px de foto y frase de marca antes del primer dato útil — y
+    lo llevaban las cinco páginas interiores por igual, incluida
+    /contacto, donde el formulario quedaba bajo el pliegue.
+
+    80vh se reserva para las páginas donde el hero ES el mensaje
+    (/nosotros, /sostenibilidad, las fichas). Un listado o un
+    formulario usa --sm. */
+.page-hero--sm {
+    height: 58vh;
+    min-height: 380px;
+}
+
+/* Es un <img> (PageHero.astro): el LCP de la página, con srcset y prioridad alta. */
+.page-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.page-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            rgba(20, 23, 45, 0.30) 0%,
+            rgba(20, 23, 45, 0.65) 60%,
+            rgba(20, 23, 45, 0.95) 100%);
+}
+
+.page-hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--sp-l1) var(--sp-l2);
+}
+
+.page-hero-title {
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: var(--fw-bold);
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: var(--ls-tight);
+    margin-bottom: var(--sp-3);
+}
+
+.page-hero-subtitle {
+    font-size: var(--fs-base);
+    color: var(--c-on-dark-3);
+    font-weight: var(--fw-normal);
+    letter-spacing: 0.2px;
+    margin: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   8. COMPONENTE: BREADCRUMB
+   Compartido por todas las páginas internas.
+
+   <nav class="breadcrumb">
+     <a href="./index.html">Inicio</a>
+     <span class="breadcrumb-sep">›</span>
+     <span class="breadcrumb-current">Página actual</span>
+   </nav>
+══════════════════════════════════════════════════════════════ */
+.breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-on-dark-3);
+    margin-bottom: var(--sp-4);
+}
+
+.breadcrumb a {
+    color: var(--c-on-dark-3);
+    text-decoration: none;
+    transition: color var(--t);
+}
+
+.breadcrumb a:hover {
+    color: #fff;
+}
+
+.breadcrumb-sep {
+    color: rgba(255, 255, 255, 0.30);
+    font-size: var(--fs-2xs);
+}
+
+.breadcrumb-current {
+    color: var(--c-on-dark-1);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   9. LAYOUT: TOP BAR
+══════════════════════════════════════════════════════════════ */
+.top-bar {
+    background: var(--c-primary);
+    border-bottom: 2px solid var(--c-accent);
+    font-family: var(--font-ui);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-topbar);
+    padding: var(--sp-2) 0;
+    transition: transform var(--t);
+}
+
+.top-bar.hidden {
+    transform: translateY(-100%);
+}
+
+.top-bar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+
+.top-bar-contact {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-size: var(--fs-sm);
+    letter-spacing: 0.2px;
+    color: var(--c-on-dark-2);
+    text-decoration: none;
+    transition: color var(--t);
+}
+
+.top-bar-contact:hover { color: #fff; }
+
+.top-bar-social {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+/*  Pildoras de acceso rapido del topbar: Intranet y Contactenos.
+    "Canal Etico" salio de aca y vive en el pie, donde tiene su propio
+    boton de acento — no era un tercer enlace mas de esta fila. */
+.top-bar-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--sp-1) var(--sp-3);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--c-on-dark-2);
+    border: 1px solid var(--c-border-dark-strong);
+    border-radius: var(--radius);
+    transition: background var(--t), color var(--t), border-color var(--t);
+    white-space: nowrap;
+}
+
+.top-bar-pill:hover {
+    background: var(--c-border-dark);
+    color: #fff;
+    border-color: var(--c-border-dark-strong);
+}
+
+.top-bar-pill--accent {
+    color: var(--c-accent);
+    border-color: var(--c-accent);
+}
+
+.top-bar-pill--accent:hover {
+    background: var(--c-accent);
+    border-color: var(--c-accent);
+    color: #fff;
+}
+
+.top-bar-links {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+}
+
+.tb-sep {
+    color: var(--c-border-dark-strong);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-normal);
+    user-select: none;
+    line-height: 1;
+}
+
+.top-bar-social a {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--c-surface-dark-2);
+    color: var(--c-on-dark-2);
+    text-decoration: none;
+    transition: background var(--t), color var(--t);
+}
+
+.top-bar-social a:hover {
+    background: var(--c-border-dark-strong);
+    color: #fff;
+}
+
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. LAYOUT: HEADER / NAV
+══════════════════════════════════════════════════════════════ */
+.header {
+    background: transparent;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-header);
+    padding: var(--sp-4) 0;
+    transition: background var(--t), box-shadow var(--t), padding var(--t), transform var(--t);
+}
+
+.header.with-topbar {
+    top: 42px;
+}
+
+/*  El primer valor es un filete de 1px, no una elevacion: separa el
+    header del contenido blanco. El segundo si es sombra, y es el token. */
+.header.scrolled {
+    background: var(--c-bg-white);
+    box-shadow: 0 1px 0 var(--c-border), var(--shadow-card);
+    padding: var(--sp-3) 0;
+    top: 0 !important;
+}
+
+.header.hidden {
+    transform: translateY(-100%);
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.logo {
+    position: relative;
+    display: block;
+    text-decoration: none;
+}
+
+.logo img {
+    height: 38px;
+}
+
+.logo-white {
+    opacity: 1;
+    transition: opacity var(--t);
+}
+
+.logo-color {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity var(--t);
+}
+
+.header.scrolled .logo-white {
+    opacity: 0;
+}
+
+.header.scrolled .logo-color {
+    opacity: 1;
+}
+
+/* Nav links */
+.nav ul {
+    display: flex;
+    list-style: none;
+    gap: var(--sp-7);
+}
+
+.nav a {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--c-on-dark-1);
+    text-decoration: none;
+    position: relative;
+    transition: color var(--t);
+}
+
+.nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--c-accent);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform var(--t);
+}
+
+.nav a:hover {
+    color: #fff;
+}
+
+.nav a:hover::after,
+.nav a.active::after {
+    transform: scaleX(1);
+}
+
+.nav a.active {
+    color: #fff;
+    font-weight: var(--fw-bold);
+}
+
+/* Página activa via aria-current */
+.nav a[aria-current="page"] {
+    color: #fff;
+    font-weight: var(--fw-bold);
+}
+
+.nav a[aria-current="page"]::after {
+    transform: scaleX(1);
+    background: var(--c-accent);
+}
+
+.header.scrolled .nav a[aria-current="page"] {
+    color: var(--c-primary);
+    font-weight: var(--fw-bold);
+}
+
+.header.scrolled .nav a[aria-current="page"]::after {
+    background: var(--c-accent);
+}
+
+.header.scrolled .nav a {
+    color: var(--c-text-body);
+}
+
+.header.scrolled .nav a:hover {
+    color: var(--c-primary);
+}
+
+.header.scrolled .nav a.active {
+    color: var(--c-primary);
+}
+
+/* Dropdown */
+.dropdown {
+    position: relative;
+}
+
+.dropdown > a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+}
+
+.nav-chevron {
+    opacity: 0.60;
+    flex-shrink: 0;
+    transition: transform var(--t);
+}
+
+.dropdown:hover .nav-chevron,
+.dropdown:focus-within .nav-chevron {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--c-primary);
+    border-top: 2px solid var(--c-accent);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow-card-hover);
+    min-width: 210px;
+    padding: var(--sp-2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all var(--t);
+    z-index: var(--z-header);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown:focus-within .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-xs) !important;
+    letter-spacing: 0.3px;
+    padding: var(--sp-2) var(--sp-3);
+    color: var(--c-on-dark-2) !important;
+    border-radius: var(--radius);
+    transition: background var(--t), color var(--t);
+}
+
+.dropdown-menu a:hover {
+    color: #fff !important;
+    background: rgba(217, 130, 43, 0.12) !important;
+}
+
+.dropdown-menu a svg {
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity var(--t), color var(--t);
+}
+
+.dropdown-menu a:hover svg {
+    opacity: 0.85;
+    color: var(--c-accent);
+}
+
+.dropdown-menu a::after {
+    display: none !important;
+}
+
+/* Nav condensado en pantallas medianas (1024px laptop).
+   Entre 1024 y 1100 es la combinacion mas apretada del sitio: los
+   enlaces ceden gap y tamano antes que romper a una segunda linea. */
+@media (max-width: 1100px) {
+    .nav ul { gap: var(--sp-5); }
+    .nav a   { font-size: var(--fs-xs); }
+}
+
+/* Toggle mobile */
+.menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: color var(--t);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.menu-toggle svg {
+    width: 24px;
+    height: 24px;
+    display: block;
+    flex-shrink: 0;
+}
+
+.header.scrolled .menu-toggle {
+    color: var(--c-primary);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   11. LAYOUT: FOOTER
+══════════════════════════════════════════════════════════════ */
+.footer {
+    background: var(--c-primary);
+    padding: var(--sp-l3) 0 0;
+    font-family: var(--font-ui);
+    position: relative;
+}
+
+/*  Filete plano, no degradado de tres paradas. Rima con el
+    border-bottom del topbar: la pagina queda acotada arriba y abajo
+    por la misma linea de 2px, que es una regla del sistema y no un
+    adorno distinto en cada extremo. */
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--c-accent);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.4fr;
+    gap: var(--sp-l2);
+    margin-bottom: 0;
+}
+
+.footer-brand {
+    align-items: flex-start !important;
+}
+
+.footer-logo img {
+    height: 44px;
+}
+
+.footer-slogan {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.4px;
+    line-height: 1.8;
+    color: var(--c-on-dark-2);
+    margin-bottom: var(--sp-6);
+}
+
+.footer-social {
+    display: flex;
+    gap: var(--sp-2);
+}
+
+.footer-social a {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--c-surface-dark-2);
+    color: var(--c-on-dark-2);
+    text-decoration: none;
+    transition: background var(--t), color var(--t);
+}
+
+.footer-social a:hover {
+    background: var(--c-border-dark-strong);
+    color: #fff;
+}
+
+.footer-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-section h3 {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-on-dark-3);
+    margin-bottom: var(--sp-5);
+}
+
+.footer-section ul li {
+    margin-bottom: var(--sp-2);
+    font-size: var(--fs-base);
+    color: var(--c-on-dark-3);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+}
+
+/*  Los iconos de correo y telefono del pie. La regla vive aca y no en el
+    layout porque el simbolo lo pinta <Icono>, un componente: un selector
+    escrito en el <style> de la pagina se compilaria con su data-astro-cid y
+    el svg del componente no lo lleva — regla 1 de CLAUDE.md.
+
+    El `li` ya es flex con gap, asi que aqui no hace falta ni margen ni
+    alineacion vertical: los dos iconos los traian en un `style` en linea que
+    no hacia nada. */
+.footer-section ul li svg {
+    color: var(--c-on-dark-icono);
+    flex-shrink: 0;
+}
+
+.footer-section ul li a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    color: var(--c-on-dark-3);
+    text-decoration: none;
+    transition: color var(--t), padding-left var(--t);
+}
+
+.footer-section ul li a:hover {
+    color: #fff;
+    padding-left: var(--sp-1);
+}
+
+/*  Único botón del pie. Es acceso rápido a un canal de denuncias:
+    tiene que encontrarse de un vistazo, no leerse en una lista. */
+.footer-ethics {
+    align-self: flex-start;
+    margin-top: var(--sp-6);
+}
+
+.footer-bottom {
+    background: rgba(0, 0, 0, 0.20);
+    margin-top: var(--sp-l2);
+    padding: var(--sp-4) 0;
+}
+
+.footer-bottom .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+}
+
+.footer-bottom p {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: var(--fs-sm);
+    margin: 0;
+}
+
+.footer-bottom-links {
+    display: flex;
+    gap: var(--sp-5);
+}
+
+.footer-bottom-links a {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: var(--fs-sm);
+    text-decoration: none;
+    transition: color var(--t);
+}
+
+.footer-bottom-links a:hover {
+    color: var(--c-on-dark-2);
+}
+
+/* Back to top */
+/*  Los seis !important de este bloque no defendian de nada: ninguna
+    pagina redefine .back-to-top. Eran de cuando Swiper y Font Awesome
+    peleaban por la cascada. */
+.back-to-top {
+    position: fixed;
+    bottom: var(--sp-7);
+    right: var(--sp-7);
+    z-index: var(--z-float);
+    width: 44px;
+    height: 44px;
+    background: var(--c-secondary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--t), visibility var(--t), background var(--t), transform var(--t);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-card-hover);
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    background: var(--c-primary);
+    transform: translateY(-3px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   12. LAYOUT: MOBILE MENU
+══════════════════════════════════════════════════════════════ */
+body.menu-open {
+    overflow: hidden;
+    touch-action: none;
+}
+
+.mobile-menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    z-index: var(--z-mobile-menu);
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--t), visibility var(--t);
+}
+
+.mobile-menu.active {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.mobile-menu-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--c-primary);
+}
+
+.mobile-menu-content {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    overflow: hidden;
+    background: var(--c-primary);
+}
+
+/* Header */
+.mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: var(--sp-4) var(--sp-5);
+    flex-shrink: 0;
+}
+
+.mobile-menu-close {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-surface-dark-2);
+    border: none;
+    border-radius: var(--radius);
+    color: #fff;
+    cursor: pointer;
+    transition: background var(--t);
+    flex-shrink: 0;
+}
+
+.mobile-menu-close:hover {
+    background: var(--c-border-dark-strong);
+}
+
+/* Nav */
+.mobile-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-4) var(--sp-3);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.mobile-nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/*  Centrado vertical con margenes automaticos, no con justify-content: en un
+    contenedor que puede desbordar, justify-content:center recorta la parte de
+    arriba y la deja inalcanzable al hacer scroll. `margin:auto` centra cuando
+    sobra sitio y cede cuando falta.
+
+    Va DESPUES de `.mobile-nav ul` a proposito. `.mobile-nav > ul` y
+    `.mobile-nav ul` tienen la misma especificidad -- una clase y un elemento
+    en las dos -- asi que decide el orden, y puesta antes perdia contra el
+    `margin: 0` de arriba sin dar ninguna senal. El selector de hijo directo
+    es para no tocar los submenus. */
+.mobile-nav > ul {
+    margin-block: auto;
+}
+
+.mobile-nav a {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-3);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: #fff;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    transition: background var(--t), color var(--t);
+}
+
+.mobile-nav a:hover {
+    background: var(--c-surface-dark-1);
+    color: #fff;
+}
+
+.mobile-nav a svg {
+    opacity: 0.5;
+    flex-shrink: 0;
+    color: var(--c-on-dark-2);
+}
+
+/* Dropdown Operaciones */
+.mobile-nav li.mobile-dropdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.mobile-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-3);
+    border-radius: var(--radius);
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: background var(--t), color var(--t);
+}
+
+.mobile-dropdown-toggle:hover {
+    background: var(--c-surface-dark-1);
+    color: #fff;
+}
+
+.mobile-dropdown-toggle svg:first-child {
+    opacity: 0.45;
+    flex-shrink: 0;
+}
+
+.mobile-dropdown-icon {
+    margin-left: auto;
+    opacity: 0.35;
+    transition: transform var(--t);
+    flex-shrink: 0;
+}
+
+.mobile-dropdown-toggle[aria-expanded="true"] .mobile-dropdown-icon {
+    transform: rotate(180deg);
+}
+
+.mobile-submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 var(--sp-l1);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+}
+
+.mobile-dropdown.open .mobile-submenu {
+    max-height: 320px;
+}
+
+.mobile-submenu a {
+    font-size: var(--fs-sm) !important;
+    letter-spacing: 0.3px !important;
+    color: var(--c-on-dark-3) !important;
+    padding: var(--sp-2) var(--sp-3) !important;
+    text-transform: none !important;
+    font-weight: var(--fw-medium) !important;
+}
+
+.mobile-submenu a:hover {
+    color: #fff !important;
+    background: var(--c-surface-dark-1) !important;
+}
+
+/* Acciones + footer (anclados abajo) */
+.mobile-menu-bottom {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mobile-menu-actions {
+    padding: 0 var(--sp-5) var(--sp-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+
+.mobile-btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    width: 100%;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--radius);
+    text-decoration: none;
+    background: var(--c-secondary);
+    color: #fff;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    transition: background var(--t);
+}
+
+.mobile-btn-primary:hover {
+    background: #154060;
+}
+
+.mobile-btn-outline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    width: 100%;
+    padding: var(--sp-3) var(--sp-4);
+    border-radius: var(--radius);
+    text-decoration: none;
+    background: var(--c-surface-dark-1);
+    border: 1px solid var(--c-border-dark);
+    color: #fff;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    transition: background var(--t), border-color var(--t);
+}
+
+.mobile-btn-outline:hover {
+    background: var(--c-border-dark);
+    border-color: var(--c-border-dark-strong);
+}
+
+/* Footer */
+.mobile-menu-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
+    border-top: 1px solid var(--c-surface-dark-2);
+}
+
+.mobile-menu-socials {
+    display: flex;
+    justify-content: center;
+    gap: var(--sp-3);
+}
+
+/*  44px: el minimo tactil recomendado. Estaban en 30, por debajo del umbral
+    y ademas perdidas contra el ancho de la pantalla. */
+.mobile-menu-socials a {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-surface-dark-2);
+    border-radius: 50%;
+    color: var(--c-on-dark-3);
+    text-decoration: none;
+    transition: background var(--t), color var(--t);
+}
+
+.mobile-menu-socials a:hover {
+    background: var(--c-border-dark-strong);
+    color: #fff;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. FORMULARIOS, AVISOS Y SUPERFICIES
+══════════════════════════════════════════════════════════════ */
+/*
+  Esta capa nació tarde y por duplicado. /contacto tenía su juego de
+  estilos de formulario dentro de la página, y el panel escribió otro
+  distinto para lo mismo: dos definiciones de "un campo de texto", en
+  dos archivos, que ya habían empezado a divergir en el radio del
+  borde y en la duración de la transición.
+
+  Los valores de acá salen de /contacto, que era la implementación
+  madura, con los tokens puestos donde había literales: la fuente
+  estaba escrita a mano en vez de --font-ui, el radio como 2px en vez
+  de --radius y las transiciones como .22s en vez de --t.
+
+  Regla: una pantalla nueva NO define estilos de campo, aviso ni
+  superficie. Si algo falta acá, se agrega acá.
+*/
+
+/* ── Campos ─────────────────────────────────────────────────── */
+
+/*  Dos columnas que caen a una en móvil. Para un campo a ancho
+    completo, dejarlo fuera de .form-row. */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-4);
+}
+
+.form-group {
+    margin-bottom: var(--sp-4);
+}
+
+/*  La etiqueta es obligatoria y visible, nunca reemplazada por el
+    placeholder: el placeholder desaparece al escribir, así que quien
+    vuelve a un formulario a medio llenar pierde la referencia de qué
+    iba en cada casilla. Además es lo único que lee un lector de
+    pantalla de forma fiable. */
+.form-group label {
+    display: block;
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    margin-bottom: var(--sp-2);
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    /*  min-width:0 porque un campo dentro de una pista de rejilla no
+        puede encogerse por debajo de su tamaño intrínseco sin esto, y
+        .form-row desborda en pantallas angostas. */
+    min-width: 0;
+    padding: var(--sp-3);
+    font-family: var(--font-ui);
+    font-size: var(--fs-base);
+    color: var(--c-text-heading);
+    background: var(--c-bg-muted);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color var(--t), box-shadow var(--t), background var(--t);
+    -webkit-appearance: none;
+}
+
+/*  El foco cambia borde Y fondo: el anillo solo no se distingue con
+    suficiente claridad sobre el gris del campo en reposo. */
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    border-color: var(--c-secondary);
+    background: var(--c-bg-white);
+    box-shadow: 0 0 0 3px rgba(27, 82, 120, 0.09);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--c-text-placeholder);
+}
+
+.form-input:disabled,
+.form-textarea:disabled,
+.form-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/*  Invalidez visible solo después de intentar enviar: :invalid a secas
+    pinta de rojo un campo obligatorio que la persona todavía no llegó
+    a tocar. Se activa agregando .was-validated al <form>. */
+.was-validated .form-input:invalid,
+.was-validated .form-textarea:invalid,
+.was-validated .form-select:invalid {
+    border-color: #c0392b;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 130px;
+}
+
+/*  Texto de ayuda bajo el campo. Va enlazado con aria-describedby. */
+.form-hint {
+    display: block;
+    margin-top: var(--sp-2);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    line-height: 1.5;
+}
+
+.form-error {
+    display: block;
+    margin-top: var(--sp-2);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    color: #8c1d1d;
+    line-height: 1.5;
+}
+
+/* ── Avisos ─────────────────────────────────────────────────── */
+/*
+  Un solo componente para "algo salió bien", "algo falló" y "ojo con
+  esto". Antes eran .form-success en /contacto y .pnl-aviso en el
+  panel, con paletas distintas para el mismo estado.
+
+  Los cuatro pares de color están verificados sobre su propio fondo:
+  ninguno baja de 7:1, que es holgado incluso para texto chico.
+*/
+.notice {
+    padding: var(--sp-4);
+    border-radius: var(--radius);
+    border: 1px solid;
+    font-size: var(--fs-base);
+    line-height: 1.55;
+}
+
+.notice + .notice {
+    margin-top: var(--sp-3);
+}
+
+.notice--ok {
+    background: #e9f6ee;
+    color: #1c6b3c;
+    border-color: #c3e5d0;
+}
+
+.notice--error {
+    background: #fdeaea;
+    color: #8c1d1d;
+    border-color: #f3c9c9;
+}
+
+.notice--warn {
+    background: #fdf3e6;
+    color: #7a4a10;
+    border-color: #f0dcc0;
+}
+
+.notice--info {
+    background: #eaf1f7;
+    color: #1b4b6e;
+    border-color: #c8dced;
+}
+
+/* ── Superficies ────────────────────────────────────────────── */
+/*
+  .card levanta al pasar el cursor, porque es un objeto sobre el que
+  se hace clic. Una superficie que solo contiene contenido no se
+  mueve: el movimiento promete una acción que no existe. Por eso esto
+  no es un modificador de .card.
+*/
+.panel {
+    background: var(--c-bg-white);
+    border: 1px solid var(--c-border-light);
+    border-radius: var(--radius);
+    padding: var(--sp-7);
+}
+
+.panel + .panel {
+    margin-top: var(--sp-5);
+}
+
+/*  Filete superior de acento. Es el que usa el formulario de contacto
+    para señalar dónde está la acción principal de la página. */
+.panel--accent {
+    border-top: 3px solid var(--c-secondary);
+}
+
+.panel--raised {
+    box-shadow: var(--shadow-card);
+}
+
+/*  Filete lateral izquierdo. Es el mismo acento de 3px que --accent,
+    en el otro borde, y existe por una razón de composición: un módulo
+    de barra lateral va al costado de un cuerpo de texto que ya tiene
+    su propio titular arriba, y ahí el filete superior compite con él.
+    En el borde izquierdo acompaña la columna en vez de cortarla.
+
+    Es `border-left` y no un ::before absoluto —que es como estaba
+    escrito en las dos páginas— para que quede simétrico con --accent
+    y sin pseudo-elemento. Con box-sizing: border-box el ancho total
+    no cambia. */
+.panel--rail {
+    border-left: 3px solid var(--c-secondary);
+}
+
+/*  Panel compacto. El padding por defecto es --sp-7, que está pensado
+    para un panel a ancho de contenido. En una barra lateral de ~300px
+    son 64px de aire sobre 300 de ancho: el contenido se queda con la
+    mitad de la columna. */
+.panel--sm {
+    padding: var(--sp-6);
+}
+
+/*  Borde punteado: esto todavía no existe. Se usa para un módulo
+    anunciado pero no construido, nunca para contenido real. */
+.panel--ghost {
+    background: var(--c-bg-muted);
+    border: 1px dashed var(--c-border);
+    padding: var(--sp-5);
+}
+
+.panel-title {
+    font-size: var(--fs-xl);
+    color: var(--c-text-heading);
+    margin-bottom: var(--sp-2);
+}
+
+/*  Rótulo de panel: 11px en caja alta y apagado. No es .panel-title
+    con otro tamaño — es otra cosa. Un módulo de barra lateral no
+    encabeza nada, nombra lo que tiene dentro: "Ficha técnica",
+    "Descargas". Con .panel-title (22px) el rótulo pesa más que el
+    dato que rotula.
+
+    Es el mismo tratamiento que la etiqueta de un campo de formulario,
+    que era el tercer sitio donde aparecía escrito a mano. .sh-label no
+    sirve acá: lleva el guión naranja de cabecera de sección. */
+.panel-label {
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    margin-bottom: var(--sp-4);
+}
+
+.panel-desc {
+    font-size: var(--fs-base);
+    color: var(--c-text-muted);
+    line-height: 1.6;
+}
+
+/* ── Estado en texto ────────────────────────────────────────── */
+/*  Para una celda o un renglon que informa un estado sin ocupar un aviso
+    entero: un codigo activo o dado de baja, el resultado de una
+    comprobacion. Misma paleta que .notice, para que verde signifique lo
+    mismo en los dos sitios. */
+.status-ok    { color: #1c6b3c; font-weight: var(--fw-semibold); }
+.status-error { color: #8c1d1d; font-weight: var(--fw-bold); }
+.status-warn  { color: #7a4a10; font-weight: var(--fw-semibold); }
+.status-off   { color: var(--c-text-muted); font-weight: var(--fw-medium); }
+
+/* ── Lista de clave y valor ─────────────────────────────────── */
+/*  Filas de dato con etiqueta a la izquierda y valor a la derecha.
+    flex-wrap para que en pantallas angostas el valor baje en vez de
+    comprimir la etiqueta hasta partirla letra por letra. */
+.data-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: var(--fs-sm);
+}
+
+.data-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    justify-content: space-between;
+    padding: var(--sp-3) 0;
+    border-bottom: 1px solid var(--c-border-light);
+}
+
+.data-list li:last-child {
+    border-bottom: none;
+}
+
+.data-list dt,
+.data-list .data-key {
+    color: var(--c-text-muted);
+    min-width: 0;
+}
+
+.data-list dd,
+.data-list .data-value {
+    margin: 0;
+    color: var(--c-text-heading);
+    font-weight: var(--fw-semibold);
+    text-align: right;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   14. DIÁLOGOS
+══════════════════════════════════════════════════════════════ */
+
+/* ── Diálogo ────────────────────────────────────────────────── */
+/*
+  Se muestra con el atributo `hidden`, no con una clase: así el contenido
+  queda fuera del árbol de accesibilidad cuando está cerrado, sin que haya que
+  acordarse de sincronizar `aria-hidden` a mano.
+
+  Quien lo abra tiene que ocuparse de dos cosas que el CSS no puede: bloquear
+  el scroll del fondo y devolver el foco al elemento que lo abrió.
+*/
+.dialogo {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-mobile-menu);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-5);
+    background: rgba(20, 23, 45, 0.55);
+    overflow-y: auto;
+}
+
+.dialogo-caja {
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--c-bg-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card-hover);
+    padding: var(--sp-7);
+    position: relative;
+}
+
+
+.dialogo-titulo {
+    font-size: var(--fs-xl);
+    color: var(--c-text-heading);
+    margin-bottom: var(--sp-2);
+    padding-right: var(--sp-7);
+}
+
+.dialogo-desc {
+    font-size: var(--fs-base);
+    color: var(--c-text-muted);
+    line-height: 1.6;
+    margin-bottom: var(--sp-6);
+}
+
+/*  44px: por encima del mínimo táctil. Cerrar es la acción que más se busca
+    a las apuradas. */
+.dialogo-cerrar {
+    position: absolute;
+    top: var(--sp-4);
+    right: var(--sp-4);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius);
+    color: var(--c-text-muted);
+    cursor: pointer;
+    transition: background var(--t), color var(--t);
+}
+
+.dialogo-cerrar:hover {
+    background: var(--c-bg-muted);
+    color: var(--c-text-heading);
+}
+
+@media (max-width: 479.98px) {
+    .dialogo-caja { padding: var(--sp-5); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   15. UTILITARIOS
+══════════════════════════════════════════════════════════════ */
+
+/* Oculto a la vista y presente para lectores de pantalla. */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Primer foco de cada página: salta el menú. Solo se ve al recibir foco. */
+.skip-link {
+    position: absolute;
+    top: calc(-1 * var(--sp-l2));
+    left: var(--sp-4);
+    z-index: 10000;
+    padding: var(--sp-3) var(--sp-5);
+    background: var(--c-primary);
+    color: #fff;
+    font-weight: var(--fw-semibold);
+    border-radius: var(--radius);
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    top: var(--sp-4);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--sp-l1);
+}
+
+.main {
+    padding-top: 0;
+}
+
+/* ── Chrome minimo ──
+   Lo activa `minimalChrome` de BaseLayout: sin top bar, header, menu movil,
+   pie ni boton de volver arriba. Hoy solo lo usa /404.
+
+   ESTABA EN EL <style> DE 404.astro Y LA TERCERA REGLA NO SERVIA. `html` y
+   `body` no los scopea Astro, asi que esas dos si aplicaban; `.main` si, y como
+   el <main> lo escribe BaseLayout y no la pagina, compilaba a
+   `html.layout-minimal .main[data-astro-cid-de-404]` contra un elemento sin ese
+   atributo. La regla se emitia en el CSS, era valida, y no enganchaba con nada
+   — el fallo silencioso que describe la regla 1 de CLAUDE.md.
+
+   Las tres van juntas aca porque las tres son del layout, no de la pagina: el
+   dia que otra use `minimalChrome` las hereda sin copiar nada. */
+html.layout-minimal {
+    min-height: 100dvh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+html.layout-minimal body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    min-height: 0;
+    width: 100%;
+}
+
+html.layout-minimal .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Iconos dentro de un contenedor concreto ──
+   Mismo motivo que el bloque de arriba, y el mismo que la regla 1 de
+   CLAUDE.md: el simbolo lo pinta <Icono>, que es un componente, asi que un
+   selector `... svg` escrito en el <style> de la pagina se compila con el
+   data-astro-cid de esa pagina y el svg del componente no lo lleva.
+
+   Las dos estaban en su pagina y funcionaban mientras el <svg> se escribia a
+   mano ahi. Al pasar los iconos al componente dejaron de enganchar, y el HTML
+   publicado no cambio ni un byte: por eso se encontraron midiendo los
+   selectores, no leyendo el diff. */
+.scroll-hint svg {
+    display: block;
+}
+
+.mn-contacto-links svg {
+    flex-shrink: 0;
+    color: var(--c-text-muted);
+}
+
+/* Animaciones */
+/*  Cursor del typewriter del home. Convive con initTypewriter en main.ts.
+    El corte duro (51%) se reemplazo por el desvanecido: a 500ms el salto
+    binario se lee como un parpadeo nervioso al lado de un titular de 60px. */
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes clientsScroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   16. VENDORS: AOS
+══════════════════════════════════════════════════════════════ */
+
+/* AOS — sincronizar duración */
+[data-aos] {
+    transition-duration: 240ms !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   17. RESPONSIVE
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 767.98px) {
+    :root {
+        --section-py: var(--section-py-sm);
+    }
+
+    /* Topbar */
+    .top-bar {
+        display: none;
+    }
+
+    /* Header */
+    .header.with-topbar {
+        top: 0;
+    }
+
+    .nav {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    /* Container */
+    .container {
+        padding: 0 var(--sp-5);
+    }
+
+    /* Section Header */
+    .sh {
+        margin-bottom: var(--sp-7);
+    }
+
+    .sh--narrow,
+    .sh--medium {
+        max-width: 100%;
+    }
+
+    /* Page Hero */
+    .page-hero {
+        height: 60vh;
+        min-height: 360px;
+    }
+
+    .page-hero--sm {
+        height: 46vh;
+        min-height: 280px;
+    }
+
+    .page-hero-content {
+        padding: 0 var(--sp-5) var(--sp-l1);
+    }
+
+    /* Formularios */
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Footer */
+    .footer-content {
+        grid-template-columns: 1fr !important;
+        gap: var(--sp-7);
+        text-align: center !important;
+    }
+
+    .footer-brand {
+        align-items: center !important;
+    }
+
+    .footer-social {
+        justify-content: center !important;
+    }
+
+    .footer-section ul li {
+        justify-content: center;
+    }
+
+    .footer-ethics {
+        align-self: center;
+    }
+
+    .footer-bottom .container {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .footer-bottom-links {
+        justify-content: center;
+    }
+
+    /* AOS desactivado en mobile para rendimiento */
+    [data-aos] {
+        transition-duration: 0ms !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: var(--sp-7);
+    }
+}
+
+@media (min-width: 1024px) {
+    .nav {
+        display: block;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+}

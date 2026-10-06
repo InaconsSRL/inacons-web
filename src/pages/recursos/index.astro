@@ -1,0 +1,138 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icono from '../../components/Icono.astro';
+import imagenHero from '../../assets/imagenes/image_heroprincipal.webp';
+
+const ETIQUETA: Record<string, string> = {
+  'logo': 'Logo',
+  'flyer-impreso': 'Impreso',
+  'flyer-digital': 'Digital',
+  'documento': 'Documento',
+};
+const CON_VISTA_PREVIA = new Set(['PNG', 'SVG', 'JPG', 'JPEG', 'WEBP']);
+
+const recursos = await Promise.all(
+  (await getCollection('recursos'))
+    .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99))
+    .map(async (r) => ({ ...r.data, Descripcion: (await render(r)).Content })),
+);
+---
+
+{/*
+  noindex, follow: material interno —logos y flyers imprimibles— para quien
+  trabaja en INACONS, no una página de cara al cliente. Se puede rastrear para
+  que el noindex se lea; por eso no va en robots.txt.
+*/}
+<BaseLayout
+  title="Recursos | INACONS"
+  description="Logos, flyers y material de apoyo de INACONS, listos para descargar."
+  robots="noindex, follow"
+>
+  <style slot="head">
+    .recursos-intro { max-width: 680px; margin-bottom: var(--sp-7); }
+    .recursos-intro p { font-size: var(--fs-md); color: var(--c-text-muted); line-height: 1.85; }
+    .recursos-intro a { color: var(--c-secondary); font-weight: var(--fw-semibold); text-underline-offset: 3px; }
+
+    .recursos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--sp-6);
+    }
+    .recurso-card {
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border-light);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow var(--t), border-color var(--t);
+    }
+    .recurso-card:hover { box-shadow: var(--shadow-card-hover); border-color: var(--c-border); }
+    .recurso-preview {
+      position: relative;
+      aspect-ratio: 4/3;
+      background: var(--c-bg-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .recurso-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      padding: var(--sp-4);
+    }
+    .recurso-formato {
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-display);
+      letter-spacing: var(--ls-label);
+      color: var(--c-secondary);
+    }
+    .recurso-tipo {
+      position: absolute;
+      top: var(--sp-2);
+      left: var(--sp-2);
+      background: var(--c-primary);
+      color: #fff;
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      padding: var(--sp-1) var(--sp-2);
+      border-radius: var(--radius);
+    }
+    .recurso-body { padding: var(--sp-4) var(--sp-5) var(--sp-5); flex: 1; display: flex; flex-direction: column; gap: var(--sp-1); }
+    .recurso-titulo { font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--c-text-heading); line-height: 1.35; }
+    .recurso-meta, .recurso-desc :global(p) { font-size: var(--fs-xs); color: var(--c-text-muted); }
+    .recurso-body .btn { align-self: flex-start; margin-top: auto; }
+    .recurso-desc { margin-bottom: var(--sp-4); }
+  </style>
+
+  <PageHero
+    image={imagenHero}
+    title="Recursos y<br>material de apoyo"
+    subtitle="Logos, flyers y documentos oficiales, listos para descargar."
+    current="Recursos"
+  />
+
+  <section class="sec sec--white">
+    <div class="container">
+      <div class="recursos-intro" data-aos="fade-up">
+        <p>
+          Los archivos publicados aquí son propiedad de INACONS S.R.L. Su uso debe respetar la
+          <a href="/documentos/">normativa corporativa</a> y las versiones vigentes de cada pieza.
+        </p>
+      </div>
+
+      <div class="recursos-grid">
+        {recursos.map((r) => {
+          const formato = r.formato.toUpperCase();
+          return (
+            <article class="recurso-card">
+              <div class="recurso-preview">
+                {CON_VISTA_PREVIA.has(formato)
+                  ? <img src={r.archivo} alt="" loading="lazy" decoding="async" />
+                  : <span class="recurso-formato" aria-hidden="true">{formato}</span>}
+                <span class="recurso-tipo">{ETIQUETA[r.categoria]}</span>
+              </div>
+              <div class="recurso-body">
+                <h2 class="recurso-titulo">{r.titulo}</h2>
+                <p class="recurso-meta">{formato}{r.dimensiones && ` · ${r.dimensiones}`}</p>
+                <div class="recurso-desc"><r.Descripcion /></div>
+                <a href={r.archivo} download class="btn btn-primary btn-sm">
+                  <Icono nombre="descarga" tam={14} />
+                  Descargar
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

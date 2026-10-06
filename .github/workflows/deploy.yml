@@ -1,0 +1,62 @@
+name: Deploy a cPanel
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Dos push seguidos lanzarían dos subidas FTP en paralelo contra el mismo
+# directorio y el mismo archivo de estado. No se cancela la que está en curso:
+# un deploy a medio subir deja el sitio mezclado.
+concurrency:
+  group: deploy-produccion
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Tipos y contenido: un error aquí corta el deploy antes de subir nada.
+      - name: Comprobar tipos
+        run: npm run check
+
+      # PUBLIC_CONTACT_ENDPOINT es una variable de repositorio (Settings →
+      # Secrets and variables → Actions → Variables), no un secret: termina
+      # dentro del JavaScript público. Vacía, el formulario usa mailto.
+      - name: Build
+        run: npm run build
+        env:
+          PUBLIC_CONTACT_ENDPOINT: ${{ vars.PUBLIC_CONTACT_ENDPOINT }}
+
+      # La versión exacta que se intentó subir queda descargable 90 días desde
+      # la pestaña Actions, aunque el FTP falle: es el rollback.
+      - name: Guardar dist/ como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 90
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server:   ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir:  ./dist/
+          server-dir: /sites/home.inacons.com.pe/

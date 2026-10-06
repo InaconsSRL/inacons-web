@@ -1,0 +1,82 @@
+---
+/**
+ * PageHero.astro
+ * ─────────────────────────────────────────────────────────────
+ * Cabecera de las páginas interiores: imagen, breadcrumb, título y
+ * BreadcrumbList en JSON-LD.
+ *
+ * La imagen es un <img> y no un background-image: es el elemento LCP de
+ * la página, así que se pide con prioridad alta y con srcset, y el
+ * navegador la descubre al leer el HTML en vez de esperar al CSS.
+ *
+ * Uso:
+ *   <PageHero image={imagenNosotros} title="Comprometidos con la<br>Excelencia"
+ *     subtitle="…" current="Nosotros" />
+ *   <PageHero image={servicio.data.imagen} title={titulo}
+ *     parent={{ label: 'Servicios', href: '/servicios/' }} current={titulo} size="md" />
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  image: ImageMetadata;
+  /** Admite <br> para partir la línea. */
+  title: string;
+  subtitle?: string;
+  current: string;
+  parent?: { label: string; href: string };
+  size?: 'sm' | 'md';
+  /** object-position de la imagen (por defecto "center") */
+  bgPosition?: string;
+}
+
+const { image, title, subtitle, current, parent, size = 'sm', bgPosition = 'center' } = Astro.props;
+
+const migas = [
+  { name: 'Inicio', href: '/' },
+  ...(parent ? [{ name: parent.label, href: parent.href }] : []),
+  { name: current, href: Astro.url.pathname },
+];
+---
+
+<script type="application/ld+json" set:html={JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": migas.map((m, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "name": m.name,
+    "item": new URL(m.href, Astro.site).href,
+  })),
+})} />
+
+<section class:list={['page-hero', { 'page-hero--sm': size === 'sm' }]}>
+  <Image
+    quality={70}
+    class="page-hero-bg"
+    src={image}
+    alt=""
+    widths={[768, 1280, 1920]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+    style={`object-position: ${bgPosition}`}
+  />
+  <div class="page-hero-overlay"></div>
+  <div class="page-hero-content">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Inicio</a>
+      {parent && (
+        <>
+          <span class="breadcrumb-sep" aria-hidden="true">›</span>
+          <a href={parent.href}>{parent.label}</a>
+        </>
+      )}
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <span class="breadcrumb-current" aria-current="page">{current}</span>
+    </nav>
+
+    <h1 class="page-hero-title" set:html={title} />
+    {subtitle && <p class="page-hero-subtitle">{subtitle}</p>}
+  </div>
+</section>

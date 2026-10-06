@@ -1,0 +1,308 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icono from '../../components/Icono.astro';
+
+type Proyecto = CollectionEntry<'proyectos'>;
+
+export async function getStaticPaths() {
+  const proyectos = await getCollection('proyectos');
+  return proyectos.map((proyecto: Proyecto) => ({
+    params: { slug: proyecto.id },
+    props: { proyecto, todosProyectos: proyectos },
+  }));
+}
+
+interface Props {
+  proyecto: Proyecto;
+  todosProyectos: Proyecto[];
+}
+
+const { proyecto, todosProyectos } = Astro.props;
+const { Content } = await render(proyecto);
+const { titulo, ubicacion, categoria, año, imagen, galeria = [] } = proyecto.data;
+
+const relacionados = todosProyectos
+  .filter((p) => p.id !== proyecto.id && p.data.categoria === categoria)
+  .slice(0, 3);
+---
+
+<BaseLayout
+  title={`${titulo} | INACONS`}
+  description={`${categoria} en ${ubicacion} (${año}): proyecto ejecutado por INACONS, empresa peruana de ingeniería y construcción.`}
+  ogImage={imagen}
+>
+
+  <PageHero
+    image={imagen}
+    title={titulo}
+    subtitle={`${ubicacion} — ${año}`}
+    parent={{ label: 'Proyectos', href: '/proyectos/' }}
+    current={titulo}
+    size="md"
+  />
+
+  <!-- CONTENIDO -->
+  <section class="sec sec--white">
+    <div class="container">
+      <div class="proyecto-layout">
+
+        <!-- Columna principal -->
+        <div class="proyecto-body" data-aos="fade-up">
+
+          <span class="proyecto-badge">{categoria}</span>
+
+          <Content />
+
+          <!-- Galería -->
+          {galeria.length > 0 && (
+            <div class="galeria">
+              <div class="galeria-principal">
+                <Image quality={70} src={galeria[0]} alt={`${titulo} — foto principal`} widths={[640, 960, 1280]} sizes="(min-width: 1024px) 800px, 100vw" />
+              </div>
+              {galeria.length > 1 && (
+                <div class="galeria-thumbs">
+                  {galeria.slice(1).map((foto, i) => (
+                    <div class="galeria-thumb">
+                      <Image quality={70} src={foto} alt={`${titulo} — foto ${i + 2}`} width={400} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <a href="/contacto/" class="btn btn-primary">
+            Solicitar cotización
+            <Icono nombre="flecha-derecha" tam={15} />
+          </a>
+        </div>
+
+        <!-- Ficha técnica -->
+        <aside class="proyecto-aside">
+          <div class="panel panel--sm panel--rail" data-aos="fade-left">
+            <p class="panel-label">Ficha Técnica</p>
+            <ul class="data-list">
+              <li><span class="data-key">Ubicación</span><span class="data-value">{ubicacion}</span></li>
+              <li><span class="data-key">Categoría</span><span class="data-value">{categoria}</span></li>
+              <li><span class="data-key">Año</span><span class="data-value">{año}</span></li>
+            </ul>
+          </div>
+
+          {relacionados.length > 0 && (
+            <div class="panel panel--sm panel--rail" data-aos="fade-left" data-aos-delay="100">
+              <p class="panel-label">Proyectos relacionados</p>
+              <nav aria-label="Proyectos relacionados">
+                {relacionados.map((p) => (
+                  <a href={`/proyectos/${p.id}/`} class="related-link">
+                    <div class="related-thumb">
+                      <Image quality={70} src={p.data.imagen} alt="" width={104} />
+                    </div>
+                    <div class="related-info">
+                      <span class="related-name">{p.data.titulo}</span>
+                      <span class="related-meta">{p.data.ubicacion} — {p.data.año}</span>
+                    </div>
+                  </a>
+                ))}
+              </nav>
+            </div>
+          )}
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    label="¿Proyecto similar?"
+    title="¿Tienes un proyecto que requiere nuestra experiencia?"
+    description="Contamos con el equipo y la metodología para llevar tu proyecto al más alto nivel de calidad."
+    primaryHref="/contacto/"
+    primaryLabel="Contáctenos"
+    secondaryHref="/proyectos/"
+    secondaryLabel="Ver todos los proyectos"
+  />
+
+</BaseLayout>
+
+<style>
+  .proyecto-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--sp-l3);
+    align-items: start;
+  }
+
+  .proyecto-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: var(--sp-1) var(--sp-3);
+    background: rgba(27,82,120,0.09);
+    border: 1px solid rgba(27,82,120,0.20);
+    border-radius: var(--radius);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--c-secondary);
+    margin-bottom: var(--sp-6);
+  }
+
+  .proyecto-body :global(h2) {
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    font-weight: var(--fw-bold);
+    color: var(--c-text-heading);
+    margin: var(--sp-7) 0 var(--sp-4);
+  }
+
+  .proyecto-body :global(p) {
+    font-size: var(--fs-md);
+    line-height: 1.85;
+    color: var(--c-text-body);
+    margin-bottom: var(--sp-4);
+  }
+
+  .proyecto-body :global(ul) {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+
+  .proyecto-body :global(li) {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    font-size: var(--fs-md);
+    color: var(--c-text-body);
+  }
+
+  .proyecto-body :global(li)::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--c-secondary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: var(--sp-2);
+  }
+
+  /* Galería */
+  .galeria { margin: var(--sp-7) 0; }
+
+  .galeria-principal {
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+    margin-bottom: var(--sp-1);
+  }
+
+  .galeria-principal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .6s ease;
+  }
+
+  .galeria-principal:hover img { transform: scale(1.03); }
+
+  .galeria-thumbs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-1);
+  }
+
+  .galeria-thumb {
+    height: 120px;
+    overflow: hidden;
+  }
+
+  .galeria-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.85);
+    transition: filter .3s, transform .4s;
+  }
+
+  .galeria-thumb:hover img {
+    filter: brightness(1);
+    transform: scale(1.05);
+  }
+
+  /* Aside */
+  .proyecto-aside {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+
+  /*  El aside separa con gap, así que el margen de .panel + .panel
+      sobra: sumaría 20px a los 4 del gap. */
+  .proyecto-aside .panel + .panel { margin-top: 0; }
+
+
+  .related-link {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) 0;
+    text-decoration: none;
+    border-bottom: 1px solid var(--c-border-light);
+    transition: padding-left var(--t);
+  }
+
+  .related-link:last-child { border-bottom: none; }
+  .related-link:hover { padding-left: var(--sp-1); }
+
+  .related-thumb {
+    width: 52px;
+    height: 40px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .related-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .related-name {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    line-height: 1.3;
+    transition: color var(--t);
+  }
+
+  .related-link:hover .related-name { color: var(--c-secondary); }
+
+  .related-meta {
+    display: block;
+    font-size: var(--fs-2xs);
+    color: var(--c-text-muted);
+    margin-top: 2px;
+  }
+
+  @media (max-width: 1023.98px) {
+    .proyecto-layout { grid-template-columns: 1fr; gap: var(--sp-l2); }
+    .proyecto-aside  { position: static; }
+    .galeria-principal { height: 280px; }
+  }
+
+  @media (max-width: 767.98px) {
+    .galeria-thumbs { grid-template-columns: repeat(2, 1fr); }
+    .galeria-thumb  { height: 100px; }
+  }
+</style>

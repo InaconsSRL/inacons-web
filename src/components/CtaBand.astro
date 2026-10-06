@@ -1,0 +1,101 @@
+---
+/**
+ * CtaBand.astro
+ * ─────────────────────────────────────────────────────────────
+ * Banda de cierre con llamada a contacto. Toda página de cara al cliente
+ * termina con una: el menú principal no lleva /contacto/ (regla 8 de
+ * CLAUDE.md) y el top-bar desaparece al primer scroll.
+ *
+ * Uso:
+ *   <CtaBand
+ *     label="¿Listo para iniciar?"
+ *     title={`¿Tienes un proyecto de ${titulo}?`}
+ *     description="Nuestro equipo técnico está disponible para asesorarte."
+ *     primaryHref="/contacto/"
+ *     primaryLabel="Contáctenos"
+ *     secondaryHref="/proyectos/"
+ *     secondaryLabel="Ver proyectos"
+ *   />
+ */
+import Icono from './Icono.astro';
+
+interface Props {
+  label: string;
+  title: string;
+  description?: string;
+  primaryHref: string;
+  primaryLabel: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+  /**
+   * Fondo de la banda. 'dark' (por defecto) para el cierre de las
+   * páginas slug; 'light' cuando la banda va intercalada entre dos
+   * secciones oscuras y tiene que ser el respiro claro entre ambas.
+   *
+   * No es solo el fondo: el botón secundario cambia de variante. En
+   * claro, .btn-outline-light es texto blanco con borde blanco —
+   * invisible.
+   */
+  tone?: 'dark' | 'light';
+}
+
+const {
+  label,
+  title,
+  description,
+  primaryHref,
+  primaryLabel,
+  secondaryHref,
+  secondaryLabel,
+  tone = 'dark',
+} = Astro.props;
+
+const sectionClass  = tone === 'light' ? 'sec sec--muted' : 'sec sec--dark';
+const secondaryClass = tone === 'light' ? 'btn btn-outline btn-lg' : 'btn btn-outline-light btn-lg';
+---
+
+<section class={sectionClass}>
+  <div class="container">
+    <div class="sh sh--center sh--medium">
+      <p class="sh-label">{label}</p>
+      <h2 class="sh-title" set:html={title} />
+      {description && <p class="sh-desc">{description}</p>}
+    </div>
+    <div class="cta-band-actions">
+      <a href={primaryHref} class="btn btn-primary btn-lg">
+        {primaryLabel}
+        <Icono nombre="enviar" tam={15} />
+      </a>
+      {secondaryHref && secondaryLabel && (
+        <a href={secondaryHref} class={secondaryClass}>
+          {secondaryLabel}
+          <Icono nombre="flecha-derecha" tam={14} />
+        </a>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band-actions {
+    display: flex;
+    gap: var(--sp-3);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--sp-7);
+  }
+
+  @media (max-width: 767.98px) {
+    .cta-band-actions {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .cta-band-actions .btn {
+      width: 100%;
+      max-width: 320px;
+      justify-content: center;
+    }
+  }
+</style>

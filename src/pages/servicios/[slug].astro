@@ -1,0 +1,231 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icono from '../../components/Icono.astro';
+import { serviciosPorOrden, type Servicio } from '../../lib/servicios';
+import { BROCHURE } from '../../data/empresa';
+
+export async function getStaticPaths() {
+  const servicios = await serviciosPorOrden();
+  return servicios.map((servicio) => ({
+    params: { slug: servicio.id },
+    props: { servicio, otros: servicios.filter((s) => s.id !== servicio.id) },
+  }));
+}
+
+interface Props {
+  servicio: Servicio;
+  otros: Servicio[];
+}
+
+const { servicio, otros } = Astro.props;
+const { Content } = await render(servicio);
+const { titulo, descripcion, imagen, especialidades } = servicio.data;
+---
+
+<BaseLayout title={`${titulo} | INACONS`} description={descripcion} ogImage={imagen}>
+
+  <PageHero
+    image={imagen}
+    title={titulo}
+    subtitle={descripcion}
+    parent={{ label: 'Servicios', href: '/servicios/' }}
+    current={titulo}
+    size="md"
+  />
+
+  <!-- CONTENIDO -->
+  <section class="sec sec--white">
+    <div class="container">
+      <div class="service-layout">
+
+        <!-- Columna principal -->
+        <div class="service-body" data-aos="fade-up">
+          <Content />
+
+          {especialidades && especialidades.length > 0 && (
+            <>
+              <h2>Nos especializamos en:</h2>
+              <ul>
+                {especialidades.map((e: string) => <li>{e}</li>)}
+              </ul>
+            </>
+          )}
+
+          <a href="/contacto/" class="btn btn-primary">
+            Solicitar cotización
+            <Icono nombre="flecha-derecha" tam={15} />
+          </a>
+        </div>
+
+        <!-- Aside -->
+        <aside class="service-aside">
+          <!-- Descarga del brochure -->
+          <div class="panel panel--sm panel--rail">
+            <p class="panel-label">Descargas</p>
+            <div class="download-list">
+              <a href={BROCHURE} target="_blank" rel="noopener" class="download-item">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+                Brochure General
+              </a>
+            </div>
+          </div>
+
+          <!-- Otros servicios -->
+          <div class="panel panel--sm panel--rail">
+            <p class="panel-label">Otros servicios</p>
+            <nav class="other-services" aria-label="Otros servicios">
+              {otros.map((s) => (
+                <a href={`/servicios/${s.id}/`} class="other-service-link">
+                  {s.data.titulo}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+              ))}
+            </nav>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    label="¿Listo para iniciar?"
+    title={`¿Tienes un proyecto de ${titulo}?`}
+    description="Nuestro equipo técnico está disponible para asesorarte y presentarte una propuesta sin compromiso."
+    primaryHref="/contacto/"
+    primaryLabel="Contáctenos"
+    secondaryHref="/proyectos/"
+    secondaryLabel="Ver proyectos"
+  />
+
+</BaseLayout>
+
+<style>
+  .service-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--sp-l3);
+    align-items: start;
+  }
+
+  .service-body :global(h2) {
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+    font-weight: var(--fw-bold);
+    color: var(--c-text-heading);
+    margin-bottom: var(--sp-4);
+    margin-top: var(--sp-7);
+  }
+
+  .service-body :global(p) {
+    font-size: var(--fs-md);
+    line-height: 1.85;
+    color: var(--c-text-body);
+    margin-bottom: var(--sp-5);
+  }
+
+  .service-body :global(ul) {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--sp-6);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-2) var(--sp-6);
+  }
+
+  .service-body :global(li) {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    font-size: var(--fs-md);
+    color: var(--c-text-body);
+    line-height: 1.5;
+  }
+
+  .service-body :global(li)::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--c-secondary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: var(--sp-2);
+  }
+
+  .service-aside {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+
+  /*  El aside separa con gap, así que el margen de .panel + .panel
+      sobra: sumaría 20px a los 4 del gap, y en la rejilla de tablet
+      empujaría la segunda tarjeta dentro de su celda. */
+  .service-aside .panel + .panel { margin-top: 0; }
+
+  .download-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+  .download-item {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--c-bg-muted);
+    border: 1.5px solid var(--c-border-light);
+    border-radius: var(--radius);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    transition: border-color var(--t), background var(--t), color var(--t);
+  }
+
+  .download-item:hover {
+    border-color: var(--c-secondary);
+    background: rgba(27,82,120,0.05);
+    color: var(--c-secondary);
+  }
+
+  .other-services { display: flex; flex-direction: column; }
+
+  .other-service-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-3) var(--sp-1);
+    font-size: var(--fs-base);
+    font-weight: var(--fw-medium);
+    color: var(--c-text-body);
+    text-decoration: none;
+    border-bottom: 1px solid var(--c-border-light);
+    transition: color var(--t), padding-left var(--t);
+  }
+
+  .other-service-link:last-child { border-bottom: none; }
+
+  .other-service-link:hover {
+    color: var(--c-secondary);
+    padding-left: var(--sp-1);
+  }
+
+  @media (max-width: 1023.98px) {
+    .service-layout {
+      grid-template-columns: 1fr;
+      gap: var(--sp-l2);
+    }
+    .service-aside {
+      position: static;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .service-aside { grid-template-columns: 1fr; }
+    .service-body :global(ul) { grid-template-columns: 1fr; }
+  }
+</style>

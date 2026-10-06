@@ -1,0 +1,747 @@
+---
+import { Image, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import MediaCard from '../components/MediaCard.astro';
+import Icono from '../components/Icono.astro';
+import { serviciosPorMenu } from '../lib/servicios';
+import { BROCHURE, CIFRAS, PROYECTOS_POR_CIUDAD } from '../data/empresa';
+import imagenHero from '../assets/imagenes/image_heroprincipal.webp';
+import imagenNosotros from '../assets/imagenes/image_nosotros.webp';
+
+const servicios = await serviciosPorMenu();
+
+const destacados = (await getCollection('proyectos'))
+  .filter((p) => p.data.destacado)
+  .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99))
+  .slice(0, 3);
+
+// El póster del vídeo es la imagen LCP del home: se precarga con el mismo
+// URL optimizado que usa el <video>, o el navegador la pediría dos veces.
+const poster = await getImage({ src: imagenHero, quality: 70, width: 1920, format: 'webp' });
+
+const LOGOS = import.meta.glob<{ default: ImageMetadata }>('../assets/imagenes/clientes/*', { eager: true });
+const logo = (archivo: string) => LOGOS[`../assets/imagenes/clientes/${archivo}`].default;
+const CLIENTES = [
+  ['cliente_electrocentro.png', 'Electrocentro'],
+  ['cliente_electrodunas.png', 'Electrodunas'],
+  ['cliente_electroperu.png', 'Electroperú'],
+  ['cliente_enel.png', 'Enel'],
+  ['cliente_epsgrau.png', 'EPS Grau'],
+  ['cliente_grupocentenario.png', 'Grupo Centenario'],
+  ['cliente_indecopi.png', 'Indecopi'],
+  ['cliente_losportales.png', 'Los Portales'],
+  ['cliente_luzdelsur.png', 'Luz del Sur'],
+  ['cliente_mediacommerce.png', 'Media Commerce'],
+  ['cliente_sanmiguel.png', 'San Miguel'],
+  ['cliente_sedapal.png', 'Sedapal'],
+  ['cliente_zv.png', 'ZV'],
+  ['ge_vernova.svg', 'GE Vernova'],
+  ['kallpa.png', 'Kallpa'],
+].map(([archivo, nombre]) => ({ imagen: logo(archivo), nombre }));
+
+const cifrasHero = [CIFRAS.experiencia, CIFRAS.superficie, CIFRAS.inversion, CIFRAS.trabajadores];
+const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) => ({ idMapa, peso })));
+---
+
+<BaseLayout
+  title="INACONS | Empresa Constructora en Perú"
+  description="Empresa constructora peruana con más de 15 años en obras civiles, infraestructura, electromecánica y consultoría a nivel nacional."
+>
+  <link slot="head" rel="preload" as="image" href={poster.src} fetchpriority="high" />
+
+<style slot="head">
+    /* ── HERO ── */
+    .home-hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 620px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(to bottom, rgba(20,23,45,0.30) 0%, rgba(20,23,45,0.92) 100%),
+        linear-gradient(110deg, rgba(20,23,45,0.85) 0%, rgba(27,82,120,0.35) 60%, transparent 100%);
+    }
+    /*  Dos columnas: el mensaje a la izquierda y las cifras al costado.
+        Estaban en una banda al pie del hero, que las ponia por debajo
+        de los botones y empujaba scroll-hint y boton de pausa 168px
+        hacia arriba. Al costado del titular se leen a la vez que el, y
+        el hero recupera su borde inferior. */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 var(--sp-l1);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--sp-l3);
+      align-items: center;
+    }
+    .hero-main { min-width: 0; }
+
+    /* ── CIFRAS DEL HERO ── */
+    .hero-stats {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-6);
+      padding-left: var(--sp-7);
+      border-left: 1px solid var(--c-border-dark-strong);
+    }
+    .hero-stat { white-space: nowrap; text-align: left; }
+
+    .hero-stat .stat-label { margin-top: var(--sp-1); }
+
+    /*  Entre 768 y 1024 no hay ancho para las dos columnas: el titular
+        a 4.3vw ya ocupa casi todo el contenedor y las cifras al costado
+        lo empujarian a partirse. En tablet van en fila bajo el mensaje,
+        que es donde si hay sitio horizontal. */
+    @media (max-width: 1023.98px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: var(--sp-l2);
+      }
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--sp-5);
+        padding-left: 0;
+        padding-top: var(--sp-6);
+        border-left: none;
+        border-top: 1px solid var(--c-border-dark-strong);
+      }
+      .hero-stat { text-align: center; }
+    }
+    .home-hero h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: var(--fs-hero);
+      font-weight: var(--fw-semibold);
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: var(--sp-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+      letter-spacing: var(--ls-tight);
+    }
+    .hero-line {
+      display: flex;
+      align-items: baseline;
+      gap: var(--sp-3);
+      flex-wrap: wrap;
+    }
+    .word.fixed   { color: var(--c-on-dark-2); font-weight: var(--fw-normal); letter-spacing: var(--ls-wide); }
+    .word.highlight { color: #fff; font-weight: var(--fw-display); letter-spacing: var(--ls-tight); }
+    /* Ghost reserva el espacio final desde el inicio — sin CLS */
+    .word.typewriter {
+      position: relative;
+      display: inline-block;
+    }
+    .tw-ghost {
+      visibility: hidden;
+      user-select: none;
+      pointer-events: none;
+    }
+    .tw-typed {
+      position: absolute;
+      left: 0;
+      top: 0;
+      white-space: nowrap;
+      color: inherit;
+    }
+    /* @keyframes blink vive en design-system.css */
+    .word.typewriter.typing .tw-typed::after {
+      content: '|';
+      color: var(--c-on-dark-3);
+      animation: blink .5s infinite;
+      margin-left: 2px;
+    }
+    .hero-desc {
+      font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+      color: var(--c-on-dark-2);
+      margin-bottom: var(--sp-7);
+      max-width: 500px;
+      font-weight: var(--fw-normal);
+      letter-spacing: 0.2px;
+    }
+    .hero-actions { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+
+    /* ── ABOUT (Bechtel-style 2-col) ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-l4);
+      align-items: center;
+    }
+    /* Sin el marco naranja desplazado ni el badge flotante, nada queda
+       posicionado en absoluto aca dentro: se van tambien el position
+       relative y la escalera de z-index que existian solo para ellos. */
+    .about-img-frame {
+      height: 540px;
+    }
+    .about-img-frame img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 20%;
+    }
+    .about-content { display: flex; flex-direction: column; }
+    .about-body-text {
+      font-size: var(--fs-md);
+      color: rgba(20,23,45,0.68);
+      line-height: 1.78;
+      margin: 0 0 var(--sp-3);
+    }
+    /* ── CLIENTES SCROLL ── */
+    .clients-track-wrap {
+      overflow: hidden;
+      mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    }
+    /* @keyframes clientsScroll vive en design-system.css */
+    .clients-track {
+      display: flex;
+      width: max-content;
+      animation: clientsScroll 30s linear infinite;
+    }
+    .clients-track:hover { animation-play-state: paused; }
+    /*
+      Enel, Sedapal, Luz del Sur, GE Vernova, Kallpa, Indecopi: es lo
+      más persuasivo que tiene la home. Estaba en gris al 48% de
+      opacidad, y el color solo volvía con :hover — que en táctil no
+      existe. En celular la banda entera era una fila de manchas grises.
+
+      El gris uniforme se conserva en escritorio, donde el hover puede
+      devolver el color. En dispositivos sin hover se muestran a color
+      de entrada, porque ahí no hay forma de pedirlo.
+    */
+    .client-logo-item {
+      flex: 0 0 158px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-4) var(--sp-5);
+      border-right: 1px solid var(--c-border-light);
+      filter: grayscale(100%);
+      opacity: 0.85;
+      transition: filter var(--t), opacity var(--t);
+    }
+    .client-logo-item:hover { filter: grayscale(0%); opacity: 1; }
+
+    @media (hover: none) {
+      .client-logo-item { filter: none; opacity: 1; }
+    }
+
+    /*
+      Control de pausa del carrusel — WCAG 2.2.2 (nivel A).
+
+      Cualquier movimiento automático que dure más de 5 segundos tiene
+      que poder detenerse. La pausa al pasar el mouse no cumple: no es
+      alcanzable por teclado y no existe en táctil. El patrón es el
+      mismo que ya usa bien el botón de pausa del video del hero.
+    */
+    .clients-controls {
+      display: flex;
+      justify-content: center;
+      margin-top: var(--sp-5);
+    }
+    .clients-pause-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
+      min-height: 32px;
+      background: transparent;
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      color: var(--c-text-muted);
+      font-family: var(--font-ui);
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      cursor: pointer;
+      transition: border-color var(--t), color var(--t);
+    }
+    .clients-pause-btn:hover {
+      border-color: var(--c-secondary);
+      color: var(--c-secondary);
+    }
+    .clients-track.is-paused { animation-play-state: paused; }
+
+    .client-logo-item img { max-height: 40px; max-width: 108px; object-fit: contain; }
+
+    /* ── EYEBROW ── */
+    .hero-eyebrow {
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-accent);
+      margin-bottom: var(--sp-5);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 28px;
+      height: 1.5px;
+      background: var(--c-accent);
+      flex-shrink: 0;
+    }
+
+    /* ── SCROLL HINT ── */
+    /* Los 168px de bottom eran la altura medida de la banda de
+       indicadores que ocupaba el pie del hero. Sin banda, van al
+       borde. Mismo motivo en .hero-pause-btn. */
+    .scroll-hint {
+      position: absolute;
+      bottom: var(--sp-l1);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 4;
+      color: var(--c-on-dark-3);
+      animation: scrollBounce 1.8s ease-in-out infinite;
+      cursor: pointer;
+    }
+    @keyframes scrollBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0);   opacity: 0.55; }
+      50%       { transform: translateX(-50%) translateY(8px); opacity: 0.90; }
+    }
+
+    /* ── PAUSA VIDEO ── */
+    .hero-pause-btn {
+      position: absolute;
+      right: var(--sp-l1);
+      bottom: var(--sp-l1);
+      z-index: 4;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--c-border-dark);
+      border: 1px solid var(--c-border-dark-strong);
+      border-radius: 50%;
+      color: var(--c-on-dark-3);
+      cursor: pointer;
+      transition: background var(--t), color var(--t), border-color var(--t);
+    }
+    .hero-pause-btn:hover {
+      background: var(--c-border-dark-strong);
+      color: #fff;
+      border-color: rgba(255,255,255,0.40);
+    }
+    /* icon-play initial state se maneja por JS en initHeroPause */
+
+    /* Accesibilidad: todo lo que se mueve solo, quieto. Bloque unico. */
+    @media (prefers-reduced-motion: reduce) {
+      .scroll-hint   { animation: none; opacity: 0.55; }
+      .clients-track { animation: none; }
+    }
+
+    /* ── SERVICES SHOWCASE ── */
+    /*  El fondo y la adaptacion de .sh-* sobre oscuro los pone
+        .sec--dark del sistema. Aca solo el padding, que es propio:
+        sin padding inferior porque la rejilla va a sangre. */
+    /*  Las tarjetas ya no van a sangre: viven dentro de .container,
+        alineadas con la cabecera y con el resto de la pagina. Iban de
+        borde a borde de la ventana (1440px) mientras todo lo demas
+        estaba en 1200, y se leian como un bloque ajeno pegado encima.
+        Con la rejilla dentro, la seccion recupera su padding inferior. */
+    .services-showcase {
+      padding: var(--section-py) 0;
+    }
+
+    /*  Servicios y proyectos son la misma tarjeta: tienen que medir
+        igual. Y medir igual no es solo compartir proporcion — con
+        servicios en tres columnas y proyectos en dos, la misma
+        proporcion daba tarjetas de distinto tamano, que es lo que se
+        veia: las de proyectos eran mas anchas Y mas altas.
+
+        Las dos rejillas usan ahora el mismo ancho de columna (un
+        tercio) y la misma proporcion (4/3, la de MediaCard por
+        defecto). Proyectos va en flex y no en grid para que, cuando
+        haya menos de tres destacados, las tarjetas queden centradas
+        en vez de dejar un hueco a la derecha. */
+    /*  El ancho y el reparto de las tarjetas los pone .cards-row del
+        design system: el selector es "> *" y los hijos son MediaCard,
+        que al no tener <style> propio no llevan data-astro-cid. Escrito
+        aca, Astro lo scopearia y no engancharia con nada. Lo unico que
+        queda en la pagina es lo que si es de la pagina. */
+    .cards-row { margin-top: var(--sp-l2); }
+    .services-grid { background: var(--c-surface-dark-2); }
+
+    /* ── PROYECTOS DESTACADOS ── */
+    .projects-showcase {
+      padding: var(--section-py) 0;
+    }
+    .projects-footer { text-align: center; padding-top: var(--sp-l2); }
+
+    /* ── COVERAGE MAP ── */
+    .coverage-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-l3);
+      align-items: center;
+    }
+    /* Mapa SVG interactivo por departamentos */
+    .map-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #peruMapContainer {
+      width: 100%;
+      max-width: 280px;
+    }
+    /* El SVG se inyecta vía JS — su tamaño y su sombra van con element.style
+       en main.ts, no acá: Astro le pega data-astro-cid a este selector pero
+       el SVG inyectado nunca lo lleva, así que una regla acá nunca engancha. */
+    .map-stats-title {
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
+      color: var(--c-text-muted);
+      margin-bottom: var(--sp-5);
+    }
+    /*  Siete barras de progreso para siete cifras que ya estan escritas
+        al lado. La barra no anadia un dato: repetia el mismo en otra
+        forma, y se llevaba consigo una funcion de JS, dos radios
+        literales y una transicion de 1.2s. */
+    .map-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: var(--sp-4);
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--c-border-light);
+    }
+    .map-stat:last-child { border-bottom: none; }
+    .map-stat-city {
+      font-size: var(--fs-md);
+      font-weight: var(--fw-semibold);
+      color: var(--c-primary);
+    }
+    .map-stat-count {
+      font-size: var(--fs-md);
+      font-weight: var(--fw-display);
+      /* Son las cifras de proyectos por ciudad: el dato del bloque.
+         --c-accent sobre claro da 2.93:1 y no pasa AA. --c-accent-ink
+         conserva el naranja y llega a 5.33:1 sobre --c-bg-muted, que
+         es el fondo de esta seccion. */
+      color: var(--c-accent-ink);
+      letter-spacing: var(--ls-tight);
+    }
+
+    @media (max-width: 767.98px) {
+      /* Hero */
+      .home-hero {
+        min-height: 100svh;
+        align-items: center;
+      }
+      /*
+        El eyebrow se queda. Era lo único en toda la primera pantalla
+        que decía a qué se dedica la empresa: el H1 es el eslogan y no
+        nombra el rubro. Ocultarlo dejaba al visitante de celular sin
+        saber qué vende INACONS hasta pasar el hero entero.
+      */
+      .scroll-hint    { display: none; }
+      .hero-content {
+        padding: var(--sp-l3) var(--sp-5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .hero-eyebrow { justify-content: center; }
+      .home-hero h1 {
+        text-align: center;
+        width: 100%;
+        letter-spacing: var(--ls-tight);
+      }
+      /*
+        Antes: nowrap + overflow:hidden. Eso no ajusta el titular, lo
+        recorta — en un teléfono de 360px "CONSTRUIMOS CONFIANZA" no
+        entra y perdía letras por el borde, en silencio.
+
+        Ahora el tamaño lo resuelve --fs-hero de forma fluida, y el
+        wrap queda como red de seguridad: en el peor caso la palabra
+        baja de línea, que es feo pero legible. Recortar no lo es.
+      */
+      .hero-line {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: var(--sp-2);
+        width: 100%;
+      }
+      .word.fixed,
+      .word.highlight {
+        white-space: nowrap;
+        font-size: inherit;
+      }
+      .hero-desc {
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
+      }
+      .hero-actions {
+        justify-content: center;
+        flex-direction: column;
+        width: 100%;
+      }
+      .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      /*  En una columna no caben cuatro cifras al costado: bajan bajo
+          los botones en 2x2, sin el filete lateral, que ahi no separa
+          nada. */
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: var(--sp-l2);
+      }
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--sp-6) var(--sp-4);
+        padding-left: 0;
+        border-left: none;
+        width: 100%;
+      }
+      /*
+        El nowrap de .hero-stat es para escritorio, donde las cifras van en
+        columna y "Inversión gestionada" cabe de sobra en una línea. En el
+        grid de dos columnas del móvil ese nowrap es el que rompía la página:
+        una columna 1fr no puede encogerse por debajo de su contenido, y con
+        el texto sin poder partirse el mínimo era la frase entera. A 320px el
+        grid medía más que el viewport y arrastraba a todo el documento con
+        scroll horizontal — de ahí la franja blanca a la derecha de las
+        secciones, que solo pintan hasta donde llega el ancho real.
+
+        min-width: 0 es el cinturón: anula el mínimo automático de la celda
+        para que el ajuste no dependa solo de que el texto pueda partirse.
+      */
+      .hero-stat {
+        text-align: center;
+        white-space: normal;
+        min-width: 0;
+      }
+      .hero-stat .stat-num { font-size: var(--fs-2xl); }
+
+      /* CTA */
+
+      .cards-row { margin-top: var(--sp-7); }
+      .about-grid { grid-template-columns: 1fr; gap: var(--sp-l2); }
+      .about-img-frame { height: 360px; }
+      .coverage-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
+      #peruMapContainer { max-width: 220px; }
+    }
+  </style>
+
+  <!--
+    ORDEN DEL HOME — claro y oscuro alternados (referencia Bechtel): cada
+    sección se apoya en el contraste de la anterior y Clientes cierra en claro.
+  -->
+  <section class="home-hero">
+    <!-- Sin src: main.ts lo carga solo en escritorio. En móvil basta el póster. -->
+    <video class="hero-video" muted loop playsinline preload="none" poster={poster.src} data-src="/assets/videos/hero.mp4" aria-hidden="true"></video>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-main">
+        <p class="hero-eyebrow">Ingeniería &amp; Construcción</p>
+        <h1 aria-label="Construimos confianza, innovamos espacios, trascendemos juntos">
+          <span class="hero-line" aria-hidden="true">
+            <span class="word fixed">CONSTRUIMOS</span>
+            <span class="word highlight typewriter" data-text="CONFIANZA"><span class="tw-ghost">CONFIANZA</span><span class="tw-typed"></span></span>
+          </span>
+          <span class="hero-line" aria-hidden="true">
+            <span class="word highlight typewriter" data-text="INNOVAMOS"><span class="tw-ghost">INNOVAMOS</span><span class="tw-typed"></span></span>
+            <span class="word fixed">ESPACIOS</span>
+          </span>
+          <span class="hero-line" aria-hidden="true">
+            <span class="word fixed">TRASCENDEMOS</span>
+            <span class="word highlight typewriter" data-text="JUNTOS"><span class="tw-ghost">JUNTOS</span><span class="tw-typed"></span></span>
+          </span>
+        </h1>
+        <p class="hero-desc">Más de 15 años de experiencia en ingeniería y construcción al servicio del Perú.</p>
+        <div class="hero-actions">
+          <a href="/proyectos/" class="btn btn-primary btn-lg">Ver Proyectos</a>
+          <a href={BROCHURE} target="_blank" rel="noopener" class="btn btn-outline-light btn-lg">Descargar Brochure</a>
+        </div>
+      </div>
+
+      <!-- Cifras del brochure (src/data/empresa.ts). data-counter es el contrato con main.ts. -->
+      <div class="hero-stats">
+        {cifrasHero.map((c) => (
+          <div class="hero-stat card--stat card--stat-lg card--stat-oscuro">
+            <span class="stat-num" data-counter={c.valor} data-prefix={c.prefijo} data-suffix={c.sufijo}>{c.prefijo}{c.valor}{c.sufijo}</span>
+            <span class="stat-label">{c.rotulo}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+    <button class="hero-pause-btn" id="heroPauseBtn" aria-label="Pausar video" hidden>
+      <Icono nombre="pausa" tam={14} class="icon-pause" />
+      <Icono nombre="reproducir" tam={14} class="icon-play" />
+    </button>
+    <div class="scroll-hint" aria-hidden="true">
+      <Icono nombre="chevron-abajo" tam={28} trazo={1.5} />
+    </div>
+  </section>
+
+  <section class="sec sec--white">
+    <div class="container">
+      <div class="sh sh--medium" data-aos="fade-up">
+        <p class="sh-label">Quiénes somos</p>
+        <h2 class="sh-title">Construimos los proyectos que mueven al Perú</h2>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-img-frame">
+          <Image quality={70} src={imagenNosotros} alt="Equipo INACONS en obra" widths={[480, 640, 960]} sizes="(min-width: 768px) 50vw, 100vw" />
+        </div>
+
+        <div class="about-content">
+          <p class="about-body-text">Somos una empresa peruana de ingeniería y construcción con más de 15 años ejecutando proyectos en toda la geografía nacional — desde la costa del Pacífico hasta la alta sierra.</p>
+          <p class="about-body-text">Trabajamos con empresas líderes del sector público y privado, aplicando las más altas normas de calidad, seguridad y metodología BIM en cada obra.</p>
+          <a href="/nosotros/" class="btn btn-primary">Conoce nuestra historia</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec--dark services-showcase">
+    <div class="container">
+      <div class="sh sh--center sh--medium" data-aos="fade-up" data-aos-duration="700">
+        <p class="sh-label">Nuestras Especialidades</p>
+        <h2 class="sh-title">Lo que construimos</h2>
+        <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
+      </div>
+      <div class="cards-row services-grid">
+        {servicios.map((s) => (
+          <MediaCard href={`/servicios/${s.id}/`} image={s.data.imagen} alt="" title={s.data.titulo} desc={s.data.resumen} ratioMobile="3/2" />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--muted">
+    <div class="container">
+      <div class="sh sh--medium" data-aos="fade-up">
+        <p class="sh-label">Presencia nacional</p>
+        <h2 class="sh-title">Dónde construimos</h2>
+        <p class="sh-desc">Desde la costa hasta la sierra, operamos en las zonas de mayor actividad económica del país.</p>
+      </div>
+
+      <div class="coverage-grid" data-aos="fade-up">
+        <!--
+          #peruMapContainer NUNCA en display:none: initCoverageMap mide con
+          getBBox() y sin caja devuelve ceros — los pines desaparecen sin error.
+          Ocultar por opacidad (data-aos) es seguro; por display no.
+        -->
+        <div class="map-wrap">
+          <div id="peruMapContainer" data-ciudades={ciudadesMapa} data-etiqueta="Mapa de cobertura de INACONS en el Perú"></div>
+        </div>
+
+        <div class="map-stats">
+          <p class="map-stats-title">Proyectos por ciudad</p>
+          {PROYECTOS_POR_CIUDAD.map((c) => (
+            <div class="map-stat">
+              <span class="map-stat-city">{c.ciudad}</span>
+              <span class="map-stat-count">+{c.proyectos}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {destacados.length > 0 && (
+    <section class="sec--dark projects-showcase">
+      <div class="container">
+        <div class="sh sh--medium" data-aos="fade-up" data-aos-duration="700">
+          <p class="sh-label">Proyectos destacados</p>
+          <h2 class="sh-title">Nuestra huella en el Perú</h2>
+        </div>
+
+        <div class="cards-row projects-grid" data-aos="fade-up" data-aos-duration="800">
+          {destacados.map((p) => (
+            <MediaCard
+              href={`/proyectos/${p.id}/`}
+              image={p.data.imagen}
+              alt=""
+              tag={p.data.categoria}
+              title={p.data.titulo}
+              meta={`${p.data.ubicacion} · ${p.data.año}`}
+              ratioMobile="3/2"
+            />
+          ))}
+        </div>
+
+        <div class="projects-footer" data-aos="fade-up" data-aos-duration="600">
+          <a href="/proyectos/" class="btn btn-outline-light">Ver todos los proyectos</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="sec sec--white" id="clientes">
+    <div class="container">
+      <div class="sh sh--center sh--medium" data-aos="fade-up" data-aos-duration="600">
+        <p class="sh-label">Nuestros Clientes</p>
+        <h2 class="sh-title">Empresas que confían en nuestra experiencia y calidad</h2>
+        <p class="sh-desc">Trabajamos con empresas líderes que valoran la calidad, innovación y compromiso en cada proyecto de construcción.</p>
+      </div>
+      <div class="clients-track-wrap">
+        <!-- La lista va dos veces para el desplazamiento infinito; la copia se oculta a lectores de pantalla. -->
+        <div class="clients-track">
+          {[false, true].map((copia) => CLIENTES.map((c) => (
+            <div class="client-logo-item" aria-hidden={copia ? 'true' : undefined}>
+              <Image quality={70} src={c.imagen} alt={copia ? '' : c.nombre} width={216} loading="lazy" />
+            </div>
+          )))}
+        </div>
+      </div>
+
+      <div class="clients-controls">
+        <button type="button" class="clients-pause-btn" id="clientsPauseBtn" aria-pressed="false">
+          <Icono nombre="pausa" tam={12} class="icon-pause" />
+          <Icono nombre="reproducir" tam={12} class="icon-play" />
+          <span class="clients-pause-label">Pausar</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    label="¿Empezamos?"
+    title="Cuéntanos qué necesitas construir"
+    description="Revisamos el alcance y te respondemos con una propuesta técnica y un plazo."
+    primaryHref="/contacto/"
+    primaryLabel="Solicitar propuesta"
+    secondaryHref="/proyectos/"
+    secondaryLabel="Ver proyectos"
+  />
+
+</BaseLayout>

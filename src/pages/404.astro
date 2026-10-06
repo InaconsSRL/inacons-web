@@ -1,0 +1,218 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icono from '../components/Icono.astro';
+
+Astro.response.status = 404;
+---
+
+<BaseLayout
+  title="Página no encontrada | INACONS"
+  description="La página que buscas no existe o fue movida."
+  robots="noindex, nofollow"
+  minimalChrome
+>
+  <style slot="head">
+    .error-section {
+      flex: 1 0 auto;
+      width: 100%;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--c-bg-muted);
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding: clamp(24px, 5vw, 48px) var(--sp-5);
+    }
+
+    .error-section::before {
+      content: '404';
+      position: absolute;
+      font-size: clamp(12rem, 30vw, 22rem);
+      font-weight: var(--fw-display);
+      color: rgba(20, 23, 45, 0.045);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+      letter-spacing: var(--ls-tight);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .error-section::before {
+        opacity: 0.35;
+      }
+    }
+
+    .error-logo {
+      margin-bottom: clamp(24px, 4vw, 40px);
+      z-index: 1;
+    }
+
+    .error-logo img {
+      height: 32px;
+      width: auto;
+      display: block;
+      opacity: 0.85;
+      transition: opacity 0.2s ease;
+    }
+
+    .error-logo:hover img,
+    .error-logo:focus-visible img {
+      opacity: 1;
+    }
+
+    .error-logo:focus-visible {
+      outline: 2px solid var(--c-secondary);
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+
+    .error-content {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .error-label {
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-secondary);
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+
+    .error-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: var(--fw-display);
+      color: var(--c-text-heading);
+      line-height: 1.15;
+      margin: 0 0 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .error-desc {
+      font-size: var(--fs-md);
+      color: var(--c-text-muted);
+      line-height: 1.75;
+      margin: 0 0 2.5rem;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: var(--sp-3);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .error-actions .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    .error-actions .btn svg {
+      flex-shrink: 0;
+    }
+
+    .error-links {
+      margin-top: 3.5rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--c-border-light);
+    }
+
+    .error-links > p {
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-text-muted);
+      margin: 0 0 1.25rem;
+    }
+
+    .error-links-grid {
+      display: flex;
+      gap: var(--sp-2);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .error-link-item {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--sp-2) var(--sp-4);
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-semibold);
+      color: var(--c-text-heading);
+      border: 1.5px solid var(--c-border-light);
+      border-radius: 2px;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .error-link-item:hover {
+      border-color: var(--c-secondary);
+      color: var(--c-secondary);
+      background: rgba(27, 82, 120, 0.04);
+    }
+
+    .error-link-item:focus-visible {
+      outline: 2px solid var(--c-secondary);
+      outline-offset: 2px;
+    }
+  </style>
+
+  <section class="error-section" aria-labelledby="error-heading">
+    <a href="/" class="error-logo">
+      <img
+        src="/assets/imagenes/logos/logo_inacons.svg"
+        width="120"
+        height="32"
+        alt="INACONS"
+        decoding="async"
+      />
+    </a>
+
+    <div class="error-content" data-aos="fade-up" data-aos-duration="600">
+      <span class="error-label">Error 404</span>
+      <h1 id="error-heading" class="error-title">Esta página<br />no existe</h1>
+      <p class="error-desc">
+        La URL que ingresaste no fue encontrada. Puede que haya sido movida,
+        eliminada o que hayas escrito mal la dirección.
+      </p>
+      <div class="error-actions">
+        <a href="/" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          Ir al inicio
+        </a>
+        <a href="/contacto/" class="btn btn-outline">
+          <Icono nombre="correo" />
+          Contáctenos
+        </a>
+      </div>
+
+      <nav class="error-links" aria-label="Enlaces útiles">
+        <p>O visita una de estas páginas</p>
+        <div class="error-links-grid">
+          <a href="/nosotros/" class="error-link-item">Nosotros</a>
+          <a href="/servicios/" class="error-link-item">Servicios</a>
+          <a href="/proyectos/" class="error-link-item">Proyectos</a>
+          <a href="/documentos/" class="error-link-item">Documentos</a>
+          <a href="/sostenibilidad/" class="error-link-item">Sostenibilidad</a>
+          <a href="/canal-etico/" class="error-link-item">Canal ético</a>
+        </div>
+      </nav>
+    </div>
+  </section>
+</BaseLayout>

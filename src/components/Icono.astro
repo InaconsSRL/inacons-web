@@ -1,0 +1,71 @@
+---
+/**
+ * Icono.astro
+ * ─────────────────────────────────────────────────────────────
+ * Pinta un símbolo del catálogo de `src/lib/iconos.ts`.
+ *
+ * Por qué existe: había 94 copias literales de 24 símbolos repartidas por 13
+ * archivos. El de descarga estaba doce veces, y dos de esas doce dibujaban la
+ * misma flecha con la línea al revés —`y1="3" y2="15"` contra `y1="15" y2="3"`—
+ * que es idéntica en pantalla y distinta en el código. Ese es exactamente el
+ * tipo de diferencia que nadie detecta leyendo y que se multiplica sola.
+ *
+ * ── LO QUE ESTE COMPONENTE NO HACE ──────────────────────────────────────
+ * No reduce el peso de la página. El HTML publicado sigue llevando el trazado
+ * completo en cada sitio donde aparece el icono: esto es reutilización de
+ * código fuente, no de bytes servidos. Para lo segundo haría falta un sprite
+ * con <use>, que es otra decisión y tiene sus propias contrapartidas.
+ *
+ * ── EL `set:html` Y LA REGLA 1 DE CLAUDE.md ─────────────────────────────
+ * El interior del <svg> se inyecta, así que sus hijos NO llevan el
+ * `data-astro-cid` de la página. Verificado antes de hacerlo: no hay ni un
+ * selector `svg path`, `svg circle` ni equivalente en todo el repositorio, y
+ * `.feature-icon` vive en design-system.css, que es global y no depende del
+ * atributo. Si algún día hace falta estilar un hijo del símbolo, no se puede
+ * hacer desde el <style> de una página: o va al sistema de diseño, o el icono
+ * vuelve a escribirse a mano ahí.
+ *
+ * Uso:
+ *   <Icono nombre="descarga" tam={14} />
+ *   <Icono nombre="chevron-abajo" tam={10} trazo={2.5} class="nav-chevron" />
+ */
+import { ICONOS, type NombreIcono } from '../lib/iconos';
+
+interface Props {
+  nombre: NombreIcono;
+  /** Lado del cuadrado en px. El viewBox siempre es 0 0 24 24. */
+  tam?: number;
+  /** Grosor del contorno. Se ignora en los de tipo `relleno`. */
+  trazo?: number;
+  class?: string;
+}
+
+const { nombre, tam = 16, trazo = 2, class: clase } = Astro.props;
+const icono = ICONOS[nombre];
+---
+
+{icono.tipo === 'trazo' ? (
+  <svg
+    width={tam}
+    height={tam}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width={trazo}
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    class={clase}
+    set:html={icono.d}
+  />
+) : (
+  <svg
+    width={tam}
+    height={tam}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+    class={clase}
+    set:html={icono.d}
+  />
+)}

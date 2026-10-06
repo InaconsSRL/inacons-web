@@ -1,0 +1,547 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getImage } from 'astro:assets';
+import Icono from '../components/Icono.astro';
+import { BROCHURE, CIFRAS, NORMAS_ISO } from '../data/empresa';
+import imagenFondo from '../assets/imagenes/mineria_stand.webp';
+
+const URL_DOCUMENTOS = '/documentos/';
+
+// URL pública de esta página para compartir. Sale de `site` (astro.config.mjs).
+const URL_PAGINA = new URL('/mineria/', Astro.site).href;
+
+// El texto va delante del enlace: en el correo, una URL sola parece spam.
+const TEXTO_COMPARTIR = `INACONS en el sector minero — ${URL_PAGINA}`;
+const URL_WHATSAPP = `https://wa.me/?text=${encodeURIComponent(TEXTO_COMPARTIR)}`;
+const URL_CORREO = `mailto:?subject=${encodeURIComponent('INACONS en el sector minero')}&body=${encodeURIComponent(TEXTO_COMPARTIR)}`;
+
+const fondo = await getImage({ src: imagenFondo, quality: 70, width: 1920, format: 'webp' });
+const badges = [CIFRAS.experiencia, NORMAS_ISO, CIFRAS.trabajadores];
+
+// Personas de contacto del diálogo. Editar acá para agregar, quitar o
+// corregir un dato — el markup de abajo solo itera esta lista.
+const CONTACTOS = [
+  {
+    nombre: 'Henry Godiño Calisaya',
+    cargo: 'Gerencia Comercial y Proyectos',
+    email: 'hgodino@inacons.com.pe',
+    telefono: '(+51) 931 145 199',
+    telefonoHref: '+51931145199',
+    whatsapp: '51931145199',
+  },
+  {
+    nombre: 'Freddy Godino Calisaya',
+    cargo: 'Gerencia de Operaciones',
+    email: 'fgodino@inacons.com.pe',
+    telefono: '(+51) 954 175 589',
+    telefonoHref: '+51954175589',
+    whatsapp: '51954175589',
+  },
+  {
+    nombre: 'Emili Gómez Echavigurín',
+    cargo: 'Jefe de Negocios de Ingeniería',
+    email: 'egomeze@inacons.com.pe',
+    telefono: '(+51) 969 707 173',
+    telefonoHref: '+51969707173',
+    whatsapp: '51969707173',
+  },
+];
+---
+
+<BaseLayout
+  title="INACONS en el sector minero"
+  description="Reafirmamos nuestra presencia y experiencia en la industria minera peruana: movimiento de tierras, campamentos, obras electromecánicas e ingeniería digital."
+  minimalChrome={true}
+>
+
+  <style slot="head">
+    /*  El hero ocupa la pantalla completa por sí solo y "Nuestras
+        soluciones" es una sección normal debajo. Metidas las dos en un
+        único bloque de 100vh, ninguna llegaba a llenar la pantalla. */
+    .mn-hero-screen {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--c-primary);
+      overflow: hidden;
+    }
+
+    .mn-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Velo diagonal: oscuro a la izquierda (donde va el texto) y más
+       claro a la derecha (donde respira la foto). Nunca baja de 0.55
+       para que el blanco del texto siga en AA sobre cualquier zona. */
+    .mn-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg,
+        rgba(3, 8, 20, 0.93) 0%,
+        rgba(3, 8, 20, 0.86) 40%,
+        rgba(3, 8, 20, 0.58) 70%,
+        rgba(3, 8, 20, 0.75) 100%);
+    }
+
+    .mn-brand {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* Área de protección del logo = altura del isotipo (34px). */
+      padding: 34px var(--sp-l1);
+    }
+
+    .mn-logo { height: 34px; width: auto; display: block; }
+
+    .mn-back {
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-medium);
+      color: var(--c-on-dark-2);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color var(--t), border-color var(--t);
+    }
+    .mn-back:hover { color: var(--c-text-white); border-color: currentColor; }
+
+    .mn-brand-right { display: flex; align-items: center; gap: var(--sp-4); }
+
+    .mn-share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      background: transparent;
+      border: 1px solid var(--c-border-dark-strong);
+      border-radius: var(--radius);
+      padding: var(--sp-2) var(--sp-3);
+      font-family: var(--font-ui);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-medium);
+      color: var(--c-on-dark-1);
+      cursor: pointer;
+      transition: background var(--t), border-color var(--t);
+    }
+    .mn-share-btn:hover { background: var(--c-border-dark); border-color: var(--c-border-dark-strong); }
+    .mn-share-btn span { display: none; }
+    @media (min-width: 480px) {
+      .mn-share-btn span { display: inline; }
+    }
+
+    .mn-hero {
+      position: relative;
+      z-index: 2;
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-l3);
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--sp-l1);
+    }
+
+    .mn-copy { flex: 0 1 560px; min-width: 0; }
+
+    .mn-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-accent);
+      margin-bottom: var(--sp-4);
+    }
+    .mn-eyebrow::before {
+      content: '';
+      width: 28px;
+      height: 1.5px;
+      background: var(--c-accent);
+      flex-shrink: 0;
+    }
+
+    .mn-title {
+      font-size: var(--fs-display);
+      font-weight: var(--fw-display);
+      color: var(--c-text-white);
+      line-height: 1.15;
+      letter-spacing: var(--ls-tight);
+      margin-bottom: var(--sp-4);
+    }
+
+    .mn-sub {
+      font-size: var(--fs-md);
+      color: var(--c-on-dark-2);
+      line-height: 1.6;
+      max-width: 44ch;
+      margin-bottom: var(--sp-6);
+    }
+
+    /*  Los 4 botones apilados en columna a la derecha suman, junto con
+        las cifras, más
+        alto del que entra en 768px sin scroll — medido: 837px de
+        contenido en un viewport de 768. Quedan en fila bajo el texto,
+        que es donde sí hay ancho de sobra, y las cifras solas ocupan la
+        columna derecha. */
+    .mn-ctas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+    }
+
+    /* Cifras: mismo contrato data-counter que .hero-stats en index.astro.
+       .stat-num/.stat-label por defecto son de texto oscuro (design-system.css
+       los define para fondo claro); acá se sobreescribe el color, igual que
+       hace .hero-stat en el home, y se les da caja propia con filete de
+       acento. */
+    .mn-badges {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+    .mn-badge {
+      text-align: left;
+      background: var(--c-surface-dark-2);
+      border-left: 3px solid var(--c-accent);
+      border-radius: var(--radius);
+      padding: var(--sp-3) var(--sp-5);
+    }
+    /* --fs-display: mismo tamaño que usa .hero-stat .stat-num en el home
+       para esta misma clase de cifra destacada — ver index.astro. */
+    .mn-badge .stat-label { margin-top: var(--sp-1); }
+
+    .mn-solutions {
+      background: var(--c-bg-white);
+      padding: var(--sp-6) var(--sp-l1);
+    }
+
+    .mn-solutions-inner { max-width: 1200px; margin: 0 auto; }
+
+    .mn-solutions-label {
+      font-size: var(--fs-2xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--c-secondary);
+      margin-bottom: var(--sp-4);
+    }
+
+    /* .feature-* ya vienen de design-system.css listos para fondo claro.
+       Acá se afina el color del ícono a --c-accent-ink (--c-accent puro
+       falla AA sobre blanco, 2.93:1) y se sube el tamaño de texto: en
+       esta franja, a ancho completo, el tamaño por defecto del
+       componente se veía chico. */
+    .mn-solutions .feature-icon {
+      width: 60px;
+      height: 60px;
+      color: var(--c-accent-ink);
+    }
+    .mn-solutions .feature-title { font-size: var(--fs-xl); }
+    .mn-solutions .feature-desc { font-size: var(--fs-base); line-height: 1.6; }
+
+    /* Dos columnas también en desktop (el sistema por defecto pone 4 en
+       una fila a este ancho — ver design-system.css). Acá se pidió
+       explícitamente dos filas de dos; el alto extra que eso agrega ya
+       no tiene que entrar en una sola pantalla, así que la página
+       scrollea a partir de acá y es intencional. */
+    @media (min-width: 1024px) {
+      .mn-solutions .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .mn-compartir-link { display: flex; gap: var(--sp-2); }
+    .mn-compartir-link .form-input { flex: 1 1 auto; min-width: 0; }
+    .mn-compartir-redes { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-4); }
+
+    /* Diálogo de contacto: .dialogo/.dialogo-caja vienen del sistema
+       (design-system.css) — acá solo se define la lista de personas. */
+    .mn-contacto-item + .mn-contacto-item {
+      margin-top: var(--sp-5);
+      padding-top: var(--sp-5);
+      border-top: 1px solid var(--c-border-light);
+    }
+    .mn-contacto-nombre {
+      font-size: var(--fs-base);
+      font-weight: var(--fw-semibold);
+      color: var(--c-text-heading);
+    }
+    .mn-contacto-cargo {
+      font-size: var(--fs-xs);
+      color: var(--c-text-muted);
+      margin-top: var(--sp-1);
+      margin-bottom: var(--sp-3);
+    }
+    .mn-contacto-links { display: flex; flex-direction: column; gap: var(--sp-2); }
+    .mn-contacto-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: var(--fs-sm);
+      color: var(--c-secondary);
+      text-decoration: none;
+    }
+    .mn-contacto-links a:hover { text-decoration: underline; }
+
+    @media (max-width: 1023.98px) {
+      /*  El hero pasa a columna acá abajo, y eso pide más alto del que
+          min-height:100vh da por sí solo. Con min-height (no height) el
+          bloque puede crecer más de una pantalla sin recortar nada, pero
+          se deja el reset explícito igual: ya costó una tarde encontrar
+          este mismo síntoma una vez (768×1024, contenido invisible) y es
+          más barato dejarlo escrito que confiar en la memoria. */
+      .mn-hero-screen { height: auto; overflow: visible; }
+      .mn-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: var(--sp-6);
+        padding-bottom: var(--sp-6);
+        gap: var(--sp-6);
+      }
+      .mn-badges { width: 100%; flex-direction: row; flex-wrap: wrap; }
+      .mn-badge { flex: 1 1 200px; }
+    }
+
+    @media (max-width: 767.98px) {
+      .mn-brand { padding: var(--sp-5) var(--sp-4); }
+      .mn-hero { padding: 0 var(--sp-4); }
+      .mn-title { font-size: clamp(1.6rem, 7vw, 2.25rem); }
+      .mn-sub { max-width: none; }
+      .mn-ctas .btn { flex: 1 1 calc(50% - var(--sp-3) / 2); }
+      .mn-solutions { padding: var(--sp-5) var(--sp-4) var(--sp-6); }
+    }
+
+    @media (max-width: 479.98px) {
+      .mn-ctas .btn { flex: 1 1 100%; }
+    }
+  </style>
+
+  <div class="mn-hero-screen">
+    <div class="mn-bg" style={`background-image: url('${fondo.src}')`}></div>
+    <div class="mn-overlay"></div>
+
+    <div class="mn-brand">
+      <img
+        src="/assets/imagenes/logos/logo_inacons_white.svg"
+        alt="INACONS"
+        class="mn-logo"
+        width="150"
+        height="34"
+      />
+      <div class="mn-brand-right">
+        <a href="/" class="mn-back">inacons.com.pe</a>
+        <button type="button" class="mn-share-btn" data-abrir="dlg-compartir" aria-haspopup="dialog">
+          <Icono nombre="compartir" tam={15} />
+          <span>Compartir</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mn-hero">
+      <div class="mn-copy">
+        <p class="mn-eyebrow" data-aos="fade-up">Minería</p>
+        <h1 class="mn-title" data-aos="fade-up" data-aos-delay="80">
+          INACONS en el sector minero
+        </h1>
+        <p class="mn-sub" data-aos="fade-up" data-aos-delay="160">
+          Confianza construida, Operación Asegurada
+        </p>
+
+        <div class="mn-ctas" data-aos="fade-up" data-aos-delay="240">
+          <a class="btn btn-primary btn-lg" href={BROCHURE} target="_blank" rel="noopener">
+            Brochure
+          </a>
+          <button type="button" class="btn btn-primary btn-lg" data-abrir="dlg-contacto" aria-haspopup="dialog">
+            Contacto
+          </button>
+          <a class="btn btn-primary btn-lg" href={URL_DOCUMENTOS}>
+            Documentos
+          </a>
+        </div>
+      </div>
+
+      <div class="mn-badges" data-aos="fade-left" data-aos-delay="200">
+        {badges.map((c) => (
+          <div class="mn-badge card--stat card--stat-lg card--stat-oscuro">
+            <span class="stat-num" data-counter={c.valor} data-prefix={c.prefijo} data-suffix={c.sufijo}>{c.prefijo}{c.valor}{c.sufijo}</span>
+            <span class="stat-label">{c.rotulo}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="mn-solutions">
+    <div class="mn-solutions-inner">
+      <p class="mn-solutions-label">Nuestras soluciones</p>
+      <div class="feature-grid">
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3Z"/></svg>
+            </span>
+            <h2 class="feature-title">Movimiento de Tierras</h2>
+            <p class="feature-desc">Corte, relleno y nivelación de terrenos a gran escala</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg>
+            </span>
+            <h2 class="feature-title">Campamentos Mineros</h2>
+            <p class="feature-desc">Construcción de vías, redes sanitarias, eléctricas y edificaciones</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">
+              <Icono nombre="rayo" tam={28} trazo={1.75} />
+            </span>
+            <h2 class="feature-title">Obras Electromecánicas</h2>
+            <p class="feature-desc">Bombeo, subestaciones e instrumentación, mantenimiento industrial</p>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </span>
+            <h2 class="feature-title">Ingeniería Digital</h2>
+            <p class="feature-desc">BIM, drones y LIDAR para reducir tiempos y errores en obra</p>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diálogo de contacto — abre desde el botón "Contacto" de arriba -->
+  <div class="dialogo" id="dlg-contacto" role="dialog" aria-modal="true" aria-labelledby="dlg-contacto-titulo" hidden>
+    <div class="dialogo-caja">
+      <button type="button" class="dialogo-cerrar" data-cerrar="dlg-contacto" aria-label="Cerrar">
+        <Icono nombre="cerrar" tam={20} />
+      </button>
+
+      <h3 class="dialogo-titulo" id="dlg-contacto-titulo">Contacto comercial</h3>
+      <p class="dialogo-desc">Escribe o llama directamente al área que corresponda.</p>
+
+      {CONTACTOS.map((c) => (
+        <div class="mn-contacto-item">
+          <p class="mn-contacto-nombre">{c.nombre}</p>
+          <p class="mn-contacto-cargo">{c.cargo}</p>
+          <div class="mn-contacto-links">
+            <a href={`mailto:${c.email}`}>
+              <Icono nombre="correo" tam={15} />
+              {c.email}
+            </a>
+            <a href={`tel:${c.telefonoHref}`}>
+              <Icono nombre="telefono" tam={15} />
+              {c.telefono}
+            </a>
+            <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener">
+              <Icono nombre="whatsapp" tam={15} />
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Diálogo de compartir — abre desde el botón "Compartir" del encabezado -->
+  <div class="dialogo" id="dlg-compartir" role="dialog" aria-modal="true" aria-labelledby="dlg-compartir-titulo" hidden>
+    <div class="dialogo-caja">
+      <button type="button" class="dialogo-cerrar" data-cerrar="dlg-compartir" aria-label="Cerrar">
+        <Icono nombre="cerrar" tam={20} />
+      </button>
+
+      <h3 class="dialogo-titulo" id="dlg-compartir-titulo">Compartir esta página</h3>
+      <p class="dialogo-desc">Copia el enlace o envíalo directamente.</p>
+
+      <div class="mn-compartir-link">
+        <input type="text" class="form-input" id="mn-link-input" value={URL_PAGINA} readonly aria-label="Enlace de esta página" />
+        <button type="button" class="btn btn-primary" id="btn-copiar-link">Copiar</button>
+      </div>
+
+      <div class="mn-compartir-redes">
+        <a class="btn btn-outline btn-sm" href={URL_WHATSAPP} target="_blank" rel="noopener">
+          <Icono nombre="whatsapp" />
+          WhatsApp
+        </a>
+        <a class="btn btn-outline btn-sm" href={URL_CORREO}>
+          <Icono nombre="correo" />
+          Correo
+        </a>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-compartir-nativo" hidden>
+          <Icono nombre="compartir" />
+          Más opciones
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Diálogos con `hidden` (no clase): se bloquea el scroll del fondo y el
+    // foco vuelve a quien abrió.
+    let ultimoFoco: HTMLElement | null = null;
+
+    function abrir(id: string) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      ultimoFoco = document.activeElement as HTMLElement;
+      el.hidden = false;
+      document.body.style.overflow = 'hidden';
+      el.querySelector<HTMLElement>('button, a')?.focus();
+    }
+
+    function cerrar(id: string) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.hidden = true;
+      document.body.style.overflow = '';
+      ultimoFoco?.focus();
+    }
+
+    document.querySelectorAll<HTMLElement>('[data-abrir]').forEach((b) =>
+      b.addEventListener('click', () => abrir(b.getAttribute('data-abrir')!))
+    );
+    document.querySelectorAll<HTMLElement>('[data-cerrar]').forEach((b) =>
+      b.addEventListener('click', () => cerrar(b.getAttribute('data-cerrar')!))
+    );
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      document.querySelectorAll<HTMLElement>('.dialogo:not([hidden])').forEach((d) => cerrar(d.id));
+    });
+
+    // ── Copiar enlace ──
+    const inputLink = document.getElementById('mn-link-input') as HTMLInputElement | null;
+    const btnCopiar = document.getElementById('btn-copiar-link');
+
+    btnCopiar?.addEventListener('click', async () => {
+      if (!inputLink) return;
+      const textoOriginal = btnCopiar.textContent;
+      try {
+        await navigator.clipboard.writeText(inputLink.value);
+        btnCopiar.textContent = 'Copiado';
+      } catch {
+        // Sin permiso de portapapeles (o sin HTTPS): seleccionar el texto
+        // deja a la persona copiarlo a mano con Ctrl/Cmd+C.
+        inputLink.select();
+        btnCopiar.textContent = 'Selecciona y copia';
+      }
+      setTimeout(() => { btnCopiar.textContent = textoOriginal; }, 2000);
+    });
+
+    // ── Compartir nativo ──
+    // El botón nace `hidden`: solo se muestra si el navegador soporta la
+    // Web Share API (móviles sobre todo). Ahí abre la hoja de compartir
+    // propia del sistema — Telegram, SMS, Instagram, lo que la persona
+    // tenga instalado — sin que este sitio tenga que conocer cada app.
+    const btnNativo = document.getElementById('btn-compartir-nativo') as HTMLButtonElement | null;
+    if (btnNativo && typeof navigator.share === 'function' && inputLink) {
+      btnNativo.hidden = false;
+      btnNativo.addEventListener('click', () => {
+        navigator.share({ title: 'INACONS en el sector minero', url: inputLink.value }).catch(() => {});
+      });
+    }
+  </script>
+
+</BaseLayout>

@@ -1,0 +1,21 @@
+# Build y tipos generados
+dist/
+.astro/
+
+# Dependencias
+node_modules/
+
+# Logs
+npm-debug.log*
+
+# Variables de entorno: solo se versiona el ejemplo
+.env
+.env.*
+!.env.example
+
+# Editor, sistema y herramientas locales
+.DS_Store
+.idea/
+.vscode/
+.claude/
+.unlighthouse/

@@ -1,0 +1,416 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Icono from '../components/Icono.astro';
+import { serviciosPorMenu } from '../lib/servicios';
+import { CONTACTO } from '../data/empresa';
+import imagenHero from '../assets/imagenes/image_heroprincipal.webp';
+
+const servicios = await serviciosPorMenu();
+const { correoVentas, correoGerencia, telefono, whatsapp, redes, sedes } = CONTACTO;
+---
+
+<BaseLayout title="Contacto | INACONS" description="Contáctate con INACONS para iniciar tu proyecto de construcción e ingeniería en el Perú.">
+
+  <style slot="head">
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: var(--sp-l3);
+      align-items: start;
+    }
+    .contact-info-items { margin-top: var(--sp-7); }
+    .contact-info-item {
+      display: flex;
+      gap: var(--sp-4);
+      align-items: flex-start;
+      padding: var(--sp-5) 0;
+      border-bottom: 1px solid var(--c-border-light);
+    }
+    .contact-info-item:first-child { border-top: 1px solid var(--c-border-light); }
+    .c-icon {
+      width: 44px; height: 44px;
+      background: var(--c-bg-muted);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--c-secondary);
+      flex-shrink: 0;
+    }
+    .c-info-label {
+      font-size: var(--fs-2xs); font-weight: var(--fw-semibold);
+      letter-spacing: var(--ls-label); text-transform: uppercase;
+      color: var(--c-text-muted); margin-bottom: var(--sp-1);
+    }
+    .c-info-value { font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--c-text-heading); line-height: 1.5; }
+    .c-info-value a { color: var(--c-text-heading); text-decoration: none; transition: color var(--t); }
+    .c-info-value a:hover { color: var(--c-secondary); }
+
+    .contact-social { display: flex; gap: var(--sp-2); margin-top: var(--sp-6); }
+    .contact-social a {
+      width: 40px; height: 40px;
+      border: 1.5px solid var(--c-border);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--c-text-muted); text-decoration: none;
+      transition: border-color var(--t), color var(--t), background var(--t);
+    }
+    .contact-social a:hover {
+      border-color: var(--c-secondary);
+      color: var(--c-secondary);
+      background: rgba(27,82,120,0.05);
+    }
+    .form-sh { margin-bottom: var(--sp-7); }
+    .form-sh .sh-title { font-size: var(--fs-xl); }
+    .form-estado:not(:empty) { margin-bottom: var(--sp-6); }
+    .form-estado .btn { margin-top: var(--sp-3); }
+
+    .location-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.8fr;
+      gap: var(--sp-l2); align-items: start;
+    }
+    .location-items { margin-top: var(--sp-2); }
+    .location-item {
+      display: flex; gap: var(--sp-4); align-items: flex-start;
+      padding: var(--sp-5) 0; border-bottom: 1px solid var(--c-border-light);
+    }
+    .location-item:first-child { border-top: 1px solid var(--c-border-light); }
+    .loc-icon {
+      width: 40px; height: 40px;
+      background: var(--c-bg-white);
+      border: 1px solid var(--c-border-light);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--c-secondary); flex-shrink: 0;
+    }
+    .loc-name { font-size: var(--fs-sm); font-weight: var(--fw-bold); color: var(--c-text-heading); margin-bottom: var(--sp-1); }
+    .loc-addr { font-size: var(--fs-sm); color: var(--c-text-muted); line-height: 1.6; }
+    .map-wrap { overflow: hidden; border-radius: var(--radius); border: 1px solid var(--c-border-light); height: 380px; }
+    .map-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    .channel-band { background: var(--c-primary); padding: var(--section-py) 0; }
+    .channel-band .sh-label { color: var(--c-on-dark-2); }
+    .channel-band .sh-label::before { background: var(--c-border-dark-strong); }
+    .channel-band .sh-title { color: #fff; }
+    .channel-band .sh-desc  { color: var(--c-on-dark-3); }
+    .channel-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-6); margin: var(--sp-l2) 0; }
+    .channel-feat {
+      background: var(--c-surface-dark-1);
+      border: 1px solid var(--c-border-dark);
+      border-radius: var(--radius); padding: var(--sp-6);
+      transition: background var(--t), border-color var(--t);
+    }
+    .channel-feat:hover { background: var(--c-surface-dark-2); border-color: var(--c-border-dark-strong); }
+    .channel-feat-icon {
+      width: 44px; height: 44px;
+      background: rgba(27,82,120,0.40);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; margin-bottom: var(--sp-4);
+    }
+    .channel-feat-title { font-size: var(--fs-md); font-weight: var(--fw-bold); color: #fff; margin-bottom: var(--sp-1); }
+    .channel-feat-desc { font-size: var(--fs-sm); color: var(--c-on-dark-3); line-height: 1.65; }
+    .channel-cta { text-align: center; }
+    @media (max-width: 767.98px) {
+      .contact-grid { grid-template-columns: 1fr; gap: var(--sp-l1); }
+      .location-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
+      .map-wrap { height: 280px; }
+      .channel-features { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <PageHero
+    image={imagenHero}
+    title="¿Listo para tu<br>próximo proyecto?"
+    subtitle="Estamos aquí para ayudarte a materializar cada idea"
+    current="Contacto"
+  />
+
+  <section class="sec sec--white">
+    <div class="container">
+      <div class="contact-grid">
+
+        <div data-aos="fade-right" data-aos-duration="800">
+          <div class="sh sh--left sh--narrow">
+            <p class="sh-label">Información de Contacto</p>
+            <h2 class="sh-title">Conecta con nosotros</h2>
+            <p class="sh-desc">Estamos disponibles para atender tus consultas y proyectos.</p>
+          </div>
+          <div class="contact-info-items">
+            <div class="contact-info-item">
+              <div class="c-icon"><Icono nombre="correo" tam={20} /></div>
+              <div>
+                <p class="c-info-label">Correo Ventas</p>
+                <p class="c-info-value"><a href={`mailto:${correoVentas}`}>{correoVentas}</a></p>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="c-icon"><Icono nombre="correo" tam={20} /></div>
+              <div>
+                <p class="c-info-label">Correo Gerencia</p>
+                <p class="c-info-value"><a href={`mailto:${correoGerencia}`}>{correoGerencia}</a></p>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="c-icon"><Icono nombre="telefono" tam={20} /></div>
+              <div>
+                <p class="c-info-label">Teléfono</p>
+                <p class="c-info-value"><a href={telefono.href}>{telefono.texto}</a></p>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="c-icon"><Icono nombre="whatsapp" tam={20} /></div>
+              <div>
+                <p class="c-info-label">WhatsApp</p>
+                <p class="c-info-value"><a href={whatsapp.href} target="_blank" rel="noopener">{whatsapp.texto}</a></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-social">
+            <a href={whatsapp.href} target="_blank" rel="noopener" aria-label="WhatsApp"><Icono nombre="whatsapp" tam={18} /></a>
+            <a href={redes.facebook} target="_blank" rel="noopener" aria-label="Facebook"><Icono nombre="facebook" tam={18} /></a>
+            <a href={redes.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn"><Icono nombre="linkedin" tam={18} /></a>
+          </div>
+        </div>
+
+        <div data-aos="fade-left" data-aos-duration="800">
+          <div class="panel panel--accent panel--raised">
+            <div class="sh sh--left form-sh">
+              <p class="sh-label">Formulario de Contacto</p>
+              <h2 class="sh-title">Cuéntanos sobre tu proyecto</h2>
+              <p class="sh-desc">Completa el formulario y nos pondremos en contacto a la brevedad.</p>
+            </div>
+
+            <!-- El script pinta aquí el resultado del envío. role="status" lo anuncia sin mover el foco. -->
+            <div class="form-estado" id="formEstado" role="status" aria-live="polite"></div>
+
+            <form id="contactForm" novalidate data-correo={correoVentas}>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="fullName">Nombre completo *</label>
+                  <input type="text" id="fullName" name="nombre" class="form-input" autocomplete="name" maxlength="120" required />
+                </div>
+                <div class="form-group">
+                  <label for="email">Correo electrónico *</label>
+                  <input type="email" id="email" name="correo" class="form-input" autocomplete="email" maxlength="160" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="phone">Teléfono *</label>
+                  <input type="tel" id="phone" name="telefono" class="form-input" autocomplete="tel" maxlength="30" required />
+                </div>
+                <div class="form-group">
+                  <label for="company">Empresa</label>
+                  <input type="text" id="company" name="empresa" class="form-input" autocomplete="organization" maxlength="160" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="service">Servicio de interés *</label>
+                <select id="service" name="servicio" class="form-select" required>
+                  <option value="">Selecciona un servicio</option>
+                  {servicios.map((s) => <option value={s.data.titulo}>{s.data.titulo}</option>)}
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="message">Mensaje *</label>
+                <textarea id="message" name="mensaje" class="form-textarea" maxlength="3000" required></textarea>
+              </div>
+              <!-- Campo trampa: invisible para personas, los bots lo rellenan. -->
+              <input type="text" name="company_url" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+              <p class="form-hint">Usaremos tus datos solo para responder esta consulta. Los campos con * son obligatorios.</p>
+              <button type="submit" class="btn btn-primary btn-block" id="formSubmit">
+                <Icono nombre="enviar" tam={15} />
+                Enviar mensaje
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--muted">
+    <div class="container">
+      <div class="sh sh--left sh--narrow" data-aos="fade-up">
+        <p class="sh-label">Ubicación</p>
+        <h2 class="sh-title">Encuéntranos en nuestras oficinas</h2>
+      </div>
+      <div class="location-grid">
+        <div data-aos="fade-right">
+          <div class="location-items">
+            {sedes.map((sede) => (
+              <div class="location-item">
+                <div class="loc-icon"><Icono nombre="ubicacion" tam={18} /></div>
+                <div>
+                  <p class="loc-name">{sede.nombre}</p>
+                  <p class="loc-addr">{sede.direccion}<br />{sede.zona}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div class="map-wrap" data-aos="fade-left">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.5!2d-76.7344!3d-12.4762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDI4JzM0LjMiUyA3NsKwNDQnMDMuOCJX!5e0!3m2!1ses!2spe!4v1700000000000!5m2!1ses!2spe"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="strict-origin-when-cross-origin"
+            title="Ubicación INACONS — Pucusana, Lima">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="channel-band">
+    <div class="container">
+      <div class="sh sh--center sh--medium" data-aos="fade-up">
+        <p class="sh-label">Canal de Comunicación</p>
+        <h2 class="sh-title">Canal directo de consultas y sugerencias</h2>
+        <p class="sh-desc">Tenemos un canal especializado para atender tus consultas, reclamos o sugerencias de manera directa y eficiente.</p>
+      </div>
+      <div class="channel-features">
+        <div class="channel-feat" data-aos="fade-up" data-aos-delay="80">
+          <div class="channel-feat-icon"><Icono nombre="chat" tam={22} /></div>
+          <h3 class="channel-feat-title">Consultas Directas</h3>
+          <p class="channel-feat-desc">Resuelve tus dudas sobre nuestros servicios de forma rápida y eficiente.</p>
+        </div>
+        <div class="channel-feat" data-aos="fade-up" data-aos-delay="160">
+          <div class="channel-feat-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          </div>
+          <h3 class="channel-feat-title">Reclamos</h3>
+          <p class="channel-feat-desc">Reporta cualquier inconveniente para que podamos solucionarlo de inmediato.</p>
+        </div>
+        <div class="channel-feat" data-aos="fade-up" data-aos-delay="240">
+          <div class="channel-feat-icon"><Icono nombre="bombilla" tam={22} /></div>
+          <h3 class="channel-feat-title">Sugerencias</h3>
+          <p class="channel-feat-desc">Comparte tus ideas para ayudarnos a mejorar continuamente nuestros servicios.</p>
+        </div>
+      </div>
+      <div class="channel-cta" data-aos="fade-up">
+        <a href="/canal-etico/" class="btn btn-primary btn-lg">
+          Ingresar al Canal de Comunicación
+          <Icono nombre="enlace-externo" tam={15} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { PUBLIC_CONTACT_ENDPOINT as ENDPOINT } from 'astro:env/client';
+
+    /*
+      Envío del formulario.
+
+      Con PUBLIC_CONTACT_ENDPOINT definida en el build, se envía por POST como
+      JSON y solo se declara éxito si el servidor responde 2xx. Es el punto de
+      enchufe del sistema nuevo: el contrato está en docs/contenido.md.
+
+      Sin endpoint, se abre el programa de correo del visitante con el mensaje
+      armado. Eso no confirma nada —no se puede saber si se envió—, así que no
+      se dice "¡Listo!", el formulario no se oculta y se ofrece copiar el texto.
+    */
+    const LIMITE_MAILTO = 1800;
+
+    const form = document.getElementById('contactForm') as HTMLFormElement | null;
+    const boton = document.getElementById('formSubmit') as HTMLButtonElement | null;
+    const estado = document.getElementById('formEstado');
+
+    function aviso(tipo: 'ok' | 'error' | 'info', html: string) {
+      if (!estado) return;
+      estado.innerHTML = `<div class="notice notice--${tipo}">${html}</div>`;
+      estado.scrollIntoView({ block: 'nearest' });
+    }
+
+    function textoDelMensaje(d: Record<string, string>) {
+      return [
+        'Mensaje desde el formulario web de INACONS',
+        '',
+        `Nombre: ${d.nombre}`,
+        `Correo: ${d.correo}`,
+        `Teléfono: ${d.telefono}`,
+        `Empresa: ${d.empresa || '—'}`,
+        `Servicio de interés: ${d.servicio}`,
+        '',
+        d.mensaje,
+      ].join('\n');
+    }
+
+    async function enviarAlEndpoint(url: string, datos: Record<string, string>) {
+      const respuesta = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ ...datos, origen: location.href }),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+    }
+
+    function abrirCorreo(correo: string, datos: Record<string, string>) {
+      const cuerpo = textoDelMensaje(datos);
+      const enlace = `mailto:${correo}?subject=${encodeURIComponent(`Consulta web — ${datos.servicio} — ${datos.nombre}`)}&body=${encodeURIComponent(cuerpo)}`;
+
+      const cabe = enlace.length <= LIMITE_MAILTO;
+      if (cabe) window.location.href = enlace;
+
+      aviso('info',
+        (cabe
+          ? `<strong>Abrimos tu programa de correo con el mensaje listo.</strong> Revísalo y envíalo desde ahí. Si no se abrió nada, `
+          : `<strong>Tu mensaje es demasiado largo para abrirlo en el correo.</strong> `) +
+        `copia el mensaje y envíalo a <a href="mailto:${correo}">${correo}</a>.` +
+        `<br><button type="button" class="btn btn-outline btn-sm" id="copiarMensaje">Copiar mensaje</button>`);
+
+      document.getElementById('copiarMensaje')?.addEventListener('click', async (e) => {
+        const b = e.currentTarget as HTMLButtonElement;
+        try {
+          await navigator.clipboard.writeText(cuerpo);
+          b.textContent = 'Mensaje copiado';
+        } catch {
+          b.textContent = `No se pudo copiar: escribe a ${correo}`;
+        }
+      });
+    }
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const datos = Object.fromEntries(
+        [...new FormData(form)].map(([k, v]) => [k, String(v).trim()]),
+      );
+      if (datos.company_url) return;
+
+      form.classList.add('was-validated');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      delete datos.company_url;
+      const correo = form.dataset.correo ?? '';
+
+      if (!ENDPOINT) {
+        abrirCorreo(correo, datos);
+        return;
+      }
+
+      if (boton) boton.disabled = true;
+      aviso('info', 'Enviando…');
+      try {
+        await enviarAlEndpoint(ENDPOINT, datos);
+        aviso('ok', '<strong>Mensaje enviado.</strong> Te responderemos a la brevedad.');
+        form.reset();
+        form.classList.remove('was-validated');
+      } catch {
+        aviso('error',
+          `<strong>No pudimos enviar tu mensaje.</strong> Tus datos siguen en el formulario: ` +
+          `inténtalo de nuevo o escríbenos a <a href="mailto:${correo}">${correo}</a>.`);
+      } finally {
+        if (boton) boton.disabled = false;
+      }
+    });
+  </script>
+
+</BaseLayout>

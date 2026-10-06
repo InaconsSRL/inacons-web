@@ -1,0 +1,338 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import PageHero from '../components/PageHero.astro';
+import SellosCertificacion from '../components/SellosCertificacion.astro';
+import Icono from '../components/Icono.astro';
+import { Image } from 'astro:assets';
+import { CIFRAS } from '../data/empresa';
+import imagenNosotros from '../assets/imagenes/image_nosotros.webp';
+import imagenObra from '../assets/imagenes/about_section.webp';
+import imagenEquipo from '../assets/imagenes/about_team.webp';
+
+const cifras = [CIFRAS.experiencia, CIFRAS.trabajadores, CIFRAS.inversion];
+---
+
+<BaseLayout
+  title="Nosotros | INACONS"
+  description="Conoce más sobre INACONS: nuestra misión, visión y los valores que nos han consolidado como líderes en construcción e ingeniería durante más de 15 años."
+>
+
+  <PageHero
+    image={imagenNosotros}
+    title="Comprometidos con la<br>Excelencia en Construcción"
+    subtitle="Más de 15 años construyendo confianza en el Perú"
+    current="Nosotros"
+  />
+
+  <!-- QUIÉNES SOMOS -->
+  <section class="sec sec--white">
+    <div class="container">
+      <div class="about-intro-grid">
+        <div data-aos="fade-right">
+          <div class="sh">
+            <p class="sh-label">Quiénes Somos</p>
+            <h2 class="sh-title">Una empresa construida sobre confianza y resultados</h2>
+          </div>
+          <p class="body-text">
+            Somos INACONS, una empresa con más de 15 años de experiencia en ingeniería y construcción en el Perú. Desarrollamos proyectos de alta complejidad con los más altos estándares de calidad, seguridad y sostenibilidad.
+          </p>
+          <p class="body-text">
+            Nuestro equipo multidisciplinario, con más de 200 trabajadores por obra, nos permite ofrecer soluciones especializadas y cumplir con nuestra misión: transformar espacios y construir confianza en cada proyecto.
+          </p>
+          <div class="about-stat-row">
+            {cifras.map((c) => (
+              <div class="about-stat">
+                <strong data-counter={c.valor} data-prefix={c.prefijo} data-suffix={c.sufijo}>{c.prefijo}{c.valor}{c.sufijo}</strong>
+                <span>{c.rotulo}</span>
+              </div>
+            ))}
+          </div>
+          <a href="/contacto/" class="btn btn-primary about-cta">
+            Contáctenos
+            <Icono nombre="flecha-derecha" tam={14} />
+          </a>
+        </div>
+        <div class="about-intro-img" data-aos="fade-left">
+          <Image quality={70} src={imagenObra} alt="Equipo INACONS en obra" widths={[480, 720, 960]} sizes="(min-width: 1024px) 50vw, 100vw" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISIÓN / VISIÓN / VALORES -->
+  <section class="sec sec--muted">
+    <div class="container">
+      <div class="mvv-grid">
+        <div>
+          <div class="sh" data-aos="fade-up">
+            <p class="sh-label">Ingeniería que Construye</p>
+            <h2 class="sh-title">Principios que guían cada proyecto</h2>
+          </div>
+          <div class="mvv-block" data-aos="fade-up" data-aos-delay="80">
+            <p class="mvv-label">Misión</p>
+            <h3 class="mvv-title">Generamos valor en cada obra</h3>
+            <p class="mvv-desc">Desarrollar servicios de ingeniería y construcción en obras civiles, infraestructura y electromecánicas, transformando la calidad de vida y asegurando la continuidad operativa de nuestros clientes, con innovación y desarrollo responsable.</p>
+          </div>
+          <div class="mvv-block" data-aos="fade-up" data-aos-delay="160">
+            <p class="mvv-label">Visión</p>
+            <h3 class="mvv-title">Referentes en Latinoamérica</h3>
+            <p class="mvv-desc">Ser reconocidos como una empresa sólida en ingeniería y construcción, con capacidad para diversificar sus servicios y consolidar su presencia en Latinoamérica para 2030.</p>
+          </div>
+          <div class="mvv-block" data-aos="fade-up" data-aos-delay="240">
+            <p class="mvv-label">Valores</p>
+            <h3 class="mvv-title">Lo que nos define como equipo</h3>
+            <div class="valores-list">
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Confianza</span>
+                <p class="feature-desc">El pilar de nuestras relaciones.</p>
+              </div>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Innovación</span>
+                <p class="feature-desc">Evolución constante en procesos y tecnología.</p>
+              </div>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Trascender</span>
+                <p class="feature-desc">Dejar un legado de calidad en cada obra.</p>
+              </div>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Lealtad</span>
+                <p class="feature-desc">Compromiso recíproco a largo plazo.</p>
+              </div>
+              <div class="feature-item feature-item--card feature-item--sm">
+                <span class="feature-title">Identidad</span>
+                <p class="feature-desc">Comprometerse con los objetivos de la organización, asumiéndolos como propios.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mvv-img" data-aos="fade-left">
+          <Image quality={70} src={imagenEquipo} alt="Equipo INACONS" widths={[480, 720, 960]} sizes="(min-width: 1024px) 45vw, 100vw" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO INSTITUCIONAL -->
+  <section class="sec sec--white video-inst-sec" aria-labelledby="video-institucional-heading">
+    <div class="container">
+      <div class="sh sh--center sh--narrow video-inst-sh" data-aos="fade-up">
+        <p class="sh-label">INACONS</p>
+        <h2 id="video-institucional-heading" class="sh-title">Video institucional</h2>
+      </div>
+      <div class="contenedor-video" data-aos="fade-up" data-aos-delay="80">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/mlrYw3IldXs?modestbranding=1&rel=0"
+          title="Video institucional INACONS"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- POR QUÉ INACONS -->
+  <section class="sec sec--muted">
+    <div class="container">
+      <div class="sh sh--center sh--medium" data-aos="fade-up">
+        <p class="sh-label">Lo que nos diferencia</p>
+        <h2 class="sh-title">Por qué elegir INACONS</h2>
+        <p class="sh-desc">Cuatro pilares que definen nuestra forma de trabajar y nos distinguen como líderes en el sector de la construcción e ingeniería.</p>
+      </div>
+      <div class="pillars-grid">
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="80">
+          <div class="feature-num" aria-hidden="true">01</div>
+          <h3 class="feature-title">Experiencia</h3>
+          <p class="feature-desc">Más de 15 años de trayectoria nos respaldan como líderes en el sector, desarrollando proyectos innovadores y sostenibles a lo largo de todo el Perú.</p>
+        </div>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="160">
+          <div class="feature-num" aria-hidden="true">02</div>
+          <h3 class="feature-title">Innovación y Sostenibilidad</h3>
+          <p class="feature-desc">Implementamos las últimas tecnologías y prácticas sostenibles para crear espacios que respeten el medio ambiente y mejoren la calidad de vida.</p>
+        </div>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="240">
+          <div class="feature-num" aria-hidden="true">03</div>
+          <h3 class="feature-title">Orientación al Cliente</h3>
+          <p class="feature-desc">Nuestro compromiso es superar las expectativas de cada cliente, brindando soluciones personalizadas y un servicio de excelencia en cada proyecto.</p>
+        </div>
+        <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="320">
+          <div class="feature-num" aria-hidden="true">04</div>
+          <h3 class="feature-title">Equipo Humano</h3>
+          <p class="feature-desc">Contamos con un equipo multicultural que se adapta a cualquier contexto y tiene la experiencia para enfrentar todo tipo de retos con excelencia.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    Las certificaciones cierran la pagina: son la prueba de los cuatro
+    pilares de la seccion de arriba. Van despues de una seccion --muted,
+    asi que el componente pinta en --white y la alternancia sigue.
+
+    Mientras ninguna norma tenga sello autorizado esto no emite nada en
+    produccion; el hueco solo se ve en desarrollo.
+  -->
+  <SellosCertificacion />
+
+
+  <CtaBand
+    label="Trabajemos juntos"
+    title="¿Buscas un contratista con respaldo?"
+    description="Quince años de obra ejecutada y un sistema de gestión certificado."
+    primaryHref="/contacto/"
+    primaryLabel="Contáctenos"
+    secondaryHref="/proyectos/"
+    secondaryLabel="Ver proyectos"
+  />
+
+</BaseLayout>
+
+<style>
+  .body-text {
+    font-size: var(--fs-md);
+    color: var(--c-text-body);
+    line-height: 1.85;
+    margin-bottom: var(--sp-5);
+  }
+
+  /* Quiénes somos */
+  .about-intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-l3);
+    align-items: center;
+  }
+
+  .about-intro-img {
+    position: relative;
+    height: 500px;
+  }
+
+  .about-intro-img::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: -10px; right: 10px; bottom: 10px;
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius);
+    z-index: 0;
+  }
+
+  .about-intro-img img {
+    position: relative; z-index: 1;
+    width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius);
+  }
+
+  .about-stat-row { display: flex; gap: var(--sp-l1); margin-top: var(--sp-l1); }
+  .about-cta { margin-top: var(--sp-l1); }
+
+  .about-stat strong {
+    display: block;
+    font-size: var(--fs-display); font-weight: var(--fw-display);
+    color: var(--c-primary); letter-spacing: var(--ls-tight); line-height: 1;
+  }
+
+  .about-stat span {
+    font-size: var(--fs-sm); color: var(--c-text-muted);
+    font-weight: var(--fw-medium); text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* Misión / Visión / Valores */
+  .mvv-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--sp-l2);
+    align-items: start;
+  }
+
+  .mvv-grid > div:first-child > .sh {
+    margin-bottom: var(--sp-6);
+  }
+
+  .mvv-img {
+    position: sticky; top: 120px;
+    height: 520px; border-radius: var(--radius); overflow: hidden;
+  }
+
+  .mvv-img img { width: 100%; height: 100%; object-fit: cover; }
+
+  .mvv-block {
+    padding: var(--sp-4) 0;
+    border-top: 1px solid var(--c-border-light);
+  }
+
+  .mvv-block:first-child { border-top: none; padding-top: 0; }
+
+  .mvv-label {
+    font-size: var(--fs-2xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-label);
+    text-transform: uppercase; color: var(--c-secondary);
+    margin-bottom: var(--sp-1);
+  }
+
+  .mvv-title {
+    font-size: var(--fs-lg); font-weight: var(--fw-bold);
+    color: var(--c-text-heading); margin-bottom: var(--sp-2);
+  }
+
+  .mvv-desc { font-size: var(--fs-base); color: var(--c-text-muted); line-height: 1.75; }
+
+  .valores-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-2) var(--sp-3);
+    margin-top: var(--sp-2);
+  }
+
+
+  /* Video institucional */
+  .video-inst-sec .video-inst-sh {
+    margin-bottom: var(--sp-6);
+  }
+
+  .video-inst-sec .video-inst-sh .sh-title {
+    margin-bottom: 0;
+  }
+
+  .contenedor-video {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: var(--radius);
+    box-shadow: 0 12px 40px rgba(20, 23, 45, 0.08);
+  }
+
+  .contenedor-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Pilares */
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--sp-1);
+    margin-top: var(--sp-l2);
+  }
+
+
+  @media (max-width: 1023.98px) {
+    .about-intro-grid { grid-template-columns: 1fr; gap: var(--sp-l1); }
+    .about-intro-img { height: 360px; }
+    .mvv-grid { grid-template-columns: 1fr; gap: var(--sp-l1); }
+    .mvv-img { position: relative; top: 0; height: 280px; }
+    .valores-list { grid-template-columns: 1fr; }
+    .pillars-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 639.98px) {
+    .pillars-grid { grid-template-columns: 1fr; }
+    .about-stat-row { flex-wrap: wrap; gap: var(--sp-6); }
+  }
+</style>

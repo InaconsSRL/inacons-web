@@ -1,0 +1,78 @@
+ErrorDocument 404 /404.html
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # ── QR ya impresos ───────────────────────────────────────────────────
+    #  Hay material en circulación (flyers A4, stand de Expomina) con QR que
+    #  apuntan a /r/CODIGO y a /empresa/?c=CODIGO. El redirector dinámico se
+    #  retiró; estas reglas fijas mantienen vivo ese papel sin base de datos.
+    #
+    #  302 y no 301: el sistema nuevo podrá tomar /r/ sin pelear contra
+    #  redirecciones permanentes guardadas en la caché de cada navegador.
+    #
+    #  [NC] NO ES OPCIONAL. Los QR se codificaron en MAYÚSCULAS (modo
+    #  alfanumérico), así que el escaneo llega como /R/CANAL_ETICO. Sin [NC]
+    #  el patrón no engancha y el papel da 404, aunque tecleado en minúsculas
+    #  funcione. Guion bajo y guion medio valen igual: así se imprimieron.
+    RewriteRule ^r/canal[_-]etico/?$ /canal-etico/ [R=302,NC,L]
+    RewriteRule ^r/tickets[_-]ti/?$ https://materen-ti.vercel.app/soporte [R=302,NC,L]
+    RewriteRule ^r/expomina[_-]form/?$ /mineria/ [R=302,NC,L]
+    RewriteRule ^r(/.*)?$ / [R=302,NC,L]
+
+    #  Forma larga que generaba el sistema anterior a /r/. Los dos flyers de
+    #  /recursos/ la llevan impresa: /empresa/?c=canal_etico y ?c=tickets_ti.
+    RewriteCond %{QUERY_STRING} (?:^|&)c=canal[_-]etico(?:&|$) [NC]
+    RewriteRule ^empresa/?$ /canal-etico/? [R=302,NC,L]
+    RewriteCond %{QUERY_STRING} (?:^|&)c=tickets[_-]ti(?:&|$) [NC]
+    RewriteRule ^empresa/?$ https://materen-ti.vercel.app/soporte? [R=302,NC,L]
+    RewriteRule ^empresa(/.*)?$ /? [R=302,NC,L]
+
+    #  QR del stand de Expomina 2026, codificado directo a /expomina/.
+    RewriteRule ^expomina/?$ /mineria/ [R=301,NC,L]
+
+    #  Activos con hash de Astro: marca para la regla de caché de abajo.
+    RewriteRule ^_astro/ - [E=ASSET_INMUTABLE:1]
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+    AddOutputFilterByType DEFLATE text/javascript application/javascript application/json
+    AddOutputFilterByType DEFLATE application/xml application/manifest+json image/svg+xml
+</IfModule>
+
+# ── Caché ───────────────────────────────────────────────────────────────────
+#  Una sola fuente: mod_headers. mod_expires emite su propio Cache-Control y
+#  dejaba cada respuesta con dos valores en conflicto (medido en producción,
+#  sep-2026).
+#
+#  El HTML sigue llegando también con un `max-age=3600` que añade el hosting
+#  después de este archivo. No rompe nada —con varios Cache-Control valen todas
+#  las directivas y `no-cache` obliga a revalidar—; quitarlo es del panel del
+#  hosting.
+<IfModule mod_headers.c>
+
+    #  Activos con hash en el nombre (CSS, JS e imágenes que procesa Astro):
+    #  cambiar el contenido cambia la URL, así que se cachean para siempre.
+    Header always set Cache-Control "public, max-age=31536000, immutable" env=ASSET_INMUTABLE
+
+    #  Archivos de public/ con nombre fijo (logos, mapa, favicon, PDF, vídeo):
+    #  un mes. Reemplazar uno con el mismo nombre se ve, como mucho, a los 30 días.
+    <FilesMatch "\.(svg|png|jpe?g|webp|ico|pdf|mp4|webm|woff2?)$">
+        Header always set Cache-Control "public, max-age=2592000" env=!ASSET_INMUTABLE
+    </FilesMatch>
+
+    #  El HTML se revalida siempre: es lo que hace que un despliegue se vea al instante.
+    <FilesMatch "\.html$">
+        Header always set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+
+    Header always unset Expires
+
+    Header always set X-Frame-Options           "SAMEORIGIN"
+    Header always set X-Content-Type-Options    "nosniff"
+    Header always set Referrer-Policy           "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy        "camera=(), microphone=(), geolocation=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>

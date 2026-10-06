@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Referencia interna del sistema de diseño. Mantener en paralelo con el filtro
+# del sitemap en astro.config.mjs.
+Disallow: /sistema/
+
+Sitemap: https://home.inacons.com.pe/sitemap-index.xml
