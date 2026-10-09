@@ -24,23 +24,20 @@ const poster = await getImage({ src: imagenHero, quality: 70, width: 1920, forma
 
 const LOGOS = import.meta.glob<{ default: ImageMetadata }>('../assets/imagenes/clientes/*', { eager: true });
 const logo = (archivo: string) => LOGOS[`../assets/imagenes/clientes/${archivo}`].default;
-const CLIENTES = [
-  ['cliente_electrocentro.png', 'Electrocentro'],
-  ['cliente_electrodunas.png', 'Electrodunas'],
-  ['cliente_electroperu.png', 'Electroperú'],
-  ['cliente_enel.png', 'Enel'],
-  ['cliente_epsgrau.png', 'EPS Grau'],
-  ['cliente_grupocentenario.png', 'Grupo Centenario'],
-  ['cliente_indecopi.png', 'Indecopi'],
-  ['cliente_losportales.png', 'Los Portales'],
-  ['cliente_luzdelsur.png', 'Luz del Sur'],
-  ['cliente_mediacommerce.png', 'Media Commerce'],
-  ['cliente_sanmiguel.png', 'San Miguel'],
-  ['cliente_sedapal.png', 'Sedapal'],
-  ['cliente_zv.png', 'ZV'],
-  ['ge_vernova.svg', 'GE Vernova'],
-  ['kallpa.png', 'Kallpa'],
-].map(([archivo, nombre]) => ({ imagen: logo(archivo), nombre }));
+// Los clientes del brochure, en su orden. Uno sin logo en
+// src/assets/imagenes/clientes/ se muestra con su nombre hasta que llegue el archivo.
+const CLIENTES: { nombre: string; imagen?: ImageMetadata }[] = [
+  { nombre: 'Electroperú',            imagen: logo('cliente_electroperu.png') },
+  { nombre: 'Electrocentro',          imagen: logo('cliente_electrocentro.png') },
+  { nombre: 'Kallpa',                 imagen: logo('kallpa.png') },
+  { nombre: 'Sedapal',                imagen: logo('cliente_sedapal.png') },
+  { nombre: 'Grupo Centenario',       imagen: logo('cliente_grupocentenario.png') },
+  { nombre: 'ElectroDunas',           imagen: logo('cliente_electrodunas.png') },
+  { nombre: 'Los Portales',           imagen: logo('cliente_losportales.png') },
+  { nombre: 'Activos Mineros S.A.C.' },
+  { nombre: 'Pluz' },
+  { nombre: 'Luz del Sur',            imagen: logo('cliente_luzdelsur.png') },
+];
 
 const cifrasHero = [CIFRAS.experiencia, CIFRAS.superficie, CIFRAS.inversion, CIFRAS.trabajadores];
 const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) => ({ idMapa, peso })));
@@ -243,6 +240,13 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     }
 
     .client-logo-item img { max-height: 40px; max-width: 108px; object-fit: contain; }
+    .client-logo-nombre {
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-bold);
+      color: var(--c-text-heading);
+      text-align: center;
+      line-height: 1.2;
+    }
 
     /* ── EYEBROW ── */
     .hero-eyebrow {
@@ -604,7 +608,9 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         <div class="clients-track">
           {[false, true].map((copia) => CLIENTES.map((c) => (
             <div class="client-logo-item" aria-hidden={copia ? 'true' : undefined}>
-              <Image quality={70} src={c.imagen} alt={copia ? '' : c.nombre} width={216} loading="lazy" />
+              {c.imagen
+                ? <Image quality={70} src={c.imagen} alt={copia ? '' : c.nombre} width={216} loading="lazy" />
+                : <span class="client-logo-nombre">{c.nombre}</span>}
             </div>
           )))}
         </div>

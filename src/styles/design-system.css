@@ -1687,7 +1687,10 @@ a.btn:active {
     border-top: 2px solid var(--c-accent);
     border-radius: 0 0 var(--radius) var(--radius);
     box-shadow: var(--shadow-card-hover);
+    /* Ancho del rótulo más largo ("Arquitectura y Paisajismo") en una línea */
     min-width: 210px;
+    width: max-content;
+    max-width: 320px;
     padding: var(--sp-2);
     opacity: 0;
     visibility: hidden;
