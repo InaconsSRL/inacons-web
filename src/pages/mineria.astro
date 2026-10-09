@@ -82,10 +82,10 @@ const CONTACTOS = [
       position: absolute;
       inset: 0;
       background: linear-gradient(115deg,
-        rgba(3, 8, 20, 0.93) 0%,
-        rgba(3, 8, 20, 0.86) 40%,
-        rgba(3, 8, 20, 0.58) 70%,
-        rgba(3, 8, 20, 0.75) 100%);
+        color-mix(in srgb, var(--c-night) 93%, transparent) 0%,
+        color-mix(in srgb, var(--c-night) 86%, transparent) 40%,
+        color-mix(in srgb, var(--c-night) 58%, transparent) 70%,
+        color-mix(in srgb, var(--c-night) 75%, transparent) 100%);
     }
 
     .mn-brand {
@@ -95,7 +95,7 @@ const CONTACTOS = [
       align-items: center;
       justify-content: space-between;
       /* Área de protección del logo = altura del isotipo (34px). */
-      padding: 34px var(--sp-l1);
+      padding: var(--sp-7) var(--sp-l1);
     }
 
     .mn-logo { height: 34px; width: auto; display: block; }
@@ -112,25 +112,14 @@ const CONTACTOS = [
 
     .mn-brand-right { display: flex; align-items: center; gap: var(--sp-4); }
 
-    .mn-share-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--sp-2);
-      background: transparent;
-      border: 1px solid var(--c-border-dark-strong);
-      border-radius: var(--radius);
-      padding: var(--sp-2) var(--sp-3);
-      font-family: var(--font-ui);
-      font-size: var(--fs-xs);
-      font-weight: var(--fw-medium);
-      color: var(--c-on-dark-1);
-      cursor: pointer;
-      transition: background var(--t), border-color var(--t);
-    }
-    .mn-share-btn:hover { background: var(--c-border-dark); border-color: var(--c-border-dark-strong); }
     .mn-share-btn span { display: none; }
     @media (min-width: 480px) {
       .mn-share-btn span { display: inline; }
+    }
+    /* En 320px el logo a 150px más el enlace y el botón no caben en una fila. */
+    @media (max-width: 399.98px) {
+      .mn-logo { width: 120px; height: auto; }
+      .mn-brand-right { gap: var(--sp-2); }
     }
 
     .mn-hero {
@@ -336,7 +325,7 @@ const CONTACTOS = [
       />
       <div class="mn-brand-right">
         <a href="/" class="mn-back">inacons.com.pe</a>
-        <button type="button" class="mn-share-btn" data-abrir="dlg-compartir" aria-haspopup="dialog">
+        <button type="button" class="btn-control btn-control--dark mn-share-btn" data-abrir="dlg-compartir" aria-haspopup="dialog">
           <Icono nombre="compartir" tam={15} />
           <span>Compartir</span>
         </button>
@@ -383,14 +372,14 @@ const CONTACTOS = [
       <div class="feature-grid">
           <div class="feature-item">
             <span class="feature-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3Z"/></svg>
+              <Icono nombre="montana" tam={28} trazo={1.75} />
             </span>
             <h2 class="feature-title">Movimiento de Tierras</h2>
             <p class="feature-desc">Corte, relleno y nivelación de terrenos a gran escala</p>
           </div>
           <div class="feature-item">
             <span class="feature-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg>
+              <Icono nombre="campamento" tam={28} trazo={1.75} />
             </span>
             <h2 class="feature-title">Campamentos Mineros</h2>
             <p class="feature-desc">Construcción de vías, redes sanitarias, eléctricas y edificaciones</p>
@@ -404,7 +393,7 @@ const CONTACTOS = [
           </div>
           <div class="feature-item">
             <span class="feature-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <Icono nombre="capas" tam={28} trazo={1.75} />
             </span>
             <h2 class="feature-title">Ingeniería Digital</h2>
             <p class="feature-desc">BIM, drones y LIDAR para reducir tiempos y errores en obra</p>

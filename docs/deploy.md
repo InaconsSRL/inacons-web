@@ -13,6 +13,7 @@ anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.
 |---|---|---|
 | `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` | Secret | Acceso FTP del cPanel |
 | `PUBLIC_CONTACT_ENDPOINT` | Variable | Destino del formulario de contacto. Opcional y público |
+| `PUBLIC_ANALYTICS_TOKEN` | Variable | Token de Cloudflare Web Analytics. Sin él no se carga analítica |
 
 ## Dominios
 
@@ -47,12 +48,14 @@ permanentes guardadas en los navegadores. **Llevan `[NC]` y no es opcional**: lo
 codificaron en mayúsculas y el escaneo llega como `/R/CANAL_ETICO`; sin `[NC]` el papel da
 404 aunque tecleado en minúsculas funcione.
 
-**Caché** (solo con `mod_headers`; `mod_expires` duplicaba `Cache-Control`):
+**Caché** (solo con `mod_headers`; el `mod_expires` del servidor se apaga con `ExpiresActive Off`):
 
 - `/_astro/` → un año, `immutable`. Todo lo que procesa Astro lleva hash en el nombre.
 - Archivos de `public/` con nombre fijo → 30 días.
-- HTML → `no-cache, must-revalidate`, para que un despliegue se vea al instante. El hosting
-  añade además un `max-age=3600` que no se puede quitar desde aquí; `no-cache` prevalece.
+- HTML → `no-cache, must-revalidate`, para que un despliegue se vea al instante.
+
+Si una respuesta vuelve a traer dos `Cache-Control`, el segundo lo pone un proxy delante
+de Apache y se quita desde el panel del hosting.
 
 **Seguridad**: `Options -Indexes`, `X-Frame-Options`, `X-Content-Type-Options`,
 `Referrer-Policy`, `Permissions-Policy` y HSTS.
@@ -63,5 +66,6 @@ Dos listas en paralelo: el filtro del sitemap (`SECCIONES_PRIVADAS` en
 `astro.config.mjs`) y los `Disallow` de `public/robots.txt`.
 
 - `/sistema/` → fuera del sitemap y bloqueada en `robots.txt`.
+- `/privacidad/` → fuera del sitemap y con `noindex` mientras sea borrador.
 - `/recursos/` → fuera del sitemap y con `noindex`, pero **no** en `robots.txt`: una URL
   bloqueada no se rastrea y nadie leería su `noindex`.

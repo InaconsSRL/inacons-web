@@ -234,7 +234,7 @@ const cifras = [CIFRAS.experiencia, CIFRAS.trabajadores, CIFRAS.inversion];
 
   .about-stat span {
     font-size: var(--fs-sm); color: var(--c-text-muted);
-    font-weight: var(--fw-medium); text-transform: uppercase; letter-spacing: 1px;
+    font-weight: var(--fw-medium); text-transform: uppercase; letter-spacing: var(--ls-ui);
   }
 
   /* Misión / Visión / Valores */
@@ -301,7 +301,7 @@ const cifras = [CIFRAS.experiencia, CIFRAS.trabajadores, CIFRAS.inversion];
     max-width: 900px;
     margin: 0 auto;
     border-radius: var(--radius);
-    box-shadow: 0 12px 40px rgba(20, 23, 45, 0.08);
+    box-shadow: 0 12px 40px color-mix(in srgb, var(--c-primary) 8%, transparent);
   }
 
   .contenedor-video iframe {

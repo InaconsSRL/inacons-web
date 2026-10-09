@@ -6,10 +6,8 @@
   espaciado o color no sale de acá, es un bug: significa que alguien
   volvió a decidir a mano algo que ya estaba decidido.
 
-  Antes de este bloque el sitio tenía 65 tamaños de fuente distintos,
-  106 de padding y 122 rgba() inventados en el punto de uso. De ahí
-  salieron los fallos de contraste: nadie los revisaba porque no había
-  un lugar donde revisarlos.
+  Tenerlos en un solo sitio es lo que permite revisar el contraste: un
+  rgba() inventado en el punto de uso no lo revisa nadie.
 */
 :root {
     /* ── PALETA CORPORATIVA ──────────────────────────────────── */
@@ -17,6 +15,9 @@
     /* Azul marino profundo — identidad */
     --c-secondary: #1b5278;
     /* Azul medio — soporte */
+    --c-secondary-hover: #154060;
+    --c-night: #030814;
+    /* Casi negro, solo para velos sobre fotografía muy clara (hero de /mineria/) */
     --c-accent: #d9822b;
     /* Naranja — énfasis. Solo sobre fondo OSCURO: sobre claro da
        2.93:1 y no pasa AA. Para naranja sobre claro usar --c-accent-ink. */
@@ -33,16 +34,14 @@
     --c-text-heading: #14172d;
     --c-text-body: #3d4460;
     --c-text-muted: #5a6280;
-    /* Antes #6b7494 → 4.15:1 sobre --c-bg-muted, fallaba AA.
-       #5a6280 da 6.01:1 sobre blanco y 5.40:1 sobre muted. */
+    /* 6.01:1 sobre blanco y 5.40:1 sobre muted. No aclararlo: #6b7494
+       daba 4.15:1 sobre muted y no pasaba AA. */
 
     --c-ink-ghost: rgba(20, 23, 45, 0.06);
     /* Tinta fantasma: el número gigante detrás de una tarjeta numerada,
        y nada más. No es texto — es textura, y por eso NO tiene que pasar
        contraste: lo que lleva va siempre con aria-hidden y su información
-       la da el orden del DOM. Si algo tiene que leerse, no usa esto.
-       Estaba escrito cuatro veces (0.04, 0.045, 0.05, 0.06) en cuatro
-       páginas, que es como se pierde de vista que era decorativo. */
+       la da el orden del DOM. Si algo tiene que leerse, no usa esto. */
 
     --c-text-placeholder: #b0b6c8;
     /* Deliberadamente por debajo de AA, y por eso con una regla atada:
@@ -72,13 +71,43 @@
     --c-surface-dark-2: rgba(255, 255, 255, 0.08);
     --c-border-dark: rgba(255, 255, 255, 0.12);
     --c-border-dark-strong: rgba(255, 255, 255, 0.22);
+    --c-border-dark-hover: rgba(255, 255, 255, 0.40);
+    --c-surface-dark-sunk: rgba(0, 0, 0, 0.20);
+    /* Banda hundida dentro de un fondo oscuro (pie del footer) */
 
     /* ── BORDES SOBRE CLARO ──────────────────────────────────── */
     --c-border: #dce1ea;
     --c-border-light: #edf0f5;
 
+    /* ── TRANSPARENCIAS ──────────────────────────────────────── */
+    /*  Un velo o un tinte de un color de marca no lleva rgba() literal: se
+        escribe sobre el token, para que cambiar el color arrastre sus
+        transparencias.
+          color-mix(in srgb, var(--c-secondary) 4%, transparent)
+        equivale exactamente a rgba(27, 82, 120, 0.04). */
+
+    /* ── ESTADOS ─────────────────────────────────────────────── */
+    /*  Texto, fondo y borde de cada aviso. Cada texto pasa 7:1 sobre su
+        propio fondo, holgado incluso en tamaño chico. */
+    --c-ok: #1c6b3c;
+    --c-ok-bg: #e9f6ee;
+    --c-ok-border: #c3e5d0;
+    --c-error: #8c1d1d;
+    --c-error-bg: #fdeaea;
+    --c-error-border: #f3c9c9;
+    --c-error-field: #c0392b;
+    /* Borde de un campo inválido: tiene que verse a golpe de vista, no leerse */
+    --c-warn: #7a4a10;
+    --c-warn-bg: #fdf3e6;
+    --c-warn-border: #f0dcc0;
+    --c-info: #1b4b6e;
+    --c-info-bg: #eaf1f7;
+    --c-info-border: #c8dced;
+
     /* ── TIPOGRAFÍA ──────────────────────────────────────────── */
-    --font-ui: 'Montserrat', sans-serif;
+    --font-ui: var(--font-montserrat);
+    /* La define <Font> en BaseLayout (astro.config.mjs → fonts), con su fallback métrico */
+    --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
     /*  Escala de texto — 8 pasos.
         Calibrada sobre el uso real: los pasos caen donde ya había masa,
@@ -102,6 +131,9 @@
     /* 22px — h3 */
     --fs-2xl: clamp(1.5rem, 2.6vw, 2rem);
     /* 24–32px — h2 */
+
+    --fs-title: clamp(1.3rem, 2.2vw, 1.7rem);
+    /* 21–27px — título de bloque dentro de una ficha (servicio, proyecto) */
 
     /*  Display — fuera de la escala de texto, siempre fluido. */
     --fs-display: clamp(2rem, 4vw, 3rem);
@@ -131,6 +163,8 @@
     /* titulares grandes */
     --ls-label: 0.14em;
     /* rótulos en caja alta, tamaños 11–14px */
+    --ls-ui: 0.06em;
+    /* caja alta en botones, menús y etiquetas cortas, 12–14px */
     --ls-wide: 0.03em;
     /* caja alta a tamaño display. NO usar --ls-label acá: 0.14em sobre
        una palabra de 60px son 8.5px por carácter y revienta el ancho
@@ -257,9 +291,8 @@
   que cualquier regla de autor que fije `display` lo anula -- y lo anula en
   silencio, porque el atributo sigue ahi en el HTML y todo parece correcto.
 
-  Paso con `.dialogo`, que declara `display: flex`: los dos dialogos del panel
-  se pintaban apilados sobre la pagina y no se podia usar nada. El componente
-  llevaba escrito en su propio comentario que se mostraba con `hidden`.
+  Un componente con `display: flex` (como .dialogo) dejaba visible lo que
+  el HTML marcaba como oculto.
 
   Con esto, `hidden` vuelve a significar oculto para todo componente presente y
   futuro, y ocultar deja de depender de que nadie declare `display` despues.
@@ -336,10 +369,10 @@ button {
   el blanco se ve sobre oscuro (17.64:1) y el azul sobre claro (8.32:1).
 */
 :focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid var(--c-text-white);
     outline-offset: 0;
     box-shadow: 0 0 0 4px var(--c-secondary);
-    border-radius: 1px;
+    border-radius: var(--radius);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -417,12 +450,8 @@ button {
     line-height: 1;
 }
 
-/*  Un solo guion, siempre delante. Antes el rotulo centrado llevaba
-    ademas un ::after simetrico: doce guiones en el home, dos por cada
-    cabecera de seccion. Con seis secciones usando el mismo patron de
-    rotulo + titulo + descripcion, la cinta decorativa era justo lo que
-    hacia que ninguna destacara. El transition no animaba nada: nada
-    cambiaba el width. */
+/*  Un solo guion, siempre delante: con seis cabeceras iguales en el home,
+    un guion a cada lado convertía la decoración en ruido. */
 .sh-label::before {
     content: '';
     display: block;
@@ -486,7 +515,7 @@ a.btn {
     font-family: var(--font-ui);
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
-    letter-spacing: 0.6px;
+    letter-spacing: var(--ls-ui);
     text-transform: uppercase;
     text-decoration: none;
     border-radius: var(--radius);
@@ -501,7 +530,7 @@ a.btn {
 .btn-primary,
 .btn.btn-primary {
     background: var(--c-secondary);
-    color: #fff;
+    color: var(--c-text-white);
     border-color: var(--c-secondary);
 }
 
@@ -525,21 +554,21 @@ a.btn {
 .btn-outline:hover,
 .btn.btn-outline:hover {
     background: var(--c-secondary);
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 /* Outline claro — sobre fondos oscuros */
 .btn-outline-light,
 .btn.btn-outline-light {
     background: transparent;
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.40);
+    color: var(--c-text-white);
+    border-color: var(--c-border-dark-hover);
 }
 
 .btn-outline-light:hover,
 .btn.btn-outline-light:hover {
     background: var(--c-border-dark);
-    border-color: rgba(255, 255, 255, 0.75);
+    border-color: color-mix(in srgb, var(--c-text-white) 75%, transparent);
 }
 
 /* Accent — CTAs muy específicos.
@@ -576,17 +605,28 @@ a.btn:active {
 .btn-lg {
     padding: var(--sp-4) var(--sp-l1);
     font-size: var(--fs-base);
-    letter-spacing: 0.9px;
+    letter-spacing: var(--ls-ui);
+}
+
+/*  En teléfono un rótulo largo parte línea en vez de salirse de la pantalla:
+    con nowrap, un botón más ancho que el viewport da scroll horizontal a
+    toda la página. */
+@media (max-width: 639.98px) {
+    .btn,
+    a.btn {
+        max-width: 100%;
+        white-space: normal;
+        line-height: 1.25;
+        text-align: center;
+    }
 }
 
 /*  Boton a ancho completo, para formularios y paneles.
 
     Lleva min-height 44px, que es el minimo tactil recomendado, y .btn
-    base se queda en 37. No se corrige .btn aca porque cambiar su altura
-    mueve el layout de todas las paginas del sitio a la vez; queda
-    registrado como pendiente en docs/performance.md. En un formulario el
-    boton es el objetivo mas importante de la pantalla, asi que este si
-    lo cumple. */
+    base se queda en 37: subir .btn movería el layout de todo el sitio a la
+    vez. En un formulario el botón es el objetivo principal, así que este
+    sí lo cumple. */
 .btn-block {
     width: 100%;
     min-height: 44px;
@@ -601,6 +641,114 @@ a.btn:active {
     opacity: 0.55;
     cursor: progress;
     transform: none;
+}
+
+/* ── Control ──
+   Botón secundario de una interfaz, no una llamada a la acción: pausar un
+   carrusel, compartir. Rótulo chico en caja alta y borde fino, para que no
+   compita con los .btn de la sección. */
+.btn-control {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-4);
+    min-height: 32px;
+    background: transparent;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    color: var(--c-text-muted);
+    font-family: var(--font-ui);
+    font-size: var(--fs-2xs);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
+    cursor: pointer;
+    transition: background var(--t), border-color var(--t), color var(--t);
+}
+
+.btn-control:hover {
+    border-color: var(--c-secondary);
+    color: var(--c-secondary);
+}
+
+.btn-control--dark {
+    border-color: var(--c-border-dark-strong);
+    color: var(--c-on-dark-1);
+}
+
+.btn-control--dark:hover {
+    background: var(--c-border-dark);
+    border-color: var(--c-border-dark-hover);
+    color: var(--c-text-white);
+}
+
+/* ── Botón de icono redondo sobre oscuro ──
+   Solo símbolo, así que el nombre va siempre en aria-label. */
+.btn-icono {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--c-border-dark);
+    border: 1px solid var(--c-border-dark-strong);
+    border-radius: 50%;
+    color: var(--c-on-dark-3);
+    cursor: pointer;
+    transition: background var(--t), color var(--t), border-color var(--t);
+}
+
+.btn-icono:hover {
+    background: var(--c-border-dark-strong);
+    border-color: var(--c-border-dark-hover);
+    color: var(--c-text-white);
+}
+
+/* ── Pestañas ──
+   Patrón ARIA tablist: el estado lo dan aria-selected y el atributo hidden
+   de cada panel, que es lo que leen los lectores de pantalla. initTabs() en
+   main.ts los mantiene sincronizados y mueve el foco con las flechas. */
+/*  La línea base es una sombra y no un border: con overflow-x (para que las
+    pestañas se desplacen en vez de desbordar la página en 320px) un border
+    del contenedor taparía el subrayado de la pestaña activa. */
+.tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    box-shadow: inset 0 -2px 0 var(--c-border-light);
+    margin-bottom: var(--sp-l2);
+}
+
+.tab {
+    padding: var(--sp-4) var(--sp-7);
+    font-family: var(--font-ui);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--c-text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--t), border-color var(--t);
+}
+
+.tab:hover {
+    color: var(--c-text-heading);
+}
+
+.tab[aria-selected="true"] {
+    color: var(--c-secondary);
+    border-bottom-color: var(--c-secondary);
+}
+
+@media (max-width: 767.98px) {
+    .tab {
+        padding: var(--sp-3) var(--sp-4);
+        font-size: var(--fs-xs);
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -693,9 +841,9 @@ a.btn:active {
     inset: 0;
     z-index: 1;
     background: linear-gradient(to top,
-            rgba(20, 23, 45, 0.94) 0%,
-            rgba(20, 23, 45, 0.55) 50%,
-            rgba(20, 23, 45, 0.18) 100%);
+            color-mix(in srgb, var(--c-primary) 94%, transparent) 0%,
+            color-mix(in srgb, var(--c-primary) 55%, transparent) 50%,
+            color-mix(in srgb, var(--c-primary) 18%, transparent) 100%);
 }
 
 /*  El velo degradado de arriba NO garantiza contraste: es un degradado
@@ -717,8 +865,8 @@ a.btn:active {
     z-index: 2;
     padding: var(--sp-6);
     background: linear-gradient(to top,
-            rgba(20, 23, 45, 0.92) 0%,
-            rgba(20, 23, 45, 0.92) 72%,
+            color-mix(in srgb, var(--c-primary) 92%, transparent) 0%,
+            color-mix(in srgb, var(--c-primary) 92%, transparent) 72%,
             transparent 100%);
 }
 
@@ -736,7 +884,7 @@ a.btn:active {
     font-weight: var(--fw-semibold);
     color: var(--c-text-white);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: var(--ls-wide);
     margin: 0 0 var(--sp-1);
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -833,11 +981,8 @@ a.btn:active {
    las tarjetas se ordenan solas —una galeria, un listado— el hueco
    estorba; cuando son dos destacados de tres, centrarlos se ve mejor.
 
-   Estaba escrita tres veces con tres nombres: .channels-grid en
-   /canal-etico, .cert-grid en /documentos y una tercera en la galeria
-   de proyecto, con los mismos dos breakpoints copiados a mano en cada
-   una. La galeria se quedo fuera a proposito: colapsa a dos columnas y
-   nunca a una, que para miniaturas es otra decision, no un descuido. */
+   La galería de proyecto no usa .grid-3 a propósito: colapsa a dos
+   columnas y nunca a una, que para miniaturas es otra decisión. */
 .grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -865,9 +1010,8 @@ a.btn:active {
    que los use: los dos simbolos los pinta <Icono>, y un selector escrito en la
    pagina se compila con su data-astro-cid, que el svg del componente no lleva.
 
-   Antes esto era un `style="display:none"` en linea, y solo en uno de los dos
-   botones: el del hero parpadeaba —el play visible hasta que main.ts corria— y
-   el del carrusel no. */
+   Va en CSS y no como style inline para que el play no parpadee visible
+   hasta que corre main.ts. */
 .icon-play {
     display: none;
 }
@@ -1071,10 +1215,7 @@ a.btn:active {
 }
 
 /*  Número de orden. Ocupa el lugar del ícono en una tarjeta numerada:
-    "01 · Descubrimiento". Va siempre con aria-hidden — ver --c-ink-ghost.
-
-    Estaba escrito dos veces, con dos tamaños (--fs-display y 3.5rem) y
-    dos alfas, para la misma tarjeta de proceso en /servicios y /nosotros. */
+    "01 · Descubrimiento". Va siempre con aria-hidden — ver --c-ink-ghost. */
 .feature-num {
     font-size: var(--fs-display);
     font-weight: var(--fw-display);
@@ -1173,9 +1314,9 @@ a.btn:active {
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom,
-            rgba(20, 23, 45, 0.30) 0%,
-            rgba(20, 23, 45, 0.65) 60%,
-            rgba(20, 23, 45, 0.95) 100%);
+            color-mix(in srgb, var(--c-primary) 30%, transparent) 0%,
+            color-mix(in srgb, var(--c-primary) 65%, transparent) 60%,
+            color-mix(in srgb, var(--c-primary) 95%, transparent) 100%);
 }
 
 .page-hero-content {
@@ -1190,7 +1331,7 @@ a.btn:active {
 .page-hero-title {
     font-size: clamp(2rem, 5vw, 3.8rem);
     font-weight: var(--fw-bold);
-    color: #fff;
+    color: var(--c-text-white);
     line-height: 1.1;
     letter-spacing: var(--ls-tight);
     margin-bottom: var(--sp-3);
@@ -1200,7 +1341,7 @@ a.btn:active {
     font-size: var(--fs-base);
     color: var(--c-on-dark-3);
     font-weight: var(--fw-normal);
-    letter-spacing: 0.2px;
+    letter-spacing: var(--ls-wide);
     margin: 0;
 }
 
@@ -1233,11 +1374,11 @@ a.btn:active {
 }
 
 .breadcrumb a:hover {
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 .breadcrumb-sep {
-    color: rgba(255, 255, 255, 0.30);
+    color: var(--c-on-dark-icono);
     font-size: var(--fs-2xs);
 }
 
@@ -1282,13 +1423,13 @@ a.btn:active {
     align-items: center;
     gap: var(--sp-1);
     font-size: var(--fs-sm);
-    letter-spacing: 0.2px;
+    letter-spacing: var(--ls-wide);
     color: var(--c-on-dark-2);
     text-decoration: none;
     transition: color var(--t);
 }
 
-.top-bar-contact:hover { color: #fff; }
+.top-bar-contact:hover { color: var(--c-text-white); }
 
 .top-bar-social {
     display: flex;
@@ -1305,7 +1446,7 @@ a.btn:active {
     padding: var(--sp-1) var(--sp-3);
     font-size: var(--fs-2xs);
     font-weight: var(--fw-semibold);
-    letter-spacing: 1px;
+    letter-spacing: var(--ls-ui);
     text-transform: uppercase;
     text-decoration: none;
     color: var(--c-on-dark-2);
@@ -1317,7 +1458,7 @@ a.btn:active {
 
 .top-bar-pill:hover {
     background: var(--c-border-dark);
-    color: #fff;
+    color: var(--c-text-white);
     border-color: var(--c-border-dark-strong);
 }
 
@@ -1329,7 +1470,7 @@ a.btn:active {
 .top-bar-pill--accent:hover {
     background: var(--c-accent);
     border-color: var(--c-accent);
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 .top-bar-links {
@@ -1361,7 +1502,7 @@ a.btn:active {
 
 .top-bar-social a:hover {
     background: var(--c-border-dark-strong);
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 .top-bar-right {
@@ -1449,7 +1590,7 @@ a.btn:active {
 .nav a {
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
-    letter-spacing: 0.5px;
+    letter-spacing: var(--ls-wide);
     text-transform: uppercase;
     color: var(--c-on-dark-1);
     text-decoration: none;
@@ -1471,7 +1612,7 @@ a.btn:active {
 }
 
 .nav a:hover {
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 .nav a:hover::after,
@@ -1480,13 +1621,13 @@ a.btn:active {
 }
 
 .nav a.active {
-    color: #fff;
+    color: var(--c-text-white);
     font-weight: var(--fw-bold);
 }
 
 /* Página activa via aria-current */
 .nav a[aria-current="page"] {
-    color: #fff;
+    color: var(--c-text-white);
     font-weight: var(--fw-bold);
 }
 
@@ -1570,7 +1711,7 @@ a.btn:active {
     align-items: center;
     gap: var(--sp-2);
     font-size: var(--fs-xs) !important;
-    letter-spacing: 0.3px;
+    letter-spacing: var(--ls-wide);
     padding: var(--sp-2) var(--sp-3);
     color: var(--c-on-dark-2) !important;
     border-radius: var(--radius);
@@ -1578,8 +1719,8 @@ a.btn:active {
 }
 
 .dropdown-menu a:hover {
-    color: #fff !important;
-    background: rgba(217, 130, 43, 0.12) !important;
+    color: var(--c-text-white) !important;
+    background: color-mix(in srgb, var(--c-accent) 12%, transparent) !important;
 }
 
 .dropdown-menu a svg {
@@ -1614,7 +1755,7 @@ a.btn:active {
     height: 44px;
     background: none;
     border: none;
-    color: #fff;
+    color: var(--c-text-white);
     cursor: pointer;
     transition: color var(--t);
     padding: 0;
@@ -1674,7 +1815,7 @@ a.btn:active {
 .footer-slogan {
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
-    letter-spacing: 0.4px;
+    letter-spacing: var(--ls-wide);
     line-height: 1.8;
     color: var(--c-on-dark-2);
     margin-bottom: var(--sp-6);
@@ -1700,7 +1841,7 @@ a.btn:active {
 
 .footer-social a:hover {
     background: var(--c-border-dark-strong);
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 .footer-section {
@@ -1749,7 +1890,7 @@ a.btn:active {
 }
 
 .footer-section ul li a:hover {
-    color: #fff;
+    color: var(--c-text-white);
     padding-left: var(--sp-1);
 }
 
@@ -1761,7 +1902,7 @@ a.btn:active {
 }
 
 .footer-bottom {
-    background: rgba(0, 0, 0, 0.20);
+    background: var(--c-surface-dark-sunk);
     margin-top: var(--sp-l2);
     padding: var(--sp-4) 0;
 }
@@ -1775,7 +1916,7 @@ a.btn:active {
 }
 
 .footer-bottom p {
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--c-on-dark-3);
     font-size: var(--fs-sm);
     margin: 0;
 }
@@ -1786,7 +1927,7 @@ a.btn:active {
 }
 
 .footer-bottom-links a {
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--c-on-dark-3);
     font-size: var(--fs-sm);
     text-decoration: none;
     transition: color var(--t);
@@ -1808,7 +1949,7 @@ a.btn:active {
     width: 44px;
     height: 44px;
     background: var(--c-secondary);
-    color: #fff;
+    color: var(--c-text-white);
     border: none;
     border-radius: var(--radius);
     cursor: pointer;
@@ -1894,7 +2035,7 @@ body.menu-open {
     background: var(--c-surface-dark-2);
     border: none;
     border-radius: var(--radius);
-    color: #fff;
+    color: var(--c-text-white);
     cursor: pointer;
     transition: background var(--t);
     flex-shrink: 0;
@@ -1946,17 +2087,17 @@ body.menu-open {
     padding: var(--sp-3) var(--sp-3);
     border-radius: var(--radius);
     text-decoration: none;
-    color: #fff;
+    color: var(--c-text-white);
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
-    letter-spacing: 0.6px;
+    letter-spacing: var(--ls-ui);
     text-transform: uppercase;
     transition: background var(--t), color var(--t);
 }
 
 .mobile-nav a:hover {
     background: var(--c-surface-dark-1);
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 .mobile-nav a svg {
@@ -1980,11 +2121,11 @@ body.menu-open {
     border-radius: var(--radius);
     background: none;
     border: none;
-    color: #fff;
+    color: var(--c-text-white);
     font-family: var(--font-ui);
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
-    letter-spacing: 0.6px;
+    letter-spacing: var(--ls-ui);
     text-transform: uppercase;
     cursor: pointer;
     width: 100%;
@@ -1994,7 +2135,7 @@ body.menu-open {
 
 .mobile-dropdown-toggle:hover {
     background: var(--c-surface-dark-1);
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 .mobile-dropdown-toggle svg:first-child {
@@ -2019,7 +2160,7 @@ body.menu-open {
     padding: 0 0 0 var(--sp-l1);
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.35s ease;
+    transition: max-height var(--t);
 }
 
 .mobile-dropdown.open .mobile-submenu {
@@ -2028,7 +2169,7 @@ body.menu-open {
 
 .mobile-submenu a {
     font-size: var(--fs-sm) !important;
-    letter-spacing: 0.3px !important;
+    letter-spacing: var(--ls-wide) !important;
     color: var(--c-on-dark-3) !important;
     padding: var(--sp-2) var(--sp-3) !important;
     text-transform: none !important;
@@ -2036,7 +2177,7 @@ body.menu-open {
 }
 
 .mobile-submenu a:hover {
-    color: #fff !important;
+    color: var(--c-text-white) !important;
     background: var(--c-surface-dark-1) !important;
 }
 
@@ -2064,16 +2205,16 @@ body.menu-open {
     border-radius: var(--radius);
     text-decoration: none;
     background: var(--c-secondary);
-    color: #fff;
+    color: var(--c-text-white);
     font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
-    letter-spacing: 0.8px;
+    letter-spacing: var(--ls-ui);
     text-transform: uppercase;
     transition: background var(--t);
 }
 
 .mobile-btn-primary:hover {
-    background: #154060;
+    background: var(--c-secondary-hover);
 }
 
 .mobile-btn-outline {
@@ -2087,10 +2228,10 @@ body.menu-open {
     text-decoration: none;
     background: var(--c-surface-dark-1);
     border: 1px solid var(--c-border-dark);
-    color: #fff;
+    color: var(--c-text-white);
     font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
-    letter-spacing: 0.8px;
+    letter-spacing: var(--ls-ui);
     text-transform: uppercase;
     transition: background var(--t), border-color var(--t);
 }
@@ -2133,23 +2274,14 @@ body.menu-open {
 
 .mobile-menu-socials a:hover {
     background: var(--c-border-dark-strong);
-    color: #fff;
+    color: var(--c-text-white);
 }
 
 /* ══════════════════════════════════════════════════════════════
    13. FORMULARIOS, AVISOS Y SUPERFICIES
 ══════════════════════════════════════════════════════════════ */
 /*
-  Esta capa nació tarde y por duplicado. /contacto tenía su juego de
-  estilos de formulario dentro de la página, y el panel escribió otro
-  distinto para lo mismo: dos definiciones de "un campo de texto", en
-  dos archivos, que ya habían empezado a divergir en el radio del
-  borde y en la duración de la transición.
-
-  Los valores de acá salen de /contacto, que era la implementación
-  madura, con los tokens puestos donde había literales: la fuente
-  estaba escrita a mano en vez de --font-ui, el radio como 2px en vez
-  de --radius y las transiciones como .22s en vez de --t.
+  Una sola definición de campo, aviso y superficie para todo el sitio.
 
   Regla: una pantalla nueva NO define estilos de campo, aviso ni
   superficie. Si algo falta acá, se agrega acá.
@@ -2211,7 +2343,7 @@ body.menu-open {
 .form-select:focus {
     border-color: var(--c-secondary);
     background: var(--c-bg-white);
-    box-shadow: 0 0 0 3px rgba(27, 82, 120, 0.09);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-secondary) 9%, transparent);
 }
 
 .form-input::placeholder,
@@ -2232,7 +2364,7 @@ body.menu-open {
 .was-validated .form-input:invalid,
 .was-validated .form-textarea:invalid,
 .was-validated .form-select:invalid {
-    border-color: #c0392b;
+    border-color: var(--c-error-field);
 }
 
 .form-textarea {
@@ -2254,14 +2386,14 @@ body.menu-open {
     margin-top: var(--sp-2);
     font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
-    color: #8c1d1d;
+    color: var(--c-error);
     line-height: 1.5;
 }
 
 /* ── Avisos ─────────────────────────────────────────────────── */
 /*
   Un solo componente para "algo salió bien", "algo falló" y "ojo con
-  esto". Antes eran .form-success en /contacto y .pnl-aviso en el
+  esto".
   panel, con paletas distintas para el mismo estado.
 
   Los cuatro pares de color están verificados sobre su propio fondo:
@@ -2280,27 +2412,27 @@ body.menu-open {
 }
 
 .notice--ok {
-    background: #e9f6ee;
-    color: #1c6b3c;
-    border-color: #c3e5d0;
+    background: var(--c-ok-bg);
+    color: var(--c-ok);
+    border-color: var(--c-ok-border);
 }
 
 .notice--error {
-    background: #fdeaea;
-    color: #8c1d1d;
-    border-color: #f3c9c9;
+    background: var(--c-error-bg);
+    color: var(--c-error);
+    border-color: var(--c-error-border);
 }
 
 .notice--warn {
-    background: #fdf3e6;
-    color: #7a4a10;
-    border-color: #f0dcc0;
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
+    border-color: var(--c-warn-border);
 }
 
 .notice--info {
-    background: #eaf1f7;
-    color: #1b4b6e;
-    border-color: #c8dced;
+    background: var(--c-info-bg);
+    color: var(--c-info);
+    border-color: var(--c-info-border);
 }
 
 /* ── Superficies ────────────────────────────────────────────── */
@@ -2396,10 +2528,59 @@ body.menu-open {
     entero: un codigo activo o dado de baja, el resultado de una
     comprobacion. Misma paleta que .notice, para que verde signifique lo
     mismo en los dos sitios. */
-.status-ok    { color: #1c6b3c; font-weight: var(--fw-semibold); }
-.status-error { color: #8c1d1d; font-weight: var(--fw-bold); }
-.status-warn  { color: #7a4a10; font-weight: var(--fw-semibold); }
+.status-ok    { color: var(--c-ok); font-weight: var(--fw-semibold); }
+.status-error { color: var(--c-error); font-weight: var(--fw-bold); }
+.status-warn  { color: var(--c-warn); font-weight: var(--fw-semibold); }
 .status-off   { color: var(--c-text-muted); font-weight: var(--fw-medium); }
+
+/* ── Prosa ──────────────────────────────────────────────────── */
+/*  Texto largo de lectura continua: políticas, condiciones, artículos.
+    Vive aquí y no en la página porque su markup suele venir de un
+    componente (<Content /> de una colección), al que el <style> de la
+    página no alcanza (regla 1). */
+.prosa {
+    max-width: 72ch;
+    color: var(--c-text-body);
+    font-size: var(--fs-md);
+    line-height: 1.8;
+}
+
+.prosa h2 {
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
+    color: var(--c-text-heading);
+    margin: var(--sp-l1) 0 var(--sp-3);
+}
+
+.prosa h2:first-child {
+    margin-top: 0;
+}
+
+.prosa h3 {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    margin: var(--sp-6) 0 var(--sp-2);
+}
+
+.prosa p,
+.prosa ul {
+    margin: 0 0 var(--sp-4);
+}
+
+.prosa ul {
+    list-style: disc;
+    padding-left: var(--sp-5);
+}
+
+.prosa li + li {
+    margin-top: var(--sp-1);
+}
+
+.prosa a {
+    color: var(--c-secondary);
+    text-decoration: underline;
+}
 
 /* ── Lista de clave y valor ─────────────────────────────────── */
 /*  Filas de dato con etiqueta a la izquierda y valor a la derecha.
@@ -2460,7 +2641,7 @@ body.menu-open {
     align-items: center;
     justify-content: center;
     padding: var(--sp-5);
-    background: rgba(20, 23, 45, 0.55);
+    background: color-mix(in srgb, var(--c-primary) 55%, transparent);
     overflow-y: auto;
 }
 
@@ -2544,7 +2725,7 @@ body.menu-open {
     z-index: 10000;
     padding: var(--sp-3) var(--sp-5);
     background: var(--c-primary);
-    color: #fff;
+    color: var(--c-text-white);
     font-weight: var(--fw-semibold);
     border-radius: var(--radius);
     text-decoration: none;

@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import PageHero from '../components/PageHero.astro';
+import { CONTACTO } from '../data/empresa';
+import imagenHero from '../assets/imagenes/home_about.webp';
+
+// Borrador hasta que lo apruebe el abogado. Mientras sea true la página no se
+// indexa, no va en el sitemap (astro.config.mjs) ni se enlaza desde el sitio,
+// y muestra el aviso y los datos que faltan. Al aprobarla: false aquí, quitar
+// 'privacidad' de SECCIONES_PRIVADAS y enlazarla en el pie y en /contacto/.
+const BORRADOR = true;
+const ACTUALIZADA = '9 de octubre de 2026';
+
+const [sedePrincipal] = CONTACTO.sedes;
+---
+
+<BaseLayout
+  title="Política de Privacidad | INACONS"
+  description="Cómo trata INACONS S.R.L. los datos personales de quienes visitan su sitio web o le escriben, conforme a la Ley N.° 29733."
+  robots={BORRADOR ? 'noindex, nofollow' : undefined}
+>
+  <PageHero
+    image={imagenHero}
+    title="Política de<br>Privacidad"
+    subtitle="Cómo tratamos los datos personales que nos confías"
+    current="Privacidad"
+  />
+
+  <section class="sec sec--white">
+    <div class="container">
+      {BORRADOR && (
+        <div class="notice notice--warn privacidad-aviso" role="note">
+          <strong>Borrador pendiente de revisión legal.</strong> Esta página no está
+          enlazada ni indexada. Los datos marcados como <mark>pendiente</mark> los
+          completa INACONS y el texto completo lo valida su abogado antes de publicarse.
+        </div>
+      )}
+
+      <article class="prosa">
+        <p>Última actualización: {ACTUALIZADA}.</p>
+
+        <p>
+          Esta política explica qué datos personales trata INACONS S.R.L. cuando visitas
+          este sitio web o te comunicas con nosotros, con qué finalidad y cómo puedes
+          ejercer tus derechos, conforme a la Ley N.° 29733, Ley de Protección de Datos
+          Personales, y su Reglamento.
+        </p>
+
+        <h2>1. Responsable del tratamiento</h2>
+        <ul>
+          <li>Razón social: INACONS S.R.L.</li>
+          <li>RUC: <mark>pendiente</mark></li>
+          <li>Domicilio: {sedePrincipal.direccion}, {sedePrincipal.zona} <mark>confirmar si es el domicilio fiscal</mark></li>
+          <li>Correo para asuntos de datos personales: <mark>pendiente</mark></li>
+        </ul>
+
+        <h2>2. Qué datos tratamos y para qué</h2>
+
+        <h3>Formulario de contacto</h3>
+        <p>
+          Nombre, correo electrónico, teléfono, empresa, servicio de interés y el mensaje
+          que escribas. Los usamos únicamente para responder tu consulta y, si la pides,
+          preparar una propuesta. La base es tu consentimiento, que das al enviar el
+          formulario. Sin esos datos no podemos responderte.
+        </p>
+
+        <h3>Correo, teléfono y WhatsApp</h3>
+        <p>
+          Si nos escribes o llamas directamente, tratamos los datos que nos facilites con
+          la misma finalidad: atender tu comunicación.
+        </p>
+
+        <h3>Canal ético</h3>
+        <p>
+          Los formularios de consultas, denuncias y reportes del
+          <a href="/canal-etico/">Canal Ético</a> se gestionan en una plataforma externa
+          con su propio aviso de privacidad. Pueden enviarse de forma anónima.
+        </p>
+
+        <h3>Navegación</h3>
+        <p>
+          El servidor registra datos técnicos de cada visita (dirección IP, fecha, página
+          solicitada y navegador) para mantener el sitio seguro y funcionando. También
+          podemos medir visitas de forma agregada con una herramienta que no usa cookies
+          ni identifica a la persona.
+        </p>
+
+        <h2>3. Cookies</h2>
+        <p>
+          Este sitio no instala cookies propias. El mapa de ubicación de la página de
+          contacto lo sirve Google Maps, que puede instalar sus propias cookies según su
+          política.
+        </p>
+
+        <h2>4. A quién se comunican los datos</h2>
+        <p>
+          No vendemos ni cedemos tus datos. Solo acceden a ellos los proveedores que
+          necesitamos para operar el sitio, que actúan por encargo nuestro:
+        </p>
+        <ul>
+          <li>Proveedor de alojamiento web: <mark>confirmar nombre y país</mark></li>
+          <li>Sistema que recibe el formulario de contacto: <mark>pendiente</mark></li>
+          <li>Herramienta de medición de visitas, si se activa: <mark>pendiente</mark></li>
+        </ul>
+        <p>
+          Cuando alguno de ellos esté fuera del Perú, el envío constituye un flujo
+          transfronterizo de datos y se realiza con las garantías que exige la ley.
+        </p>
+
+        <h2>5. Cuánto tiempo los conservamos</h2>
+        <p>
+          Mientras sean necesarios para atender tu consulta o la relación comercial que
+          resulte de ella, y después durante <mark>plazo pendiente</mark> para atender
+          posibles responsabilidades. Luego se eliminan.
+        </p>
+
+        <h2>6. Tus derechos</h2>
+        <p>
+          Puedes ejercer en cualquier momento tus derechos de información, acceso,
+          rectificación, cancelación y oposición, y revocar tu consentimiento,
+          escribiendo al correo indicado en el punto 1 con una copia de tu documento de
+          identidad. Respondemos en los plazos que fija el Reglamento.
+        </p>
+        <p>
+          Si consideras que no atendimos tu solicitud, puedes presentar una reclamación
+          ante la Autoridad Nacional de Protección de Datos Personales del Ministerio de
+          Justicia y Derechos Humanos.
+        </p>
+
+        <h2>7. Banco de datos</h2>
+        <p>
+          Los datos se incorporan al banco de datos de clientes y contactos de INACONS
+          S.R.L., inscrito en el Registro Nacional de Protección de Datos Personales con
+          el código <mark>pendiente</mark>.
+        </p>
+
+        <h2>8. Seguridad</h2>
+        <p>
+          Aplicamos medidas técnicas y organizativas para proteger los datos contra
+          pérdida, uso indebido o acceso no autorizado. El sitio se sirve siempre por
+          conexión cifrada (HTTPS).
+        </p>
+
+        <h2>9. Menores de edad</h2>
+        <p>
+          Este sitio está dirigido a empresas y profesionales. No recogemos a sabiendas
+          datos de menores de 18 años.
+        </p>
+
+        <h2>10. Cambios en esta política</h2>
+        <p>
+          Si la modificamos, publicaremos la nueva versión en esta misma página con su
+          fecha de actualización.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <CtaBand
+    label="¿Dudas sobre tus datos?"
+    title="Escríbenos y te respondemos"
+    description="Atendemos cualquier consulta sobre el tratamiento de tus datos personales."
+    primaryHref="/contacto/"
+    primaryLabel="Contactar"
+  />
+</BaseLayout>
+
+<style>
+  .privacidad-aviso {
+    margin-bottom: var(--sp-l1);
+  }
+  mark {
+    background: var(--c-warn-bg);
+    color: var(--c-warn);
+    padding: 0 var(--sp-1);
+    border-radius: var(--radius);
+  }
+</style>

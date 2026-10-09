@@ -4,11 +4,8 @@
  * ─────────────────────────────────────────────────────────────
  * Pinta un símbolo del catálogo de `src/lib/iconos.ts`.
  *
- * Por qué existe: había 94 copias literales de 24 símbolos repartidas por 13
- * archivos. El de descarga estaba doce veces, y dos de esas doce dibujaban la
- * misma flecha con la línea al revés —`y1="3" y2="15"` contra `y1="15" y2="3"`—
- * que es idéntica en pantalla y distinta en el código. Ese es exactamente el
- * tipo de diferencia que nadie detecta leyendo y que se multiplica sola.
+ * Es la única forma de pintar un icono en el sitio: un dibujo copiado en
+ * varios archivos termina con versiones distintas que nadie detecta leyendo.
  *
  * ── LO QUE ESTE COMPONENTE NO HACE ──────────────────────────────────────
  * No reduce el peso de la página. El HTML publicado sigue llevando el trazado
@@ -18,12 +15,8 @@
  *
  * ── EL `set:html` Y LA REGLA 1 DE CLAUDE.md ─────────────────────────────
  * El interior del <svg> se inyecta, así que sus hijos NO llevan el
- * `data-astro-cid` de la página. Verificado antes de hacerlo: no hay ni un
- * selector `svg path`, `svg circle` ni equivalente en todo el repositorio, y
- * `.feature-icon` vive en design-system.css, que es global y no depende del
- * atributo. Si algún día hace falta estilar un hijo del símbolo, no se puede
- * hacer desde el <style> de una página: o va al sistema de diseño, o el icono
- * vuelve a escribirse a mano ahí.
+ * `data-astro-cid` de la página. Estilar un hijo del símbolo desde el <style>
+ * de una página no engancha: ese estilo va en design-system.css.
  *
  * Uso:
  *   <Icono nombre="descarga" tam={14} />

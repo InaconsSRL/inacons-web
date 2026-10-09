@@ -1,16 +1,10 @@
 /**
  * iconos.ts
  * ─────────────────────────────────────────────────────────────
- * Catálogo de los símbolos que aparecen más de una vez en el sitio.
- *
- * Existe por algo medible: antes había 98 copias literales de 24 dibujos
- * repartidas por el repositorio. Cambiar el icono de descarga obligaba a
- * encontrar sus once copias, y la que se olvidara quedaba distinta sin que
- * nada fallara.
- *
- * Solo entra aquí lo que se repite. Un símbolo usado una sola vez sigue
- * escrito donde se usa: sacarlo de su sitio para dejarlo en una lista común
- * no ahorra nada y aleja el dibujo de donde se lee.
+ * Catálogo de todos los símbolos del sitio. Ninguna página escribe un <svg>
+ * a mano: una sola forma de pintar iconos, y un dibujo que cambia en un solo
+ * sitio. Un icono que se dibuja en dos lugares termina con dos versiones
+ * distintas sin que nada falle.
  *
  * `tipo` decide cómo se pinta, y no es decorativo:
  *   trazo   → contorno con `stroke`, `fill: none`   (la mayoría)
@@ -37,16 +31,40 @@ export interface Icono {
 }
 
 export const ICONOS = {
-  // Algunas entradas aparecen una sola vez y están aquí a propósito: el icono
-  // se elige a partir de un dato, así que tiene que poder nombrarse. Es el caso
-  // de las normas ISO en /documentos/ (balanza) y del campo `icono` de cada
-  // servicio en src/content/servicios/ (edificio, servidor, diamante, grafico).
+  'ajustes': {
+    d: '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+    tipo: 'trazo',
+  },
+  'alerta': {
+    d: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    tipo: 'trazo',
+  },
+  'alerta-circulo': {
+    d: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+    tipo: 'trazo',
+  },
   'balanza': {
     d: '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
     tipo: 'trazo',
   },
   'bombilla': {
     d: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    tipo: 'trazo',
+  },
+  'campamento': {
+    d: '<path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/>',
+    tipo: 'trazo',
+  },
+  'capas': {
+    d: '<path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+    tipo: 'trazo',
+  },
+  'carpeta-abierta': {
+    d: '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+    tipo: 'trazo',
+  },
+  'casco': {
+    d: '<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15V9a8 8 0 0 1 16 0v6"/>',
     tipo: 'trazo',
   },
   'cerrar': {
@@ -57,8 +75,20 @@ export const ICONOS = {
     d: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
     tipo: 'trazo',
   },
+  'check-circulo': {
+    d: '<path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/>',
+    tipo: 'trazo',
+  },
   'chevron-abajo': {
     d: '<path d="m6 9 6 6 6-6"/>',
+    tipo: 'trazo',
+  },
+  'chevron-arriba': {
+    d: '<path d="m18 15-6-6-6 6"/>',
+    tipo: 'trazo',
+  },
+  'chevron-derecha': {
+    d: '<path d="m9 18 6-6-6-6"/>',
     tipo: 'trazo',
   },
   'compartir': {
@@ -69,6 +99,10 @@ export const ICONOS = {
     d: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
     tipo: 'trazo',
   },
+  'cuadricula': {
+    d: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
+    tipo: 'trazo',
+  },
   'descarga': {
     d: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="3" y2="15"/>',
     tipo: 'trazo',
@@ -77,8 +111,20 @@ export const ICONOS = {
     d: '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
     tipo: 'trazo',
   },
+  'documento': {
+    d: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/>',
+    tipo: 'trazo',
+  },
+  'documento-texto': {
+    d: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    tipo: 'trazo',
+  },
   'edificio': {
     d: '<path d="M3 21h18M9 21V7l3-4 3 4v14"/><path d="M15 11h3v10"/><path d="M3 11h5v10H3z"/>',
+    tipo: 'trazo',
+  },
+  'edificio-oficinas': {
+    d: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
     tipo: 'trazo',
   },
   'enlace-externo': {
@@ -95,6 +141,14 @@ export const ICONOS = {
   },
   'escudo': {
     d: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    tipo: 'trazo',
+  },
+  'escudo-alerta': {
+    d: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+    tipo: 'trazo',
+  },
+  'escudo-aspa': {
+    d: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m14.5 9.5-5 5"/><path d="m9.5 9.5 5 5"/>',
     tipo: 'trazo',
   },
   'escudo-check': {
@@ -117,16 +171,60 @@ export const ICONOS = {
     d: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
     tipo: 'trazo',
   },
+  'inicio': {
+    d: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/> <polyline points="9 22 9 12 15 12 15 22"/>',
+    tipo: 'trazo',
+  },
+  'insignia-check': {
+    d: '<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>',
+    tipo: 'trazo',
+  },
   'linkedin': {
     d: '<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>',
     tipo: 'relleno',
+  },
+  'maletin': {
+    d: '<path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+    tipo: 'trazo',
+  },
+  'mano': {
+    d: '<path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>',
+    tipo: 'trazo',
+  },
+  'manos-corazon': {
+    d: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/>',
+    tipo: 'trazo',
+  },
+  'menu': {
+    d: '<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
+    tipo: 'trazo',
+  },
+  'montana': {
+    d: '<path d="m8 3 4 8 5-5 5 15H2L8 3Z"/>',
+    tipo: 'trazo',
+  },
+  'ojo-tachado': {
+    d: '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>',
+    tipo: 'trazo',
   },
   'pausa': {
     d: '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
     tipo: 'relleno',
   },
+  'portapapeles-check': {
+    d: '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>',
+    tipo: 'trazo',
+  },
+  'pregunta': {
+    d: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    tipo: 'trazo',
+  },
   'premio': {
     d: '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
+    tipo: 'trazo',
+  },
+  'pulgar-arriba': {
+    d: '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
     tipo: 'trazo',
   },
   'rayo': {

@@ -35,13 +35,15 @@ jobs:
       - name: Comprobar tipos
         run: npm run check
 
-      # PUBLIC_CONTACT_ENDPOINT es una variable de repositorio (Settings →
-      # Secrets and variables → Actions → Variables), no un secret: termina
-      # dentro del JavaScript público. Vacía, el formulario usa mailto.
+      # Las PUBLIC_* son variables de repositorio (Settings → Secrets and
+      # variables → Actions → Variables), no secrets: terminan dentro del HTML
+      # y el JavaScript públicos. Vacías, el formulario usa mailto y no se
+      # carga analítica.
       - name: Build
         run: npm run build
         env:
           PUBLIC_CONTACT_ENDPOINT: ${{ vars.PUBLIC_CONTACT_ENDPOINT }}
+          PUBLIC_ANALYTICS_TOKEN: ${{ vars.PUBLIC_ANALYTICS_TOKEN }}
 
       # La versión exacta que se intentó subir queda descargable 90 días desde
       # la pestaña Actions, aunque el FTP falle: es el rollback.

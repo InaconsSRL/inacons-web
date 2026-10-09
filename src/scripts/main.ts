@@ -5,8 +5,7 @@
   lo minifica y le pone hash, y sale como módulo (diferido).
 
   Cada init* se ejecuta aislado: un error en uno no impide que corran
-  los demás. Antes iban en serie y un fallo en el botón de pausa dejaba
-  la página sin mapa, sin aviso.
+  los demás (un fallo en el botón de pausa no debe dejar la página sin mapa).
 */
 
 const reducirMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -399,6 +398,40 @@ function initCoverageMap() {
     .catch((err) => console.warn('initCoverageMap: no se pudo pintar el mapa.', err));
 }
 
+/*
+  ─── Pestañas (.tabs del sistema) ───
+  Patrón ARIA tablist: solo la pestaña activa entra en el orden de tabulación,
+  y las flechas, Inicio y Fin mueven entre pestañas. El panel se oculta con el
+  atributo hidden, que también lo saca del árbol de accesibilidad.
+*/
+function initTabs() {
+  document.querySelectorAll<HTMLElement>('[role="tablist"]').forEach((lista) => {
+    const pestanas = [...lista.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+
+    const activar = (activa: HTMLButtonElement) => {
+      for (const p of pestanas) {
+        const elegida = p === activa;
+        p.setAttribute('aria-selected', String(elegida));
+        p.tabIndex = elegida ? 0 : -1;
+        const panel = document.getElementById(p.getAttribute('aria-controls') ?? '');
+        if (panel) panel.hidden = !elegida;
+      }
+      activa.focus();
+    };
+
+    pestanas.forEach((p, i) => {
+      p.addEventListener('click', () => activar(p));
+      p.addEventListener('keydown', (e) => {
+        const n = pestanas.length;
+        const destino = { ArrowRight: (i + 1) % n, ArrowLeft: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
+        if (destino === undefined) return;
+        e.preventDefault();
+        activar(pestanas[destino]);
+      });
+    });
+  });
+}
+
 /* ─── Indicador de scroll del hero ─── */
 function initScrollHint() {
   document.querySelector('.scroll-hint')?.addEventListener('click', () => {
@@ -417,6 +450,7 @@ for (const init of [
   initResponsive,
   initClientsCarousel,
   initHeroVideo,
+  initTabs,
   initScrollHint,
   initCoverageMap,
 ]) {

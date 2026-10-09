@@ -76,14 +76,10 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       inset: 0;
       z-index: 1;
       background:
-        linear-gradient(to bottom, rgba(20,23,45,0.30) 0%, rgba(20,23,45,0.92) 100%),
-        linear-gradient(110deg, rgba(20,23,45,0.85) 0%, rgba(27,82,120,0.35) 60%, transparent 100%);
+        linear-gradient(to bottom, color-mix(in srgb, var(--c-primary) 30%, transparent) 0%, color-mix(in srgb, var(--c-primary) 92%, transparent) 100%),
+        linear-gradient(110deg, color-mix(in srgb, var(--c-primary) 85%, transparent) 0%, color-mix(in srgb, var(--c-secondary) 35%, transparent) 60%, transparent 100%);
     }
-    /*  Dos columnas: el mensaje a la izquierda y las cifras al costado.
-        Estaban en una banda al pie del hero, que las ponia por debajo
-        de los botones y empujaba scroll-hint y boton de pausa 168px
-        hacia arriba. Al costado del titular se leen a la vez que el, y
-        el hero recupera su borde inferior. */
+    /*  Las cifras van al costado del titular para que se lean a la vez que él. */
     .hero-content {
       position: relative;
       z-index: 2;
@@ -131,7 +127,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       .hero-stat { text-align: center; }
     }
     .home-hero h1 {
-      font-family: 'Montserrat', sans-serif;
+      font-family: var(--font-ui);
       font-size: var(--fs-hero);
       font-weight: var(--fw-semibold);
       text-transform: uppercase;
@@ -149,7 +145,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       flex-wrap: wrap;
     }
     .word.fixed   { color: var(--c-on-dark-2); font-weight: var(--fw-normal); letter-spacing: var(--ls-wide); }
-    .word.highlight { color: #fff; font-weight: var(--fw-display); letter-spacing: var(--ls-tight); }
+    .word.highlight { color: var(--c-text-white); font-weight: var(--fw-display); letter-spacing: var(--ls-tight); }
     /* Ghost reserva el espacio final desde el inicio — sin CLS */
     .word.typewriter {
       position: relative;
@@ -180,7 +176,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       margin-bottom: var(--sp-7);
       max-width: 500px;
       font-weight: var(--fw-normal);
-      letter-spacing: 0.2px;
+      letter-spacing: var(--ls-wide);
     }
     .hero-actions { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
 
@@ -191,9 +187,6 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       gap: var(--sp-l4);
       align-items: center;
     }
-    /* Sin el marco naranja desplazado ni el badge flotante, nada queda
-       posicionado en absoluto aca dentro: se van tambien el position
-       relative y la escalera de z-index que existian solo para ellos. */
     .about-img-frame {
       height: 540px;
     }
@@ -205,7 +198,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     .about-content { display: flex; flex-direction: column; }
     .about-body-text {
       font-size: var(--fs-md);
-      color: rgba(20,23,45,0.68);
+      color: var(--c-text-body);
       line-height: 1.78;
       margin: 0 0 var(--sp-3);
     }
@@ -222,16 +215,8 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       animation: clientsScroll 30s linear infinite;
     }
     .clients-track:hover { animation-play-state: paused; }
-    /*
-      Enel, Sedapal, Luz del Sur, GE Vernova, Kallpa, Indecopi: es lo
-      más persuasivo que tiene la home. Estaba en gris al 48% de
-      opacidad, y el color solo volvía con :hover — que en táctil no
-      existe. En celular la banda entera era una fila de manchas grises.
-
-      El gris uniforme se conserva en escritorio, donde el hover puede
-      devolver el color. En dispositivos sin hover se muestran a color
-      de entrada, porque ahí no hay forma de pedirlo.
-    */
+    /*  Los logos van en gris donde el hover puede devolverles el color; en
+        táctil no hay hover, así que se muestran a color de entrada. */
     .client-logo-item {
       flex: 0 0 158px;
       display: flex;
@@ -249,42 +234,13 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       .client-logo-item { filter: none; opacity: 1; }
     }
 
-    /*
-      Control de pausa del carrusel — WCAG 2.2.2 (nivel A).
-
-      Cualquier movimiento automático que dure más de 5 segundos tiene
-      que poder detenerse. La pausa al pasar el mouse no cumple: no es
-      alcanzable por teclado y no existe en táctil. El patrón es el
-      mismo que ya usa bien el botón de pausa del video del hero.
-    */
+    /*  Pausa del carrusel — WCAG 2.2.2: un movimiento automático de más de 5 s
+        tiene que poder detenerse por teclado y en táctil, no solo con hover. */
     .clients-controls {
       display: flex;
       justify-content: center;
       margin-top: var(--sp-5);
     }
-    .clients-pause-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--sp-2);
-      padding: var(--sp-2) var(--sp-4);
-      min-height: 32px;
-      background: transparent;
-      border: 1px solid var(--c-border);
-      border-radius: var(--radius);
-      color: var(--c-text-muted);
-      font-family: var(--font-ui);
-      font-size: var(--fs-2xs);
-      font-weight: var(--fw-semibold);
-      text-transform: uppercase;
-      letter-spacing: var(--ls-label);
-      cursor: pointer;
-      transition: border-color var(--t), color var(--t);
-    }
-    .clients-pause-btn:hover {
-      border-color: var(--c-secondary);
-      color: var(--c-secondary);
-    }
-    .clients-track.is-paused { animation-play-state: paused; }
 
     .client-logo-item img { max-height: 40px; max-width: 108px; object-fit: contain; }
 
@@ -310,9 +266,6 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     }
 
     /* ── SCROLL HINT ── */
-    /* Los 168px de bottom eran la altura medida de la banda de
-       indicadores que ocupaba el pie del hero. Sin banda, van al
-       borde. Mismo motivo en .hero-pause-btn. */
     .scroll-hint {
       position: absolute;
       bottom: var(--sp-l1);
@@ -334,24 +287,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       right: var(--sp-l1);
       bottom: var(--sp-l1);
       z-index: 4;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--c-border-dark);
-      border: 1px solid var(--c-border-dark-strong);
-      border-radius: 50%;
-      color: var(--c-on-dark-3);
-      cursor: pointer;
-      transition: background var(--t), color var(--t), border-color var(--t);
     }
-    .hero-pause-btn:hover {
-      background: var(--c-border-dark-strong);
-      color: #fff;
-      border-color: rgba(255,255,255,0.40);
-    }
-    /* icon-play initial state se maneja por JS en initHeroPause */
 
     /* Accesibilidad: todo lo que se mueve solo, quieto. Bloque unico. */
     @media (prefers-reduced-motion: reduce) {
@@ -360,34 +296,14 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     }
 
     /* ── SERVICES SHOWCASE ── */
-    /*  El fondo y la adaptacion de .sh-* sobre oscuro los pone
-        .sec--dark del sistema. Aca solo el padding, que es propio:
-        sin padding inferior porque la rejilla va a sangre. */
-    /*  Las tarjetas ya no van a sangre: viven dentro de .container,
-        alineadas con la cabecera y con el resto de la pagina. Iban de
-        borde a borde de la ventana (1440px) mientras todo lo demas
-        estaba en 1200, y se leian como un bloque ajeno pegado encima.
-        Con la rejilla dentro, la seccion recupera su padding inferior. */
+    /*  El fondo oscuro y los .sh-* sobre oscuro los pone .sec--dark. El ancho
+        de las tarjetas lo pone .cards-row del sistema: sus hijos son MediaCard
+        y un selector de esta página no los alcanzaría (regla 1). Servicios y
+        proyectos comparten ancho de columna y proporción para medir igual. */
     .services-showcase {
       padding: var(--section-py) 0;
     }
 
-    /*  Servicios y proyectos son la misma tarjeta: tienen que medir
-        igual. Y medir igual no es solo compartir proporcion — con
-        servicios en tres columnas y proyectos en dos, la misma
-        proporcion daba tarjetas de distinto tamano, que es lo que se
-        veia: las de proyectos eran mas anchas Y mas altas.
-
-        Las dos rejillas usan ahora el mismo ancho de columna (un
-        tercio) y la misma proporcion (4/3, la de MediaCard por
-        defecto). Proyectos va en flex y no en grid para que, cuando
-        haya menos de tres destacados, las tarjetas queden centradas
-        en vez de dejar un hueco a la derecha. */
-    /*  El ancho y el reparto de las tarjetas los pone .cards-row del
-        design system: el selector es "> *" y los hijos son MediaCard,
-        que al no tener <style> propio no llevan data-astro-cid. Escrito
-        aca, Astro lo scopearia y no engancharia con nada. Lo unico que
-        queda en la pagina es lo que si es de la pagina. */
     .cards-row { margin-top: var(--sp-l2); }
     .services-grid { background: var(--c-surface-dark-2); }
 
@@ -425,10 +341,6 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       color: var(--c-text-muted);
       margin-bottom: var(--sp-5);
     }
-    /*  Siete barras de progreso para siete cifras que ya estan escritas
-        al lado. La barra no anadia un dato: repetia el mismo en otra
-        forma, y se llevaba consigo una funcion de JS, dos radios
-        literales y una transicion de 1.2s. */
     .map-stat {
       display: flex;
       justify-content: space-between;
@@ -460,12 +372,8 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         min-height: 100svh;
         align-items: center;
       }
-      /*
-        El eyebrow se queda. Era lo único en toda la primera pantalla
-        que decía a qué se dedica la empresa: el H1 es el eslogan y no
-        nombra el rubro. Ocultarlo dejaba al visitante de celular sin
-        saber qué vende INACONS hasta pasar el hero entero.
-      */
+      /*  El eyebrow se mantiene en móvil: es lo único de la primera pantalla
+          que nombra el rubro (el H1 es el eslogan). */
       .scroll-hint    { display: none; }
       .hero-content {
         padding: var(--sp-l3) var(--sp-5);
@@ -479,15 +387,8 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         width: 100%;
         letter-spacing: var(--ls-tight);
       }
-      /*
-        Antes: nowrap + overflow:hidden. Eso no ajusta el titular, lo
-        recorta — en un teléfono de 360px "CONSTRUIMOS CONFIANZA" no
-        entra y perdía letras por el borde, en silencio.
-
-        Ahora el tamaño lo resuelve --fs-hero de forma fluida, y el
-        wrap queda como red de seguridad: en el peor caso la palabra
-        baja de línea, que es feo pero legible. Recortar no lo es.
-      */
+      /*  Nunca recortar el titular: --fs-hero lo ajusta y el wrap es la red de
+          seguridad para "CONSTRUIMOS CONFIANZA" en 360px. */
       .hero-line {
         flex-wrap: wrap;
         justify-content: center;
@@ -514,9 +415,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         width: 100%;
         justify-content: center;
       }
-      /*  En una columna no caben cuatro cifras al costado: bajan bajo
-          los botones en 2x2, sin el filete lateral, que ahi no separa
-          nada. */
+      /*  En una columna, las cifras bajan en 2×2 y sin filete lateral. */
       .hero-content {
         grid-template-columns: 1fr;
         gap: var(--sp-l2);
@@ -529,27 +428,14 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         border-left: none;
         width: 100%;
       }
-      /*
-        El nowrap de .hero-stat es para escritorio, donde las cifras van en
-        columna y "Inversión gestionada" cabe de sobra en una línea. En el
-        grid de dos columnas del móvil ese nowrap es el que rompía la página:
-        una columna 1fr no puede encogerse por debajo de su contenido, y con
-        el texto sin poder partirse el mínimo era la frase entera. A 320px el
-        grid medía más que el viewport y arrastraba a todo el documento con
-        scroll horizontal — de ahí la franja blanca a la derecha de las
-        secciones, que solo pintan hasta donde llega el ancho real.
-
-        min-width: 0 es el cinturón: anula el mínimo automático de la celda
-        para que el ajuste no dependa solo de que el texto pueda partirse.
-      */
+      /*  Sin nowrap ni mínimo automático: en el grid 2×2, una celda 1fr que no
+          puede partir su texto ensancha la página y da scroll horizontal. */
       .hero-stat {
         text-align: center;
         white-space: normal;
         min-width: 0;
       }
       .hero-stat .stat-num { font-size: var(--fs-2xl); }
-
-      /* CTA */
 
       .cards-row { margin-top: var(--sp-7); }
       .about-grid { grid-template-columns: 1fr; gap: var(--sp-l2); }
@@ -601,7 +487,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         ))}
       </div>
     </div>
-    <button class="hero-pause-btn" id="heroPauseBtn" aria-label="Pausar video" hidden>
+    <button type="button" class="btn-icono hero-pause-btn" id="heroPauseBtn" aria-label="Pausar video" hidden>
       <Icono nombre="pausa" tam={14} class="icon-pause" />
       <Icono nombre="reproducir" tam={14} class="icon-play" />
     </button>
@@ -725,7 +611,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       </div>
 
       <div class="clients-controls">
-        <button type="button" class="clients-pause-btn" id="clientsPauseBtn" aria-pressed="false">
+        <button type="button" class="btn-control" id="clientsPauseBtn" aria-pressed="false">
           <Icono nombre="pausa" tam={12} class="icon-pause" />
           <Icono nombre="reproducir" tam={12} class="icon-play" />
           <span class="clients-pause-label">Pausar</span>

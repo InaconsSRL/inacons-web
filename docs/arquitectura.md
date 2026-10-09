@@ -9,7 +9,7 @@
 | Comportamiento | `src/scripts/main.ts`, un módulo empaquetado por Astro |
 | Imágenes | `astro:assets`: WebP, `srcset` y dimensiones reales generadas en el build |
 | Contenido | Content collections en `src/content/`, validadas con Zod |
-| Fuentes | Google Fonts — Montserrat, carga asíncrona |
+| Fuentes | Montserrat con la API de fuentes de Astro: se descarga en el build y se sirve desde `/_astro/fonts/` |
 | Dependencias | `astro` y `@astrojs/sitemap`. Nada más |
 
 No hay backend propio ni base de datos. El único dato dinámico es el envío del
@@ -52,6 +52,7 @@ una página va en `src/assets/` y se importa.
 | `/sostenibilidad/` | `sostenibilidad.astro` | ✅ |
 | `/documentos/` | `documentos.astro` | ✅ |
 | `/canal-etico/` | `canal-etico.astro` | ✅ |
+| `/privacidad/` | `privacidad.astro` | ❌ mientras `BORRADOR = true` — pendiente de revisión legal |
 | `/contacto/` | `contacto.astro` | ✅ |
 | `/mineria/` | `mineria.astro` | ✅ presentación del sector minero (sin menú ni pie) |
 | `/recursos/` | `recursos/index.astro` | ❌ `noindex` — material interno |
@@ -76,7 +77,7 @@ El orden de los servicios en menú, pie, home y formulario lo da el campo `menu`
 ## CSS
 
 `src/styles/design-system.css` tiene los tokens (color, tipografía, espaciado) y todos los
-componentes compartidos; `/sistema/` los muestra pintados con ese mismo archivo. Se importa
+componentes compartidos (botones, controles, pestañas, prosa, avisos…); `/sistema/` los muestra pintados con ese mismo archivo. Se importa
 en `BaseLayout`, así que sale minificado, con hash y cacheable para siempre.
 
 Las páginas solo escriben en su `<style>` el layout que es suyo. Regla 1 de
@@ -86,7 +87,7 @@ scope de la página, así que `.marco img` en la página funciona.
 
 ## main.ts
 
-Doce funciones `init*`, cada una aislada con `try/catch`: un error en una no detiene a las
+Trece funciones `init*`, cada una aislada con `try/catch`: un error en una no detiene a las
 demás. Todas respetan `prefers-reduced-motion`.
 
 | Función | Qué hace | Hook HTML |
@@ -101,6 +102,7 @@ demás. Todas respetan `prefers-reduced-motion`.
 | `initResponsive` | Clase `with-topbar` en escritorio | `#header`, `.main` |
 | `initClientsCarousel` | Pausa del carrusel de clientes | `.clients-track`, `#clientsPauseBtn` |
 | `initHeroVideo` | Carga el vídeo solo en escritorio | `.hero-video[data-src]`, `#heroPauseBtn` |
+| `initTabs` | Pestañas ARIA: clic, flechas, Inicio y Fin | `[role="tablist"]` con `.tab[aria-controls]` |
 | `initScrollHint` | Flecha del hero | `.scroll-hint` |
 | `initCoverageMap` | Inyecta el mapa y dibuja los pines | `#peruMapContainer[data-ciudades]` |
 

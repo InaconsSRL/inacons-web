@@ -44,14 +44,23 @@ Options -Indexes
 
 # ── Caché ───────────────────────────────────────────────────────────────────
 #  Una sola fuente: mod_headers. mod_expires emite su propio Cache-Control y
-#  dejaba cada respuesta con dos valores en conflicto (medido en producción,
-#  sep-2026).
+#  deja cada respuesta con dos valores en conflicto.
 #
-#  El HTML sigue llegando también con un `max-age=3600` que añade el hosting
-#  después de este archivo. No rompe nada —con varios Cache-Control valen todas
-#  las directivas y `no-cache` obliga a revalidar—; quitarlo es del panel del
-#  hosting.
+#  El hosting añade su propio Cache-Control por tipo de archivo (HTML 1 h,
+#  CSS 1 día, SVG 7 días), medido en producción en oct-2026. Es el patrón de
+#  un mod_expires activado en la configuración del servidor: se apaga aquí.
+#  Si tras desplegar sigue apareciendo un segundo Cache-Control, viene de un
+#  proxy delante de Apache y solo se quita desde el panel del hosting.
+<IfModule mod_expires.c>
+    ExpiresActive Off
+</IfModule>
+
 <IfModule mod_headers.c>
+
+    #  Segunda red para lo mismo: borra el Cache-Control que otro módulo haya
+    #  puesto en la respuesta. No toca los de abajo: van con `always`, que es
+    #  otra tabla de cabeceras.
+    Header unset Cache-Control
 
     #  Activos con hash en el nombre (CSS, JS e imágenes que procesa Astro):
     #  cambiar el contenido cambia la URL, así que se cachean para siempre.

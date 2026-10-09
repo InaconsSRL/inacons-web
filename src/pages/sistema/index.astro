@@ -130,7 +130,7 @@ const codigoLista = `<ul class="data-list">
       border: 1px solid var(--c-border);
       border-radius: var(--radius);
     }
-    .ds-indice a:hover { background: var(--c-secondary); color: #fff; border-color: var(--c-secondary); }
+    .ds-indice a:hover { background: var(--c-secondary); color: var(--c-text-white); border-color: var(--c-secondary); }
 
     .ds-seccion { margin-top: var(--sp-l3); scroll-margin-top: var(--sp-5); }
     .ds-seccion > h2 {
@@ -159,6 +159,17 @@ const codigoLista = `<ul class="data-list">
     .ds-demo--oscuro { background: var(--c-primary); }
 
     .ds-fila { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+    .ds-fila--ancha { gap: var(--sp-l1); }
+    .ds-ondark { color: var(--tono); font-size: var(--fs-md); }
+    .ds-ondark + .ds-ondark { margin-top: var(--sp-3); }
+    .ds-ondark code { color: inherit; }
+    .ds-cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .ds-cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .ds-centrado { max-width: 720px; margin: 0 auto; }
+    .ds-sep { margin-top: var(--sp-4); }
+    .ds-sep-chico { margin-top: var(--sp-1); }
+    .ds-titulo-chico { font-size: var(--fs-base); }
+    .ds-angosto { max-width: 300px; }
 
     .ds-codigo {
       background: var(--c-primary);
@@ -169,7 +180,7 @@ const codigoLista = `<ul class="data-list">
     }
     .ds-codigo pre {
       margin: 0;
-      font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-family: var(--font-mono);
       font-size: var(--fs-xs);
       line-height: 1.7;
       color: var(--c-on-dark-1);
@@ -197,7 +208,7 @@ const codigoLista = `<ul class="data-list">
 
     .ds-sp { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-2) 0; }
     .ds-sp code { font-size: var(--fs-xs); color: var(--c-text-muted); min-width: 80px; flex-shrink: 0; }
-    .ds-sp-barra { height: 14px; background: var(--c-secondary); border-radius: 1px; }
+    .ds-sp-barra { height: 14px; background: var(--c-secondary); border-radius: var(--radius); }
 
     .ds-nota {
       border-left: 3px solid var(--c-accent);
@@ -263,7 +274,7 @@ const codigoLista = `<ul class="data-list">
             <div class="ds-colores">
               {g.items.map((c) => (
                 <div class="ds-color">
-                  <div class="ds-muestra" style={`background: ${c.valor}`}></div>
+                  <div class="ds-muestra" style={`background: var(${c.token})`}></div>
                   <div class="ds-color-info">
                     <code>{c.token}</code>
                     <small>{c.valor}</small>
@@ -277,14 +288,14 @@ const codigoLista = `<ul class="data-list">
 
         <p class="ds-grupo">Texto sobre oscuro</p>
         <div class="ds-demo ds-demo--oscuro">
-          <p style="color: var(--c-on-dark-1); font-size: var(--fs-md); margin-bottom: var(--sp-3)">
-            <code style="color:inherit">--c-on-dark-1</code> — 14.95:1, titulares y texto principal
+          <p class="ds-ondark" style="--tono: var(--c-on-dark-1)">
+            <code>--c-on-dark-1</code> — 14.95:1, titulares y texto principal
           </p>
-          <p style="color: var(--c-on-dark-2); font-size: var(--fs-md); margin-bottom: var(--sp-3)">
-            <code style="color:inherit">--c-on-dark-2</code> — 9.52:1, texto de apoyo
+          <p class="ds-ondark" style="--tono: var(--c-on-dark-2)">
+            <code>--c-on-dark-2</code> — 9.52:1, texto de apoyo
           </p>
-          <p style="color: var(--c-on-dark-3); font-size: var(--fs-md)">
-            <code style="color:inherit">--c-on-dark-3</code> — 7.37:1, metadatos y rótulos. Es el mínimo permitido.
+          <p class="ds-ondark" style="--tono: var(--c-on-dark-3)">
+            <code>--c-on-dark-3</code> — 7.37:1, metadatos y rótulos. Es el mínimo permitido.
           </p>
         </div>
       </section>
@@ -360,6 +371,39 @@ const codigoLista = `<ul class="data-list">
           <button class="btn btn-primary btn-block">Bloque — ancho completo, 44px de alto</button>
         </div>
 
+        <p class="ds-grupo">Controles de interfaz</p>
+        <p>
+          <code>.btn-control</code> para acciones secundarias de la propia interfaz
+          (pausar, compartir), con <code>--dark</code> sobre oscuro.
+          <code>.btn-icono</code> es solo símbolo: lleva <code>aria-label</code> siempre.
+        </p>
+        <div class="ds-demo">
+          <div class="ds-fila">
+            <button type="button" class="btn-control"><Icono nombre="pausa" tam={12} /> Pausar</button>
+          </div>
+        </div>
+        <div class="ds-demo ds-demo--oscuro">
+          <div class="ds-fila">
+            <button type="button" class="btn-control btn-control--dark"><Icono nombre="compartir" tam={14} /> Compartir</button>
+            <button type="button" class="btn-icono" aria-label="Pausar video"><Icono nombre="pausa" tam={14} /></button>
+          </div>
+        </div>
+
+        <p class="ds-grupo">Pestañas</p>
+        <p>
+          <code>.tabs</code> con <code>role="tablist"</code> y cada <code>.tab</code> con
+          <code>aria-controls</code>. <code>initTabs()</code> las activa solo: no hace falta
+          script en la página.
+        </p>
+        <div class="ds-demo">
+          <div class="tabs" role="tablist" aria-label="Ejemplo de pestañas">
+            <button type="button" class="tab" role="tab" id="ds-tab-1" aria-selected="true" aria-controls="ds-panel-1">Primera</button>
+            <button type="button" class="tab" role="tab" id="ds-tab-2" aria-selected="false" aria-controls="ds-panel-2" tabindex="-1">Segunda</button>
+          </div>
+          <div id="ds-panel-1" role="tabpanel" aria-labelledby="ds-tab-1"><p>Contenido de la primera pestaña.</p></div>
+          <div id="ds-panel-2" role="tabpanel" aria-labelledby="ds-tab-2" hidden><p>Contenido de la segunda pestaña.</p></div>
+        </div>
+
         <div class="ds-codigo"><pre>{codigoBotones}</pre></div>
       </section>
 
@@ -377,7 +421,7 @@ const codigoLista = `<ul class="data-list">
 
         <p class="ds-grupo">Los cinco modificadores</p>
         <div class="ds-demo">
-          <div class="feature-grid" style="grid-template-columns: repeat(3, 1fr)">
+          <div class="feature-grid ds-cols-3">
             <div class="feature-item feature-item--card feature-item--centrado">
               <div class="feature-icon">
                 <Icono nombre="escudo" tam={22} />
@@ -388,7 +432,7 @@ const codigoLista = `<ul class="data-list">
 
             <div class="feature-item feature-item--card feature-item--fila">
               <div class="feature-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+                <Icono nombre="check-circulo" tam={22} />
               </div>
               <div>
                 <p class="feature-title">--fila</p>
@@ -414,7 +458,7 @@ const codigoLista = `<ul class="data-list">
           Con <code>--marca</code> pasa a marca de agua en la esquina.
         </p>
         <div class="ds-demo">
-          <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr)">
+          <div class="feature-grid ds-cols-2">
             <div class="feature-item feature-item--card">
               <div class="feature-num" aria-hidden="true">01</div>
               <p class="feature-title">En el flujo</p>
@@ -448,7 +492,7 @@ const codigoLista = `<ul class="data-list">
           cual sea la foto.
         </div>
         <div class="ds-demo">
-          <div class="cards-row" style="max-width: 720px; margin: 0 auto">
+          <div class="cards-row ds-centrado">
             <MediaCard
               href="/proyectos/"
               image={imagenProyecto}
@@ -485,12 +529,12 @@ const codigoLista = `<ul class="data-list">
             <h3 class="panel-title">.panel .panel--raised</h3>
             <p class="panel-desc">Superficie con sombra. La caja por defecto de un panel.</p>
           </div>
-          <div class="panel panel--accent" style="margin-top: var(--sp-4)">
+          <div class="panel panel--accent ds-sep">
             <h3 class="panel-title">.panel--accent</h3>
             <p class="panel-desc">Filete superior. Señala dónde está la acción principal de la pantalla.</p>
           </div>
-          <div class="panel--ghost" style="margin-top: var(--sp-4)">
-            <h3 class="panel-title" style="font-size: var(--fs-base)">.panel--ghost</h3>
+          <div class="panel--ghost ds-sep">
+            <h3 class="panel-title ds-titulo-chico">.panel--ghost</h3>
             <p class="panel-desc">Borde punteado: esto todavía no existe. Nunca para contenido real.</p>
           </div>
         </div>
@@ -507,7 +551,7 @@ const codigoLista = `<ul class="data-list">
         </p>
 
         <div class="ds-demo">
-          <div style="max-width: 300px">
+          <div class="ds-angosto">
             <div class="panel panel--sm panel--rail">
               <p class="panel-label">Ficha técnica</p>
               <ul class="data-list">
@@ -515,7 +559,7 @@ const codigoLista = `<ul class="data-list">
                 <li><span class="data-key">Año</span><span class="data-value">2025</span></li>
               </ul>
             </div>
-            <div class="panel panel--sm panel--rail" style="margin-top: var(--sp-1)">
+            <div class="panel panel--sm panel--rail ds-sep-chico">
               <p class="panel-label">Descargas</p>
               <p class="panel-desc">Brochure general</p>
             </div>
@@ -562,9 +606,9 @@ const codigoLista = `<ul class="data-list">
             <textarea id="ds-mensaje" class="form-textarea"></textarea>
           </div>
 
-          <div class="form-group">
+          <div class="form-group was-validated">
             <label for="ds-error">Campo con error</label>
-            <input type="text" id="ds-error" class="form-input" style="border-color:#c0392b" value="valor inválido" />
+            <input type="email" id="ds-error" class="form-input" value="valor inválido" />
             <span class="form-error">Este código ya existe.</span>
           </div>
 
@@ -640,7 +684,7 @@ const codigoLista = `<ul class="data-list">
 
         <p class="ds-grupo">Card de dato</p>
         <div class="ds-demo">
-          <div class="ds-fila" style="gap: var(--sp-l1)">
+          <div class="ds-fila ds-fila--ancha">
             <div class="card--stat">
               <span class="stat-num">+50</span>
               <span class="stat-label">Proyectos en Huancayo</span>
@@ -664,7 +708,7 @@ const codigoLista = `<ul class="data-list">
           cada una en su página.
         </p>
         <div class="ds-demo ds-demo--oscuro">
-          <div class="ds-fila" style="gap: var(--sp-l1)">
+          <div class="ds-fila ds-fila--ancha">
             <div class="card--stat card--stat-lg card--stat-oscuro">
               <span class="stat-num">+15</span>
               <span class="stat-label">Años de experiencia</span>

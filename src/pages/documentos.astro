@@ -25,36 +25,6 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
 <BaseLayout title="Documentos | INACONS" description="Certificaciones ISO y documentos corporativos de INACONS — transparencia y compromiso con la calidad">
 
   <style slot="head">
-    /* Pestañas */
-    .tabs-wrap {
-      display: flex;
-      gap: 0;
-      border-bottom: 2px solid var(--c-border-light);
-      margin-bottom: var(--sp-l2);
-    }
-    .tab-btn {
-      padding: var(--sp-4) var(--sp-7);
-      font-family: 'Montserrat', sans-serif;
-      font-size: var(--fs-sm);
-      font-weight: var(--fw-semibold);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-      color: var(--c-text-muted);
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      cursor: pointer;
-      transition: color .2s, border-color .2s;
-    }
-    .tab-btn:hover { color: var(--c-text-heading); }
-    .tab-btn.active {
-      color: var(--c-secondary);
-      border-bottom-color: var(--c-secondary);
-    }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
     /* Intro de sección */
     .docs-intro {
       max-width: 640px;
@@ -81,10 +51,10 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
       display: flex; flex-direction: column; align-items: center;
       padding: var(--sp-6) var(--sp-5);
       border-right: 1px solid var(--c-border-light);
-      text-align: center; transition: background .22s;
+      text-align: center; transition: background var(--t);
     }
     .norm-item:last-child { border-right: none; }
-    .norm-item:hover { background: rgba(27,82,120,0.04); }
+    .norm-item:hover { background: color-mix(in srgb, var(--c-secondary) 4%, transparent); }
 
     /* Responsive */
     @media (max-width: 767.98px) {
@@ -93,7 +63,6 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
       .norms-band { flex-direction: column; }
       .norm-item { border-right: none; border-bottom: 1px solid var(--c-border-light); }
       .norm-item:last-child { border-bottom: none; }
-      .tab-btn { padding: var(--sp-3) var(--sp-4); font-size: var(--fs-xs); }
     }
     @media (min-width: 768px) and (max-width: 1023.98px) {
       .cert-grid .feature-item:nth-child(4),
@@ -124,24 +93,20 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
       </div>
 
       <!-- Pestañas -->
-      <div class="tabs-wrap" role="tablist" aria-label="Tipo de documento" data-aos="fade-up">
-        <button type="button" class="tab-btn active" role="tab" id="tabbtn-certificaciones" aria-selected="true" aria-controls="tab-certificaciones">
+      <div class="tabs" role="tablist" aria-label="Tipo de documento" data-aos="fade-up">
+        <button type="button" class="tab" role="tab" id="tabbtn-certificaciones" aria-selected="true" aria-controls="tab-certificaciones">
           Certificaciones ISO
         </button>
-        <button type="button" class="tab-btn" role="tab" id="tabbtn-politicas" aria-selected="false" aria-controls="tab-politicas" tabindex="-1">
+        <button type="button" class="tab" role="tab" id="tabbtn-politicas" aria-selected="false" aria-controls="tab-politicas" tabindex="-1">
           Políticas Corporativas
         </button>
       </div>
 
       <!-- Panel: Certificaciones -->
-      <div class="tab-panel active" id="tab-certificaciones" role="tabpanel" aria-labelledby="tabbtn-certificaciones">
+      <div id="tab-certificaciones" role="tabpanel" aria-labelledby="tabbtn-certificaciones">
         <div class="cert-grid grid-3">
           {/*
-            Las cuatro normas salen de src/content/certificaciones/. Antes
-            estaban escritas a mano aqui teniendo la coleccion con los mismos
-            datos, que es justo lo que prohibe la regla 3 de CLAUDE.md: el PDF
-            del certificado aparecia en dos sitios y el dia que cambiara uno,
-            el otro se quedaba apuntando al viejo sin que nada fallara.
+            Las normas salen de src/content/certificaciones/ (regla 3).
 
             El retardo de la animacion se calcula por posicion. La tarjeta de
             INCE-489, que va debajo, sigue escrita a mano y cierra la serie con
@@ -161,7 +126,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
           ))}
           <a href="/assets/documentos/certificado_ince_489.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="400">
             <span class="feature-num feature-num--marca" aria-hidden="true">INCE</span>
-            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+            <div class="feature-icon"><Icono nombre="insignia-check" tam={24} /></div>
             <p class="panel-label">INCE-489</p>
             <h3 class="feature-title">Certificado de Capacidad Técnica</h3>
             <p class="feature-desc">Acredita nuestra capacidad técnica y experiencia comprobada en la ejecución de proyectos.</p>
@@ -179,11 +144,11 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
       </div>
 
       <!-- Panel: Políticas -->
-      <div class="tab-panel" id="tab-politicas" role="tabpanel" aria-labelledby="tabbtn-politicas">
+      <div id="tab-politicas" role="tabpanel" hidden aria-labelledby="tabbtn-politicas">
         <div class="cert-grid grid-3">
           <a href="/assets/documentos/politica_alcohol_drogas.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
-            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></div>
+            <div class="feature-icon"><Icono nombre="escudo-alerta" tam={24} /></div>
             <p class="panel-label">Política</p>
             <h3 class="feature-title">Alcohol y Drogas</h3>
             <p class="feature-desc">Normativa sobre prevención y control del consumo de sustancias en el entorno de trabajo.</p>
@@ -193,7 +158,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
           </a>
           <a href="/assets/documentos/politica_negativa_trabajo_inseguro.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
-            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m14.5 9.5-5 5"/><path d="m9.5 9.5 5 5"/></svg></div>
+            <div class="feature-icon"><Icono nombre="escudo-aspa" tam={24} /></div>
             <p class="panel-label">Política</p>
             <h3 class="feature-title">Negativa al Trabajo Inseguro</h3>
             <p class="feature-desc">Derecho de los trabajadores a rechazar actividades que pongan en riesgo su seguridad.</p>
@@ -203,7 +168,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
           </a>
           <a href="/assets/documentos/politica_sig.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
-            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg></div>
+            <div class="feature-icon"><Icono nombre="ajustes" tam={24} /></div>
             <p class="panel-label">Política</p>
             <h3 class="feature-title">Sistema Integrado de Gestión</h3>
             <p class="feature-desc">Política del Sistema Integrado de Gestión de Calidad, Medio Ambiente y Seguridad.</p>
@@ -213,7 +178,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
           </a>
           <a href="/assets/documentos/politica_antisoborno.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
-            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+            <div class="feature-icon"><Icono nombre="mano" tam={24} />
             </div>
             <p class="panel-label">Política</p>
             <h3 class="feature-title">Antisoborno</h3>
@@ -224,7 +189,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
           </a>
           <a href="/assets/documentos/otros_alcance_sig.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
-            <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></div>
+            <div class="feature-icon"><Icono nombre="documento-texto" tam={24} /></div>
             <p class="panel-label">Documento</p>
             <h3 class="feature-title">Alcance del SIG</h3>
             <p class="feature-desc">Documentación complementaria sobre el alcance de nuestro Sistema Integrado de Gestión.</p>
@@ -247,27 +212,3 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
   />
 
 </BaseLayout>
-
-<script>
-  // Pestañas con el patrón ARIA: clic o flechas izquierda/derecha.
-  const pestanas = [...document.querySelectorAll<HTMLButtonElement>('.tab-btn')];
-
-  const activar = (activa: HTMLButtonElement) => {
-    for (const p of pestanas) {
-      const elegida = p === activa;
-      p.classList.toggle('active', elegida);
-      p.setAttribute('aria-selected', String(elegida));
-      p.tabIndex = elegida ? 0 : -1;
-      document.getElementById(p.getAttribute('aria-controls') ?? '')?.classList.toggle('active', elegida);
-    }
-    activa.focus();
-  };
-
-  pestanas.forEach((p, i) => {
-    p.addEventListener('click', () => activar(p));
-    p.addEventListener('keydown', (e) => {
-      const paso = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-      if (paso) activar(pestanas[(i + paso + pestanas.length) % pestanas.length]);
-    });
-  });
-</script>
