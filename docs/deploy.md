@@ -48,14 +48,14 @@ permanentes guardadas en los navegadores. **Llevan `[NC]` y no es opcional**: lo
 codificaron en mayúsculas y el escaneo llega como `/R/CANAL_ETICO`; sin `[NC]` el papel da
 404 aunque tecleado en minúsculas funcione.
 
-**Caché** (solo con `mod_headers`; el `mod_expires` del servidor se apaga con `ExpiresActive Off`):
+**Caché** (solo con `mod_headers`; `mod_expires` duplicaba `Cache-Control`):
 
 - `/_astro/` → un año, `immutable`. Todo lo que procesa Astro lleva hash en el nombre.
 - Archivos de `public/` con nombre fijo → 30 días.
 - HTML → `no-cache, must-revalidate`, para que un despliegue se vea al instante.
 
-Si una respuesta vuelve a traer dos `Cache-Control`, el segundo lo pone un proxy delante
-de Apache y se quita desde el panel del hosting.
+Toda respuesta trae además un segundo `Cache-Control` que añade un proxy del hosting
+delante de Apache. No se puede quitar desde `.htaccess` (probado); se pide al hosting.
 
 **Seguridad**: `Options -Indexes`, `X-Frame-Options`, `X-Content-Type-Options`,
 `Referrer-Policy`, `Permissions-Policy` y HSTS.
