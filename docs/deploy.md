@@ -14,6 +14,7 @@ anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.
 | `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` | Secret | Acceso FTP del cPanel |
 | `PUBLIC_CONTACT_ENDPOINT` | Variable | Destino del formulario de contacto. Opcional y público |
 | `PUBLIC_ANALYTICS_TOKEN` | Variable | Token de Cloudflare Web Analytics. Sin él no se carga analítica |
+| `FTP_PROTOCOL` | Variable | `ftps` cuando el hosting acepte TLS. Vacía → `ftp` sin cifrar |
 
 ## Dominios
 

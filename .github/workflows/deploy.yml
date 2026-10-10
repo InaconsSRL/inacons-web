@@ -3,6 +3,8 @@ name: Deploy a cPanel
 on:
   push:
     branches: [main]
+  # Botón "Run workflow" en Actions: para redesplegar tras cambiar una variable.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -54,9 +56,16 @@ jobs:
           path: dist/
           retention-days: 90
 
+      # El hosting aún no acepta TLS en el FTP (AUTH TLS → 500, oct-2026): la
+      # contraseña viaja en claro. Cuando lo active, la variable de repositorio
+      # FTP_PROTOCOL = ftps cifra la conexión sin tocar este archivo. `strict`
+      # exige un certificado válido para FTP_SERVER: si falla, FTP_SERVER tiene
+      # que ser el nombre del certificado (p. ej. el hostname del servidor).
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftp' }}
+          security: strict
           server:   ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
