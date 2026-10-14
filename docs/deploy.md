@@ -4,7 +4,8 @@
 
 Push a `main` → GitHub Actions (`.github/workflows/deploy.yml`) → `npm ci` →
 `npm run build` → `dist/` se guarda como artefacto 90 días → subida por FTP a
-`/sites/home.inacons.com.pe/` en cPanel.
+`public_html/sites/home.inacons.com.pe/` en cPanel, con una cuenta FTP cuya raíz es esa
+carpeta: el deploy no puede tocar nada más del hosting.
 
 No hay staging: `home.inacons.com.pe` **es** producción. Para volver a una versión
 anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.

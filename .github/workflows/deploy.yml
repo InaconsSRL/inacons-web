@@ -70,4 +70,6 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir:  ./dist/
-          server-dir: /sites/home.inacons.com.pe/
+          # La cuenta FTP de deploy tiene como raíz la carpeta de la web
+          # (public_html/sites/home.inacons.com.pe) y no ve nada más del hosting.
+          server-dir: ./
