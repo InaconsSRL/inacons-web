@@ -15,7 +15,19 @@ anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.
 | `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` | Secret | Acceso FTP del cPanel |
 | `PUBLIC_CONTACT_ENDPOINT` | Variable | Destino del formulario de contacto. Opcional y público |
 | `PUBLIC_ANALYTICS_TOKEN` | Variable | Token de Cloudflare Web Analytics. Sin él no se carga analítica |
-| `FTP_PROTOCOL` | Variable | `ftps` cuando el hosting acepte TLS. Vacía → `ftp` sin cifrar |
+| `FTP_PROTOCOL` | Variable | `ftps` si el hosting llegara a aceptar TLS. Vacía → `ftp` sin cifrar |
+
+### Límites del plan de hosting
+
+El plan contratado en Ecohosting Perú no ofrece, y el proveedor no habilita:
+
+- **FTP cifrado (FTPS) ni SSH.** La contraseña del deploy viaja sin cifrar. Se mitiga así:
+  - La cuenta `web@inacons.com.pe` tiene como raíz `public_html/sites/home.inacons.com.pe`
+    y no ve nada más del hosting. Nunca se usa la cuenta principal `ene06ind`.
+  - Su contraseña es exclusiva de esa cuenta y se cambia (cPanel y secret `FTP_PASSWORD`)
+    si hay sospecha de filtración o cuando alguien con acceso deja el equipo.
+- **Control del `Cache-Control`.** Un proxy delante de Apache añade un segundo valor a cada
+  respuesta. No rompe nada (ver la sección de caché).
 
 ## Dominios
 
@@ -57,7 +69,13 @@ codificaron en mayúsculas y el escaneo llega como `/R/CANAL_ETICO`; sin `[NC]` 
 - HTML → `no-cache, must-revalidate`, para que un despliegue se vea al instante.
 
 Toda respuesta trae además un segundo `Cache-Control` que añade un proxy del hosting
-delante de Apache. No se puede quitar desde `.htaccess` (probado); se pide al hosting.
+delante de Apache. No se puede quitar desde `.htaccess` (probado) y el plan no permite
+cambiarlo: el HTML se sigue revalidando siempre por `no-cache`.
+
+**Sitio anterior**: los `.html` de la raíz (`/nosotros.html`, `/obras-civiles.html`…) y
+los PDF que vivían en la raíz redirigen con 301 a su página o archivo actual. Cualquier otro
+`.html` de la raíz va al inicio. El deploy solo borra lo que él mismo subió, así que esos
+archivos viejos pueden seguir en el servidor sin que nadie llegue a verlos.
 
 **Seguridad**: `Options -Indexes`, `X-Frame-Options`, `X-Content-Type-Options`,
 `Referrer-Policy`, `Permissions-Policy` y HSTS.

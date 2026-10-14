@@ -56,9 +56,10 @@ jobs:
           path: dist/
           retention-days: 90
 
-      # El hosting aún no acepta TLS en el FTP (AUTH TLS → 500, oct-2026): la
-      # contraseña viaja en claro. Cuando lo active, la variable de repositorio
-      # FTP_PROTOCOL = ftps cifra la conexión sin tocar este archivo. `strict`
+      # El plan de hosting no ofrece TLS en el FTP (AUTH TLS → 500; el proveedor
+      # no lo habilita en este plan, oct-2026): la contraseña viaja en claro. Lo
+      # mitiga que la cuenta solo ve la carpeta de la web (docs/deploy.md). Si
+      # algún día hay TLS, FTP_PROTOCOL = ftps lo activa sin tocar este archivo. `strict`
       # exige un certificado válido para FTP_SERVER: si falla, FTP_SERVER tiene
       # que ser el nombre del certificado (p. ej. el hostname del servidor).
       - name: Deploy via FTP

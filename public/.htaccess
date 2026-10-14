@@ -32,6 +32,18 @@ Options -Indexes
     #  QR del stand de Expomina 2026, codificado directo a /expomina/.
     RewriteRule ^expomina/?$ /mineria/ [R=301,NC,L]
 
+    #  Sitio anterior (HTML plano). Sus archivos pueden seguir en el servidor
+    #  —el deploy solo borra lo que él mismo subió— y Google y enlaces externos
+    #  los conocen: 301 a la página equivalente. Cualquier otro .html de la raíz
+    #  va al inicio. index.html y 404.html son del sitio actual y se excluyen;
+    #  [NS] evita que la subpetición interna de DirectoryIndex entre en bucle.
+    RewriteRule ^(canal-etico|nosotros|servicios|proyectos|contacto|documentos|sostenibilidad|mineria|recursos)\.html$ /$1/ [R=301,NC,NS,L]
+    RewriteRule ^certificacion\.html$ /documentos/ [R=301,NC,NS,L]
+    RewriteRule ^(obras-civiles|infraestructura|electromecanica|paisajismo|consultoria)\.html$ /servicios/$1/ [R=301,NC,NS,L]
+    RewriteRule ^(brochure_inacons|certificado_ince_489)\.pdf$ /assets/documentos/$1.pdf [R=301,NC,NS,L]
+    RewriteCond %{REQUEST_URI} !^/(index|404)\.html$ [NC]
+    RewriteRule ^[^/]+\.html$ / [R=301,NC,NS,L]
+
     #  Activos con hash de Astro: marca para la regla de caché de abajo.
     RewriteRule ^_astro/ - [E=ASSET_INMUTABLE:1]
 </IfModule>
@@ -49,8 +61,8 @@ Options -Indexes
 #  El hosting añade después un segundo Cache-Control por tipo de archivo
 #  (HTML 1 h, CSS 1 día, SVG 7 días, fuentes 30 días). Lo pone un proxy delante
 #  de Apache, no Apache: ni ExpiresActive Off ni Header unset lo quitan (probado
-#  en producción, oct-2026). Se desactiva desde el panel o el soporte del hosting.
-#  Mientras tanto no rompe nada: `no-cache` sigue obligando a revalidar el
+#  en producción, oct-2026), y el plan contratado no permite cambiarlo. No
+#  rompe nada: `no-cache` sigue obligando a revalidar el
 #  HTML. Lo que se pierde es que los activos con hash pueden revalidarse antes
 #  del año que piden, porque el max-age duplicado deja la decisión al navegador.
 
