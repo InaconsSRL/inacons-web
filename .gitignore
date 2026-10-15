@@ -19,3 +19,7 @@ npm-debug.log*
 .vscode/
 .claude/
 .unlighthouse/
+
+# Worker de contacto: secrets locales y estado de wrangler
+.dev.vars
+.wrangler/

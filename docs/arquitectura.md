@@ -12,9 +12,11 @@
 | Fuentes | Montserrat con la API de fuentes de Astro: se descarga en el build y se sirve desde `/_astro/fonts/` |
 | Dependencias | `astro` y `@astrojs/sitemap`. Nada más |
 
-No hay backend propio ni base de datos. El único dato dinámico es el envío del
-formulario de contacto, que sale a un endpoint externo configurable (ver
-[contenido.md](contenido.md#formulario-de-contacto)).
+El sitio no tiene backend ni base de datos. El único dato dinámico es el envío del
+formulario de contacto, que sale al Worker de `workers/contacto/`: un proyecto aparte, con
+su propio `package.json`, que se despliega en Cloudflare y no en el hosting (ver
+[contenido.md](contenido.md#formulario-de-contacto) y
+[deploy.md](deploy.md#worker-del-formulario-de-contacto)).
 
 ## Árbol
 

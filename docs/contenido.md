@@ -88,11 +88,16 @@ en ningún otro sitio.
 
 ## Formulario de contacto
 
-`/contacto/` envía a la URL de `PUBLIC_CONTACT_ENDPOINT` (variable de build). Sin ella,
-abre el correo del visitante con el mensaje armado y le ofrece copiarlo; nunca declara
-éxito sin confirmación.
+`/contacto/` envía a la URL de `PUBLIC_CONTACT_ENDPOINT` (variable de build), que es el
+Worker de `workers/contacto/`. Sin ella, abre el correo del visitante con el mensaje
+armado y le ofrece copiarlo; nunca declara éxito sin confirmación.
 
-**Contrato del endpoint** — lo que tiene que aceptar el sistema nuevo:
+El Worker comprueba Turnstile, limita a 3 envíos por hora por conexión o por correo,
+guarda una copia en D1, avisa a `ventas@` por Zoho CPaaS con *Reply-To* al visitante y le
+manda un acuse de recibo. Las copias se borran solas a los 12 meses (`RETENCION_MESES`).
+
+**Contrato del endpoint** — lo que acepta el Worker, y lo que tendría que aceptar
+cualquier reemplazo:
 
 ```http
 POST <PUBLIC_CONTACT_ENDPOINT>
@@ -101,14 +106,19 @@ Content-Type: application/json
 {
   "nombre": "…", "correo": "…", "telefono": "…", "empresa": "…",
   "servicio": "Obras Civiles", "mensaje": "…",
-  "origen": "https://home.inacons.com.pe/contacto/"
+  "origen": "https://home.inacons.com.pe/contacto/",
+  "turnstile": "<token del widget>"
 }
 ```
 
-Cualquier respuesta 2xx se muestra como enviado. Otra respuesta, o más de 10 s sin
-respuesta, muestra el error y conserva lo escrito. El endpoint tiene que permitir CORS
-desde `https://home.inacons.com.pe`. El campo trampa `company_url` se filtra en el
-navegador y no se envía.
+Cualquier respuesta 2xx se muestra como enviado; el Worker solo la da cuando CPaaS aceptó
+el aviso a ventas. Un 429 se explica como límite por hora. Cualquier otra respuesta, o
+más de 10 s sin respuesta, muestra el error y conserva lo escrito. El endpoint tiene que
+permitir CORS desde `https://home.inacons.com.pe`. El campo trampa `company_url` se
+filtra en el navegador y no se envía.
+
+Turnstile solo se carga si están definidas `PUBLIC_CONTACT_ENDPOINT` y
+`PUBLIC_TURNSTILE_SITE_KEY`. Con el modo `mailto` no hay nada que proteger.
 
 ## Vídeo y PDF
 

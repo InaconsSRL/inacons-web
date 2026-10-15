@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "inacons-contacto",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+
+  // Variables públicas. Los secrets (CPAAS_TOKEN, TURNSTILE_SECRET,
+  // IP_SALT) van con `wrangler secret put` y nunca en este archivo.
+  "vars": {
+    // localhost para probar el formulario con `npm run dev` del sitio.
+    "ORIGENES": "https://home.inacons.com.pe,http://localhost:4321",
+    // La muestra CPaaS en Agent → SMTP/API (Anfitrión + /v1.1/email). Depende
+    // del centro de datos de la cuenta: .com, .eu, .in…
+    "CPAAS_URL": "https://cpaas.zoho.com/v1.1/email",
+    "CORREO_DESTINO": "ventas@inacons.com.pe",
+    // Tiene que ser del dominio verificado en CPaaS. No necesita buzón: las
+    // respuestas van a CORREO_DESTINO o al visitante por Reply-To.
+    "CORREO_REMITENTE": "noreply@inacons.com.pe",
+    "ENVIAR_ACUSE": "si",
+    "RETENCION_MESES": "12"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "inacons-contacto",
+      // Lo devuelve `npx wrangler d1 create inacons-contacto`.
+      "database_id": "7ff95165-8e7e-4f42-8e8c-e8e84c631e2c"
+    }
+  ],
+
+  // Purga diaria de consultas más antiguas que RETENCION_MESES.
+  "triggers": { "crons": ["0 8 * * *"] }
+}

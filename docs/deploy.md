@@ -13,7 +13,8 @@ anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.
 | Configuración en GitHub | Tipo | Qué es |
 |---|---|---|
 | `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` | Secret | Acceso FTP del cPanel |
-| `PUBLIC_CONTACT_ENDPOINT` | Variable | Destino del formulario de contacto. Opcional y público |
+| `PUBLIC_CONTACT_ENDPOINT` | Variable | URL del Worker de contacto. Opcional y público |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Variable | Clave de sitio de Turnstile. Pública; solo se usa con endpoint |
 | `PUBLIC_ANALYTICS_TOKEN` | Variable | Token de Cloudflare Web Analytics. Sin él no se carga analítica |
 | `FTP_PROTOCOL` | Variable | `ftps` si el hosting llegara a aceptar TLS. Vacía → `ftp` sin cifrar |
 
@@ -28,6 +29,51 @@ El plan contratado en Ecohosting Perú no ofrece, y el proveedor no habilita:
     si hay sospecha de filtración o cuando alguien con acceso deja el equipo.
 - **Control del `Cache-Control`.** Un proxy delante de Apache añade un segundo valor a cada
   respuesta. No rompe nada (ver la sección de caché).
+
+## Worker del formulario de contacto
+
+`workers/contacto/` no se publica con el push: es un Cloudflare Worker que se despliega
+a mano desde esa carpeta. Usa la cuenta de Cloudflare de la empresa, Zoho CPaaS (ex
+ZeptoMail) para enviar y una base D1 para guardar la copia de cada consulta.
+
+**Antes, en Zoho CPaaS:** dominio `inacons.com.pe` verificado (un TXT `…._domainkey` y un
+CNAME de rebotes en el Editor de zona DNS del cPanel, sin tocar el SPF ni el `_dmarc`
+existentes) y el Agent `web-contacto` asociado al dominio. En su pestaña *SMTP/API* están
+la clave API (secret `CPAAS_TOKEN`) y el anfitrión de la API, que con `/v1.1/email` es
+`CPAAS_URL` en `wrangler.jsonc`.
+
+**Antes, en Cloudflare → Turnstile:** un widget para `home.inacons.com.pe` y `localhost`.
+Da una clave de sitio (variable `PUBLIC_TURNSTILE_SITE_KEY` en GitHub) y una secreta
+(secret del Worker).
+
+**Primera vez**, desde `workers/contacto/`:
+
+```bash
+npm ci
+npx wrangler login
+npx wrangler d1 create inacons-contacto      # copiar el database_id a wrangler.jsonc
+npx wrangler d1 execute inacons-contacto --remote --file=schema.sql
+npx wrangler secret put CPAAS_TOKEN
+npx wrangler secret put TURNSTILE_SECRET
+npx wrangler secret put IP_SALT               # cualquier texto aleatorio largo
+npx wrangler deploy                           # imprime la URL *.workers.dev
+```
+
+La URL que imprime `deploy` va en la variable `PUBLIC_CONTACT_ENDPOINT` de GitHub. El
+siguiente push del sitio ya envía al Worker. Hoy es
+`https://inacons-contacto.inacons-contacto.workers.dev`, en la cuenta de Cloudflare de
+`soporteinformatico.inacons@gmail.com`.
+
+**Cambios posteriores:** `npx wrangler deploy` desde la carpeta. Los secrets no se
+vuelven a poner.
+
+**Ver las consultas** (una con `estado = 'error'` es una que ventas no recibió):
+
+```bash
+npx wrangler d1 execute inacons-contacto --remote --command "SELECT id, creado, nombre, correo, servicio, estado FROM consultas ORDER BY id DESC LIMIT 20"
+```
+
+**Errores de envío:** Cloudflare → Workers → `inacons-contacto` → Logs.
 
 ## Dominios
 

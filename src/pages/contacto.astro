@@ -4,10 +4,14 @@ import PageHero from '../components/PageHero.astro';
 import Icono from '../components/Icono.astro';
 import { serviciosPorMenu } from '../lib/servicios';
 import { CONTACTO } from '../data/empresa';
+import { PUBLIC_CONTACT_ENDPOINT, PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
 import imagenHero from '../assets/imagenes/image_heroprincipal.webp';
 
 const servicios = await serviciosPorMenu();
 const { correoVentas, correoGerencia, telefono, whatsapp, redes, sedes } = CONTACTO;
+// Sin endpoint el formulario abre el correo del visitante: no hay nada que
+// proteger y no se carga el script de Cloudflare.
+const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KEY);
 ---
 
 <BaseLayout title="Contacto | INACONS" description="Contáctate con INACONS para iniciar tu proyecto de construcción e ingeniería en el Perú.">
@@ -223,6 +227,11 @@ const { correoVentas, correoGerencia, telefono, whatsapp, redes, sedes } = CONTA
               </div>
               <!-- Campo trampa: invisible para personas, los bots lo rellenan. -->
               <input type="text" name="company_url" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+              {conTurnstile && (
+                <div class="form-group">
+                  <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-language="es" data-theme="light" data-size="flexible"></div>
+                </div>
+              )}
               <p class="form-hint">Usaremos tus datos solo para responder esta consulta. Los campos con * son obligatorios.</p>
               <button type="submit" class="btn btn-primary btn-block" id="formSubmit">
                 <Icono nombre="enviar" tam={15} />
@@ -235,6 +244,7 @@ const { correoVentas, correoGerencia, telefono, whatsapp, redes, sedes } = CONTA
       </div>
     </div>
   </section>
+  {conTurnstile && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
 
   <section class="sec sec--muted">
     <div class="container">
@@ -344,14 +354,14 @@ const { correoVentas, correoGerencia, telefono, whatsapp, redes, sedes } = CONTA
       ].join('\n');
     }
 
-    async function enviarAlEndpoint(url: string, datos: Record<string, string>) {
+    async function enviarAlEndpoint(url: string, datos: Record<string, string>, turnstile: string) {
       const respuesta = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ ...datos, origen: location.href }),
+        body: JSON.stringify({ ...datos, turnstile, origen: location.href }),
         signal: AbortSignal.timeout(10000),
       });
-      if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+      if (!respuesta.ok) throw new Error(String(respuesta.status));
     }
 
     function abrirCorreo(correo: string, datos: Record<string, string>) {
@@ -391,7 +401,11 @@ const { correoVentas, correoGerencia, telefono, whatsapp, redes, sedes } = CONTA
         form.reportValidity();
         return;
       }
+      // Turnstile mete su token como campo del formulario; viaja aparte porque
+      // no es parte del mensaje.
+      const turnstile = datos['cf-turnstile-response'] ?? '';
       delete datos.company_url;
+      delete datos['cf-turnstile-response'];
       const correo = form.dataset.correo ?? '';
 
       if (!ENDPOINT) {
@@ -399,19 +413,28 @@ const { correoVentas, correoGerencia, telefono, whatsapp, redes, sedes } = CONTA
         return;
       }
 
+      if (form.querySelector('.cf-turnstile') && !turnstile) {
+        aviso('info', 'Espera a que termine la verificación de seguridad, sobre el botón, y vuelve a enviar.');
+        return;
+      }
+
       if (boton) boton.disabled = true;
       aviso('info', 'Enviando…');
       try {
-        await enviarAlEndpoint(ENDPOINT, datos);
+        await enviarAlEndpoint(ENDPOINT, datos, turnstile);
         aviso('ok', '<strong>Mensaje enviado.</strong> Te responderemos a la brevedad.');
         form.reset();
         form.classList.remove('was-validated');
-      } catch {
-        aviso('error',
-          `<strong>No pudimos enviar tu mensaje.</strong> Tus datos siguen en el formulario: ` +
-          `inténtalo de nuevo o escríbenos a <a href="mailto:${correo}">${correo}</a>.`);
+      } catch (e) {
+        aviso('error', (e instanceof Error && e.message === '429'
+          ? `<strong>Ya recibimos varios mensajes tuyos en la última hora.</strong> Tus datos siguen en el formulario: ` +
+            `vuelve a intentarlo más tarde o escríbenos a <a href="mailto:${correo}">${correo}</a>.`
+          : `<strong>No pudimos enviar tu mensaje.</strong> Tus datos siguen en el formulario: ` +
+            `inténtalo de nuevo o escríbenos a <a href="mailto:${correo}">${correo}</a>.`));
       } finally {
         if (boton) boton.disabled = false;
+        // Cada token sirve para un solo envío, haya salido bien o no.
+        (window as { turnstile?: { reset(): void } }).turnstile?.reset();
       }
     });
   </script>

@@ -1,0 +1,12 @@
+# Copiar como `.dev.vars` para `npm run dev`. En producción son secrets del
+# Worker (`npx wrangler secret put NOMBRE`), nunca valores en el repositorio.
+
+# Clave API del Agent web-contacto de Zoho CPaaS (SMTP/API → Clave API).
+CPAAS_TOKEN=
+
+# Clave de prueba pública de Cloudflare: siempre aprueba. En producción va la
+# clave secreta del widget Turnstile de home.inacons.com.pe.
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+
+# Cualquier texto aleatorio largo. Si cambia, solo se reinicia el límite por hora.
+IP_SALT=desarrollo-local

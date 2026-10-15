@@ -41,6 +41,8 @@ export default defineConfig({
     schema: {
       // Destino del formulario de /contacto/ (POST, JSON). Vacía → mailto.
       PUBLIC_CONTACT_ENDPOINT: envField.string({ context: 'client', access: 'public', optional: true }),
+      // Clave de sitio de Cloudflare Turnstile. Solo se usa si hay endpoint.
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({ context: 'client', access: 'public', optional: true }),
       // Token de Cloudflare Web Analytics (sin cookies). Vacía → sin analítica.
       PUBLIC_ANALYTICS_TOKEN: envField.string({ context: 'client', access: 'public', optional: true }),
     },
