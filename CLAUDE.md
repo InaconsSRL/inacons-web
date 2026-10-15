@@ -107,3 +107,4 @@ imágenes dramáticas, KPIs integrados en el layout.
 | [docs/arquitectura.md](docs/arquitectura.md) | Estructura, datos compartidos, CSS, `main.ts`, el mapa |
 | [docs/contenido.md](docs/contenido.md) | Colecciones, imágenes, cifras y contrato del formulario |
 | [docs/deploy.md](docs/deploy.md) | CI/CD, dominios, `.htaccess`, indexación |
+| [docs/bitacora.md](docs/bitacora.md) | Qué se hizo en cada sesión, por qué, y qué quedó pendiente |
