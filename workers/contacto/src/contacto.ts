@@ -25,6 +25,8 @@ const LIMITES: Record<keyof Consulta, number> = {
 };
 const OBLIGATORIOS: (keyof Consulta)[] = ['nombre', 'correo', 'telefono', 'servicio', 'mensaje'];
 
+export const IP_A_TURNSTILE = true;
+
 // Por hora. Turnstile frena a los bots; esto frena a una persona usando el
 // acuse de recibo para inundar el buzón de un tercero, o el de ventas.
 const MAXIMO_POR_HORA = 3;
@@ -61,6 +63,7 @@ export async function procesar(consulta: Consulta, env: Env, ipHash: string): Pr
     });
   } catch (e) {
     await marcar(env, id, 'error', String(e));
+    console.error(`contacto: falló el aviso de la consulta ${id}`);
     return { status: 502, datos: { ok: false, error: 'envio' } };
   }
   await marcar(env, id, 'notificado');
@@ -109,23 +112,23 @@ function avisoAVentas(c: Consulta, id: number) {
   return { texto, html };
 }
 
+// No repite el mensaje ni nada que escriba el visitante salvo su nombre: el
+// acuse va a la dirección que él teclea, y con el mensaje dentro serviría
+// para mandar cualquier texto a un tercero desde el dominio de INACONS.
 function acuse(c: Consulta) {
   const texto = [
     `Hola, ${c.nombre}:`,
     '',
-    `Recibimos tu consulta sobre ${c.servicio}. Nuestro equipo la revisará y te responderá a la brevedad.`,
+    'Recibimos tu consulta en la web de INACONS. Nuestro equipo la revisará y te responderá a la brevedad.',
     '',
-    'Tu mensaje:',
-    c.mensaje,
+    'Si no enviaste esta consulta, ignora este correo.',
     '',
     'INACONS S.R.L.',
   ].join('\n');
   const html = `
     <p>Hola, ${escapar(c.nombre)}:</p>
-    <p>Recibimos tu consulta sobre <strong>${escapar(c.servicio)}</strong>.
-    Nuestro equipo la revisará y te responderá a la brevedad.</p>
-    <p style="color:#555">Tu mensaje:</p>
-    <blockquote style="white-space:pre-wrap;border-left:3px solid #ccc;margin:0;padding-left:12px">${escapar(c.mensaje)}</blockquote>
+    <p>Recibimos tu consulta en la web de INACONS. Nuestro equipo la revisará y te responderá a la brevedad.</p>
+    <p style="color:#777;font-size:12px">Si no enviaste esta consulta, ignora este correo.</p>
     <p>INACONS S.R.L.</p>`;
   return { texto, html };
 }

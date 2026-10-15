@@ -378,7 +378,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
         mostrarIdentidad(false);
       } catch (e) {
         aviso('error', e instanceof Error && e.message === '429'
-          ? '<strong>Recibimos varios reportes desde tu conexión en la última hora.</strong> Lo que escribiste sigue en el formulario: vuelve a intentarlo más tarde.'
+          ? '<strong>Recibimos varios reportes seguidos desde tu conexión.</strong> Lo que escribiste sigue en el formulario: espera un minuto y vuelve a enviarlo.'
           : '<strong>No pudimos enviar tu reporte.</strong> Lo que escribiste sigue en el formulario: inténtalo de nuevo en unos minutos.');
       } finally {
         if (boton) boton.disabled = false;

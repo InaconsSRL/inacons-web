@@ -17,6 +17,8 @@ import * as contacto from './contacto';
 import { sha256, turnstileValido, type Env, type Respuesta } from './comun';
 
 type Ruta<T> = {
+  /** Si la IP del visitante se manda a Turnstile. Es opcional para Cloudflare. */
+  IP_A_TURNSTILE: boolean;
   validar(cuerpo: Record<string, unknown>): T | null;
   procesar(datos: T, env: Env, ipHash: string): Promise<Respuesta>;
 };
@@ -59,10 +61,7 @@ export default {
     // reportes del Canal Ético no se purgan aquí: son registros de
     // cumplimiento y su plazo lo decide quien los gestiona.
     const meses = Number.parseInt(env.RETENCION_MESES, 10) || 12;
-    await env.DB.batch([
-      env.DB.prepare(`DELETE FROM consultas WHERE creado < datetime('now', ?1)`).bind(`-${meses} months`),
-      env.DB.prepare(`DELETE FROM limites WHERE creado < datetime('now', '-1 day')`),
-    ]);
+    await env.DB.prepare(`DELETE FROM consultas WHERE creado < datetime('now', ?1)`).bind(`-${meses} months`).run();
   },
 } satisfies ExportedHandler<Env>;
 
@@ -71,7 +70,8 @@ export default {
 async function atender<T>(ruta: Ruta<T>, cuerpo: Record<string, unknown>, env: Env, ip: string): Promise<Respuesta> {
   const datos = ruta.validar(cuerpo);
   if (!datos) return { status: 400, datos: { ok: false, error: 'datos' } };
-  if (!(await turnstileValido(String(cuerpo.turnstile ?? ''), ip, env.TURNSTILE_SECRET))) {
+  const ipTurnstile = ruta.IP_A_TURNSTILE ? ip : '';
+  if (!(await turnstileValido(String(cuerpo.turnstile ?? ''), ipTurnstile, env.TURNSTILE_SECRET))) {
     return { status: 403, datos: { ok: false, error: 'verificacion' } };
   }
   return ruta.procesar(datos, env, await sha256(`${env.IP_SALT}:${ip}`));

@@ -2,6 +2,7 @@
 
 export interface Env {
   DB: D1Database;
+  LIMITE_CANAL: RateLimit;
   // Secrets (wrangler secret put …). CPAAS_TOKEN se acepta con o sin el
   // prefijo "Zoho-enczapikey": el botón de copiar de la consola lo incluye.
   CPAAS_TOKEN: string;

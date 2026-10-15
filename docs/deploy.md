@@ -82,7 +82,9 @@ npx wrangler d1 execute inacons-contacto --remote --command "SELECT codigo, crea
 **Cambios en `schema.sql`:** se vuelve a aplicar con el mismo `d1 execute … --file`; todas
 las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe.
 
-**Errores de envío:** Cloudflare → Workers → `inacons-contacto` → Logs.
+**Errores de envío:** Cloudflare → Workers → `inacons-contacto` → Logs. Solo aparecen los
+fallos, con el número de consulta o reporte: el registro automático de cada petición está
+apagado (`invocation_logs: false`) para que el Canal Ético no deje datos de conexión.
 
 ## Dominios
 

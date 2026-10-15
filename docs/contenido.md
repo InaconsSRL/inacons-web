@@ -94,7 +94,8 @@ armado y le ofrece copiarlo; nunca declara éxito sin confirmación.
 
 El Worker comprueba Turnstile, limita a 3 envíos por hora por conexión o por correo,
 guarda una copia en D1, avisa a `ventas@` por Zoho CPaaS con *Reply-To* al visitante y le
-manda un acuse de recibo. Las copias se borran solas a los 12 meses (`RETENCION_MESES`).
+manda un acuse de recibo. El acuse no repite el mensaje: va a la dirección que teclea el
+visitante, y con el texto dentro serviría para escribirle a un tercero desde el dominio. Las copias se borran solas a los 12 meses (`RETENCION_MESES`).
 
 **Contrato del endpoint** — lo que acepta el Worker, y lo que tendría que aceptar
 cualquier reemplazo:
@@ -155,8 +156,9 @@ Content-Type: application/json
 Responde `{ "ok": true, "codigo": "CE-XXXX-XXXX" }` y la página muestra el código: en un
 reporte anónimo es la única forma de volver a referirse a él. El asunto del aviso lleva
 tipo y código, nunca el nombre. Los reportes se guardan en la tabla `reportes` de D1 y no
-se purgan solos; la fila no lleva IP ni su hash (el límite de 30 por hora por conexión usa la tabla
-`limites`, que se vacía cada día). En `"modalidad": "anonimo"` no van `nombre`, `correo`
+se purgan solos; ni la fila ni ninguna otra tabla guardan la IP o su hash: el límite de 5 envíos
+por minuto por conexión se cuenta en memoria (Rate Limiting de Cloudflare) y la IP no se manda a
+Turnstile. En `"modalidad": "anonimo"` no van `nombre`, `correo`
 ni `telefono`; `relacion`, `fecha`, `lugar` y `personas` son opcionales.
 
 ## Vídeo y PDF

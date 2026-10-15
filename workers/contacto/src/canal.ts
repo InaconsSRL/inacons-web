@@ -3,9 +3,9 @@
  *
  * Cada tipo de reporte llega solo a sus responsables (TIPOS). Se puede
  * reportar con nombre o de forma anónima; en el anónimo no viaja ni se
- * guarda nada que identifique a quien reporta, y la fila del reporte no
- * lleva el hash de la IP: el límite por hora se lleva en una tabla aparte
- * que se vacía cada día.
+ * guarda nada que identifique a quien reporta: la fila no lleva IP ni hash,
+ * el límite de envíos se cuenta en memoria (binding LIMITE_CANAL) y la IP no
+ * se manda a Turnstile.
  */
 
 import { CORREO_VALIDO, enviar, escapar, leerCampos, tablaHtml, type Env, type Respuesta } from './comun';
@@ -51,11 +51,12 @@ const LIMITES: Record<keyof Reporte, number> = {
   origen: 300,
 };
 
-// Por conexión, no por persona: en una oficina o una obra todos salen a
-// internet por la misma IP, y un tope bajo dejaría a un trabajador sin poder
-// denunciar porque otros reportaron antes. Turnstile ya frena a los bots;
-// esto solo corta un abuso evidente.
-const MAXIMO_POR_HORA = 30;
+// El límite (5 por minuto por conexión, en wrangler.jsonc) es alto a
+// propósito: en una oficina o una obra todos salen a internet por la misma IP,
+// y un tope bajo dejaría a un trabajador sin poder denunciar porque otros
+// reportaron antes. Turnstile ya frena a los bots; esto solo corta un abuso
+// evidente.
+export const IP_A_TURNSTILE = false;
 
 // Sin 0/O ni 1/I: el código se dicta por teléfono o se copia a mano.
 const ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -77,12 +78,8 @@ export function validar(cuerpo: Record<string, unknown>): (Reporte & { tipo: Tip
 }
 
 export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHash: string): Promise<Respuesta> {
-  const { recientes } = (await env.DB.prepare(
-    `SELECT COUNT(*) AS recientes FROM limites
-     WHERE ruta = 'canal' AND ip_hash = ?1 AND creado > datetime('now', '-1 hour')`,
-  ).bind(ipHash).first<{ recientes: number }>())!;
-  if (recientes >= MAXIMO_POR_HORA) return { status: 429, datos: { ok: false, error: 'limite' } };
-  await env.DB.prepare(`INSERT INTO limites (ruta, ip_hash) VALUES ('canal', ?1)`).bind(ipHash).run();
+  const { success } = await env.LIMITE_CANAL.limit({ key: ipHash });
+  if (!success) return { status: 429, datos: { ok: false, error: 'limite' } };
 
   const { titulo, destino } = TIPOS[reporte.tipo];
   const codigo = nuevoCodigo();
@@ -110,6 +107,7 @@ export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHa
     });
   } catch (e) {
     await marcar(env, id, 'error', String(e));
+    console.error(`canal: falló el aviso del reporte ${id}`);
     return { status: 502, datos: { ok: false, error: 'envio' } };
   }
   await marcar(env, id, 'notificado');

@@ -43,13 +43,6 @@ CREATE TABLE IF NOT EXISTS reportes (
   error        TEXT
 );
 
--- Envíos recientes por conexión, para el límite por hora del Canal Ético.
--- Separado de reportes para no ligar un reporte anónimo a una conexión;
--- se vacía cada día.
-CREATE TABLE IF NOT EXISTS limites (
-  ruta     TEXT NOT NULL,
-  ip_hash  TEXT NOT NULL,
-  creado   TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE INDEX IF NOT EXISTS limites_ip ON limites (ruta, ip_hash, creado);
+-- La tabla `limites` (hash de IP y hora por envío del Canal Ético) se retiró:
+-- permitía cruzar un reporte anónimo con su conexión. Si existe, se borra con
+--   npx wrangler d1 execute inacons-contacto --remote --command "DROP TABLE IF EXISTS limites"

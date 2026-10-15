@@ -3,7 +3,11 @@
   "name": "inacons-contacto",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
-  "observability": { "enabled": true },
+  // Sin registro automático de cada petición: guardaría datos de la conexión
+  // de quien usa el Canal Ético, y eso deshace el anonimato por otra vía. Los
+  // fallos de envío quedan igual en Logs, con un console.error sin datos
+  // personales.
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
 
   // Variables públicas. Los secrets (CPAAS_TOKEN, TURNSTILE_SECRET,
   // IP_SALT) van con `wrangler secret put` y nunca en este archivo.
@@ -28,6 +32,13 @@
       // Lo devuelve `npx wrangler d1 create inacons-contacto`.
       "database_id": "7ff95165-8e7e-4f42-8e8c-e8e84c631e2c"
     }
+  ],
+
+  // Límite del Canal Ético. Cuenta en memoria en Cloudflare y no se guarda en
+  // ningún sitio: una tabla con hash de IP y hora quedaría al lado de cada
+  // reporte anónimo y permitiría cruzarlos. El periodo solo puede ser 10 o 60 s.
+  "ratelimits": [
+    { "name": "LIMITE_CANAL", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
   ],
 
   // Purga diaria de consultas más antiguas que RETENCION_MESES.
