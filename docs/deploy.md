@@ -86,6 +86,32 @@ las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe.
 fallos, con el número de consulta o reporte: el registro automático de cada petición está
 apagado (`invocation_logs: false`) para que el Canal Ético no deje datos de conexión.
 
+## Cloudflare Web Analytics
+
+Mide visitas sin cookies. `BaseLayout.astro` carga el beacon solo si el build trae
+`PUBLIC_ANALYTICS_TOKEN`; sin la variable no se pide ningún script a Cloudflare.
+
+**Dónde sale el token:** Cloudflare → Analytics → Web Analytics → *View Web Analytics
+sites* → `home.inacons.com.pe` → *Manage site*, en el snippet
+`data-cf-beacon='{"token": "…"}'`. El dominio no está en Cloudflare (el sitio vive en
+cPanel), por eso se usa el snippet manual y no la configuración automática.
+
+**En la variable va solo el valor del token**, la cadena de 32 caracteres, no el snippet
+completo. Con el snippet pegado el build sale en verde pero el HTML publicado trae un
+`data-cf-beacon` roto y no se registra nada. Se comprueba tras el deploy:
+
+```bash
+curl -s https://home.inacons.com.pe/ | grep -o 'data-cf-beacon="[^"]*"'
+```
+
+Debe imprimir `{"token":"<32 caracteres>"}` y nada más.
+
+**Cambiar el token:** actualizar la variable y volver a lanzar el deploy (*Re-run all jobs*
+basta: las variables se leen en cada build).
+
+Los datos tardan de minutos a más de una hora en aparecer, y INP y CLS solo se llenan con
+visitas que interactúan con la página.
+
 ## Dominios
 
 El host del sitio es **`home.inacons.com.pe`**, declarado en `site` de `astro.config.mjs`.
