@@ -2,8 +2,8 @@
 
 Sitio corporativo de INACONS S.R.L. (ingeniería y construcción, Perú).
 Astro 7 en modo estático. Sin framework de UI, sin backend, sin base de datos. Dependencias:
-`astro` y `@astrojs/sitemap`. Lo único con servidor es el receptor del formulario, un
-Cloudflare Worker aparte en `workers/contacto/`.
+`astro` y `@astrojs/sitemap`. Lo único con servidor es el receptor de los formularios
+(contacto y Canal Ético), un Cloudflare Worker aparte en `workers/contacto/`.
 
 ## Comandos
 
@@ -29,7 +29,7 @@ Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/
 | Fotos que se muestran en páginas | `src/assets/imagenes/` + `astro:assets` |
 | Archivos que conservan su URL (PDF, vídeo, logos SVG, flyers) | `public/assets/` |
 | Iconos | `src/lib/iconos.ts` + `<Icono nombre="…" />` |
-| Formulario de contacto | `src/pages/contacto.astro`; receptor en `workers/contacto/`. Contrato en [docs/contenido.md](docs/contenido.md), puesta en marcha en [docs/deploy.md](docs/deploy.md) |
+| Formularios de contacto y Canal Ético | `src/pages/contacto.astro`, `src/pages/canal-etico.astro`; receptor en `workers/contacto/` (a quién llega cada reporte: `src/canal.ts`). Contrato en [docs/contenido.md](docs/contenido.md), puesta en marcha en [docs/deploy.md](docs/deploy.md) |
 | Redirecciones, caché, cabeceras | `public/.htaccess` |
 
 Detalle en [docs/arquitectura.md](docs/arquitectura.md).

@@ -64,6 +64,20 @@ const codigoFormulario = `<div class="form-row">
   </div>
 </div>`;
 
+const codigoOpciones = `<fieldset class="form-fieldset">
+  <legend>¿Cómo quieres enviarlo?</legend>
+  <div class="form-opciones">
+    <label class="form-opcion">
+      <input type="radio" name="modo" value="a" required />
+      <span>
+        <span class="form-opcion-titulo">Con mi nombre</span>
+        <span class="form-opcion-desc">Podemos responderte.</span>
+      </span>
+    </label>
+    …
+  </div>
+</fieldset>`;
+
 const codigoAviso = `<div class="notice notice--ok">Se guardaron los cambios.</div>
 <div class="notice notice--error">No se pudo guardar.</div>`;
 
@@ -617,10 +631,31 @@ const codigoLista = `<ul class="data-list">
             <input type="text" id="ds-off" class="form-input" value="No editable" disabled />
           </div>
 
+          <fieldset class="form-fieldset">
+            <legend>Opciones excluyentes</legend>
+            <div class="form-opciones">
+              <label class="form-opcion">
+                <input type="radio" name="ds-modo" value="nombre" checked />
+                <span>
+                  <span class="form-opcion-titulo">Con mi nombre</span>
+                  <span class="form-opcion-desc">Podemos responderte y pedirte más datos.</span>
+                </span>
+              </label>
+              <label class="form-opcion">
+                <input type="radio" name="ds-modo" value="anonimo" />
+                <span>
+                  <span class="form-opcion-titulo">De forma anónima</span>
+                  <span class="form-opcion-desc">No pedimos ni guardamos quién eres.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
           <button class="btn btn-primary btn-block">Guardar</button>
         </div>
 
         <div class="ds-codigo"><pre>{codigoFormulario}</pre></div>
+        <div class="ds-codigo"><pre>{codigoOpciones}</pre></div>
       </section>
 
       <!-- ── AVISOS ──────────────────────────────────────────── -->

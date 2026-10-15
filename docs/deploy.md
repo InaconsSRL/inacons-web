@@ -73,6 +73,15 @@ vuelven a poner.
 npx wrangler d1 execute inacons-contacto --remote --command "SELECT id, creado, nombre, correo, servicio, estado FROM consultas ORDER BY id DESC LIMIT 20"
 ```
 
+**Ver los reportes del Canal Ético** (solo quien gestiona cumplimiento debería hacerlo):
+
+```bash
+npx wrangler d1 execute inacons-contacto --remote --command "SELECT codigo, creado, tipo, modalidad, estado FROM reportes ORDER BY id DESC LIMIT 20"
+```
+
+**Cambios en `schema.sql`:** se vuelve a aplicar con el mismo `d1 execute … --file`; todas
+las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe.
+
 **Errores de envío:** Cloudflare → Workers → `inacons-contacto` → Logs.
 
 ## Dominios

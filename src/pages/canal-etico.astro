@@ -3,6 +3,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Icono from '../components/Icono.astro';
 import imagenHero from '../assets/imagenes/home_about.webp';
+import { PUBLIC_CONTACT_ENDPOINT, PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
+
+// `tipo` es el contrato con el Worker (workers/contacto/src/canal.ts, TIPOS):
+// es lo único que viaja. A quién le llega cada tipo se decide allá, no aquí,
+// para que los correos de los responsables no queden en el HTML público.
+const CANALES = [
+  { tipo: 'consulta', titulo: 'Canal de Consultas', icono: 'pregunta', desc: 'Tu tranquilidad es nuestra prioridad. Espacio diseñado para absolver dudas de colaboradores y socios estratégicos.' },
+  { tipo: 'denuncia', titulo: 'Canal de Denuncias', icono: 'alerta', desc: 'Tolerancia cero al soborno. Si detectas cualquier acto que comprometa nuestra integridad, repórtalo aquí.' },
+  { tipo: 'sugerencia', titulo: 'Canal de Sugerencias', icono: 'bombilla', desc: 'Crecemos juntos. Valoramos tus ideas para fortalecer nuestra mejora continua.' },
+  { tipo: 'buenas-practicas', titulo: 'Reporte de Buenas Prácticas', icono: 'pulgar-arriba', desc: 'Reconocemos el valor de cuidar lo nuestro. Reporta acciones que preservan nuestros recursos.' },
+  { tipo: 'queja', titulo: 'Reporte de Quejas', icono: 'chat', desc: 'Tu satisfacción nos importa. Si algo no cumple con nuestros estándares, utiliza este canal.' },
+  { tipo: 'acto-subestandar', titulo: 'Actos y Condiciones Subestándar', icono: 'casco', desc: 'Seguridad ante todo. Reporta cualquier condición física o acción que represente un riesgo de accidente.' },
+] as const;
+
+const RELACIONES = ['Colaborador', 'Cliente', 'Proveedor o subcontratista', 'Comunidad o vecino', 'Otro'];
+
+// Sin endpoint no hay a dónde enviar: el formulario se muestra apagado y no
+// se carga el script de Cloudflare.
+const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KEY);
 ---
 
 <BaseLayout title="Canal Ético | INACONS" description="Canal ético y de cumplimiento de INACONS — reporte confidencial y seguro">
@@ -50,6 +69,11 @@ import imagenHero from '../assets/imagenes/home_about.webp';
     }
     .check-label { font-size: var(--fs-base); font-weight: var(--fw-semibold); color: var(--c-text-heading); line-height: 1.4; }
     .terms-accept:has(input:checked) .check-label { color: var(--c-secondary); }
+    .reporte-wrap { max-width: 800px; margin: var(--sp-l2) auto 0; scroll-margin-top: var(--sp-l2); }
+    .form-sh { margin-bottom: var(--sp-7); }
+    .form-sh .sh-title { font-size: var(--fs-xl); }
+    .form-estado:not(:empty) { margin-bottom: var(--sp-6); }
+    .reporte-no-disponible { margin-bottom: var(--sp-6); }
     @media (max-width: 767.98px) {
       .guarantees-grid { grid-template-columns: 1fr; }
     }
@@ -136,57 +160,127 @@ import imagenHero from '../assets/imagenes/home_about.webp';
         <p class="sh-desc">Elige la opción que mejor se ajuste a tu reporte. Todos los canales son confidenciales.</p>
       </div>
       <div class="grid-3">
-        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="80">
-          <div class="feature-icon"><Icono nombre="pregunta" tam={24} /></div>
-          <h3 class="feature-title">Canal de Consultas</h3>
-          <p class="feature-desc">Tu tranquilidad es nuestra prioridad. Espacio diseñado para absolver dudas de colaboradores y socios estratégicos.</p>
-          <a href="https://formularios-inacons.bitrix24.site/canal-consulta/" target="_blank" class="btn btn-outline btn-sm">
-            Ingresar al formulario <Icono nombre="enlace-externo" tam={13} />
-          </a>
-        </div>
-        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="140">
-          <div class="feature-icon"><Icono nombre="alerta" tam={24} /></div>
-          <h3 class="feature-title">Canal de Denuncias</h3>
-          <p class="feature-desc">Tolerancia cero al soborno. Si detectas cualquier acto que comprometa nuestra integridad, repórtalo aquí.</p>
-          <a href="https://formularios-inacons.bitrix24.site/canal-denuncia/" target="_blank" class="btn btn-outline btn-sm">
-            Ingresar al formulario <Icono nombre="enlace-externo" tam={13} />
-          </a>
-        </div>
-        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="200">
-          <div class="feature-icon"><Icono nombre="bombilla" tam={24} /></div>
-          <h3 class="feature-title">Canal de Sugerencias</h3>
-          <p class="feature-desc">Crecemos juntos. Valoramos tus ideas para fortalecer nuestra mejora continua.</p>
-          <a href="https://formularios-inacons.bitrix24.site/canal-sugerencia/" target="_blank" class="btn btn-outline btn-sm">
-            Ingresar al formulario <Icono nombre="enlace-externo" tam={13} />
-          </a>
-        </div>
-        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="260">
-          <div class="feature-icon"><Icono nombre="pulgar-arriba" tam={24} /></div>
-          <h3 class="feature-title">Reporte de Buenas Prácticas</h3>
-          <p class="feature-desc">Reconocemos el valor de cuidar lo nuestro. Reporta acciones que preservan nuestros recursos.</p>
-          <a href="https://formularios-inacons.bitrix24.site/reporte-buenas-practicas/" target="_blank" class="btn btn-outline btn-sm">
-            Ingresar al formulario <Icono nombre="enlace-externo" tam={13} />
-          </a>
-        </div>
-        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="320">
-          <div class="feature-icon"><Icono nombre="chat" tam={24} /></div>
-          <h3 class="feature-title">Reporte de Quejas</h3>
-          <p class="feature-desc">Tu satisfacción nos importa. Si algo no cumple con nuestros estándares, utiliza este canal.</p>
-          <a href="https://formularios-inacons.bitrix24.site/reporte-quejas/" target="_blank" class="btn btn-outline btn-sm">
-            Ingresar al formulario <Icono nombre="enlace-externo" tam={13} />
-          </a>
-        </div>
-        <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="380">
-          <div class="feature-icon"><Icono nombre="casco" tam={24} /></div>
-          <h3 class="feature-title">Actos y Condiciones Subestándar</h3>
-          <p class="feature-desc">Seguridad ante todo. Reporta cualquier condición física o acción que represente un riesgo de accidente.</p>
-          <a href="https://formularios-inacons.bitrix24.site/reporte-actos-subestandar/" target="_blank" class="btn btn-outline btn-sm">
-            Ingresar al formulario <Icono nombre="enlace-externo" tam={13} />
-          </a>
+        {CANALES.map((c, i) => (
+          <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay={80 + i * 60}>
+            <div class="feature-icon"><Icono nombre={c.icono} tam={24} /></div>
+            <h3 class="feature-title">{c.titulo}</h3>
+            <p class="feature-desc">{c.desc}</p>
+            <a href="#reporte" class="btn btn-outline btn-sm" data-tipo={c.tipo}>
+              Ingresar al formulario <Icono nombre="chevron-abajo" tam={13} />
+            </a>
+          </div>
+        ))}
+      </div>
+
+      <div class="reporte-wrap" id="reporte">
+        <div class="panel panel--accent panel--raised">
+          <div class="sh sh--left form-sh">
+            <p class="sh-label">Formulario de reporte</p>
+            <h2 class="sh-title">Cuéntanos qué pasó</h2>
+            <p class="sh-desc">Cada reporte llega solo a las personas responsables de su tipo y se atiende de forma confidencial.</p>
+          </div>
+
+          {!PUBLIC_CONTACT_ENDPOINT && (
+            <div class="notice notice--warn reporte-no-disponible">
+              El formulario no está disponible en este momento. Por favor, inténtalo más tarde.
+            </div>
+          )}
+
+          <!-- El script pinta aquí el resultado del envío. role="status" lo anuncia sin mover el foco. -->
+          <div class="form-estado" id="reporteEstado" role="status" aria-live="polite"></div>
+
+          <form id="reporteForm" novalidate>
+            <div class="form-group">
+              <label for="tipoReporte">Tipo de reporte *</label>
+              <select id="tipoReporte" name="tipo" class="form-select" required>
+                <option value="">Selecciona el tipo</option>
+                {CANALES.map((c) => <option value={c.tipo}>{c.titulo}</option>)}
+              </select>
+            </div>
+
+            <fieldset class="form-fieldset">
+              <legend>¿Cómo quieres enviarlo? *</legend>
+              <div class="form-opciones">
+                <label class="form-opcion">
+                  <input type="radio" name="modalidad" value="nombre" required />
+                  <span>
+                    <span class="form-opcion-titulo">Con mi nombre</span>
+                    <span class="form-opcion-desc">Podemos responderte y pedirte más datos si hacen falta.</span>
+                  </span>
+                </label>
+                <label class="form-opcion">
+                  <input type="radio" name="modalidad" value="anonimo" required />
+                  <span>
+                    <span class="form-opcion-titulo">De forma anónima</span>
+                    <span class="form-opcion-desc">No pedimos ni guardamos quién eres. Recibirás un código para citar tu caso.</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <!-- Apagado mientras no se elija "Con mi nombre": un fieldset disabled no se envía ni se valida. -->
+            <fieldset class="form-fieldset" id="identidad" hidden disabled>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="reporteNombre">Nombre completo *</label>
+                  <input type="text" id="reporteNombre" name="nombre" class="form-input" autocomplete="name" maxlength="120" required />
+                </div>
+                <div class="form-group">
+                  <label for="reporteCorreo">Correo electrónico *</label>
+                  <input type="email" id="reporteCorreo" name="correo" class="form-input" autocomplete="email" maxlength="160" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="reporteTelefono">Teléfono</label>
+                <input type="tel" id="reporteTelefono" name="telefono" class="form-input" autocomplete="tel" maxlength="30" />
+              </div>
+            </fieldset>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="relacion">Tu relación con INACONS</label>
+                <select id="relacion" name="relacion" class="form-select">
+                  <option value="">Prefiero no decirlo</option>
+                  {RELACIONES.map((r) => <option value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="fechaHecho">Fecha aproximada del hecho</label>
+                <input type="date" id="fechaHecho" name="fecha" class="form-input" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="lugar">Lugar, obra o área</label>
+              <input type="text" id="lugar" name="lugar" class="form-input" maxlength="200" />
+            </div>
+            <div class="form-group">
+              <label for="personas">Personas involucradas</label>
+              <input type="text" id="personas" name="personas" class="form-input" maxlength="500" aria-describedby="personasHint" />
+              <span class="form-hint" id="personasHint">Nombres o cargos, si los conoces.</span>
+            </div>
+            <div class="form-group">
+              <label for="descripcion">Descripción *</label>
+              <textarea id="descripcion" name="descripcion" class="form-textarea" maxlength="5000" required aria-describedby="descripcionHint"></textarea>
+              <span class="form-hint" id="descripcionHint">Qué pasó, cuándo y cómo. Mientras más detalle, mejor se puede atender.</span>
+            </div>
+            <!-- Campo trampa: invisible para personas, los bots lo rellenan. -->
+            <input type="text" name="company_url" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            {conTurnstile && (
+              <div class="form-group">
+                <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-language="es" data-theme="light" data-size="flexible"></div>
+              </div>
+            )}
+            <p class="form-hint">Los campos con * son obligatorios.</p>
+            <button type="submit" class="btn btn-primary btn-block" id="reporteEnviar" disabled={!PUBLIC_CONTACT_ENDPOINT}>
+              <Icono nombre="enviar" tam={15} />
+              Enviar reporte
+            </button>
+          </form>
         </div>
       </div>
     </div>
   </section>
+  {conTurnstile && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
 
   <!-- Script del checkbox -->
   <script>
@@ -196,6 +290,101 @@ import imagenHero from '../assets/imagenes/home_about.webp';
       if (!canales) return;
       canales.hidden = !casilla.checked;
       if (casilla.checked) document.getElementById('channelsTitle')?.focus();
+    });
+  </script>
+
+  <script>
+    import { PUBLIC_CONTACT_ENDPOINT as ENDPOINT } from 'astro:env/client';
+
+    /*
+      Envío del Canal Ético. Solo se declara éxito si el Worker responde 2xx,
+      y entonces se muestra el código del reporte: para un reporte anónimo es
+      la única forma de volver a referirse a él.
+    */
+    const form = document.getElementById('reporteForm') as HTMLFormElement | null;
+    const boton = document.getElementById('reporteEnviar') as HTMLButtonElement | null;
+    const estado = document.getElementById('reporteEstado');
+    const identidad = document.getElementById('identidad') as HTMLFieldSetElement | null;
+    const selectTipo = document.getElementById('tipoReporte') as HTMLSelectElement | null;
+
+    function aviso(tipo: 'ok' | 'error' | 'info', html: string) {
+      if (!estado) return;
+      estado.innerHTML = `<div class="notice notice--${tipo}">${html}</div>`;
+      estado.scrollIntoView({ block: 'nearest' });
+    }
+
+    function mostrarIdentidad(si: boolean) {
+      if (!identidad) return;
+      identidad.hidden = !si;
+      identidad.disabled = !si;
+    }
+
+    form?.addEventListener('change', (e) => {
+      const campo = e.target as HTMLInputElement;
+      if (campo.name === 'modalidad') mostrarIdentidad(campo.value === 'nombre');
+    });
+
+    // Cada tarjeta lleva al mismo formulario con su tipo ya elegido.
+    document.querySelectorAll<HTMLAnchorElement>('a[data-tipo]').forEach((enlace) => {
+      enlace.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (selectTipo) selectTipo.value = enlace.dataset.tipo ?? '';
+        document.getElementById('reporte')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        selectTipo?.focus({ preventScroll: true });
+      });
+    });
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!ENDPOINT) return;
+      const datos = Object.fromEntries(
+        [...new FormData(form)].map(([k, v]) => [k, String(v).trim()]),
+      );
+      if (datos.company_url) return;
+
+      form.classList.add('was-validated');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const turnstile = datos['cf-turnstile-response'] ?? '';
+      delete datos.company_url;
+      delete datos['cf-turnstile-response'];
+
+      if (form.querySelector('.cf-turnstile') && !turnstile) {
+        aviso('info', 'Espera a que termine la verificación de seguridad, sobre el botón, y vuelve a enviar.');
+        return;
+      }
+
+      if (boton) boton.disabled = true;
+      aviso('info', 'Enviando…');
+      try {
+        const respuesta = await fetch(new URL('/canal', ENDPOINT), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ ...datos, turnstile, origen: location.href }),
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!respuesta.ok) throw new Error(String(respuesta.status));
+        const { codigo } = (await respuesta.json()) as { codigo?: string };
+        const codigoValido = /^CE-[A-Z0-9-]+$/.test(codigo ?? '');
+        aviso('ok',
+          '<strong>Reporte enviado.</strong> ' +
+          (codigoValido
+            ? `Su código es <strong>${codigo}</strong>: anótalo y úsalo para cualquier comunicación sobre este caso.`
+            : 'Será atendido de forma confidencial.'));
+        form.reset();
+        form.classList.remove('was-validated');
+        mostrarIdentidad(false);
+      } catch (e) {
+        aviso('error', e instanceof Error && e.message === '429'
+          ? '<strong>Recibimos varios reportes desde tu conexión en la última hora.</strong> Lo que escribiste sigue en el formulario: vuelve a intentarlo más tarde.'
+          : '<strong>No pudimos enviar tu reporte.</strong> Lo que escribiste sigue en el formulario: inténtalo de nuevo en unos minutos.');
+      } finally {
+        if (boton) boton.disabled = false;
+        // Cada token sirve para un solo envío, haya salido bien o no.
+        (window as { turnstile?: { reset(): void } }).turnstile?.reset();
+      }
     });
   </script>
 

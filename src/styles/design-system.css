@@ -2309,8 +2309,10 @@ body.menu-open {
     vuelve a un formulario a medio llenar pierde la referencia de qué
     iba en cada casilla. Además es lo único que lee un lector de
     pantalla de forma fiable. */
-.form-group label {
+.form-group label,
+.form-fieldset > legend {
     display: block;
+    padding: 0;
     font-size: var(--fs-2xs);
     font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-label);
@@ -2391,6 +2393,80 @@ body.menu-open {
     font-weight: var(--fw-semibold);
     color: var(--c-error);
     line-height: 1.5;
+}
+
+/*  Grupo de campos sin la caja que le pone el navegador. Sirve para
+    apagar varios campos de una vez: <fieldset disabled> los saca del
+    envío y de la validación sin tocarlos uno por uno. Su <legend> es
+    la etiqueta del grupo y se ve igual que un <label>. */
+.form-fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+/*  Elección entre dos o tres opciones excluyentes que conviene ver a la
+    vez, en vez de esconderlas en un <select>. Cada opción es un <label>
+    entero con su radio: el área de clic es la tarjeta, no el círculo.
+    Va dentro de un .form-fieldset, nunca de un .form-group, que pintaría
+    cada opción con el estilo de etiqueta. */
+.form-opciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+}
+
+.form-opcion {
+    display: flex;
+    gap: var(--sp-3);
+    align-items: baseline;
+    padding: var(--sp-4);
+    background: var(--c-bg-white);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color var(--t), background var(--t);
+}
+
+.form-opcion:hover {
+    border-color: var(--c-secondary);
+}
+
+.form-opcion:has(input:checked) {
+    border-color: var(--c-secondary);
+    background: color-mix(in srgb, var(--c-secondary) 5%, transparent);
+}
+
+.form-opcion:has(input:focus-visible) {
+    outline: 2px solid var(--c-secondary);
+    outline-offset: 2px;
+}
+
+.form-opcion input {
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--c-secondary);
+}
+
+.form-opcion-titulo {
+    display: block;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+}
+
+.form-opcion-desc {
+    display: block;
+    margin-top: var(--sp-1);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    line-height: 1.5;
+}
+
+.was-validated .form-opciones:has(input:invalid) .form-opcion {
+    border-color: var(--c-error-field);
 }
 
 /* ── Avisos ─────────────────────────────────────────────────── */

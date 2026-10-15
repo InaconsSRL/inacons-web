@@ -120,6 +120,45 @@ filtra en el navegador y no se envía.
 Turnstile solo se carga si están definidas `PUBLIC_CONTACT_ENDPOINT` y
 `PUBLIC_TURNSTILE_SITE_KEY`. Con el modo `mailto` no hay nada que proteger.
 
+## Canal Ético
+
+`/canal-etico/` envía al mismo Worker, en la ruta `/canal`. Las seis tarjetas llevan al
+mismo formulario con el tipo ya elegido. Se puede reportar **con nombre** (nombre y
+correo obligatorios, y recibe acuse) o **de forma anónima** (el navegador no manda nombre,
+correo ni teléfono, y el Worker los descarta si llegan).
+
+A quién llega cada tipo está en `TIPOS` de `workers/contacto/src/canal.ts`, no en el
+sitio, para que esos correos no queden en el HTML público. Cambiar un responsable es
+editar ahí y `npx wrangler deploy`; la web no se toca.
+
+| `tipo` | Llega a |
+|---|---|
+| `consulta` | ventas@ |
+| `denuncia`, `queja` | oficialdecumplimiento@ |
+| `sugerencia` | sig@ |
+| `buenas-practicas`, `acto-subestandar` | tbalbin@ |
+
+```http
+POST <PUBLIC_CONTACT_ENDPOINT>/canal
+Content-Type: application/json
+
+{
+  "tipo": "denuncia", "modalidad": "nombre",
+  "nombre": "…", "correo": "…", "telefono": "…",
+  "relacion": "Colaborador", "fecha": "2026-10-01",
+  "lugar": "…", "personas": "…", "descripcion": "…",
+  "origen": "https://home.inacons.com.pe/canal-etico/",
+  "turnstile": "<token del widget>"
+}
+```
+
+Responde `{ "ok": true, "codigo": "CE-XXXX-XXXX" }` y la página muestra el código: en un
+reporte anónimo es la única forma de volver a referirse a él. El asunto del aviso lleva
+tipo y código, nunca el nombre. Los reportes se guardan en la tabla `reportes` de D1 y no
+se purgan solos; la fila no lleva IP ni su hash (el límite de 5 por hora usa la tabla
+`limites`, que se vacía cada día). En `"modalidad": "anonimo"` no van `nombre`, `correo`
+ni `telefono`; `relacion`, `fecha`, `lugar` y `personas` son opcionales.
+
 ## Vídeo y PDF
 
 - Vídeo: H.264, sin audio, "optimizar para web". `public/assets/videos/hero.mp4`.
