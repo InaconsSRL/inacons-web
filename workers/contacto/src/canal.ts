@@ -51,9 +51,11 @@ const LIMITES: Record<keyof Reporte, number> = {
   origen: 300,
 };
 
-// Más holgado que contacto: no hay acuse a terceros que abusar, y quien
-// reporta varios hechos seguidos lo hace de buena fe.
-const MAXIMO_POR_HORA = 5;
+// Por conexión, no por persona: en una oficina o una obra todos salen a
+// internet por la misma IP, y un tope bajo dejaría a un trabajador sin poder
+// denunciar porque otros reportaron antes. Turnstile ya frena a los bots;
+// esto solo corta un abuso evidente.
+const MAXIMO_POR_HORA = 30;
 
 // Sin 0/O ni 1/I: el código se dicta por teléfono o se copia a mano.
 const ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';

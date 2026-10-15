@@ -155,7 +155,7 @@ Content-Type: application/json
 Responde `{ "ok": true, "codigo": "CE-XXXX-XXXX" }` y la página muestra el código: en un
 reporte anónimo es la única forma de volver a referirse a él. El asunto del aviso lleva
 tipo y código, nunca el nombre. Los reportes se guardan en la tabla `reportes` de D1 y no
-se purgan solos; la fila no lleva IP ni su hash (el límite de 5 por hora usa la tabla
+se purgan solos; la fila no lleva IP ni su hash (el límite de 30 por hora por conexión usa la tabla
 `limites`, que se vacía cada día). En `"modalidad": "anonimo"` no van `nombre`, `correo`
 ni `telefono`; `relacion`, `fecha`, `lugar` y `personas` son opcionales.
 
