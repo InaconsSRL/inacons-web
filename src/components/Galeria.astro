@@ -1,0 +1,49 @@
+---
+/**
+ * Galeria.astro
+ * ─────────────────────────────────────────────────────────────
+ * Foto principal y miniaturas debajo. La usan las fichas de proyecto y de
+ * servicio cuando el .md trae `galeria`.
+ *
+ * Las fotos pasan por astro:assets (WebP, srcset, dimensiones reales). Los
+ * estilos viven en design-system.css (.galeria*) y no aquí: el <img> lo pinta
+ * <Image> dentro de este componente y un selector de página no lo alcanzaría
+ * (regla 1 de CLAUDE.md).
+ *
+ * Uso:
+ *   <Galeria fotos={proyecto.data.galeria} titulo={proyecto.data.titulo} />
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  fotos: ImageMetadata[];
+  /** Nombre del servicio o proyecto: arma el texto alternativo de cada foto. */
+  titulo: string;
+}
+
+const { fotos, titulo } = Astro.props;
+---
+
+{fotos.length > 0 && (
+  <div class="galeria">
+    <div class="galeria-principal">
+      <Image
+        quality={70}
+        src={fotos[0]}
+        alt={`${titulo} — foto principal`}
+        widths={[640, 960, 1280]}
+        sizes="(min-width: 1024px) 800px, 100vw"
+      />
+    </div>
+    {fotos.length > 1 && (
+      <div class="galeria-thumbs">
+        {fotos.slice(1).map((foto, i) => (
+          <div class="galeria-thumb">
+            <Image quality={70} src={foto} alt={`${titulo} — foto ${i + 2}`} width={400} />
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}

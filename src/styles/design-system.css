@@ -138,6 +138,12 @@
     /*  Display — fuera de la escala de texto, siempre fluido. */
     --fs-display: clamp(2rem, 4vw, 3rem);
     /* 32–48px — h1 de páginas interiores */
+    --fs-display-lg: clamp(2.25rem, 5vw, 3.75rem);
+    /* 36–60px — h1 de la cabecera de página (.page-hero-title). Antes era un
+       clamp escrito en el componente, fuera de los tokens. */
+    --fs-section: clamp(1.75rem, 3vw, 2.75rem);
+    /* 28–44px — h2 de sección (.sh-title). Subió ~6% el tope: es el escalón
+       que da el "tipografía grande" de la referencia sin tocar ningún layout. */
     --fs-hero: clamp(1rem, 4.3vw, 3.1rem);
     /* 16–50px — h1 del home. Era clamp(1.05rem, 5.2vw, 3.8rem), un 18%
        mas grande: seis palabras en caja alta a 61px se comian la
@@ -398,13 +404,12 @@ button {
 }
 
 /* Adaptaciones de texto en sección oscura */
+/*  El rótulo y su guion van en naranja sobre oscuro, como el eyebrow del hero
+    del home: 6.03:1 sobre --c-primary, que pasa AA a 11px. Antes iba en gris
+    con un guion casi invisible, y con seis secciones alternadas la marca solo
+    aparecía en las claras. */
 .sec--dark .sh-label {
-    color: var(--c-on-dark-3);
-}
-
-.sec--dark .sh-label::before,
-.sec--dark .sh-label::after {
-    background: var(--c-border-dark-strong);
+    color: var(--c-accent);
 }
 
 .sec--dark .sh-title {
@@ -463,7 +468,7 @@ button {
 
 /* Título */
 .sh-title {
-    font-size: clamp(1.65rem, 2.8vw, 2.6rem);
+    font-size: var(--fs-section);
     font-weight: var(--fw-display);
     color: var(--c-text-heading);
     line-height: 1.15;
@@ -500,6 +505,38 @@ button {
 .sh--center .sh-label {
     justify-content: center;
     width: 100%;
+}
+
+/*  Cabecera con una acción a la derecha ("Ver todos los proyectos"): el
+    título a la izquierda y el botón alineado con la base del texto.
+    Reemplaza la fila centrada que iba debajo de las tarjetas y que obligaba a
+    bajar hasta el final para llegar al listado.
+
+      <div class="sh sh--row">
+        <div class="sh-text"> …sh-label, sh-title, sh-desc… </div>
+        <a class="btn btn-outline-light" href="…">Ver todos</a>
+      </div>                                                                 */
+.sh--row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-6);
+}
+
+.sh--row .sh-text {
+    max-width: 720px;
+    min-width: 0;
+}
+
+.sh--row .btn {
+    flex-shrink: 0;
+}
+
+@media (max-width: 767.98px) {
+    .sh--row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1069,6 +1106,66 @@ a.btn:active {
     color: var(--c-on-dark-3);
 }
 
+/* ── Banda de cifras ──
+   Los .card--stat en una fila, separados por filetes, integrados en el
+   layout en vez de flotar como tarjetas: el KPI como parte de la página, no
+   como adorno. El home la usa bajo el titular y en "Quiénes somos".
+
+     <div class="stat-band stat-band--oscuro" style="--stat-cols: 4">
+       <div class="card--stat card--stat-lg card--stat-oscuro"> … </div>
+     </div>
+
+   --stat-cols llega inline desde la página (una custom property sí atraviesa
+   al componente; un selector de página no, regla 1) y vale 4 si no se dice. */
+.stat-band {
+    display: grid;
+    grid-template-columns: repeat(var(--stat-cols, 4), 1fr);
+    border-top: 1px solid var(--c-border);
+}
+
+.stat-band > * {
+    padding: var(--sp-6) var(--sp-5);
+    border-left: 1px solid var(--c-border);
+    text-align: left;
+}
+
+.stat-band > :first-child {
+    border-left: none;
+    padding-left: 0;
+}
+
+.stat-band--oscuro {
+    border-top-color: var(--c-border-dark-strong);
+}
+
+.stat-band--oscuro > * {
+    border-left-color: var(--c-border-dark-strong);
+}
+
+@media (max-width: 767.98px) {
+    .stat-band {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-band > * {
+        text-align: center;
+        padding: var(--sp-5) var(--sp-3);
+    }
+
+    .stat-band > :nth-child(odd) {
+        border-left: none;
+        padding-left: var(--sp-3);
+    }
+
+    .stat-band > :nth-child(n + 3) {
+        border-top: 1px solid var(--c-border);
+    }
+
+    .stat-band--oscuro > :nth-child(n + 3) {
+        border-top-color: var(--c-border-dark-strong);
+    }
+}
+
 /* ── Chip ──
    Etiqueta con borde: un ícono y dos o tres palabras, nada más. Si
    necesita una descripción debajo ya no es un chip, es un
@@ -1329,7 +1426,7 @@ a.btn:active {
 }
 
 .page-hero-title {
-    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-size: var(--fs-display-lg);
     font-weight: var(--fw-bold);
     color: var(--c-text-white);
     line-height: 1.1;
@@ -1343,6 +1440,64 @@ a.btn:active {
     font-weight: var(--fw-normal);
     letter-spacing: var(--ls-wide);
     margin: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7b. COMPONENTE: CTA BAND (CtaBand.astro)
+   Cierre de toda página de cara al cliente (regla 8 de CLAUDE.md). Con
+   `image` lleva una foto de fondo bajo un velo; sin ella es la banda lisa.
+   Vive aquí y no en el componente para que /sistema/ la pinte.
+
+   El velo va de 80% a 90% de --c-primary: con la foto más clara posible el
+   texto de apoyo (--c-on-dark-3) sigue por encima de 4.5:1. Menos velo
+   dejaría ver más foto, pero el texto es el centro de la banda.
+══════════════════════════════════════════════════════════════ */
+.cta-band {
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-band-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cta-band-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            color-mix(in srgb, var(--c-primary) 80%, transparent) 0%,
+            color-mix(in srgb, var(--c-primary) 90%, transparent) 100%);
+}
+
+.cta-band .container {
+    position: relative;
+    z-index: 1;
+}
+
+.cta-band-actions {
+    display: flex;
+    gap: var(--sp-3);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--sp-7);
+}
+
+@media (max-width: 767.98px) {
+    .cta-band-actions {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .cta-band-actions .btn {
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1470,7 +1625,7 @@ a.btn:active {
 .top-bar-pill--accent:hover {
     background: var(--c-accent);
     border-color: var(--c-accent);
-    color: var(--c-text-white);
+    color: var(--c-primary);
 }
 
 .top-bar-links {
@@ -1615,14 +1770,8 @@ a.btn:active {
     color: var(--c-text-white);
 }
 
-.nav a:hover::after,
-.nav a.active::after {
+.nav a:hover::after {
     transform: scaleX(1);
-}
-
-.nav a.active {
-    color: var(--c-text-white);
-    font-weight: var(--fw-bold);
 }
 
 /* Página activa via aria-current */
@@ -1650,10 +1799,6 @@ a.btn:active {
 }
 
 .header.scrolled .nav a:hover {
-    color: var(--c-primary);
-}
-
-.header.scrolled .nav a.active {
     color: var(--c-primary);
 }
 
@@ -2664,6 +2809,182 @@ body.menu-open {
 .prosa a {
     color: var(--c-secondary);
     text-decoration: underline;
+}
+
+/* ── Prosa de ficha ─────────────────────────────────────────── */
+/*  El cuerpo de un servicio o un proyecto: lo que escribe el .md más las
+    especialidades. Es .prosa con la columna ancha del layout de dos columnas,
+    los h2 a tamaño de bloque y las listas en dos columnas con un punto.
+    Reemplaza los :global() que repetían las dos fichas.
+
+      <div class="prosa prosa--ficha"><Content /></div>                       */
+.prosa--ficha {
+    max-width: none;
+}
+
+.prosa--ficha h2 {
+    font-size: var(--fs-title);
+    margin: var(--sp-7) 0 var(--sp-4);
+}
+
+.prosa--ficha p {
+    margin-bottom: var(--sp-5);
+    line-height: 1.85;
+}
+
+.prosa--ficha ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--sp-6);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-2) var(--sp-6);
+}
+
+.prosa--ficha li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    line-height: 1.5;
+}
+
+.prosa--ficha li + li {
+    margin-top: 0;
+}
+
+.prosa--ficha li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--c-secondary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: var(--sp-2);
+}
+
+@media (max-width: 767.98px) {
+    .prosa--ficha ul {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Preguntas frecuentes ───────────────────────────────────── */
+/*  Acordeón nativo con <details>: sin JavaScript, con teclado y lector de
+    pantalla de serie. Cada pregunta es un <summary>; el chevron rota con
+    [open]. El icono lo pinta <Icono>, así que su estilo vive aquí (regla 1).
+
+      <div class="faq">
+        <details class="faq-item">
+          <summary>¿Pregunta? <Icono nombre="chevron-abajo" tam={18} /></summary>
+          <div class="faq-respuesta">…</div>
+        </details>
+      </div>                                                                  */
+.faq {
+    max-width: 860px;
+    border-top: 1px solid var(--c-border);
+}
+
+.faq-item {
+    border-bottom: 1px solid var(--c-border);
+}
+
+.faq-item summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-5) 0;
+    list-style: none;
+    cursor: pointer;
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+    color: var(--c-text-heading);
+    transition: color var(--t);
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary:hover {
+    color: var(--c-secondary);
+}
+
+.faq-item summary svg {
+    flex-shrink: 0;
+    color: var(--c-secondary);
+    transition: transform var(--t);
+}
+
+.faq-item[open] summary svg {
+    transform: rotate(180deg);
+}
+
+.faq-respuesta {
+    padding: 0 0 var(--sp-5);
+    max-width: 72ch;
+    color: var(--c-text-body);
+    line-height: 1.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .faq-item summary svg {
+        transition: none;
+    }
+}
+
+/* ── Galería de fotos ───────────────────────────────────────── */
+/*  Una foto principal y miniaturas debajo. Lleva proporción y no altura en
+    píxeles: en una columna estrecha una altura fija recorta de más. Las
+    miniaturas son tres por fila y nunca una (miniaturas de ancho completo
+    serían otra cosa). Las imágenes las pinta <Image> dentro de Galeria.astro,
+    por eso el estilo vive aquí.
+
+      <Galeria fotos={…} titulo="…" />                                        */
+.galeria {
+    margin: var(--sp-7) 0;
+}
+
+.galeria-principal {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    margin-bottom: var(--sp-1);
+}
+
+.galeria-principal img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--t-slow);
+}
+
+.galeria-principal:hover img {
+    transform: scale(1.03);
+}
+
+.galeria-thumbs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-1);
+}
+
+.galeria-thumb {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+}
+
+.galeria-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.85);
+    transition: filter var(--t), transform var(--t-slow);
+}
+
+.galeria-thumb:hover img {
+    filter: brightness(1);
+    transform: scale(1.05);
 }
 
 /* ── Lista de clave y valor ─────────────────────────────────── */

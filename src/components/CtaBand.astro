@@ -15,8 +15,14 @@
  *     primaryLabel="Contáctenos"
  *     secondaryHref="/proyectos/"
  *     secondaryLabel="Ver proyectos"
+ *     image={servicio.data.imagen}   // opcional: foto de fondo bajo un velo
  *   />
+ *
+ * Los estilos (.cta-band*) viven en design-system.css: la foto la pinta <Image>
+ * y el velo y los botones tienen que verse también en /sistema/.
  */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
 import Icono from './Icono.astro';
 
 interface Props {
@@ -37,6 +43,12 @@ interface Props {
    * invisible.
    */
   tone?: 'dark' | 'light';
+  /**
+   * Foto de fondo, bajo un velo de --c-primary. Solo con tone="dark": el velo
+   * es oscuro y el texto de la banda clara es oscuro, así que en claro se
+   * ignora en vez de dejar texto ilegible sobre una foto.
+   */
+  image?: ImageMetadata;
 }
 
 const {
@@ -48,13 +60,21 @@ const {
   secondaryHref,
   secondaryLabel,
   tone = 'dark',
+  image,
 } = Astro.props;
 
 const sectionClass  = tone === 'light' ? 'sec sec--muted' : 'sec sec--dark';
 const secondaryClass = tone === 'light' ? 'btn btn-outline btn-lg' : 'btn btn-outline-light btn-lg';
+const fondo = tone === 'dark' ? image : undefined;
 ---
 
-<section class={sectionClass}>
+<section class:list={[sectionClass, 'cta-band']}>
+  {fondo && (
+    <>
+      <Image class="cta-band-media" src={fondo} alt="" quality={70} widths={[768, 1280, 1920]} sizes="100vw" loading="lazy" />
+      <div class="cta-band-overlay"></div>
+    </>
+  )}
   <div class="container">
     <div class="sh sh--center sh--medium">
       <p class="sh-label">{label}</p>
@@ -75,27 +95,3 @@ const secondaryClass = tone === 'light' ? 'btn btn-outline btn-lg' : 'btn btn-ou
     </div>
   </div>
 </section>
-
-<style>
-  .cta-band-actions {
-    display: flex;
-    gap: var(--sp-3);
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: var(--sp-7);
-  }
-
-  @media (max-width: 767.98px) {
-    .cta-band-actions {
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-    }
-
-    .cta-band-actions .btn {
-      width: 100%;
-      max-width: 320px;
-      justify-content: center;
-    }
-  }
-</style>

@@ -13,8 +13,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MediaCard from '../../components/MediaCard.astro';
 import Icono from '../../components/Icono.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Galeria from '../../components/Galeria.astro';
 import imagenProyecto from '../../assets/imagenes/hero_project.webp';
 import imagenServicio from '../../assets/imagenes/image_obra_civiles.webp';
+import fotoA from '../../assets/imagenes/about_section.webp';
+import fotoB from '../../assets/imagenes/about_team.webp';
+import fotoC from '../../assets/imagenes/home_about.webp';
 
 // Una página estática no se puede excluir del build; una ruta con parámetro sí:
 // sin rutas que generar, no emite nada. `ruta: undefined` en una ruta rest es
@@ -52,7 +57,9 @@ const tipografia = [
   { token: '--fs-lg',      px: '18px',    uso: 'Párrafo destacado' },
   { token: '--fs-xl',      px: '22px',    uso: 'h3' },
   { token: '--fs-2xl',     px: '24–32px', uso: 'h2, cifras' },
-  { token: '--fs-display', px: '32–48px', uso: 'h1 de páginas interiores' },
+  { token: '--fs-section', px: '28–44px', uso: 'h2 de sección (.sh-title)' },
+  { token: '--fs-display', px: '32–48px', uso: 'h1 de páginas interiores, cifras destacadas' },
+  { token: '--fs-display-lg', px: '36–60px', uso: 'h1 de la cabecera de página (.page-hero-title)' },
 ];
 
 const espaciado = ['--sp-1', '--sp-2', '--sp-3', '--sp-4', '--sp-5', '--sp-6', '--sp-7', '--sp-l1', '--sp-l2', '--sp-l3'];
@@ -112,6 +119,42 @@ const codigoAside = `<aside class="proyecto-aside">
     <ul class="data-list">…</ul>
   </div>
 </aside>`;
+
+const codigoFilaEncabezado = `<div class="sh sh--row">
+  <div class="sh-text">
+    <p class="sh-label">Proyectos destacados</p>
+    <h2 class="sh-title">Nuestra huella en el Perú</h2>
+  </div>
+  <a class="btn btn-outline-light" href="/proyectos/">Ver todos los proyectos</a>
+</div>`;
+
+const codigoBandaCifras = `<div class="stat-band stat-band--oscuro" style="--stat-cols: 4">
+  <div class="card--stat card--stat-lg card--stat-oscuro">
+    <span class="stat-num" data-counter="15" data-prefix="+">+15</span>
+    <span class="stat-label">Años de experiencia</span>
+  </div>
+  …
+</div>`;
+
+const codigoCtaBand = `<CtaBand
+  label="¿Listo para iniciar?"
+  title="¿Tienes un proyecto de Obras Civiles?"
+  primaryHref="/contacto/" primaryLabel="Contáctenos"
+  image={servicio.data.imagen}     <!-- opcional: foto de fondo bajo un velo -->
+/>`;
+
+const codigoProsaFicha = `<div class="prosa prosa--ficha">
+  <Content />                     <!-- el cuerpo del .md -->
+</div>`;
+
+const codigoFaq = `<div class="faq">
+  <details class="faq-item">
+    <summary>¿Trabajan fuera de Lima? <Icono nombre="chevron-abajo" tam={18} /></summary>
+    <div class="faq-respuesta">Respuesta.</div>
+  </details>
+</div>`;
+
+const codigoGaleria = `<Galeria fotos={proyecto.data.galeria} titulo={proyecto.data.titulo} />`;
 
 const codigoLista = `<ul class="data-list">
   <li><span class="data-key">Ubicación</span><span class="data-value">Castilla, Piura</span></li>
@@ -180,6 +223,8 @@ const codigoLista = `<ul class="data-list">
       margin-bottom: var(--sp-4);
     }
     .ds-demo--oscuro { background: var(--c-primary); }
+    /* Sin relleno: la demo es una sección entera (la banda de cierre) y trae el suyo. */
+    .ds-demo--libre { padding: 0; overflow: hidden; }
 
     .ds-fila { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
     .ds-fila--ancha { gap: var(--sp-l1); }
@@ -278,6 +323,8 @@ const codigoLista = `<ul class="data-list">
           <a href="#avisos">Avisos</a>
           <a href="#listas">Listas y estados</a>
           <a href="#encabezados">Encabezados</a>
+          <a href="#bandas">Bandas</a>
+          <a href="#ficha">Ficha</a>
         </nav>
       </header>
 
@@ -786,6 +833,144 @@ const codigoLista = `<ul class="data-list">
           es un contrato con <code>initCounters()</code> de <code>src/scripts/main.ts</code>, que lo
           anima al entrar en pantalla, con <code>data-prefix</code> y <code>data-suffix</code> opcionales. Las cifras reales salen de <code>src/data/empresa.ts</code>.
         </p>
+      </section>
+
+      <!-- ── BANDAS ──────────────────────────────────────────── -->
+      <section class="ds-seccion" id="bandas">
+        <h2>Bandas</h2>
+
+        <p class="ds-grupo">Encabezado con acción</p>
+        <p>
+          <code>.sh--row</code>: título a la izquierda y el botón alineado con la base del
+          texto. Sustituye a la fila centrada de "Ver todos" que iba debajo de las
+          tarjetas. En móvil cae a columna.
+        </p>
+        <div class="ds-demo ds-demo--oscuro sec--dark">
+          <div class="sh sh--row">
+            <div class="sh-text">
+              <p class="sh-label">Proyectos destacados</p>
+              <h2 class="sh-title">Nuestra huella en el Perú</h2>
+            </div>
+            <a class="btn btn-outline-light" href="#bandas">Ver todos los proyectos</a>
+          </div>
+        </div>
+        <div class="ds-codigo"><pre>{codigoFilaEncabezado}</pre></div>
+
+        <p class="ds-grupo">Banda de cifras</p>
+        <p>
+          Los <code>.card--stat</code> en una fila, separados por filetes: el dato como parte
+          del layout y no como tarjeta suelta. <code>--stat-cols</code> fija las columnas
+          (4 si no se dice) y llega inline desde la página. En móvil pasa a 2×2. Las
+          cifras reales salen siempre de <code>src/data/empresa.ts</code>.
+        </p>
+        <div class="ds-demo ds-demo--oscuro">
+          <div class="stat-band stat-band--oscuro">
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">+15</span>
+              <span class="stat-label">Años de experiencia</span>
+            </div>
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">+150 km²</span>
+              <span class="stat-label">Construidos</span>
+            </div>
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">+100MM</span>
+              <span class="stat-label">De soles en proyectos</span>
+            </div>
+            <div class="card--stat card--stat-lg card--stat-oscuro">
+              <span class="stat-num">+200</span>
+              <span class="stat-label">Trabajadores por obra</span>
+            </div>
+          </div>
+        </div>
+        <div class="ds-demo">
+          <div class="stat-band" style="--stat-cols: 2">
+            <div class="card--stat card--stat-lg">
+              <span class="stat-num">4</span>
+              <span class="stat-label">Normas ISO certificadas</span>
+            </div>
+            <div class="card--stat card--stat-lg">
+              <span class="stat-num">+200</span>
+              <span class="stat-label">Trabajadores por obra</span>
+            </div>
+          </div>
+        </div>
+        <div class="ds-codigo"><pre>{codigoBandaCifras}</pre></div>
+
+        <p class="ds-grupo">Banda de cierre</p>
+        <p>
+          <code>CtaBand</code> cierra toda página de cara al cliente (regla 8). Con
+          <code>image</code> lleva una foto bajo un velo de 80% a 90% de
+          <code>--c-primary</code>; sin ella es la banda lisa de siempre.
+        </p>
+        <div class="ds-demo ds-demo--libre">
+          <CtaBand
+            label="¿Listo para iniciar?"
+            title="¿Tienes un proyecto de Obras Civiles?"
+            description="Nuestro equipo técnico está disponible para asesorarte."
+            primaryHref="#bandas"
+            primaryLabel="Contáctenos"
+            secondaryHref="#bandas"
+            secondaryLabel="Ver proyectos"
+            image={imagenServicio}
+          />
+        </div>
+        <div class="ds-codigo"><pre>{codigoCtaBand}</pre></div>
+      </section>
+
+      <!-- ── FICHA ───────────────────────────────────────────── -->
+      <section class="ds-seccion" id="ficha">
+        <h2>Ficha de servicio y proyecto</h2>
+
+        <p class="ds-grupo">Prosa de ficha</p>
+        <p>
+          <code>.prosa--ficha</code>: el cuerpo de un <code>.md</code> a ancho de columna, con
+          los <code>h2</code> a tamaño de bloque y las listas en dos columnas con un punto.
+          Reemplaza los <code>:global()</code> que repetía cada ficha.
+        </p>
+        <div class="ds-demo">
+          <div class="prosa prosa--ficha">
+            <p>Del terreno crudo a la operación: ejecutamos obras civiles integrando movimiento de tierras, vías, redes y edificaciones bajo una sola gestión.</p>
+            <h2>Nos especializamos en:</h2>
+            <ul>
+              <li>Campamentos mineros e industriales</li>
+              <li>Habilitaciones urbanas</li>
+              <li>Movimiento de tierras masivo</li>
+              <li>Pavimentos e infraestructura vial</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ds-codigo"><pre>{codigoProsaFicha}</pre></div>
+
+        <p class="ds-grupo">Preguntas frecuentes</p>
+        <p>
+          <code>.faq</code> con <code>&lt;details&gt;</code>: sin JavaScript, con teclado y
+          lector de pantalla de serie. El chevron rota con <code>[open]</code>.
+        </p>
+        <div class="ds-demo">
+          <div class="faq">
+            <details class="faq-item" open>
+              <summary>¿Trabajan fuera de Lima? <Icono nombre="chevron-abajo" tam={18} /></summary>
+              <div class="faq-respuesta">Sí. Ejecutamos obras en distintas regiones del Perú; las sedes son Lima y Huancayo.</div>
+            </details>
+            <details class="faq-item">
+              <summary>¿Cómo solicito una propuesta? <Icono nombre="chevron-abajo" tam={18} /></summary>
+              <div class="faq-respuesta">Desde la página de contacto, con el alcance del proyecto.</div>
+            </details>
+          </div>
+        </div>
+        <div class="ds-codigo"><pre>{codigoFaq}</pre></div>
+
+        <p class="ds-grupo">Galería</p>
+        <p>
+          <code>Galeria</code>: una foto principal y miniaturas debajo, con proporción y no
+          altura fija. Las pinta <code>&lt;Image&gt;</code>, por eso su estilo vive en el
+          sistema.
+        </p>
+        <div class="ds-demo">
+          <Galeria fotos={[fotoA, fotoB, fotoC]} titulo="Habilitación urbana" />
+        </div>
+        <div class="ds-codigo"><pre>{codigoGaleria}</pre></div>
       </section>
 
     </div>
