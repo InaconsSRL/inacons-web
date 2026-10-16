@@ -4,6 +4,80 @@ Qué se hizo, por qué y qué quedó pendiente, sesión por sesión. El cómo op
 está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el contexto que
 no se deduce del código.
 
+## 2026-10-16 — Correcciones de la auditoría técnica
+
+### Punto de partida
+
+Auditoría local (`AUDITORIA.md`, excluido de git) con 69/100 y 37 hallazgos. El código es
+sano; lo débil era lo que lo rodea: sin pruebas, un deploy que salía en verde con las
+variables vacías, el Canal Ético oculto sin JavaScript y la privacidad sin publicar. Esta
+sesión resuelve **lo que se arregla dentro del repositorio**; lo que depende de cuentas
+externas o del abogado queda abajo como pendiente. Los códigos entre paréntesis son los IDs
+de la auditoría.
+
+### Decisiones
+
+| Decisión | Por qué |
+|---|---|
+| El job `worker` de CI va **sin `needs`** | El Worker se despliega a mano. Un error de tipos o una prueba rota dejan el workflow en rojo sin impedir que se publique un cambio de contenido del sitio. |
+| El humo posterior al deploy **avisa, no revierte** | Revertir por FTP desde Actions es más riesgo que el que evita. Para volver atrás sigue el artefacto `dist-<sha>`. |
+| Acuse del Canal con tope por correo: **se calla, no se rechaza** (S-04) | Un reporte nunca se pierde por un límite pensado contra el abuso del acuse. Se guarda y se avisa a los responsables igual. |
+| `SERVICIOS` copiado en el Worker, con **prueba de contrato** (B-04) | El Worker no ve las colecciones de Astro. `contrato.test.ts` lee `src/content/servicios/` y `canal-etico.astro` y falla si las listas se separan. |
+| `noindex, follow` en `/mineria/` y no `canonical` (E-03) | No es un duplicado de `/servicios/mineria/` (otro texto, otros contactos): Google ignora un canonical entre páginas distintas. Los QR impresos siguen funcionando. **Reversible**: si se quiere posicionar la landing, se quita de `SECCIONES_PRIVADAS` y de su `robots`. |
+| Se retiran `foundingDate` y `postalCode` del JSON-LD (E-06) | Ningún dato del repositorio los respalda y la regla 5 prohíbe cifras que el brochure no declare. Se agregan a `empresa.ts` cuando la empresa los confirme. |
+| `--c-text-placeholder` **no se toca** (A-02) | Está por debajo de AA a propósito y el CSS lo justifica: el placeholder nunca lleva información y ningún campo real lo usa. |
+| `#000` del `mask-image` del home se queda | En una máscara solo cuenta el alfa; no es un color de marca. Quedó comentado. |
+| Sin correo de cumplimiento en el `<noscript>` del Canal (A-01) | Los correos de los responsables no van en el HTML público (`canal.ts`). Se avisa que hace falta JavaScript. |
+| CSP **en modo informe**, con hashes (S-03) | Externalizar todos los scripts (`assetsInlineLimit: 0`) también saca los CSS pequeños a archivos aparte, con una petición bloqueante más en varias páginas: demasiado coste de rendimiento para una política que todavía no bloquea. |
+
+### Commits
+
+| Commit | Qué |
+|---|---|
+| `745ccff` | CI: exigir variables del formulario, comprobar Turnstile en `dist/`, humo posterior, job `worker`, acciones por SHA y Dependabot (D-01, S-05, D-05). |
+| `d65c791` | Worker: Turnstile con tiempo límite y 503, tope de cuerpo de 32 KB, `ORIGENES` sin `localhost` (S-07, S-06). |
+| `31315bc` | Worker: `nombre` sin enlaces, `servicio` validado, tope de acuses del Canal y las primeras pruebas del repositorio (S-04, B-04, T-01). |
+| `951eab5` | Canal Ético visible sin JavaScript (A-01). |
+| `787031e` | Envío compartido en `src/scripts/formulario.ts` (K-01). |
+| `d6ca95e` | `inert` con el menú abierto, foco que entra al menú, mapa perezoso, colores del mapa desde tokens (A-03, R-02). |
+| `9391bb3` | WhatsApp con mensaje y JSON-LD derivado de `CONTACTO` (C-02, E-06). |
+| `1307f3f` | Títulos y descripciones; `/mineria/` fuera del índice (E-05, E-03). |
+| `f008cb0` | Interruptor único `PRIVACIDAD_PUBLICADA` (L-01, preparación). |
+| `79a647f` | `/sistema/` solo con `npm run dev` (K-02). |
+| `6ad7b02` | Content-Security-Policy en modo informe (S-03). |
+
+### Pruebas hechas
+
+- **Worker:** `npm run check` y 34 pruebas (Vitest), también con `npm ci --ignore-scripts`, que es la instalación de CI.
+- **Formularios, en el navegador, con `fetch` simulado:** éxito, 429, 502, 503 y corte de red en contacto y en Canal; la trampa y la validación no llaman a la red; el anónimo no manda nombre ni correo.
+- **Menú móvil:** el fondo queda `inert`, el foco entra al botón de cerrar, la trampa de tabulación cierra el círculo y todo vuelve al cerrar con Escape o con el botón.
+- **Mapa:** 0 peticiones del SVG al cargar y al estar arriba; 1 al acercarse; 28 elementos de pin y el naranja sale del token.
+- **Privacidad:** con el flag en `false` ningún HTML enlaza `/privacidad/` y no está en el sitemap; con `true` (probado y revertido) el pie, `/contacto/` y los términos enlazan, entra al sitemap y se indexa.
+- **CSP:** se sirvió `dist/` con la cabecera exacta del `.htaccess` y se recorrieron inicio, contacto (Turnstile y Maps), nosotros (YouTube), canal-etico y mineria: sin violaciones. Un control con un script y una imagen no permitidos sí quedó registrado.
+- **SEO:** título ≤ 60 y descripción 120–155 en todas las páginas indexables (las dos fichas de proyecto generadas quedan en 117 y 118).
+
+### Problemas encontrados
+
+- **Había un `wrangler dev` de la sesión de formularios corriendo desde el día anterior** (puerto 8787, con un Zoho falso). Bloqueaba `workers/contacto/node_modules` y se detuvo para reinstalar. Las dependencias del Worker quedaron instaladas con `--ignore-scripts`: si `wrangler dev` se queja de un binario, `npm rebuild` en esa carpeta.
+- **`focus()` sobre el botón de cerrar del menú móvil fallaba siempre**, ya antes de esta sesión: `visibility` se animaba desde `hidden` y el elemento no era enfocable en ese instante. Con `inert` además dejaba el foco en `body`. Se arregló en el CSS del menú (visible al abrir, se oculta al terminar el fundido).
+- **Astro inlina los scripts pequeños** (los de `/canal-etico/` y `/mineria/`): su hash cambia con cada edición y la CSP los permite por hash.
+
+### Pendiente
+
+Dentro del repositorio ya no queda nada de la auditoría salvo el rediseño y el contenido. **Fuera:**
+
+- [ ] **Desplegar el Worker** (`npx wrangler deploy` en `workers/contacto/`): sus cambios no están en producción hasta entonces. Después, un `OPTIONS` al Worker con `Origin: http://localhost:4321` debe dar 403.
+- [ ] **E-01 (la más urgente):** `inacons.com.pe` y `www` dan 404 en toda ruta menos `/`. Falta un 301 que conserve la ruta en el `.htaccess` del docroot del dominio raíz (no está en este repositorio).
+- [ ] **S-02:** segundo administrador corporativo y 2FA en Cloudflare, Zoho, GitHub y cPanel.
+- [ ] **D-03:** monitor externo gratuito sobre `/` y `/contacto/`, y alerta si hay consultas con `estado = 'error'`.
+- [ ] **S-01:** FTPS o SFTP con el proveedor, o servir el sitio estático desde otro hosting.
+- [ ] **Turnstile:** quitar `localhost` de los dominios del widget.
+- [ ] **Cumplimiento y abogado:** plazo de conservación de los reportes (B-01), destinatarios por rol y suplentes (B-02), términos del Canal (L-02), transferencia de datos fuera del Perú (L-04), cierre de la política y luego `PRIVACIDAD_PUBLICADA = true`.
+- [ ] **Mapa de Google sin consentimiento previo (L-03)** y **respaldo de D1 (B-03)**: no se tocaron.
+- [ ] **Confirmar con la empresa** año de fundación, código postal y coordenadas (hoy no están en el JSON-LD, salvo las coordenadas del mapa).
+- [ ] **CSP a bloqueo:** dos semanas con la consola sin violaciones (ver `docs/deploy.md`).
+- [ ] **Contenido (E-02):** ampliar los servicios y publicar más fichas de proyecto.
+
 ## 2026-10-15 — Alta en Google Search Console
 
 ### Punto de partida
