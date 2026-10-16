@@ -4,7 +4,9 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import Galeria from '../../components/Galeria.astro';
 import Icono from '../../components/Icono.astro';
+import MediaCard from '../../components/MediaCard.astro';
 
 type Proyecto = CollectionEntry<'proyectos'>;
 
@@ -23,11 +25,24 @@ interface Props {
 
 const { proyecto, todosProyectos } = Astro.props;
 const { Content } = await render(proyecto);
-const { titulo, ubicacion, categoria, año, imagen, galeria = [] } = proyecto.data;
+const { titulo, ubicacion, categoria, año, imagen, galeria = [], resumen, ficha, destacados } = proyecto.data;
 
 const relacionados = todosProyectos
   .filter((p) => p.id !== proyecto.id && p.data.categoria === categoria)
   .slice(0, 3);
+// Con dos o más hay para una sección propia; con uno basta el panel del lateral.
+const seccionRelacionados = relacionados.length >= 2;
+
+// Ubicación, categoría y año salen siempre; el resto, solo si el .md lo trae.
+const filasFicha: [string, string][] = [
+  ['Ubicación', ubicacion],
+  ['Categoría', categoria],
+  ['Año', String(año)],
+  ...(ficha?.cliente ? [['Cliente', ficha.cliente]] : []),
+  ...(ficha?.plazo ? [['Plazo', ficha.plazo]] : []),
+  ...(ficha?.alcance ? [['Alcance', ficha.alcance]] : []),
+  ...(ficha?.estado ? [['Estado', ficha.estado]] : []),
+] as [string, string][];
 ---
 
 <BaseLayout
@@ -39,7 +54,7 @@ const relacionados = todosProyectos
   <PageHero
     image={imagen}
     title={titulo}
-    subtitle={`${ubicacion} — ${año}`}
+    subtitle={resumen ?? `${ubicacion} — ${año}`}
     parent={{ label: 'Proyectos', href: '/proyectos/' }}
     current={titulo}
     size="md"
@@ -51,29 +66,15 @@ const relacionados = todosProyectos
       <div class="proyecto-layout">
 
         <!-- Columna principal -->
-        <div class="proyecto-body" data-aos="fade-up">
+        <div data-aos="fade-up">
 
           <span class="proyecto-badge">{categoria}</span>
 
-          <Content />
+          <div class="prosa prosa--ficha">
+            <Content />
+          </div>
 
-          <!-- Galería -->
-          {galeria.length > 0 && (
-            <div class="galeria">
-              <div class="galeria-principal">
-                <Image quality={70} src={galeria[0]} alt={`${titulo} — foto principal`} widths={[640, 960, 1280]} sizes="(min-width: 1024px) 800px, 100vw" />
-              </div>
-              {galeria.length > 1 && (
-                <div class="galeria-thumbs">
-                  {galeria.slice(1).map((foto, i) => (
-                    <div class="galeria-thumb">
-                      <Image quality={70} src={foto} alt={`${titulo} — foto ${i + 2}`} width={400} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <Galeria fotos={galeria} titulo={titulo} />
 
           <a href="/contacto/" class="btn btn-primary">
             Solicitar cotización
@@ -86,13 +87,13 @@ const relacionados = todosProyectos
           <div class="panel panel--sm panel--rail" data-aos="fade-left">
             <p class="panel-label">Ficha Técnica</p>
             <ul class="data-list">
-              <li><span class="data-key">Ubicación</span><span class="data-value">{ubicacion}</span></li>
-              <li><span class="data-key">Categoría</span><span class="data-value">{categoria}</span></li>
-              <li><span class="data-key">Año</span><span class="data-value">{año}</span></li>
+              {filasFicha.map(([clave, valor]) => (
+                <li><span class="data-key">{clave}</span><span class="data-value">{valor}</span></li>
+              ))}
             </ul>
           </div>
 
-          {relacionados.length > 0 && (
+          {relacionados.length > 0 && !seccionRelacionados && (
             <div class="panel panel--sm panel--rail" data-aos="fade-left" data-aos-delay="100">
               <p class="panel-label">Proyectos relacionados</p>
               <nav aria-label="Proyectos relacionados">
@@ -116,6 +117,56 @@ const relacionados = todosProyectos
     </div>
   </section>
 
+  {destacados && destacados.length > 0 && (
+    <section class="sec sec--muted">
+      <div class="container">
+        <div class="sh sh--medium" data-aos="fade-up">
+          <p class="sh-label">Lo más destacado</p>
+          <h2 class="sh-title">Qué hizo especial a esta obra</h2>
+        </div>
+        <div class="feature-grid">
+          {destacados.map((d, i) => (
+            <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay={i * 80}>
+              <div class="feature-icon"><Icono nombre={d.icono ?? 'check-circulo'} tam={24} /></div>
+              <h3 class="feature-title">{d.titulo}</h3>
+              <p class="feature-desc">{d.descripcion}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* Clara: la banda de cierre es oscura y dos oscuras seguidas borrarían la
+      alternancia. La sección de destacados, si sale, es gris; esta va en blanco. */}
+  {seccionRelacionados && (
+    <section class={`sec ${destacados && destacados.length > 0 ? 'sec--white' : 'sec--muted'}`}>
+      <div class="container">
+        <div class="sh sh--row" data-aos="fade-up">
+          <div class="sh-text">
+            <p class="sh-label">Obra ejecutada</p>
+            <h2 class="sh-title">Más proyectos de {categoria}</h2>
+          </div>
+          <a href="/proyectos/" class="btn btn-outline">Ver todos los proyectos</a>
+        </div>
+        <div class="cards-row" data-aos="fade-up">
+          {relacionados.map((p) => (
+            <MediaCard
+              href={`/proyectos/${p.id}/`}
+              image={p.data.imagen}
+              alt=""
+              tag={p.data.categoria}
+              title={p.data.titulo}
+              meta={`${p.data.ubicacion} · ${p.data.año}`}
+              ratio="4/5"
+              ratioMobile="3/2"
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
   <CtaBand
     label="¿Proyecto similar?"
     title="¿Tienes un proyecto que requiere nuestra experiencia?"
@@ -124,6 +175,7 @@ const relacionados = todosProyectos
     primaryLabel="Contáctenos"
     secondaryHref="/proyectos/"
     secondaryLabel="Ver todos los proyectos"
+    image={imagen}
   />
 
 </BaseLayout>
@@ -150,90 +202,6 @@ const relacionados = todosProyectos
     text-transform: uppercase;
     color: var(--c-secondary);
     margin-bottom: var(--sp-6);
-  }
-
-  .proyecto-body :global(h2) {
-    font-size: var(--fs-title);
-    font-weight: var(--fw-bold);
-    color: var(--c-text-heading);
-    margin: var(--sp-7) 0 var(--sp-4);
-  }
-
-  .proyecto-body :global(p) {
-    font-size: var(--fs-md);
-    line-height: 1.85;
-    color: var(--c-text-body);
-    margin-bottom: var(--sp-4);
-  }
-
-  .proyecto-body :global(ul) {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 var(--sp-6);
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-  }
-
-  .proyecto-body :global(li) {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sp-2);
-    font-size: var(--fs-md);
-    color: var(--c-text-body);
-  }
-
-  .proyecto-body :global(li)::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--c-secondary);
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: var(--sp-2);
-  }
-
-  /* Galería */
-  .galeria { margin: var(--sp-7) 0; }
-
-  .galeria-principal {
-    width: 100%;
-    height: 400px;
-    overflow: hidden;
-    margin-bottom: var(--sp-1);
-  }
-
-  .galeria-principal img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform var(--t-slow);
-  }
-
-  .galeria-principal:hover img { transform: scale(1.03); }
-
-  .galeria-thumbs {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--sp-1);
-  }
-
-  .galeria-thumb {
-    height: 120px;
-    overflow: hidden;
-  }
-
-  .galeria-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: brightness(0.85);
-    transition: filter var(--t), transform var(--t-slow);
-  }
-
-  .galeria-thumb:hover img {
-    filter: brightness(1);
-    transform: scale(1.05);
   }
 
   /* Aside */
@@ -298,11 +266,5 @@ const relacionados = todosProyectos
   @media (max-width: 1023.98px) {
     .proyecto-layout { grid-template-columns: 1fr; gap: var(--sp-l2); }
     .proyecto-aside  { position: static; }
-    .galeria-principal { height: 280px; }
-  }
-
-  @media (max-width: 767.98px) {
-    .galeria-thumbs { grid-template-columns: repeat(2, 1fr); }
-    .galeria-thumb  { height: 100px; }
   }
 </style>

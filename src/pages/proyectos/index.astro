@@ -39,6 +39,7 @@ const proyectos = (await getCollection('proyectos'))
             alt=""
             tag={p.data.categoria}
             title={p.data.titulo}
+            desc={p.data.resumen}
             meta={`${p.data.ubicacion} · ${p.data.año}`}
             ratio="4/5"
           />

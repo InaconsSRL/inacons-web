@@ -1,9 +1,11 @@
 ---
-import { render } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHero from '../../components/PageHero.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import Galeria from '../../components/Galeria.astro';
 import Icono from '../../components/Icono.astro';
+import MediaCard from '../../components/MediaCard.astro';
 import { serviciosPorOrden, type Servicio } from '../../lib/servicios';
 import { BROCHURE } from '../../data/empresa';
 
@@ -22,13 +24,38 @@ interface Props {
 
 const { servicio, otros } = Astro.props;
 const { Content } = await render(servicio);
-const { titulo, descripcion, imagen, especialidades } = servicio.data;
+const { titulo, descripcion, imagen, especialidades, categoria, destacados, faqs, galeria } = servicio.data;
+
+// Los proyectos de la misma categoría, para que la ficha enseñe obra y no solo
+// texto. Sin `categoria` en el .md, o sin proyectos de ella, la sección no sale.
+const proyectos = categoria
+  ? (await getCollection('proyectos'))
+      .filter((p) => p.data.categoria === categoria)
+      .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99))
+      .slice(0, 3)
+  : [];
 
 // La descripción del servicio es corta (68 a 109 caracteres) y un meta
 // description útil ronda los 120 a 155: se le suma la frase de respaldo más
 // larga que quepa. Si ya no cabe ninguna, va sola.
 const RESPALDOS = ['INACONS, constructora peruana con más de 15 años de experiencia.', 'INACONS: más de 15 años en obra.'];
 const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) => d.length <= 155) ?? descripcion;
+
+// Las secciones opcionales aparecen o no según el .md; las claras alternan
+// gris y blanco para no quedar pegadas aunque falten algunas. La principal
+// es blanca, así que la primera que salga es gris.
+let ultimaClara: 'sec--white' | 'sec--muted' = 'sec--white';
+const clara = () => (ultimaClara = ultimaClara === 'sec--white' ? 'sec--muted' : 'sec--white');
+
+const jsonLdFaq = faqs && faqs.length > 0 && {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.pregunta,
+    acceptedAnswer: { '@type': 'Answer', text: f.respuesta },
+  })),
+};
 ---
 
 <BaseLayout title={`${titulo} en Perú | INACONS`} description={metaDescripcion} ogImage={imagen}>
@@ -48,17 +75,19 @@ const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) =>
       <div class="service-layout">
 
         <!-- Columna principal -->
-        <div class="service-body" data-aos="fade-up">
-          <Content />
+        <div data-aos="fade-up">
+          <div class="prosa prosa--ficha">
+            <Content />
 
-          {especialidades && especialidades.length > 0 && (
-            <>
-              <h2>Nos especializamos en:</h2>
-              <ul>
-                {especialidades.map((e: string) => <li>{e}</li>)}
-              </ul>
-            </>
-          )}
+            {especialidades && especialidades.length > 0 && (
+              <>
+                <h2>Nos especializamos en:</h2>
+                <ul>
+                  {especialidades.map((e: string) => <li>{e}</li>)}
+                </ul>
+              </>
+            )}
+          </div>
 
           <a href="/contacto/" class="btn btn-primary">
             Solicitar cotización
@@ -97,6 +126,87 @@ const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) =>
     </div>
   </section>
 
+  {destacados && destacados.length > 0 && (
+    <section class={`sec ${clara()}`}>
+      <div class="container">
+        <div class="sh sh--medium" data-aos="fade-up">
+          <p class="sh-label">Por qué INACONS</p>
+          <h2 class="sh-title">Lo que nos distingue</h2>
+        </div>
+        <div class="feature-grid">
+          {destacados.map((d, i) => (
+            <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay={i * 80}>
+              <div class="feature-icon"><Icono nombre={d.icono ?? 'check-circulo'} tam={24} /></div>
+              <h3 class="feature-title">{d.titulo}</h3>
+              <p class="feature-desc">{d.descripcion}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {galeria && galeria.length > 0 && (
+    <section class={`sec ${clara()}`}>
+      <div class="container">
+        <Galeria fotos={galeria} titulo={titulo} />
+      </div>
+    </section>
+  )}
+
+  {/* Clara y no oscura: la banda de cierre es oscura y dos oscuras seguidas
+      borrarían la alternancia. Las tarjetas traen su propio velo oscuro. */}
+  {proyectos.length > 0 && (
+    <section class={`sec ${clara()}`}>
+      <div class="container">
+        <div class="sh sh--row" data-aos="fade-up">
+          <div class="sh-text">
+            <p class="sh-label">Obra ejecutada</p>
+            <h2 class="sh-title">Proyectos de {titulo}</h2>
+          </div>
+          <a href="/proyectos/" class="btn btn-outline">Ver todos los proyectos</a>
+        </div>
+        <div class="cards-row" data-aos="fade-up">
+          {proyectos.map((p) => (
+            <MediaCard
+              href={`/proyectos/${p.id}/`}
+              image={p.data.imagen}
+              alt=""
+              tag={p.data.categoria}
+              title={p.data.titulo}
+              meta={`${p.data.ubicacion} · ${p.data.año}`}
+              ratio="4/5"
+              ratioMobile="3/2"
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {faqs && faqs.length > 0 && (
+    <section class={`sec ${clara()}`}>
+      <div class="container">
+        <div class="sh sh--medium" data-aos="fade-up">
+          <p class="sh-label">Preguntas frecuentes</p>
+          <h2 class="sh-title">Lo que suelen preguntarnos</h2>
+        </div>
+        <div class="faq">
+          {faqs.map((f) => (
+            <details class="faq-item">
+              <summary>
+                {f.pregunta}
+                <Icono nombre="chevron-abajo" tam={18} />
+              </summary>
+              <div class="faq-respuesta">{f.respuesta}</div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+  {jsonLdFaq && <script type="application/ld+json" set:html={JSON.stringify(jsonLdFaq)} />}
+
   <CtaBand
     label="¿Listo para iniciar?"
     title={`¿Tienes un proyecto de ${titulo}?`}
@@ -105,6 +215,7 @@ const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) =>
     primaryLabel="Contáctenos"
     secondaryHref="/proyectos/"
     secondaryLabel="Ver proyectos"
+    image={imagen}
   />
 
 </BaseLayout>
@@ -115,49 +226,6 @@ const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) =>
     grid-template-columns: 1fr 320px;
     gap: var(--sp-l3);
     align-items: start;
-  }
-
-  .service-body :global(h2) {
-    font-size: var(--fs-title);
-    font-weight: var(--fw-bold);
-    color: var(--c-text-heading);
-    margin-bottom: var(--sp-4);
-    margin-top: var(--sp-7);
-  }
-
-  .service-body :global(p) {
-    font-size: var(--fs-md);
-    line-height: 1.85;
-    color: var(--c-text-body);
-    margin-bottom: var(--sp-5);
-  }
-
-  .service-body :global(ul) {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 var(--sp-6);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-2) var(--sp-6);
-  }
-
-  .service-body :global(li) {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sp-2);
-    font-size: var(--fs-md);
-    color: var(--c-text-body);
-    line-height: 1.5;
-  }
-
-  .service-body :global(li)::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: var(--c-secondary);
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: var(--sp-2);
   }
 
   .service-aside {
@@ -232,6 +300,5 @@ const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) =>
 
   @media (max-width: 767.98px) {
     .service-aside { grid-template-columns: 1fr; }
-    .service-body :global(ul) { grid-template-columns: 1fr; }
   }
 </style>

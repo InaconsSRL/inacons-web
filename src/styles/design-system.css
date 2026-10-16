@@ -1478,6 +1478,15 @@ a.btn:active {
     z-index: 1;
 }
 
+/*  El rótulo naranja pasa AA solo sobre --c-primary liso (6.03:1). Sobre foto,
+    incluso con el velo, medido con las siete fotos que pueden ir de fondo da
+    entre 3.4 y 4.2:1: no llega a 4.5. Con foto va en --c-on-dark-2, que con el
+    pixel más claro de cualquiera de ellas sigue por encima de 6.9:1. El guion
+    delante sigue naranja: es decoración, no texto. */
+.cta-band-media ~ .container .sh-label {
+    color: var(--c-on-dark-2);
+}
+
 .cta-band-actions {
     display: flex;
     gap: var(--sp-3);
@@ -3032,6 +3041,12 @@ body.menu-open {
 .galeria-thumb:hover img {
     filter: brightness(1);
     transform: scale(1.05);
+}
+
+@media (max-width: 767.98px) {
+    .galeria-thumbs {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* ── Lista de clave y valor ─────────────────────────────────── */
