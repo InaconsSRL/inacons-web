@@ -1,5 +1,5 @@
 ---
-import { Image, getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -17,10 +17,6 @@ const destacados = (await getCollection('proyectos'))
   .filter((p) => p.data.destacado)
   .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99))
   .slice(0, 3);
-
-// El póster del vídeo es la imagen LCP del home: se precarga con el mismo
-// URL optimizado que usa el <video>, o el navegador la pediría dos veces.
-const poster = await getImage({ src: imagenHero, quality: 70, width: 1920, format: 'webp' });
 
 const LOGOS = import.meta.glob<{ default: ImageMetadata }>('../assets/imagenes/clientes/*', { eager: true });
 const logo = (archivo: string) => LOGOS[`../assets/imagenes/clientes/${archivo}`].default;
@@ -47,8 +43,6 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
   title="INACONS | Constructora e ingeniería en Perú"
   description="Empresa constructora peruana con más de 15 años en obras civiles, infraestructura, electromecánica, minería y consultoría. Oficinas en Lima y Huancayo."
 >
-  <link slot="head" rel="preload" as="image" href={poster.src} fetchpriority="high" />
-
 <style slot="head">
     /* ── HERO ── */
     .home-hero {
@@ -60,6 +54,18 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       align-items: center;
       overflow: hidden;
     }
+    /*  El top-bar y el header son fixed (112 px a partir de 768) y el hero ocupa
+        toda la pantalla por detrás. Sin este espacio, el contenido centrado en
+        100vh se montaba bajo la cabecera con ventanas de 720 px de alto: el
+        eyebrow quedaba 31 px por debajo del borde del header. */
+    @media (min-width: 768px) {
+      .home-hero { padding-top: var(--sp-l4); }
+    }
+    /*  El póster es un <img> y no el atributo poster del vídeo: así sale con
+        srcset (en móvil baja 768 px y no 1920) y es la imagen LCP del home, con
+        prioridad alta. El vídeo va encima y es transparente hasta que carga
+        (solo en escritorio, ver initHeroVideo). */
+    .hero-poster,
     .hero-video {
       position: absolute;
       inset: 0;
@@ -76,7 +82,10 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         linear-gradient(to bottom, color-mix(in srgb, var(--c-primary) 30%, transparent) 0%, color-mix(in srgb, var(--c-primary) 92%, transparent) 100%),
         linear-gradient(110deg, color-mix(in srgb, var(--c-primary) 85%, transparent) 0%, color-mix(in srgb, var(--c-secondary) 35%, transparent) 60%, transparent 100%);
     }
-    /*  Las cifras van al costado del titular para que se lean a la vez que él. */
+    /*  Todo en una columna: mensaje y, debajo, las cifras en banda. Al costado
+        competían con el titular por el ancho y lo obligaban a partirse antes de
+        tiempo; en banda el titular puede crecer (--fs-hero) y las cifras quedan
+        integradas en el layout y no flotando junto a él. */
     .hero-content {
       position: relative;
       z-index: 2;
@@ -84,45 +93,16 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       width: 100%;
       margin: 0 auto;
       padding: 0 var(--sp-l1);
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: var(--sp-l3);
-      align-items: center;
-    }
-    .hero-main { min-width: 0; }
-
-    /* ── CIFRAS DEL HERO ── */
-    .hero-stats {
       display: flex;
       flex-direction: column;
-      gap: var(--sp-6);
-      padding-left: var(--sp-7);
-      border-left: 1px solid var(--c-border-dark-strong);
+      gap: var(--sp-l1);
     }
-    .hero-stat { white-space: nowrap; text-align: left; }
+    .hero-main { min-width: 0; }
+    .hero-stats { width: 100%; }
+    /*  La banda del sistema da 24 px arriba y abajo a cada cifra; en el hero,
+        que tiene que caber en una pantalla de 720 px, bastan 20. */
+    .hero-stat { padding-top: var(--sp-5); padding-bottom: var(--sp-5); }
 
-    .hero-stat .stat-label { margin-top: var(--sp-1); }
-
-    /*  Entre 768 y 1024 no hay ancho para las dos columnas: el titular
-        a 4.3vw ya ocupa casi todo el contenedor y las cifras al costado
-        lo empujarian a partirse. En tablet van en fila bajo el mensaje,
-        que es donde si hay sitio horizontal. */
-    @media (max-width: 1023.98px) {
-      .hero-content {
-        grid-template-columns: 1fr;
-        gap: var(--sp-l2);
-      }
-      .hero-stats {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: var(--sp-5);
-        padding-left: 0;
-        padding-top: var(--sp-6);
-        border-left: none;
-        border-top: 1px solid var(--c-border-dark-strong);
-      }
-      .hero-stat { text-align: center; }
-    }
     .home-hero h1 {
       font-family: var(--font-ui);
       font-size: var(--fs-hero);
@@ -168,10 +148,10 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       margin-left: 2px;
     }
     .hero-desc {
-      font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+      font-size: var(--fs-lg);
       color: var(--c-on-dark-2);
-      margin-bottom: var(--sp-7);
-      max-width: 500px;
+      margin-bottom: var(--sp-6);
+      max-width: 560px;
       font-weight: var(--fw-normal);
       letter-spacing: var(--ls-wide);
     }
@@ -317,7 +297,6 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     .projects-showcase {
       padding: var(--section-py) 0;
     }
-    .projects-footer { text-align: center; padding-top: var(--sp-l2); }
 
     /* ── COVERAGE MAP ── */
     .coverage-grid {
@@ -421,27 +400,9 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         width: 100%;
         justify-content: center;
       }
-      /*  En una columna, las cifras bajan en 2×2 y sin filete lateral. */
-      .hero-content {
-        grid-template-columns: 1fr;
-        gap: var(--sp-l2);
-      }
-      .hero-stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--sp-6) var(--sp-4);
-        padding-left: 0;
-        border-left: none;
-        width: 100%;
-      }
-      /*  Sin nowrap ni mínimo automático: en el grid 2×2, una celda 1fr que no
-          puede partir su texto ensancha la página y da scroll horizontal. */
-      .hero-stat {
-        text-align: center;
-        white-space: normal;
-        min-width: 0;
-      }
-      .hero-stat .stat-num { font-size: var(--fs-2xl); }
+      /*  Las cifras bajan en 2×2 (lo hace .stat-band). Un poco más chicas que
+          en escritorio: dos columnas de 187 px no admiten "+100MM" a 32 px. */
+      .hero-stats .stat-num { font-size: var(--fs-2xl); }
 
       .cards-row { margin-top: var(--sp-7); }
       .about-grid { grid-template-columns: 1fr; gap: var(--sp-l2); }
@@ -457,7 +418,8 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
   -->
   <section class="home-hero">
     <!-- Sin src: main.ts lo carga solo en escritorio. En móvil basta el póster. -->
-    <video class="hero-video" muted loop playsinline preload="none" poster={poster.src} data-src="/assets/videos/hero.mp4" aria-hidden="true"></video>
+    <Image class="hero-poster" src={imagenHero} alt="" quality={70} widths={[768, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" />
+    <video class="hero-video" muted loop playsinline preload="none" data-src="/assets/videos/hero.mp4" aria-hidden="true"></video>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <div class="hero-main">
@@ -484,7 +446,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       </div>
 
       <!-- Cifras del brochure (src/data/empresa.ts). data-counter es el contrato con main.ts. -->
-      <div class="hero-stats">
+      <div class="hero-stats stat-band stat-band--oscuro">
         {cifrasHero.map((c) => (
           <div class="hero-stat card--stat card--stat-lg card--stat-oscuro">
             <span class="stat-num" data-counter={c.valor} data-prefix={c.prefijo} data-suffix={c.sufijo}>{c.prefijo}{c.valor}{c.sufijo}</span>
@@ -525,10 +487,13 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
 
   <section class="sec--dark services-showcase">
     <div class="container">
-      <div class="sh sh--center sh--medium" data-aos="fade-up" data-aos-duration="700">
-        <p class="sh-label">Nuestras Especialidades</p>
-        <h2 class="sh-title">Lo que construimos</h2>
-        <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
+      <div class="sh sh--row" data-aos="fade-up" data-aos-duration="700">
+        <div class="sh-text">
+          <p class="sh-label">Nuestras Especialidades</p>
+          <h2 class="sh-title">Lo que construimos</h2>
+          <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
+        </div>
+        <a href="/servicios/" class="btn btn-outline-light">Ver todos los servicios</a>
       </div>
       <div class="cards-row services-grid">
         {servicios.map((s) => (
@@ -572,9 +537,12 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
   {destacados.length > 0 && (
     <section class="sec--dark projects-showcase">
       <div class="container">
-        <div class="sh sh--medium" data-aos="fade-up" data-aos-duration="700">
-          <p class="sh-label">Proyectos destacados</p>
-          <h2 class="sh-title">Nuestra huella en el Perú</h2>
+        <div class="sh sh--row" data-aos="fade-up" data-aos-duration="700">
+          <div class="sh-text">
+            <p class="sh-label">Proyectos destacados</p>
+            <h2 class="sh-title">Nuestra huella en el Perú</h2>
+          </div>
+          <a href="/proyectos/" class="btn btn-outline-light">Ver todos los proyectos</a>
         </div>
 
         <div class="cards-row projects-grid" data-aos="fade-up" data-aos-duration="800">
@@ -589,10 +557,6 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
               ratioMobile="3/2"
             />
           ))}
-        </div>
-
-        <div class="projects-footer" data-aos="fade-up" data-aos-duration="600">
-          <a href="/proyectos/" class="btn btn-outline-light">Ver todos los proyectos</a>
         </div>
       </div>
     </section>

@@ -144,11 +144,12 @@
     --fs-section: clamp(1.75rem, 3vw, 2.75rem);
     /* 28–44px — h2 de sección (.sh-title). Subió ~6% el tope: es el escalón
        que da el "tipografía grande" de la referencia sin tocar ningún layout. */
-    --fs-hero: clamp(1rem, 4.3vw, 3.1rem);
-    /* 16–50px — h1 del home. Era clamp(1.05rem, 5.2vw, 3.8rem), un 18%
-       mas grande: seis palabras en caja alta a 61px se comian la
-       pantalla y, con las cifras al costado, empujaban el titular a
-       partirse antes de tiempo.
+    --fs-hero: clamp(1rem, 4.3vw, 3.5rem);
+    /* 16–56px — h1 del home. Estuvo en clamp(1.05rem, 5.2vw, 3.8rem) y se
+       bajó a 3.1rem porque, con las cifras al costado, un titular de 61px
+       se partía antes de tiempo. Las cifras ya van en banda debajo y el
+       titular tiene todo el ancho, así que sube a 3.5rem: más grande, pero
+       no los 3.8rem que se comían la pantalla.
 
        El minimo sigue siendo bajo a proposito: la linea mas larga es
        "CONSTRUIMOS CONFIANZA" y en un telefono de 360px tiene que
@@ -1140,6 +1141,22 @@ a.btn:active {
 
 .stat-band--oscuro > * {
     border-left-color: var(--c-border-dark-strong);
+}
+
+/*  Desde 768 px la cifra no se parte: "+150 km²" en dos líneas descuadra la
+    fila. En móvil sí puede partirse: una celda 1fr que no parte su texto
+    ensancha la página y da scroll horizontal. En tablet (cuatro cifras en
+    ~700 px) baja a --fs-2xl, porque a tamaño display no cabe en su columna. */
+@media (min-width: 768px) {
+    .stat-band .stat-num {
+        white-space: nowrap;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    .stat-band .stat-num {
+        font-size: var(--fs-2xl);
+    }
 }
 
 @media (max-width: 767.98px) {
