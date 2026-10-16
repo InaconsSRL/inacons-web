@@ -9,7 +9,11 @@ import sitemap from '@astrojs/sitemap';
 //              bloqueada ahí no se rastrea y nadie llega a leer su noindex.
 //   privacidad → borrador hasta que lo apruebe el abogado. Al aprobarlo se
 //              quita de aquí y se pone BORRADOR = false en la página.
-const SECCIONES_PRIVADAS = new Set(['sistema', 'recursos', 'privacidad']);
+//   mineria  → landing del stand de Expomina, destino de los QR impresos. Va con
+//              `noindex, follow` para no competir con /servicios/mineria/; los
+//              QR siguen funcionando. Si la empresa quiere posicionarla, se
+//              quita de aquí y de su <BaseLayout robots>.
+const SECCIONES_PRIVADAS = new Set(['sistema', 'recursos', 'privacidad', 'mineria']);
 
 export default defineConfig({
   // Única fuente del dominio: canonical, sitemap, Open Graph y JSON-LD salen

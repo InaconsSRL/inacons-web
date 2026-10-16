@@ -23,9 +23,15 @@ interface Props {
 const { servicio, otros } = Astro.props;
 const { Content } = await render(servicio);
 const { titulo, descripcion, imagen, especialidades } = servicio.data;
+
+// La descripción del servicio es corta (68 a 109 caracteres) y un meta
+// description útil ronda los 120 a 155: se le suma la frase de respaldo más
+// larga que quepa. Si ya no cabe ninguna, va sola.
+const RESPALDOS = ['INACONS, constructora peruana con más de 15 años de experiencia.', 'INACONS: más de 15 años en obra.'];
+const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) => d.length <= 155) ?? descripcion;
 ---
 
-<BaseLayout title={`${titulo} | INACONS`} description={descripcion} ogImage={imagen}>
+<BaseLayout title={`${titulo} en Perú | INACONS`} description={metaDescripcion} ogImage={imagen}>
 
   <PageHero
     image={imagen}
