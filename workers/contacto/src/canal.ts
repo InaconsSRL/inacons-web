@@ -8,11 +8,11 @@
  * se manda a Turnstile.
  */
 
-import { CORREO_VALIDO, enviar, escapar, leerCampos, tablaHtml, type Env, type Respuesta } from './comun';
+import { CORREO_VALIDO, enviar, escapar, leerCampos, nombreValido, tablaHtml, type Env, type Respuesta } from './comun';
 
 // La clave es el contrato con el sitio: es el value del <select> de
 // canal-etico.astro. El título y los destinatarios solo viven aquí.
-const TIPOS = {
+export const TIPOS = {
   consulta: { titulo: 'Canal de Consultas', destino: ['ventas@inacons.com.pe'] },
   denuncia: { titulo: 'Canal de Denuncias', destino: ['oficialdecumplimiento@inacons.com.pe'] },
   sugerencia: { titulo: 'Canal de Sugerencias', destino: ['sig@inacons.com.pe'] },
@@ -58,6 +58,12 @@ const LIMITES: Record<keyof Reporte, number> = {
 // evidente.
 export const IP_A_TURNSTILE = false;
 
+// Acuses por correo y hora. El reporte se guarda y se avisa a los responsables
+// igual; lo que se calla es la cortesía hacia quien lo envía, para que el
+// acuse no sirva de megáfono hacia un tercero. En la modalidad con nombre el
+// correo ya está en la fila del reporte, así que contarlo no toca el anonimato.
+const MAXIMO_ACUSES_POR_HORA = 3;
+
 // Sin 0/O ni 1/I: el código se dicta por teléfono o se copia a mano.
 const ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -70,7 +76,7 @@ export function validar(cuerpo: Record<string, unknown>): (Reporte & { tipo: Tip
     // Lo que el navegador no debería mandar en anónimo, se descarta igual.
     r.nombre = r.correo = r.telefono = '';
   } else if (r.modalidad === 'nombre') {
-    if (!r.nombre || !CORREO_VALIDO.test(r.correo)) return null;
+    if (!r.nombre || !nombreValido(r.nombre) || !CORREO_VALIDO.test(r.correo)) return null;
   } else {
     return null;
   }
@@ -83,6 +89,17 @@ export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHa
 
   const { titulo, destino } = TIPOS[reporte.tipo];
   const codigo = nuevoCodigo();
+  const identificado = reporte.modalidad === 'nombre';
+
+  // Antes del INSERT, para no contar el reporte que se está procesando.
+  let conAcuse = false;
+  if (identificado) {
+    const { recientes } = (await env.DB.prepare(
+      `SELECT COUNT(*) AS recientes FROM reportes
+       WHERE modalidad = 'nombre' AND correo = ?1 AND creado > datetime('now', '-1 hour')`,
+    ).bind(reporte.correo).first<{ recientes: number }>())!;
+    conAcuse = recientes < MAXIMO_ACUSES_POR_HORA;
+  }
 
   // Se guarda antes de enviar: si CPaaS falla, el reporte no se pierde.
   const { id } = (await env.DB.prepare(
@@ -95,7 +112,6 @@ export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHa
     reporte.origen, destino.join(', '),
   ).first<{ id: number }>())!;
 
-  const identificado = reporte.modalidad === 'nombre';
   try {
     await enviar(env, {
       para: [...destino],
@@ -112,7 +128,7 @@ export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHa
   }
   await marcar(env, id, 'notificado');
 
-  if (identificado && env.ENVIAR_ACUSE === 'si') {
+  if (conAcuse && env.ENVIAR_ACUSE === 'si') {
     try {
       await enviar(env, {
         para: [reporte.correo],

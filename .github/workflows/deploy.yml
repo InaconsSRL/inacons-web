@@ -144,3 +144,9 @@ jobs:
 
       - name: Comprobar tipos del Worker
         run: npm run check
+
+      # Validación, reparto de los seis tipos y anonimato del Canal Ético, y las
+      # listas que el Worker comparte con el sitio (contrato.test.ts lee
+      # src/content/servicios y canal-etico.astro).
+      - name: Pruebas del Worker
+        run: npm test

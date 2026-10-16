@@ -22,6 +22,12 @@ export type Respuesta = { status: number; datos: Record<string, unknown> };
 
 export const CORREO_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Un nombre con enlace, dominio, arroba o salto de línea no es un nombre: es
+// alguien usando el acuse de recibo para mandar texto a un tercero desde
+// noreply@inacons.com.pe. El acuse lleva el nombre dentro del saludo.
+const NOMBRE_SOSPECHOSO = /:\/\/|www\.|@|[\r\n]/i;
+export const nombreValido = (nombre: string): boolean => !NOMBRE_SOSPECHOSO.test(nombre);
+
 /**
  * Lee del cuerpo solo los campos conocidos, recortados. Devuelve null si
  * alguno supera su límite: los límites son los maxlength del formulario,

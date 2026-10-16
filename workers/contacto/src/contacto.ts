@@ -1,6 +1,6 @@
 /** Ruta "/": el formulario de /contacto/. Avisa a ventas y acusa recibo. */
 
-import { CORREO_VALIDO, enviar, escapar, leerCampos, tablaHtml, type Env, type Respuesta } from './comun';
+import { CORREO_VALIDO, enviar, escapar, leerCampos, nombreValido, tablaHtml, type Env, type Respuesta } from './comun';
 
 type Consulta = {
   nombre: string;
@@ -25,6 +25,20 @@ const LIMITES: Record<keyof Consulta, number> = {
 };
 const OBLIGATORIOS: (keyof Consulta)[] = ['nombre', 'correo', 'telefono', 'servicio', 'mensaje'];
 
+// Son los `titulo` de src/content/servicios/*.md más "Otro": el <select> de
+// contacto.astro. El Worker no ve las colecciones de Astro, así que la lista se
+// copia aquí; test/contrato.test.ts falla si las dos se separan. El servicio
+// entra en el asunto del correo a ventas, por eso no puede ser texto libre.
+export const SERVICIOS: ReadonlySet<string> = new Set([
+  'Obras Civiles',
+  'Obras de Infraestructura',
+  'Obras Electromecánicas',
+  'Arquitectura y Paisajismo',
+  'Minería',
+  'Consultoría',
+  'Otro',
+]);
+
 export const IP_A_TURNSTILE = true;
 
 // Por hora. Turnstile frena a los bots; esto frena a una persona usando el
@@ -34,7 +48,7 @@ const MAXIMO_POR_HORA = 3;
 export function validar(cuerpo: Record<string, unknown>): Consulta | null {
   const c = leerCampos(cuerpo, LIMITES);
   if (!c || OBLIGATORIOS.some((campo) => !c[campo])) return null;
-  if (!CORREO_VALIDO.test(c.correo)) return null;
+  if (!CORREO_VALIDO.test(c.correo) || !nombreValido(c.nombre) || !SERVICIOS.has(c.servicio)) return null;
   return c;
 }
 

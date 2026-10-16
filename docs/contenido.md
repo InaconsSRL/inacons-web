@@ -125,6 +125,13 @@ hora; **503** Cloudflare no respondió a Turnstile en 5 s (reintentar, no es cul
 escribe). Todas salen con CORS, para que el navegador las lea como respuesta y no como
 fallo de red.
 
+Reglas de validación del Worker, además de los límites de longitud: `nombre` no puede
+llevar `://`, `www.`, `@` ni saltos de línea (el acuse lo repite en el saludo), y
+`servicio` tiene que ser uno de los títulos de `src/content/servicios/` o `Otro`. Esa lista
+vive copiada en `SERVICIOS` de `workers/contacto/src/contacto.ts`: al crear, renombrar o
+borrar un servicio hay que cambiarla también, y `npm test` en `workers/contacto/` avisa
+si se olvidó.
+
 Turnstile solo se carga si están definidas `PUBLIC_CONTACT_ENDPOINT` y
 `PUBLIC_TURNSTILE_SITE_KEY`. Con el modo `mailto` no hay nada que proteger.
 
@@ -167,6 +174,12 @@ se purgan solos; ni la fila ni ninguna otra tabla guardan la IP o su hash: el l�
 por minuto por conexión se cuenta en memoria (Rate Limiting de Cloudflare) y la IP no se manda a
 Turnstile. En `"modalidad": "anonimo"` no van `nombre`, `correo`
 ni `telefono`; `relacion`, `fecha`, `lugar` y `personas` son opcionales.
+
+Con nombre, `nombre` sigue la misma regla que en contacto (sin enlaces, arrobas ni saltos
+de línea), y el acuse de recibo sale como máximo 3 veces por hora y por correo. Pasado el
+tope el reporte **se guarda y se avisa a los responsables igual**: solo se omite el acuse.
+Los `tipo` válidos son las claves de `TIPOS` en `canal.ts` y tienen que coincidir con
+`CANALES` de `canal-etico.astro`; `npm test` lo comprueba.
 
 ## Vídeo y PDF
 
