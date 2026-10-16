@@ -186,6 +186,25 @@ archivos viejos pueden seguir en el servidor sin que nadie llegue a verlos.
 **Seguridad**: `Options -Indexes`, `X-Frame-Options`, `X-Content-Type-Options`,
 `Referrer-Policy`, `Permissions-Policy` y HSTS.
 
+**Content-Security-Policy, en modo informe.** La cabecera es
+`Content-Security-Policy-Report-Only`: no bloquea nada y no hay colector, así que las
+violaciones solo se ven abriendo la consola del navegador. Limita qué puede cargar la página
+si alguien llegara a inyectar un script (por ejemplo en `/canal-etico/`, donde se escriben
+denuncias). Para pasar a bloqueo:
+
+1. Con el sitio publicado, recorrer `/`, `/contacto/` (enviando una consulta de prueba, con
+   Turnstile), `/canal-etico/`, `/nosotros/` (vídeo), `/mineria/` y el menú móvil, con la
+   consola abierta, y anotar toda violación.
+2. Hacerlo de nuevo tras cada cambio de scripts o de proveedores externos, durante dos
+   semanas. Cero violaciones → cambiar el nombre de la cabecera a
+   `Content-Security-Policy`.
+
+Dos cosas que la rompen en silencio: (a) los scripts en línea de `/canal-etico/` y
+`/mineria/` están permitidos **por hash** y el hash cambia con cualquier edición de esos
+scripts; Chrome indica el hash esperado en el mensaje de la violación. (b) Un proveedor
+nuevo (otro iframe, otro script, otro host de fetch) hay que añadirlo a la directiva que
+corresponda. `style-src 'unsafe-inline'` se queda: Astro emite estilos en línea.
+
 ## Indexación
 
 Dos listas en paralelo: el filtro del sitemap (`SECCIONES_PRIVADAS` en
