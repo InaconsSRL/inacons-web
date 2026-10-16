@@ -2028,6 +2028,17 @@ a.btn:active {
     flex-shrink: 0;
 }
 
+/*  Una sede: nombre y dirección en dos líneas, junto al icono de ubicación. */
+.footer-sede {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-sede strong {
+    font-weight: var(--fw-semibold);
+    color: var(--c-on-dark-2);
+}
+
 .footer-section ul li a {
     display: inline-flex;
     align-items: center;
@@ -2071,7 +2082,8 @@ a.btn:active {
 
 .footer-bottom-links {
     display: flex;
-    gap: var(--sp-5);
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-5);
 }
 
 .footer-bottom-links a {
@@ -2174,9 +2186,21 @@ body.menu-open {
 .mobile-menu-header {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     padding: var(--sp-4) var(--sp-5);
     flex-shrink: 0;
+}
+
+/*  El logo vive en el sistema y no en el layout: el <img> lo pinta el layout,
+    pero la regla es de este componente, y así /sistema/ la ve. */
+.mobile-menu-logo {
+    display: block;
+    line-height: 0;
+}
+
+.mobile-menu-logo img {
+    height: var(--sp-7);
+    width: auto;
 }
 
 .mobile-menu-close {
@@ -2339,6 +2363,29 @@ body.menu-open {
     flex-shrink: 0;
     margin-top: auto;
     padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/*  Teléfono y correo. Los iconos los pinta <Icono>, por eso la regla del svg
+    está aquí (regla 1 de CLAUDE.md). */
+.mobile-menu-contact {
+    padding: 0 var(--sp-5) var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+
+.mobile-menu-contact a {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--c-on-dark-2);
+    text-decoration: none;
+}
+
+.mobile-menu-contact svg {
+    color: var(--c-on-dark-icono);
+    flex-shrink: 0;
 }
 
 .mobile-menu-actions {

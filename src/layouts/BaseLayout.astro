@@ -181,6 +181,9 @@ const [sedePrincipal] = sedes;
           <div class="mobile-menu-overlay" aria-hidden="true"></div>
           <div class="mobile-menu-content">
             <div class="mobile-menu-header">
+              <a href="/" class="mobile-menu-logo" aria-label="INACONS, inicio">
+                <img src="/assets/imagenes/logos/logo_inacons_white.svg" alt="" width="160" height="40" />
+              </a>
               <button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Cerrar menú">
                 <Icono nombre="cerrar" tam={18} trazo={2.5} />
               </button>
@@ -224,7 +227,7 @@ const [sedePrincipal] = sedes;
                 </li>
                 <li>
                   <a href="/canal-etico/">
-                    <Icono nombre="ubicacion" />
+                    <Icono nombre="balanza" />
                     Canal Ético
                   </a>
                 </li>
@@ -232,6 +235,11 @@ const [sedePrincipal] = sedes;
             </nav>
 
             <div class="mobile-menu-bottom">
+              <!-- El top-bar no existe en móvil: sin esto el teléfono solo estaba en el pie. -->
+              <div class="mobile-menu-contact">
+                <a href={telefono.href}><Icono nombre="telefono" tam={16} /> {telefono.texto}</a>
+                <a href={`mailto:${correoVentas}`}><Icono nombre="correo" tam={16} /> {correoVentas}</a>
+              </div>
               <div class="mobile-menu-actions">
                 <a href="/contacto/" class="mobile-btn-primary">Contáctenos</a>
                 <a href={BROCHURE} target="_blank" rel="noopener" class="mobile-btn-outline">Descargar Brochure</a>
@@ -298,6 +306,15 @@ const [sedePrincipal] = sedes;
                 <ul>
                   <li><a href={`mailto:${correoVentas}`}><Icono nombre="correo" tam={14} /> {correoVentas}</a></li>
                   <li><a href={telefono.href}><Icono nombre="telefono" tam={14} /> {telefono.texto}</a></li>
+                  {sedes.map((sede) => (
+                    <li>
+                      <Icono nombre="ubicacion" tam={14} />
+                      <span class="footer-sede">
+                        <strong>{sede.nombre}</strong>
+                        <span>{sede.direccion}, {sede.distrito}</span>
+                      </span>
+                    </li>
+                  ))}
                 </ul>
                 <!--
                   Canal Ético va en el pie como botón y no como un enlace más en
@@ -316,6 +333,8 @@ const [sedePrincipal] = sedes;
               <p>&copy; {new Date().getFullYear()} INACONS S.R.L. — Todos los derechos reservados.</p>
               <div class="footer-bottom-links">
                 <a href="/documentos/">Certificaciones y políticas</a>
+                <a href={intranet} target="_blank" rel="noopener">Intranet</a>
+                <a href={proveedores} target="_blank" rel="noopener">Proveedores</a>
                 {PRIVACIDAD_PUBLICADA && <a href="/privacidad/">Política de privacidad</a>}
               </div>
             </div>
