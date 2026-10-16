@@ -5,7 +5,6 @@ import { PRIVACIDAD_PUBLICADA } from './src/data/empresa.ts';
 
 // Secciones fuera del sitemap. Se compara el PRIMER segmento de la ruta: una
 // futura /proyectos/recursos-hidricos/ no debe caer aquí por contener la palabra.
-//   sistema  → referencia interna; también va en public/robots.txt.
 //   recursos → material interno con `noindex`. No va en robots.txt: una URL
 //              bloqueada ahí no se rastrea y nadie llega a leer su noindex.
 //   privacidad → borrador hasta que lo apruebe el abogado. Entra o sale con
@@ -16,7 +15,6 @@ import { PRIVACIDAD_PUBLICADA } from './src/data/empresa.ts';
 //              QR siguen funcionando. Si la empresa quiere posicionarla, se
 //              quita de aquí y de su <BaseLayout robots>.
 const SECCIONES_PRIVADAS = new Set([
-  'sistema',
   'recursos',
   'mineria',
   ...(PRIVACIDAD_PUBLICADA ? [] : ['privacidad']),

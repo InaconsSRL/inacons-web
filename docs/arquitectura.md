@@ -59,7 +59,7 @@ una página va en `src/assets/` y se importa.
 | `/contacto/` | `contacto.astro` | ✅ |
 | `/mineria/` | `mineria.astro` | ❌ `noindex, follow` y fuera del sitemap — landing del stand de Expomina y destino de QR impresos; el sector minero se indexa en `/servicios/mineria/` |
 | `/recursos/` | `recursos/index.astro` | ❌ `noindex` — material interno |
-| `/sistema/` | `sistema/index.astro` | ❌ `noindex` + `robots.txt` — referencia de componentes |
+| `/sistema/` | `sistema/[...ruta].astro` | ❌ solo con `npm run dev`: no se genera en el build — referencia de componentes |
 | `/404.html` | `404.astro` | — |
 
 `/r/…`, `/empresa/…` y `/expomina/` no son páginas: son redirecciones fijas en

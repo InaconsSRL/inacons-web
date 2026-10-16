@@ -20,7 +20,7 @@ Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/
 | Necesitas tocar | Archivo |
 |---|---|
 | Tokens, utilidades, estilos que cruzan componentes | `src/styles/design-system.css` |
-| Ver los componentes que ya existen | `/sistema/` — referencia viva, se pinta con el CSS real |
+| Ver los componentes que ya existen | `/sistema/` (solo con `npm run dev`; no sale en el build) — referencia viva, se pinta con el CSS real |
 | Comportamiento del sitio | `src/scripts/main.ts` (funciones `init*` aisladas) |
 | Head, nav, footer, meta OG, JSON-LD | `src/layouts/BaseLayout.astro` |
 | Contacto, cifras del brochure, proyectos por ciudad | `src/data/empresa.ts` |

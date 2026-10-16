@@ -191,7 +191,9 @@ archivos viejos pueden seguir en el servidor sin que nadie llegue a verlos.
 Dos listas en paralelo: el filtro del sitemap (`SECCIONES_PRIVADAS` en
 `astro.config.mjs`) y los `Disallow` de `public/robots.txt`.
 
-- `/sistema/` → fuera del sitemap y bloqueada en `robots.txt`.
+- `/sistema/` → no existe en producción: solo se genera con `npm run dev`. Tampoco
+  aparece en `robots.txt`, porque ahí anunciaría una página interna. `npm run preview` sirve
+  el build, así que tampoco la muestra.
 - `/privacidad/` → fuera del sitemap y con `noindex` mientras sea borrador. **Se publica con
   un solo cambio**: `PRIVACIDAD_PUBLICADA = true` en `src/data/empresa.ts`. Ese valor indexa
   la página, la mete en el sitemap y la enlaza desde el pie, `/contacto/` y los términos del
@@ -219,9 +221,10 @@ propiedad de dominio hay que dar la URL completa; la ruta relativa da *Direcció
 no válida*. Un sitemap recién enviado muestra *No se ha podido obtener* y *Páginas
 descubiertas: 0* durante horas o un par de días aunque responda 200; no se reenvía.
 
-**Qué es normal ver en *Páginas*:** `/sistema/` como *Bloqueada por robots.txt* y
-`/recursos/` y `/privacidad/` como *Excluida por noindex*. Una página pública en esa lista
-sí es un problema.
+**Qué es normal ver en *Páginas*:** `/recursos/`, `/privacidad/` y `/mineria/` como
+*Excluida por noindex*. `/sistema/` pudo aparecer antes como *Bloqueada por robots.txt*; ya no
+existe en producción, así que pasará a *No se ha encontrado (404)* y desaparece sola. Una
+página pública en esa lista sí es un problema.
 
 Al publicar una sección nueva basta con que salga en el sitemap; no hace falta pedir la
 indexación a mano salvo para acelerarla.

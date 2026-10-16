@@ -7,12 +7,21 @@
 // con él; si alguien la ve desactualizada, es que el componente cambió y nadie
 // lo notó, que es exactamente la señal que se busca.
 //
-// Interna: noindex, fuera del sitemap y bloqueada en robots.txt.
+// Interna: solo existe con `npm run dev`. No sale en el build, así que no está
+// en producción ni hace falta bloquearla en robots.txt (que además anunciaría
+// que existe).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MediaCard from '../../components/MediaCard.astro';
 import Icono from '../../components/Icono.astro';
 import imagenProyecto from '../../assets/imagenes/hero_project.webp';
 import imagenServicio from '../../assets/imagenes/image_obra_civiles.webp';
+
+// Una página estática no se puede excluir del build; una ruta con parámetro sí:
+// sin rutas que generar, no emite nada. `ruta: undefined` en una ruta rest es
+// exactamente /sistema/. El archivo se llama [...ruta] solo por esto.
+export function getStaticPaths() {
+  return import.meta.env.PROD ? [] : [{ params: { ruta: undefined } }];
+}
 
 // Los tokens de color, con su razón de ser. El texto de contraste sale de los
 // comentarios del propio design-system.css, no de una medición nueva.
