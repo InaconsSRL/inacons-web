@@ -57,7 +57,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     /*  El top-bar y el header son fixed (112 px a partir de 768) y el hero ocupa
         toda la pantalla por detrás. Sin este espacio, el contenido centrado en
         100vh se montaba bajo la cabecera con ventanas de 720 px de alto: el
-        eyebrow quedaba 31 px por debajo del borde del header. */
+        eyebrow quedaba 31 px metido bajo el borde del header. */
     @media (min-width: 768px) {
       .home-hero { padding-top: var(--sp-l4); }
     }

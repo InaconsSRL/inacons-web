@@ -4,6 +4,65 @@ Qué se hizo, por qué y qué quedó pendiente, sesión por sesión. El cómo op
 está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el contexto que
 no se deduce del código.
 
+## 2026-10-16 — Pequeño rediseño
+
+### Punto de partida
+
+Pedido: un rediseño pequeño —home, fichas de servicio y de proyecto, cabecera y pie, y
+pulido de tokens—, aparte de las correcciones de la auditoría. Principio: **evolucionar, no
+reemplazar**. Ninguna URL cambia, ningún `.md` existente deja de compilar, todo valor nuevo es
+un token y todo componente nuevo se agregó primero a `/sistema/`. Referencia de diseño:
+Bechtel (claro y oscuro alternados, tipografía grande, KPIs integrados en el layout).
+
+### Qué cambió
+
+| Área | Cambio |
+|---|---|
+| **Home** | Las cuatro cifras del brochure bajan de una columna junto al titular a una **banda debajo**. El titular tiene todo el ancho y sube de 50 a 56 px. El póster del hero es un `<img>` con `srcset`. "Ver todos" de servicios y proyectos va a la derecha del título. |
+| **Fichas** | Servicio: destacados, galería, proyectos de su categoría y preguntas frecuentes (con `FAQPage`), todo **si el `.md` lo trae**. Proyecto: ficha técnica con cliente, plazo, alcance y estado, y el `resumen` como subtítulo. Las dos cierran con la banda de contacto sobre la foto de la ficha. |
+| **Cabecera y pie** | Menú móvil con logo y teléfono y correo. Pie con las dos sedes, Intranet y Proveedores (antes solo en el top-bar, que no existe en móvil). Canal Ético con la balanza y no un pin de mapa. |
+| **Tokens** | `--fs-section` y `--fs-display-lg` sustituyen dos `clamp()` escritos dentro de componentes. El rótulo de sección va en naranja sobre oscuro. |
+| **Sistema** | Nuevos, con demo en `/sistema/`: `.sh--row`, `.stat-band`, `.cta-band` con foto, `.prosa--ficha`, `.faq`, `Galeria`. |
+
+### Decisiones
+
+| Decisión | Por qué |
+|---|---|
+| Cifras del hero en **banda inferior** | Lo eligió la empresa. Libera ancho para el titular y quita el punto de corte intermedio de tablet. |
+| La ficha de proyecto **no lleva monto** | Es un dato comercial que la empresa no publica. Los campos de `ficha` son texto libre, no cifras que se animen. |
+| **Sin total "+94"** en el home | La suma por ciudad incluye proyectos antiguos y la regla 5 prohíbe cifras que el brochure no declare. La lista por ciudad sigue como estaba. |
+| **Sin banda de cifras en "Quiénes somos"** | El hero ya muestra las cuatro cifras del brochure; repetirlas, o poner "4 normas ISO" sola, no aporta. |
+| **No se borra** `[data-aos] { transition-duration: 240ms !important }` | Parecía un bug (pisa `--aos-duration`), pero es el tope de movimiento del sistema: dos duraciones honestas. Las `data-aos-duration` de 600 a 800 ms de las páginas son las que lo violan, no al revés. |
+| La sección de **proyectos de la ficha es clara**, no oscura | La banda de cierre es oscura; dos oscuras seguidas borran la alternancia. Las tarjetas traen su propio velo. |
+| Con foto, el **rótulo de la banda de cierre va en `--c-on-dark-2`**, no naranja | Se midió con las siete fotos que pueden ir de fondo: el naranja da entre 3.4 y 4.2:1 sobre el velo (AA pide 4.5). El texto de apoyo queda por encima de 6.9:1 con el píxel más claro de cualquiera de ellas. |
+| El hero **reserva `--sp-l4` arriba** a partir de 768 px | Con ventanas de 720 px de alto el eyebrow quedaba 31 px metido bajo la cabecera. Ahora queda 29 px por debajo de ella. |
+| No se añadieron `seoTitulo` ni `seoDescripcion` al esquema | La descripción de cada servicio con la frase de respaldo que quepa ya cae entre 120 y 155 caracteres. |
+| Se retiraron las reglas `.nav a.active` | Nada pone esa clase: el estado activo es `aria-current`. |
+
+### Commits
+
+| Commit | Qué |
+|---|---|
+| `c605b5d` | Sistema de diseño: tokens de título y componentes nuevos, con su demo. |
+| `4431245` | Contenido: campos opcionales en servicios y proyectos. |
+| `1eccd7f` | Cabecera y pie: menú móvil, sedes y accesos internos. |
+| `82c068a` | Fichas de servicio y de proyecto. |
+| `a578782` | Home. |
+
+### Pruebas hechas
+
+- **Opcionales:** con los `.md` actuales las fichas salen completas. Con campos de prueba (revertidos) aparecen todas las secciones, alternan gris y blanco, la ficha técnica suma sus filas y el `FAQPage` sale en el JSON-LD.
+- **Hero**, medido en el navegador: 1366×768, 1280×720, 1024×768, 800×1000 y 375×812. Sin desborde horizontal, el titular no se parte y las cuatro cifras caben en una línea. A 800 px "+150 km²" se partía en dos; se arregló en `.stat-band`.
+- **Regla 1:** `grep` sobre el CSS construido sin ningún `[cid] > [cid]`.
+- **No se ejecutó Lighthouse**: el LCP y el peso del póster en móvil están razonados por el `srcset`, no medidos.
+
+### Pendiente
+
+- [ ] **Contenido para llenar las secciones nuevas.** Las fichas no inventan nada: cuando la empresa entregue `destacados`, `faqs`, `ficha` (cliente, plazo, alcance, estado) y `resumen`, se agregan al `.md`. Hoy esas secciones no se ven.
+- [ ] **Fotos de obra reales** para las galerías. Las dos fichas reutilizan fotos genéricas del sitio.
+- [ ] **Medir** con Lighthouse en móvil las cinco páginas clave, sobre todo el LCP del home.
+- [ ] La banda de cierre con foto solo se usa en las fichas; las demás páginas (nosotros, sostenibilidad, documentos) siguen con la banda lisa.
+
 ## 2026-10-16 — Correcciones de la auditoría técnica
 
 ### Punto de partida
