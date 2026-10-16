@@ -4,6 +4,7 @@ descripcion: "Proyectos electromecánicos de alta complejidad: subestaciones, tr
 resumen: "Subestaciones, redes MT/BT, automatización y control"
 imagen: ../../assets/imagenes/image_electromecanica.webp
 icono: rayo
+categoria: Electromecánica
 orden: 3
 menu: 3
 especialidades:

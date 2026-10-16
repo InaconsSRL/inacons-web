@@ -4,6 +4,7 @@ descripcion: "Ambientes funcionales y estéticamente equilibrados que respetan e
 resumen: "Parques, áreas verdes, ornamentación e interiores"
 imagen: ../../assets/imagenes/image_paisajismo.webp
 icono: hoja
+categoria: Paisajismo
 orden: 6
 menu: 4
 especialidades:

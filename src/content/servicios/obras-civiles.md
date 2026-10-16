@@ -4,6 +4,7 @@ descripcion: "Del terreno crudo a la operación: movimiento de tierras, vías, r
 resumen: "Movimiento de tierras, vías, redes y edificaciones bajo una sola gestión"
 imagen: ../../assets/imagenes/image_obra_civiles.webp
 icono: edificio
+categoria: Obras Civiles
 orden: 1
 menu: 1
 especialidades:

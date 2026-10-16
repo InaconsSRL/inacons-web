@@ -4,6 +4,7 @@ descripcion: "Factibilidad con BIM, gerencia de proyectos y supervisión indepen
 resumen: "Gerencia de proyectos, factibilidad BIM y supervisión con drones"
 imagen: ../../assets/imagenes/image_consultor.webp
 icono: grafico
+categoria: Consultoría
 orden: 5
 menu: 6
 especialidades:

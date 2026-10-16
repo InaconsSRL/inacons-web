@@ -4,6 +4,7 @@ descripcion: "Reservorios, plantas de tratamiento, bombeo, subestaciones y edifi
 resumen: "Reservorios, plantas de tratamiento, bombeo, subestaciones y edificaciones"
 imagen: ../../assets/imagenes/image_infraestructura.webp
 icono: servidor
+categoria: Infraestructura
 orden: 2
 menu: 2
 especialidades:

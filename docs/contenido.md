@@ -34,11 +34,25 @@ orden: 1                 # orden en /servicios/ y en "otros servicios"
 menu: 1                  # orden en el menú, el pie, el home y el formulario
 especialidades:          # opcional
   - Movimiento de tierras
+categoria: Obras Civiles # opcional: la ficha lista los proyectos de esa categoría
+destacados:              # opcional, hasta 4: "Por qué INACONS"
+  - titulo: Maquinaria propia
+    descripcion: Una frase.
+    icono: escudo        # opcional, del catálogo de iconos
+faqs:                    # opcional: preguntas frecuentes
+  - pregunta: ¿Trabajan fuera de Lima?
+    respuesta: Sí.
+galeria:                 # opcional
+  - ../../assets/imagenes/algo.webp
 ---
 ```
 
 Un servicio nuevo aparece solo en el menú, el pie, el home, `/servicios/` y el selector
 del formulario.
+
+Todo lo marcado *opcional* lo es de verdad: sin esos campos la ficha se publica completa y
+la sección correspondiente no se emite. No se inventa contenido para llenarlos; entran
+cuando la empresa los entrega. Un `icono` que no exista en el catálogo rompe el build.
 
 ## Proyectos
 
@@ -55,8 +69,20 @@ galeria:                     # opcional
   - ../../assets/imagenes/proyectos/pucusana-2.webp
 destacado: true              # aparece en el home (máximo 3)
 orden: 1                     # opcional
+resumen: Una frase            # opcional: hero de la ficha y descripción de la tarjeta
+ficha:                       # opcional: se suma a ubicación, categoría y año
+  cliente: Nombre
+  plazo: 14 meses            # texto libre
+  alcance: Una línea
+  estado: Entregado          # En ejecución | Entregado
+destacados:                  # opcional, hasta 4
+  - titulo: Sin accidentes
+    descripcion: Una frase.
 ---
 ```
+
+La ficha técnica **no lleva monto de inversión**: es un dato comercial que la empresa no
+publica. Los campos de `ficha` son texto libre, no cifras.
 
 ## Recursos
 

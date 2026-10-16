@@ -4,6 +4,7 @@ descripcion: "Soluciones integrales para las operaciones mineras de alta exigenc
 resumen: "Soluciones integrales para las operaciones mineras de alta exigencia"
 imagen: ../../assets/imagenes/image_mineria.webp
 icono: diamante
+categoria: Minería
 orden: 4
 menu: 5
 especialidades:
