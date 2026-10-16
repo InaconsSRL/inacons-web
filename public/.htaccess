@@ -98,11 +98,11 @@ Options -Indexes
     #  · style-src 'unsafe-inline' es obligado: Astro emite <style> en línea
     #    (las fuentes, y el de cada página) y atributos style="--var".
     #  · img-src data: porque Vite inlinea como data: las imágenes de menos de 4 KB.
-    #  · Los tres sha256 son los únicos scripts en línea del build: la clase .js
-    #    de BaseLayout (todas las páginas), el de los términos de /canal-etico/ y
-    #    el de /mineria/. Los dos últimos cambian con cada edición de esos
-    #    scripts: la consola dice qué hash esperaba.
+    #  · Los dos sha256 son los únicos scripts en línea del build: la clase .js
+    #    de BaseLayout (todas las páginas) y el de /mineria/, que cambia con cada
+    #    edición de ese script: la consola dice qué hash esperaba. El del Canal
+    #    Ético sale como archivo porque importa scripts/formulario.ts.
     #  · Orígenes externos: Turnstile (script e iframe), Web Analytics (script y
     #    beacon), Google Maps y YouTube (iframes) y el Worker de los formularios.
-    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' 'sha256-IhBT9VaagzMQOnY+UMm/OBUpPlCb4OMrDmN2Hw/JkjQ=' 'sha256-inp9cg0tXOBqSu5jhccOT/veWaDD6N2WJ4IRpmifB7s=' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://*.workers.dev https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com https://www.google.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' 'sha256-inp9cg0tXOBqSu5jhccOT/veWaDD6N2WJ4IRpmifB7s=' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://*.workers.dev https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com https://www.google.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
 </IfModule>

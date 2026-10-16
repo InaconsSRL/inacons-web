@@ -18,6 +18,10 @@ const CANALES = [
   { tipo: 'acto-subestandar', titulo: 'Actos y Condiciones Subestándar', icono: 'casco', desc: 'Seguridad ante todo. Reporta cualquier condición física o acción que represente un riesgo de accidente.' },
 ] as const;
 
+// Los tres pasos del asistente. Los dos primeros se leen una vez; el tercero es el
+// formulario. Van como lista para que el indicador y los paneles no se desfasen.
+const PASOS = ['Términos', 'Tipo', 'Tu reporte'];
+
 const RELACIONES = ['Colaborador', 'Cliente', 'Proveedor o subcontratista', 'Comunidad o vecino', 'Otro'];
 
 // Sin endpoint no hay a dónde enviar: el formulario se muestra apagado y no
@@ -29,8 +33,6 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
 
   <style slot="head">
     .guarantees-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-1); margin-top: var(--sp-l2); }
-    .terms-sh { margin-bottom: var(--sp-l1); }
-    .terms-wrap { max-width: 800px; margin: 0 auto; }
     .terms-box {
       border: 1.5px solid var(--c-border); border-radius: var(--radius);
       padding: var(--sp-6) var(--sp-7); height: 280px; overflow-y: auto;
@@ -70,16 +72,34 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     }
     .check-label { font-size: var(--fs-base); font-weight: var(--fw-semibold); color: var(--c-text-heading); line-height: 1.4; }
     .terms-accept:has(input:checked) .check-label { color: var(--c-secondary); }
-    .reporte-wrap { max-width: 800px; margin: var(--sp-l2) auto 0; scroll-margin-top: var(--sp-l2); }
-    .form-sh { margin-bottom: var(--sp-7); }
-    .form-sh .sh-title { font-size: var(--fs-xl); }
+    .reporte-wrap { max-width: 800px; margin: 0 auto; }
     .form-estado:not(:empty) { margin-bottom: var(--sp-6); }
     .reporte-no-disponible { margin-bottom: var(--sp-6); }
-    /*  Los canales se ven por defecto y solo se ocultan si hay JavaScript: es un
-        canal de cumplimiento y tiene que ser lo último que falle. `.js` lo pone
-        el script inline de BaseLayout antes del primer pintado, así que con JS no
-        hay destello. El script quita la clase y pasa el control a `hidden`. */
-    html.js .canales--pendiente { display: none; }
+    /*  Un paso a la vez, todos en el mismo lugar. Sin JavaScript no hay quien los
+        cambie: se ven los tres apilados y no se pintan el indicador ni los
+        botones de avance, que no harían nada. `.js` lo pone el script inline de
+        BaseLayout antes del primer pintado, así que con JS no hay destello; el
+        primer paso viene marcado como activo en el HTML. */
+    html.js .paso { display: none; }
+    html.js .paso--activo { display: block; }
+    html:not(.js) .pasos,
+    html:not(.js) [data-accion] { display: none; }
+    .pasos { scroll-margin-top: calc(var(--sp-l4) + var(--sp-4)); }
+    .paso-titulo {
+      font-size: var(--fs-xl);
+      font-weight: var(--fw-bold);
+      color: var(--c-text-heading);
+      margin: 0 0 var(--sp-2);
+    }
+    .paso-desc { color: var(--c-text-muted); margin: 0 0 var(--sp-6); }
+    .paso-resumen {
+      margin: 0 0 var(--sp-6);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--c-bg-muted);
+      border-radius: var(--radius);
+      font-size: var(--fs-sm);
+      color: var(--c-text-body);
+    }
     @media (max-width: 767.98px) {
       .guarantees-grid { grid-template-columns: 1fr; }
     }
@@ -127,64 +147,25 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     </div>
   </section>
 
-  <!-- ② TÉRMINOS -->
-  <section class="sec sec--white">
-    <div class="container">
-      <div class="sh sh--center sh--medium terms-sh" data-aos="fade-up">
-        <p class="sh-label">Paso previo</p>
-        <h2 class="sh-title">Términos y Condiciones de Uso</h2>
-        <p class="sh-desc">Lee atentamente los términos antes de acceder a los canales de reporte.</p>
-      </div>
-      <div class="terms-wrap" data-aos="fade-up">
-        <div class="terms-box" tabindex="0" role="region" aria-label="Términos y condiciones del Canal Ético">
-          <h3>1. Objetivo del Canal</h3>
-          <p>El Canal Ético de INACONS es el medio oficial para reportar conductas que puedan implicar la comisión de irregularidades o actos contrarios a la ley, al Código Ético o a las normas internas de la compañía.</p>
-          <h3>2. Confidencialidad y Anonimato</h3>
-          <p>INACONS garantiza la máxima confidencialidad en la gestión de las comunicaciones recibidas. Si el denunciante lo desea, el reporte puede realizarse de forma totalmente anónima. La identidad del informante no será revelada sin su consentimiento explícito, salvo obligación legal.</p>
-          <h3>3. Garantía de Indemnidad</h3>
-          <p>Queda terminantemente prohibida cualquier forma de represalia contra las personas que utilicen este canal de buena fe. INACONS tomará las medidas necesarias para proteger a los denunciantes.</p>
-          <h3>4. Tratamiento de Datos Personales</h3>
-          <p>Los datos personales facilitados serán tratados por INACONS con la finalidad de gestionar las comunicaciones recibidas e investigar los hechos denunciados.{PRIVACIDAD_PUBLICADA && <> Consulta más detalle en nuestra <a href="/privacidad/">política de privacidad</a>.</>}</p>
-          <h3>5. Responsabilidad del Usuario</h3>
-          <p>El usuario garantiza que los datos personales y la información proporcionada son verdaderos, exactos y completos. Las denuncias falsas realizadas con mala fe podrán ser objeto de sanciones disciplinarias o acciones legales.</p>
-        </div>
-        <label class="terms-accept">
-          <input type="checkbox" id="termsCheckbox" aria-controls="channelsSection">
-          <span class="check-box"></span>
-          <span class="check-label">He leído y acepto los términos y condiciones de uso del Canal Ético</span>
-        </label>
-      </div>
-    </div>
-  </section>
-
-  <!-- ③ CANALES: visibles sin JS; con JS quedan ocultos hasta aceptar los términos -->
-  <section class="sec sec--muted canales--pendiente" id="channelsSection">
+  <!-- ② REPORTE EN TRES PASOS: términos, tipo y datos, uno a la vez y en el mismo lugar -->
+  <section class="sec sec--white" id="reporte">
     <div class="container">
       <div class="sh sh--center sh--medium" data-aos="fade-up">
-        <p class="sh-label">Canales Disponibles</p>
-        <h2 class="sh-title" id="channelsTitle" tabindex="-1">Seleccione el canal correspondiente</h2>
-        <p class="sh-desc">Elige la opción que mejor se ajuste a tu reporte. Todos los canales son confidenciales.</p>
-      </div>
-      <div class="grid-3">
-        {CANALES.map((c, i) => (
-          <div class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay={80 + i * 60}>
-            <div class="feature-icon"><Icono nombre={c.icono} tam={24} /></div>
-            <h3 class="feature-title">{c.titulo}</h3>
-            <p class="feature-desc">{c.desc}</p>
-            <a href="#reporte" class="btn btn-outline btn-sm" data-tipo={c.tipo}>
-              Ingresar al formulario <Icono nombre="chevron-abajo" tam={13} />
-            </a>
-          </div>
-        ))}
+        <p class="sh-label">Haz tu reporte</p>
+        <h2 class="sh-title">Tres pasos, en esta misma pantalla</h2>
+        <p class="sh-desc">Acepta los términos, elige el tipo de reporte y cuéntanos qué pasó. Cada reporte llega solo a las personas responsables de su tipo y se atiende de forma confidencial.</p>
       </div>
 
-      <div class="reporte-wrap" id="reporte">
+      <div class="reporte-wrap" data-aos="fade-up">
         <div class="panel panel--accent panel--raised">
-          <div class="sh sh--left form-sh">
-            <p class="sh-label">Formulario de reporte</p>
-            <h2 class="sh-title">Cuéntanos qué pasó</h2>
-            <p class="sh-desc">Cada reporte llega solo a las personas responsables de su tipo y se atiende de forma confidencial.</p>
-          </div>
+          <ol class="pasos" aria-label="Progreso del reporte">
+            {PASOS.map((nombre, i) => (
+              <li class:list={['pasos-item', { 'pasos-item--actual': i === 0 }]} aria-current={i === 0 ? 'step' : undefined}>
+                <span class="pasos-num" aria-hidden="true">{i + 1}</span>
+                <span class="pasos-etiqueta">{nombre}</span>
+              </li>
+            ))}
+          </ol>
 
           {!PUBLIC_CONTACT_ENDPOINT && (
             <div class="notice notice--warn reporte-no-disponible">
@@ -203,154 +184,286 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
           <div class="form-estado" id="reporteEstado" role="status" aria-live="polite"></div>
 
           <form id="reporteForm" novalidate>
-            <div class="form-group">
-              <label for="tipoReporte">Tipo de reporte *</label>
-              <select id="tipoReporte" name="tipo" class="form-select" required>
-                <option value="">Selecciona el tipo</option>
-                {CANALES.map((c) => <option value={c.tipo}>{c.titulo}</option>)}
-              </select>
+
+            <!-- PASO 1 · Términos -->
+            <div class="paso paso--activo" data-paso="1" role="group" aria-labelledby="paso1-titulo">
+              <h3 class="paso-titulo" id="paso1-titulo" tabindex="-1">Términos y condiciones de uso</h3>
+              <p class="paso-desc">Léelos antes de continuar.</p>
+        <div class="terms-box" tabindex="0" role="region" aria-label="Términos y condiciones del Canal Ético">
+          <h3>1. Objetivo del Canal</h3>
+          <p>El Canal Ético de INACONS es el medio oficial para reportar conductas que puedan implicar la comisión de irregularidades o actos contrarios a la ley, al Código Ético o a las normas internas de la compañía.</p>
+          <h3>2. Confidencialidad y Anonimato</h3>
+          <p>INACONS garantiza la máxima confidencialidad en la gestión de las comunicaciones recibidas. Si el denunciante lo desea, el reporte puede realizarse de forma totalmente anónima. La identidad del informante no será revelada sin su consentimiento explícito, salvo obligación legal.</p>
+          <h3>3. Garantía de Indemnidad</h3>
+          <p>Queda terminantemente prohibida cualquier forma de represalia contra las personas que utilicen este canal de buena fe. INACONS tomará las medidas necesarias para proteger a los denunciantes.</p>
+          <h3>4. Tratamiento de Datos Personales</h3>
+          <p>Los datos personales facilitados serán tratados por INACONS con la finalidad de gestionar las comunicaciones recibidas e investigar los hechos denunciados.{PRIVACIDAD_PUBLICADA && <> Consulta más detalle en nuestra <a href="/privacidad/">política de privacidad</a>.</>}</p>
+          <h3>5. Responsabilidad del Usuario</h3>
+          <p>El usuario garantiza que los datos personales y la información proporcionada son verdaderos, exactos y completos. Las denuncias falsas realizadas con mala fe podrán ser objeto de sanciones disciplinarias o acciones legales.</p>
+        </div>
+        <label class="terms-accept">
+          <input type="checkbox" id="termsCheckbox" required>
+          <span class="check-box"></span>
+          <span class="check-label">He leído y acepto los términos y condiciones de uso del Canal Ético</span>
+        </label>
+              <div class="pasos-acciones">
+                <button type="button" class="btn btn-primary" data-accion="siguiente">
+                  Continuar <Icono nombre="flecha-derecha" tam={15} />
+                </button>
+              </div>
             </div>
 
-            <fieldset class="form-fieldset">
-              <legend>¿Cómo quieres enviarlo? *</legend>
-              <div class="form-opciones">
-                <label class="form-opcion">
-                  <input type="radio" name="modalidad" value="nombre" required />
-                  <span>
-                    <span class="form-opcion-titulo">Con mi nombre</span>
-                    <span class="form-opcion-desc">Podemos responderte y pedirte más datos si hacen falta.</span>
-                  </span>
-                </label>
-                <label class="form-opcion">
-                  <input type="radio" name="modalidad" value="anonimo" required />
-                  <span>
-                    <span class="form-opcion-titulo">De forma anónima</span>
-                    <span class="form-opcion-desc">No pedimos ni guardamos quién eres. Recibirás un código para citar tu caso.</span>
-                  </span>
-                </label>
-              </div>
-            </fieldset>
+            <!-- PASO 2 · Tipo y modalidad -->
+            <div class="paso" data-paso="2" role="group" aria-labelledby="paso2-titulo">
+              <h3 class="paso-titulo" id="paso2-titulo" tabindex="-1">¿Qué quieres reportar?</h3>
+              <p class="paso-desc">Elige el tipo y cómo quieres enviarlo.</p>
 
-            <!-- Apagado mientras no se elija "Con mi nombre": un fieldset disabled no se envía ni se valida. -->
-            <fieldset class="form-fieldset" id="identidad" hidden disabled>
+              <fieldset class="form-fieldset">
+                <legend class="visually-hidden">Tipo de reporte *</legend>
+                <div class="form-opciones">
+                  {CANALES.map((c) => (
+                    <label class="form-opcion">
+                      <input type="radio" name="tipo" value={c.tipo} required />
+                      <span>
+                        <span class="form-opcion-titulo">{c.titulo}</span>
+                        <span class="form-opcion-desc">{c.desc}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset class="form-fieldset">
+                <legend>¿Cómo quieres enviarlo? *</legend>
+                <div class="form-opciones">
+                  <label class="form-opcion">
+                    <input type="radio" name="modalidad" value="nombre" required />
+                    <span>
+                      <span class="form-opcion-titulo">Con mi nombre</span>
+                      <span class="form-opcion-desc">Podemos responderte y pedirte más datos si hacen falta.</span>
+                    </span>
+                  </label>
+                  <label class="form-opcion">
+                    <input type="radio" name="modalidad" value="anonimo" required />
+                    <span>
+                      <span class="form-opcion-titulo">De forma anónima</span>
+                      <span class="form-opcion-desc">No pedimos ni guardamos quién eres. Recibirás un código para citar tu caso.</span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <div class="pasos-acciones">
+                <button type="button" class="btn btn-outline" data-accion="atras">Atrás</button>
+                <button type="button" class="btn btn-primary" data-accion="siguiente">
+                  Continuar <Icono nombre="flecha-derecha" tam={15} />
+                </button>
+              </div>
+            </div>
+
+            <!-- PASO 3 · Tu reporte -->
+            <div class="paso" data-paso="3" role="group" aria-labelledby="paso3-titulo">
+              <h3 class="paso-titulo" id="paso3-titulo" tabindex="-1">Cuéntanos qué pasó</h3>
+              <p class="paso-resumen" id="pasoResumen"></p>
+
+              <!-- Apagado mientras no se elija "Con mi nombre": un fieldset disabled no se envía ni se valida. -->
+              <fieldset class="form-fieldset" id="identidad" hidden disabled>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="reporteNombre">Nombre completo *</label>
+                    <input type="text" id="reporteNombre" name="nombre" class="form-input" autocomplete="name" maxlength="120" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="reporteCorreo">Correo electrónico *</label>
+                    <input type="email" id="reporteCorreo" name="correo" class="form-input" autocomplete="email" maxlength="160" required />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="reporteTelefono">Teléfono</label>
+                  <input type="tel" id="reporteTelefono" name="telefono" class="form-input" autocomplete="tel" maxlength="30" />
+                </div>
+              </fieldset>
+
               <div class="form-row">
                 <div class="form-group">
-                  <label for="reporteNombre">Nombre completo *</label>
-                  <input type="text" id="reporteNombre" name="nombre" class="form-input" autocomplete="name" maxlength="120" required />
+                  <label for="relacion">Tu relación con INACONS</label>
+                  <select id="relacion" name="relacion" class="form-select">
+                    <option value="">Prefiero no decirlo</option>
+                    {RELACIONES.map((r) => <option value={r}>{r}</option>)}
+                  </select>
                 </div>
                 <div class="form-group">
-                  <label for="reporteCorreo">Correo electrónico *</label>
-                  <input type="email" id="reporteCorreo" name="correo" class="form-input" autocomplete="email" maxlength="160" required />
+                  <label for="fechaHecho">Fecha aproximada del hecho</label>
+                  <input type="date" id="fechaHecho" name="fecha" class="form-input" />
                 </div>
               </div>
               <div class="form-group">
-                <label for="reporteTelefono">Teléfono</label>
-                <input type="tel" id="reporteTelefono" name="telefono" class="form-input" autocomplete="tel" maxlength="30" />
+                <label for="lugar">Lugar, obra o área</label>
+                <input type="text" id="lugar" name="lugar" class="form-input" maxlength="200" />
               </div>
-            </fieldset>
+              <div class="form-group">
+                <label for="personas">Personas involucradas</label>
+                <input type="text" id="personas" name="personas" class="form-input" maxlength="500" aria-describedby="personasHint" />
+                <span class="form-hint" id="personasHint">Nombres o cargos, si los conoces.</span>
+              </div>
+              <div class="form-group">
+                <label for="descripcion">Descripción *</label>
+                <textarea id="descripcion" name="descripcion" class="form-textarea" maxlength="5000" required aria-describedby="descripcionHint"></textarea>
+                <span class="form-hint" id="descripcionHint">Qué pasó, cuándo y cómo. Mientras más detalle, mejor se puede atender.</span>
+              </div>
+              <!-- Campo trampa: invisible para personas, los bots lo rellenan. -->
+              <input type="text" name="company_url" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+              {conTurnstile && (
+                <div class="form-group">
+                  <!-- Sin data-sitekey: se pinta a mano al entrar a este paso (ver el script). Dentro de un panel oculto el widget flexible mediría cero. -->
+                  <div class="cf-turnstile"></div>
+                </div>
+              )}
+              <p class="form-hint">Los campos con * son obligatorios.</p>
 
-            <div class="form-row">
-              <div class="form-group">
-                <label for="relacion">Tu relación con INACONS</label>
-                <select id="relacion" name="relacion" class="form-select">
-                  <option value="">Prefiero no decirlo</option>
-                  {RELACIONES.map((r) => <option value={r}>{r}</option>)}
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="fechaHecho">Fecha aproximada del hecho</label>
-                <input type="date" id="fechaHecho" name="fecha" class="form-input" />
+              <div class="pasos-acciones">
+                <button type="button" class="btn btn-outline" data-accion="atras">Atrás</button>
+                <button type="submit" class="btn btn-primary" id="reporteEnviar" disabled={!PUBLIC_CONTACT_ENDPOINT}>
+                  <Icono nombre="enviar" tam={15} />
+                  Enviar reporte
+                </button>
               </div>
             </div>
-            <div class="form-group">
-              <label for="lugar">Lugar, obra o área</label>
-              <input type="text" id="lugar" name="lugar" class="form-input" maxlength="200" />
-            </div>
-            <div class="form-group">
-              <label for="personas">Personas involucradas</label>
-              <input type="text" id="personas" name="personas" class="form-input" maxlength="500" aria-describedby="personasHint" />
-              <span class="form-hint" id="personasHint">Nombres o cargos, si los conoces.</span>
-            </div>
-            <div class="form-group">
-              <label for="descripcion">Descripción *</label>
-              <textarea id="descripcion" name="descripcion" class="form-textarea" maxlength="5000" required aria-describedby="descripcionHint"></textarea>
-              <span class="form-hint" id="descripcionHint">Qué pasó, cuándo y cómo. Mientras más detalle, mejor se puede atender.</span>
-            </div>
-            <!-- Campo trampa: invisible para personas, los bots lo rellenan. -->
-            <input type="text" name="company_url" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
-            {conTurnstile && (
-              <div class="form-group">
-                <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-language="es" data-theme="light" data-size="flexible"></div>
-              </div>
-            )}
-            <p class="form-hint">Los campos con * son obligatorios.</p>
-            <button type="submit" class="btn btn-primary btn-block" id="reporteEnviar" disabled={!PUBLIC_CONTACT_ENDPOINT}>
-              <Icono nombre="enviar" tam={15} />
-              Enviar reporte
-            </button>
+
           </form>
         </div>
       </div>
     </div>
   </section>
-  {conTurnstile && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
-
-  <!-- Script del checkbox -->
-  <script>
-    const casilla = document.getElementById('termsCheckbox') as HTMLInputElement | null;
-    const canales = document.getElementById('channelsSection');
-    // Se lee `checked` y no se asume false: al volver atrás el navegador
-    // restaura la casilla marcada y los canales tienen que verse con ella.
-    if (canales) {
-      canales.hidden = !casilla?.checked;
-      canales.classList.remove('canales--pendiente');
-    }
-    casilla?.addEventListener('change', () => {
-      if (!canales) return;
-      canales.hidden = !casilla.checked;
-      if (casilla.checked) document.getElementById('channelsTitle')?.focus();
-    });
-  </script>
+  {conTurnstile && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>}
 
   <script>
-    import { PUBLIC_CONTACT_ENDPOINT as ENDPOINT } from 'astro:env/client';
+    import { PUBLIC_CONTACT_ENDPOINT as ENDPOINT, PUBLIC_TURNSTILE_SITE_KEY as SITE_KEY } from 'astro:env/client';
     import { conectarFormulario } from '../scripts/formulario';
 
     /*
-      Envío del Canal Ético. Solo se declara éxito si el Worker responde 2xx,
-      y entonces se muestra el código del reporte: para un reporte anónimo es
-      la única forma de volver a referirse a él.
+      Asistente de tres pasos. Cada paso ocupa el lugar del anterior: el
+      formulario no crece hacia abajo. Todo está en un solo <form> y los pasos
+      son paneles, así que el envío y su validación siguen siendo los de siempre
+      (scripts/formulario.ts). Lo que hace falta aquí es solo moverse entre
+      paneles y validar cada uno antes de dejarlo.
+
+      Solo se declara éxito si el Worker responde 2xx, y entonces se muestra el
+      código del reporte: para un reporte anónimo es la única forma de volver a
+      referirse a él.
     */
     const form = document.getElementById('reporteForm') as HTMLFormElement | null;
     const boton = document.getElementById('reporteEnviar') as HTMLButtonElement | null;
     const estado = document.getElementById('reporteEstado');
     const identidad = document.getElementById('identidad') as HTMLFieldSetElement | null;
-    const selectTipo = document.getElementById('tipoReporte') as HTMLSelectElement | null;
+    const resumen = document.getElementById('pasoResumen');
 
-    function mostrarIdentidad(si: boolean) {
-      if (!identidad) return;
-      identidad.hidden = !si;
-      identidad.disabled = !si;
-    }
-
-    form?.addEventListener('change', (e) => {
-      const campo = e.target as HTMLInputElement;
-      if (campo.name === 'modalidad') mostrarIdentidad(campo.value === 'nombre');
-    });
-
-    // Cada tarjeta lleva al mismo formulario con su tipo ya elegido.
-    document.querySelectorAll<HTMLAnchorElement>('a[data-tipo]').forEach((enlace) => {
-      enlace.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (selectTipo) selectTipo.value = enlace.dataset.tipo ?? '';
-        document.getElementById('reporte')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        selectTipo?.focus({ preventScroll: true });
-      });
-    });
-
-    // El orden del envío (validar, trampa, Turnstile, fetch, avisos) es común
-    // con /contacto/ y vive en scripts/formulario.ts. Aquí solo lo del Canal.
     if (form) {
+      const pasos = [...form.querySelectorAll<HTMLElement>('.paso')];
+      const indicadores = [...document.querySelectorAll<HTMLElement>('.pasos-item')];
+      const barra = document.querySelector<HTMLElement>('.pasos');
+      const comportamiento: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      let actual = 1;
+
+      const mostrarIdentidad = (si: boolean) => {
+        if (!identidad) return;
+        identidad.hidden = !si;
+        identidad.disabled = !si;
+      };
+
+      form.addEventListener('change', (e) => {
+        const campo = e.target as HTMLInputElement;
+        if (campo.name === 'modalidad') mostrarIdentidad(campo.value === 'nombre');
+      });
+
+      // Lo elegido en el paso 2, a la vista en el 3: quien escribe el relato
+      // sabe a qué canal y de qué manera lo está mandando.
+      const actualizarResumen = () => {
+        const tipo = form.querySelector<HTMLInputElement>('input[name="tipo"]:checked');
+        const modalidad = form.querySelector<HTMLInputElement>('input[name="modalidad"]:checked');
+        const titulo = tipo?.closest('label')?.querySelector('.form-opcion-titulo')?.textContent ?? '';
+        const como = modalidad?.value === 'anonimo' ? 'De forma anónima' : 'Con tu nombre';
+        if (resumen) resumen.textContent = titulo + ' · ' + como;
+      };
+
+      // Turnstile se pinta a mano, la primera vez que el paso 3 se ve: el widget
+      // flexible toma su ancho del contenedor, y dentro de un panel oculto mide
+      // cero. La API puede tardar en cargar, así que se espera a que exista.
+      type Widget = { render(el: HTMLElement, opciones: Record<string, string>): string };
+      let turnstilePintado = false;
+      const prepararTurnstile = () => {
+        const contenedor = form.querySelector<HTMLElement>('.cf-turnstile');
+        if (!contenedor || !SITE_KEY || turnstilePintado) return;
+        const sitekey: string = SITE_KEY;
+        const pintar = () => {
+          const api = (window as { turnstile?: Widget }).turnstile;
+          if (!api) return false;
+          api.render(contenedor, { sitekey, language: 'es', theme: 'light', size: 'flexible' });
+          turnstilePintado = true;
+          return true;
+        };
+        if (pintar()) return;
+        const espera = setInterval(() => { if (pintar()) clearInterval(espera); }, 200);
+        setTimeout(() => clearInterval(espera), 15000);
+      };
+
+      const ir = (n: number) => {
+        actual = n;
+        pasos.forEach((p, i) => p.classList.toggle('paso--activo', i + 1 === n));
+        indicadores.forEach((li, i) => {
+          li.classList.toggle('pasos-item--actual', i + 1 === n);
+          li.classList.toggle('pasos-item--hecho', i + 1 < n);
+          if (i + 1 === n) li.setAttribute('aria-current', 'step');
+          else li.removeAttribute('aria-current');
+        });
+        if (n === 3) {
+          actualizarResumen();
+          prepararTurnstile();
+        }
+        // El foco al título del paso: un lector de pantalla anuncia dónde está.
+        pasos[n - 1].querySelector<HTMLElement>('.paso-titulo')?.focus({ preventScroll: true });
+        // Si la persona había bajado por la página, el paso nuevo empieza arriba.
+        if (barra && barra.getBoundingClientRect().top < 0) barra.scrollIntoView({ behavior: comportamiento, block: 'start' });
+      };
+
+      // Valida solo el paso que se deja: los campos de los otros pasos no
+      // existen todavía para quien escribe. was-validated va en el panel y no en
+      // el formulario, para no pintar de rojo los campos del paso siguiente.
+      const validar = (n: number) => {
+        const paso = pasos[n - 1];
+        paso.classList.add('was-validated');
+        for (const campo of paso.querySelectorAll<HTMLInputElement>('input, select, textarea')) {
+          if (!campo.checkValidity()) {
+            campo.reportValidity();
+            return false;
+          }
+        }
+        return true;
+      };
+
+      form.addEventListener('click', (e) => {
+        const accion = (e.target as HTMLElement).closest<HTMLElement>('[data-accion]')?.dataset.accion;
+        // El aviso de un envío anterior (o de un error) sobra en cuanto la persona
+        // se mueve; se borra aquí y no en ir(), que también corre tras el éxito y
+        // se llevaría el código del reporte recién mostrado.
+        if (accion === 'siguiente' && validar(actual)) {
+          if (estado) estado.innerHTML = '';
+          ir(actual + 1);
+        } else if (accion === 'atras' && actual > 1) {
+          if (estado) estado.innerHTML = '';
+          ir(actual - 1);
+        }
+      });
+
+      // Enter dentro de un paso intermedio no envía: avanza. Va antes de
+      // conectarFormulario y corta la propagación para que el envío no corra.
+      form.addEventListener('submit', (e) => {
+        if (actual === 3) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (validar(actual)) ir(actual + 1);
+      });
+
       conectarFormulario({
         form,
         boton,
@@ -360,13 +473,19 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
           const codigo = String(respuesta.codigo ?? '');
           return '<strong>Reporte enviado.</strong> ' +
             (/^CE-[A-Z0-9-]+$/.test(codigo)
-              ? `Su código es <strong>${codigo}</strong>: anótalo y úsalo para cualquier comunicación sobre este caso.`
+              ? 'Su código es <strong>' + codigo + '</strong>: anótalo y úsalo para cualquier comunicación sobre este caso.'
               : 'Será atendido de forma confidencial.');
         },
         error: (codigo) => codigo === '429'
           ? '<strong>Recibimos varios reportes seguidos desde tu conexión.</strong> Lo que escribiste sigue en el formulario: espera un minuto y vuelve a enviarlo.'
           : '<strong>No pudimos enviar tu reporte.</strong> Lo que escribiste sigue en el formulario: inténtalo de nuevo en unos minutos.',
-        alLimpiar: () => mostrarIdentidad(false),
+        // Tras enviar se vuelve al primer paso, con los términos sin aceptar: un
+        // reporte nuevo es una aceptación nueva.
+        alLimpiar: () => {
+          mostrarIdentidad(false);
+          pasos.forEach((p) => p.classList.remove('was-validated'));
+          ir(1);
+        },
       });
     }
   </script>

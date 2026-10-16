@@ -80,6 +80,22 @@ const codigoFormulario = `<div class="form-row">
   </div>
 </div>`;
 
+const codigoPasos = `<ol class="pasos" aria-label="Progreso del reporte">
+  <li class="pasos-item pasos-item--hecho">
+    <span class="pasos-num" aria-hidden="true">1</span>
+    <span class="pasos-etiqueta">Términos</span>
+  </li>
+  <li class="pasos-item pasos-item--actual" aria-current="step">
+    <span class="pasos-num" aria-hidden="true">2</span>
+    <span class="pasos-etiqueta">Tipo</span>
+  </li>
+  <li class="pasos-item">…</li>
+</ol>
+<div class="pasos-acciones">
+  <button type="button" class="btn btn-outline">Atrás</button>
+  <button type="button" class="btn btn-primary">Continuar</button>
+</div>`;
+
 const codigoOpciones = `<fieldset class="form-fieldset">
   <legend>¿Cómo quieres enviarlo?</legend>
   <div class="form-opciones">
@@ -712,6 +728,35 @@ const codigoLista = `<ul class="data-list">
 
         <div class="ds-codigo"><pre>{codigoFormulario}</pre></div>
         <div class="ds-codigo"><pre>{codigoOpciones}</pre></div>
+
+        <p class="ds-grupo">Pasos</p>
+        <p>
+          <code>.pasos</code> y <code>.pasos-acciones</code>: un formulario largo en pasos que
+          ocupan el mismo lugar, en vez de apilarse hacia abajo. El sistema solo pinta los
+          estados (<code>--hecho</code>, <code>--actual</code>); cambiar de paso lo hace la
+          página, como en <code>/canal-etico/</code>.
+        </p>
+        <div class="ds-demo">
+          <ol class="pasos" aria-label="Progreso del reporte">
+            <li class="pasos-item pasos-item--hecho">
+              <span class="pasos-num" aria-hidden="true">1</span>
+              <span class="pasos-etiqueta">Términos</span>
+            </li>
+            <li class="pasos-item pasos-item--actual" aria-current="step">
+              <span class="pasos-num" aria-hidden="true">2</span>
+              <span class="pasos-etiqueta">Tipo</span>
+            </li>
+            <li class="pasos-item">
+              <span class="pasos-num" aria-hidden="true">3</span>
+              <span class="pasos-etiqueta">Tu reporte</span>
+            </li>
+          </ol>
+          <div class="pasos-acciones">
+            <button type="button" class="btn btn-outline">Atrás</button>
+            <button type="button" class="btn btn-primary">Continuar</button>
+          </div>
+        </div>
+        <div class="ds-codigo"><pre>{codigoPasos}</pre></div>
       </section>
 
       <!-- ── AVISOS ──────────────────────────────────────────── -->

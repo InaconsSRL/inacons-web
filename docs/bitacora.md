@@ -4,6 +4,57 @@ Qué se hizo, por qué y qué quedó pendiente, sesión por sesión. El cómo op
 está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el contexto que
 no se deduce del código.
 
+## 2026-10-16 — Canal Ético en tres pasos
+
+### Punto de partida
+
+La página apilaba cuatro bloques hacia abajo: garantías, términos, seis tarjetas de canal y el
+formulario. Cada paso aparecía debajo del anterior y obligaba a bajar por la página. Además el
+tipo de reporte se elegía dos veces: en una tarjeta, que solo rellenaba el selector, y en el
+selector del propio formulario.
+
+### Qué cambió
+
+Un asistente de **tres pasos que ocupan el mismo lugar**, dentro de un solo panel: 1) términos y
+casilla de aceptación, 2) tipo de reporte (seis opciones) y modalidad, 3) los datos y el relato.
+Un indicador de pasos arriba, "Atrás" y "Continuar" abajo. Las garantías quedan encima, como
+antes. Desaparecen las tarjetas aparte y el selector duplicado.
+
+### Decisiones
+
+| Decisión | Por qué |
+|---|---|
+| **Asistente y no formulario único con diálogo de términos** | Lo eligió la empresa. Conserva el orden actual, que es aceptar los términos **antes** de ver el formulario; con la casilla al final podría no valer si cumplimiento exige ese orden. |
+| Un solo `<form>` con tres paneles | El envío y su contrato con el Worker no cambian. `scripts/formulario.ts` sigue siendo el mismo. |
+| Cada paso se valida **antes de dejarlo**, y `was-validated` va en el panel y no en el formulario | Si fuera en el formulario, los campos del paso siguiente aparecerían en rojo antes de verlos. |
+| La casilla de términos **no lleva `name`** | No viaja al Worker. Solo hace falta que sea obligatoria para avanzar. |
+| Turnstile se pinta **a mano** al entrar al paso 3 (`render=explicit`) | El widget flexible toma su ancho del contenedor y dentro de un panel oculto mide cero. |
+| Tras enviar bien se vuelve al paso 1 con los términos **sin aceptar** | Un reporte nuevo es una aceptación nueva. El código del reporte queda a la vista arriba. |
+| Con **Enter** en un paso intermedio se avanza, no se envía | El `submit` se intercepta antes del de `formulario.ts`. |
+| El aviso de un envío anterior se borra al moverse entre pasos, no en `ir()` | `ir()` también corre tras el éxito y se llevaría el código del reporte recién mostrado. |
+| Sin JavaScript se ven los tres pasos **apilados**, sin indicador ni botones de avance | Es la mejora progresiva de la sesión anterior: el formulario no desaparece y se avisa que enviar necesita JavaScript. |
+| Se retira el hash de la CSP de esta página | El script del asistente importa `formulario.ts` y Astro lo emite como archivo: la página ya no tiene scripts en línea salvo el de la clase `js`. |
+
+### Componente nuevo
+
+`.pasos` y `.pasos-acciones` en `design-system.css`, con demo en `/sistema/`: el indicador pinta
+los estados `--hecho` y `--actual`; cambiar de paso lo hace la página. En móvil solo el paso
+actual muestra su nombre.
+
+### Pruebas hechas
+
+- **En el navegador**, con `fetch` simulado: cada paso bloquea el avance si falta lo suyo; "Atrás" conserva lo elegido; el resumen del paso 3 refleja tipo y modalidad; los datos de identidad aparecen solo con "Con mi nombre"; 429 y 503 conservan el relato; el éxito muestra el código y reinicia el asistente. En modalidad anónima no viajan nombre, correo ni teléfono.
+- **Turnstile:** emite token tras pintarse en el paso 3.
+- **Móvil (375 px) y tablet:** sin desborde horizontal; los seis tipos en una columna.
+- **Sin JavaScript** (simulado quitando la clase `js`): pasos apilados, sin indicador, solo el botón de enviar.
+- **CSP en modo informe** sirviendo `dist/` con la cabecera real: sin violaciones al recorrer los tres pasos.
+- **Pruebas del Worker:** 34, incluida la de contrato que lee los tipos de esta página.
+
+### Pendiente
+
+- [ ] **Confirmar con cumplimiento** que aceptar los términos en el paso 1 del mismo formulario, y no en una página anterior, cumple lo que necesitan.
+- [ ] **Probar en un móvil real** y con un lector de pantalla el cambio de foco entre pasos.
+
 ## 2026-10-16 — Pequeño rediseño
 
 ### Punto de partida

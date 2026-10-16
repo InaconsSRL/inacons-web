@@ -163,8 +163,15 @@ Turnstile solo se carga si están definidas `PUBLIC_CONTACT_ENDPOINT` y
 
 ## Canal Ético
 
-`/canal-etico/` envía al mismo Worker, en la ruta `/canal`. Las seis tarjetas llevan al
-mismo formulario con el tipo ya elegido. Se puede reportar **con nombre** (nombre y
+`/canal-etico/` envía al mismo Worker, en la ruta `/canal`. El formulario es un asistente de
+**tres pasos que ocupan el mismo lugar**, sin crecer hacia abajo: 1) términos y condiciones
+con su casilla, 2) tipo de reporte (seis opciones) y modalidad, 3) los datos y el relato. Cada
+paso se valida antes de dejarlo, "Atrás" conserva lo elegido, y al enviar bien se vuelve al
+primero con los términos sin aceptar. Es un solo `<form>` con tres paneles, así que el envío y
+su contrato no cambian; sin JavaScript se ven los tres apilados y se avisa que enviar
+necesita JavaScript. La casilla de términos no lleva `name`: no viaja al Worker. El widget de
+Turnstile se pinta a mano al entrar al paso 3 (`render=explicit`), porque dentro de un panel
+oculto mediría cero de ancho. Se puede reportar **con nombre** (nombre y
 correo obligatorios, y recibe acuse) o **de forma anónima** (el navegador no manda nombre,
 correo ni teléfono, y el Worker los descarta si llegan).
 

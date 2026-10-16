@@ -199,9 +199,10 @@ denuncias). Para pasar a bloqueo:
    semanas. Cero violaciones → cambiar el nombre de la cabecera a
    `Content-Security-Policy`.
 
-Dos cosas que la rompen en silencio: (a) los scripts en línea de `/canal-etico/` y
-`/mineria/` están permitidos **por hash** y el hash cambia con cualquier edición de esos
-scripts; Chrome indica el hash esperado en el mensaje de la violación. (b) Un proveedor
+Dos cosas que la rompen en silencio: (a) el script en línea de `/mineria/` está permitido
+**por hash** y el hash cambia con cualquier edición de ese script; Chrome indica el hash
+esperado en el mensaje de la violación. El del Canal Ético no cuenta: importa
+`scripts/formulario.ts` y Astro lo emite como archivo. (b) Un proveedor
 nuevo (otro iframe, otro script, otro host de fetch) hay que añadirlo a la directiva que
 corresponda. `style-src 'unsafe-inline'` se queda: Astro emite estilos en línea.
 
