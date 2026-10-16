@@ -1,19 +1,26 @@
 // @ts-check
 import { defineConfig, envField, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { PRIVACIDAD_PUBLICADA } from './src/data/empresa.ts';
 
 // Secciones fuera del sitemap. Se compara el PRIMER segmento de la ruta: una
 // futura /proyectos/recursos-hidricos/ no debe caer aquí por contener la palabra.
 //   sistema  → referencia interna; también va en public/robots.txt.
 //   recursos → material interno con `noindex`. No va en robots.txt: una URL
 //              bloqueada ahí no se rastrea y nadie llega a leer su noindex.
-//   privacidad → borrador hasta que lo apruebe el abogado. Al aprobarlo se
-//              quita de aquí y se pone BORRADOR = false en la página.
+//   privacidad → borrador hasta que lo apruebe el abogado. Entra o sale con
+//              PRIVACIDAD_PUBLICADA (src/data/empresa.ts), el mismo interruptor
+//              que la indexa y la enlaza.
 //   mineria  → landing del stand de Expomina, destino de los QR impresos. Va con
 //              `noindex, follow` para no competir con /servicios/mineria/; los
 //              QR siguen funcionando. Si la empresa quiere posicionarla, se
 //              quita de aquí y de su <BaseLayout robots>.
-const SECCIONES_PRIVADAS = new Set(['sistema', 'recursos', 'privacidad', 'mineria']);
+const SECCIONES_PRIVADAS = new Set([
+  'sistema',
+  'recursos',
+  'mineria',
+  ...(PRIVACIDAD_PUBLICADA ? [] : ['privacidad']),
+]);
 
 export default defineConfig({
   // Única fuente del dominio: canonical, sitemap, Open Graph y JSON-LD salen

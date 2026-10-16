@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Icono from '../components/Icono.astro';
 import { serviciosPorMenu } from '../lib/servicios';
-import { CONTACTO, zonaDeSede } from '../data/empresa';
+import { CONTACTO, PRIVACIDAD_PUBLICADA, zonaDeSede } from '../data/empresa';
 import { PUBLIC_CONTACT_ENDPOINT, PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
 import imagenHero from '../assets/imagenes/image_heroprincipal.webp';
 
@@ -232,7 +232,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
                   <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-language="es" data-theme="light" data-size="flexible"></div>
                 </div>
               )}
-              <p class="form-hint">Usaremos tus datos solo para responder esta consulta. Los campos con * son obligatorios.</p>
+              <p class="form-hint">Usaremos tus datos solo para responder esta consulta{PRIVACIDAD_PUBLICADA && <> (<a href="/privacidad/">política de privacidad</a>)</>}. Los campos con * son obligatorios.</p>
               <button type="submit" class="btn btn-primary btn-block" id="formSubmit">
                 <Icono nombre="enviar" tam={15} />
                 Enviar mensaje

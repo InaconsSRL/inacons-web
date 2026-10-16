@@ -2,14 +2,15 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBand from '../components/CtaBand.astro';
 import PageHero from '../components/PageHero.astro';
-import { CONTACTO, zonaDeSede } from '../data/empresa';
+import { CONTACTO, PRIVACIDAD_PUBLICADA, zonaDeSede } from '../data/empresa';
 import imagenHero from '../assets/imagenes/home_about.webp';
 
-// Borrador hasta que lo apruebe el abogado. Mientras sea true la página no se
-// indexa, no va en el sitemap (astro.config.mjs) ni se enlaza desde el sitio,
-// y muestra el aviso y los datos que faltan. Al aprobarla: false aquí, quitar
-// 'privacidad' de SECCIONES_PRIVADAS y enlazarla en el pie y en /contacto/.
-const BORRADOR = true;
+// Borrador hasta que lo apruebe el abogado. Mientras lo sea, la página no se
+// indexa, no va en el sitemap ni se enlaza desde el sitio, y muestra el aviso y
+// los datos que faltan. Se publica con PRIVACIDAD_PUBLICADA en
+// src/data/empresa.ts: ese único valor también enlaza el pie, /contacto/ y los
+// términos del Canal Ético, y la saca de SECCIONES_PRIVADAS (astro.config.mjs).
+const BORRADOR = !PRIVACIDAD_PUBLICADA;
 const ACTUALIZADA = '9 de octubre de 2026';
 
 const [sedePrincipal] = CONTACTO.sedes;

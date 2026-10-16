@@ -6,7 +6,7 @@ import { Font, getImage } from 'astro:assets';
 import { PUBLIC_ANALYTICS_TOKEN } from 'astro:env/client';
 import Icono from '../components/Icono.astro';
 import { serviciosPorMenu } from '../lib/servicios';
-import { BROCHURE, CONTACTO, DESCRIPCION_EMPRESA } from '../data/empresa';
+import { BROCHURE, CONTACTO, DESCRIPCION_EMPRESA, PRIVACIDAD_PUBLICADA } from '../data/empresa';
 import imagenPorDefecto from '../assets/imagenes/image_heroprincipal.webp';
 
 interface Props {
@@ -316,6 +316,7 @@ const [sedePrincipal] = sedes;
               <p>&copy; {new Date().getFullYear()} INACONS S.R.L. — Todos los derechos reservados.</p>
               <div class="footer-bottom-links">
                 <a href="/documentos/">Certificaciones y políticas</a>
+                {PRIVACIDAD_PUBLICADA && <a href="/privacidad/">Política de privacidad</a>}
               </div>
             </div>
           </div>

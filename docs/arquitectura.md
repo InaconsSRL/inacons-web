@@ -55,9 +55,9 @@ una página va en `src/assets/` y se importa.
 | `/sostenibilidad/` | `sostenibilidad.astro` | ✅ |
 | `/documentos/` | `documentos.astro` | ✅ |
 | `/canal-etico/` | `canal-etico.astro` | ✅ |
-| `/privacidad/` | `privacidad.astro` | ❌ mientras `BORRADOR = true` — pendiente de revisión legal |
+| `/privacidad/` | `privacidad.astro` | ❌ mientras `PRIVACIDAD_PUBLICADA = false` (`src/data/empresa.ts`) — pendiente de revisión legal |
 | `/contacto/` | `contacto.astro` | ✅ |
-| `/mineria/` | `mineria.astro` | ✅ presentación del sector minero (sin menú ni pie) |
+| `/mineria/` | `mineria.astro` | ❌ `noindex, follow` y fuera del sitemap — landing del stand de Expomina y destino de QR impresos; el sector minero se indexa en `/servicios/mineria/` |
 | `/recursos/` | `recursos/index.astro` | ❌ `noindex` — material interno |
 | `/sistema/` | `sistema/index.astro` | ❌ `noindex` + `robots.txt` — referencia de componentes |
 | `/404.html` | `404.astro` | — |

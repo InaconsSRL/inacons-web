@@ -24,6 +24,16 @@ const MENSAJE_WHATSAPP = 'Hola INACONS, quiero cotizar un proyecto. Les escribo 
 export const DESCRIPCION_EMPRESA =
   'Empresa peruana de ingeniería y construcción con más de 15 años de experiencia en obras civiles, infraestructura, electromecánica, minería y consultoría.';
 
+/**
+ * Interruptor único de la política de privacidad. En false la página es un
+ * borrador: `noindex`, fuera del sitemap, sin enlaces desde el sitio y con el
+ * aviso de datos pendientes. En true se indexa, entra al sitemap y se enlaza
+ * desde el pie, el formulario de contacto y los términos del Canal Ético. Se
+ * pone en true cuando el abogado cierre lo marcado "pendiente" en
+ * src/pages/privacidad.astro (RUC, correo de datos personales, plazos).
+ */
+export const PRIVACIDAD_PUBLICADA = false;
+
 export interface Sede {
   nombre: string;
   direccion: string;

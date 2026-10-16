@@ -192,7 +192,14 @@ Dos listas en paralelo: el filtro del sitemap (`SECCIONES_PRIVADAS` en
 `astro.config.mjs`) y los `Disallow` de `public/robots.txt`.
 
 - `/sistema/` → fuera del sitemap y bloqueada en `robots.txt`.
-- `/privacidad/` → fuera del sitemap y con `noindex` mientras sea borrador.
+- `/privacidad/` → fuera del sitemap y con `noindex` mientras sea borrador. **Se publica con
+  un solo cambio**: `PRIVACIDAD_PUBLICADA = true` en `src/data/empresa.ts`. Ese valor indexa
+  la página, la mete en el sitemap y la enlaza desde el pie, `/contacto/` y los términos del
+  Canal Ético. Antes, el abogado tiene que cerrar lo marcado *pendiente* en la página.
+- `/mineria/` → fuera del sitemap y con `noindex, follow`. Es la landing del stand de
+  Expomina y el destino de los QR impresos (siguen funcionando); no compite con
+  `/servicios/mineria/`. Si se quiere posicionarla, se quita de `SECCIONES_PRIVADAS` y su
+  `robots` en `mineria.astro`.
 - `/recursos/` → fuera del sitemap y con `noindex`, pero **no** en `robots.txt`: una URL
   bloqueada no se rastrea y nadie leería su `noindex`.
 

@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Icono from '../components/Icono.astro';
 import imagenHero from '../assets/imagenes/home_about.webp';
+import { PRIVACIDAD_PUBLICADA } from '../data/empresa';
 import { PUBLIC_CONTACT_ENDPOINT, PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
 
 // `tipo` es el contrato con el Worker (workers/contacto/src/canal.ts, TIPOS):
@@ -143,7 +144,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
           <h3>3. Garantía de Indemnidad</h3>
           <p>Queda terminantemente prohibida cualquier forma de represalia contra las personas que utilicen este canal de buena fe. INACONS tomará las medidas necesarias para proteger a los denunciantes.</p>
           <h3>4. Tratamiento de Datos Personales</h3>
-          <p>Los datos personales facilitados serán tratados por INACONS con la finalidad de gestionar las comunicaciones recibidas e investigar los hechos denunciados.</p>
+          <p>Los datos personales facilitados serán tratados por INACONS con la finalidad de gestionar las comunicaciones recibidas e investigar los hechos denunciados.{PRIVACIDAD_PUBLICADA && <> Consulta más detalle en nuestra <a href="/privacidad/">política de privacidad</a>.</>}</p>
           <h3>5. Responsabilidad del Usuario</h3>
           <p>El usuario garantiza que los datos personales y la información proporcionada son verdaderos, exactos y completos. Las denuncias falsas realizadas con mala fe podrán ser objeto de sanciones disciplinarias o acciones legales.</p>
         </div>
