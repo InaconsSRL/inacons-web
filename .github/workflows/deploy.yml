@@ -16,16 +16,19 @@ concurrency:
   group: deploy-produccion
   cancel-in-progress: false
 
+# Las acciones van fijadas por SHA, no por etiqueta: una etiqueta se puede
+# reasignar, y FTP-Deploy-Action recibe la contraseña del FTP. El comentario
+# lleva la versión; Dependabot (github-actions) actualiza las dos cosas juntas.
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
           cache: 'npm'
@@ -37,10 +40,27 @@ jobs:
       - name: Comprobar tipos
         run: npm run check
 
+      # Con estas variables vacías el build sale en verde y los formularios
+      # caen a mailto (contacto) o a "no disponible" (Canal Ético) sin que nadie
+      # se entere: ya pasó dos veces (docs/bitacora.md). Aquí se corta. La
+      # analítica solo avisa: no es un flujo de negocio.
+      - name: Exigir variables del formulario
+        env:
+          ENDPOINT: ${{ vars.PUBLIC_CONTACT_ENDPOINT }}
+          SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
+          ANALITICA: ${{ vars.PUBLIC_ANALYTICS_TOKEN }}
+        run: |
+          if [ -z "$ENDPOINT" ] || [ -z "$SITE_KEY" ]; then
+            echo "::error::PUBLIC_CONTACT_ENDPOINT o PUBLIC_TURNSTILE_SITE_KEY están vacías: los formularios saldrían sin envío. Se crean en Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+          if [ -z "$ANALITICA" ]; then
+            echo "::warning::PUBLIC_ANALYTICS_TOKEN está vacía: el sitio saldrá sin analítica."
+          fi
+
       # Las PUBLIC_* son variables de repositorio (Settings → Secrets and
       # variables → Actions → Variables), no secrets: terminan dentro del HTML
-      # y el JavaScript públicos. Vacías, el formulario usa mailto y no se
-      # carga analítica.
+      # y el JavaScript públicos.
       - name: Build
         run: npm run build
         env:
@@ -48,10 +68,19 @@ jobs:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_ANALYTICS_TOKEN: ${{ vars.PUBLIC_ANALYTICS_TOKEN }}
 
+      # Segunda red, sobre lo que de verdad se va a subir: las dos páginas con
+      # formulario tienen que traer el widget de Turnstile.
+      - name: Comprobar que los formularios salen con Turnstile
+        run: |
+          for pagina in contacto canal-etico; do
+            grep -q 'cf-turnstile' "dist/$pagina/index.html" \
+              || { echo "::error::dist/$pagina/index.html no trae Turnstile"; exit 1; }
+          done
+
       # La versión exacta que se intentó subir queda descargable 90 días desde
       # la pestaña Actions, aunque el FTP falle: es el rollback.
       - name: Guardar dist/ como artefacto
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dist-${{ github.sha }}
           path: dist/
@@ -64,7 +93,7 @@ jobs:
       # exige un certificado válido para FTP_SERVER: si falla, FTP_SERVER tiene
       # que ser el nombre del certificado (p. ej. el hostname del servidor).
       - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@8e83cea8672e3fbcbb9fdafff34debf6ae4c5f65 # v4.3.5
         with:
           protocol: ${{ vars.FTP_PROTOCOL || 'ftp' }}
           security: strict
@@ -75,3 +104,43 @@ jobs:
           # La cuenta FTP de deploy tiene como raíz la carpeta de la web
           # (public_html/sites/home.inacons.com.pe) y no ve nada más del hosting.
           server-dir: ./
+
+      # Lo que ve el visitante, no lo que se subió. El query evita la caché de
+      # una hora que añade el proxy del hosting. Este paso AVISA, no deshace el
+      # deploy: para volver atrás se sube el artefacto de arriba (docs/deploy.md).
+      - name: Humo posterior al deploy
+        run: |
+          for pagina in contacto canal-etico; do
+            curl -fsS --retry 5 --retry-delay 10 --retry-all-errors \
+              "https://home.inacons.com.pe/$pagina/?humo=${GITHUB_SHA::8}" \
+              | grep -q 'cf-turnstile' \
+              || { echo "::error::/$pagina/ quedó publicada sin Turnstile"; exit 1; }
+          done
+
+  # El Worker no se publica con el push (se despliega a mano, docs/deploy.md),
+  # pero un error de tipos o una prueba rota se tienen que ver antes de
+  # desplegarlo. Va en paralelo y sin `needs`: un fallo aquí deja el workflow en
+  # rojo sin impedir que se publique un cambio de contenido del sitio.
+  worker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/contacto
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: workers/contacto/package-lock.json
+
+      # --ignore-scripts: ni tsc ni las pruebas necesitan los binarios de
+      # workerd ni de esbuild.
+      - name: Instalar dependencias del Worker
+        run: npm ci --ignore-scripts
+
+      - name: Comprobar tipos del Worker
+        run: npm run check

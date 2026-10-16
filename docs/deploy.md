@@ -2,10 +2,27 @@
 
 ## Cómo se publica
 
-Push a `main` → GitHub Actions (`.github/workflows/deploy.yml`) → `npm ci` →
-`npm run build` → `dist/` se guarda como artefacto 90 días → subida por FTP a
-`public_html/sites/home.inacons.com.pe/` en cPanel, con una cuenta FTP cuya raíz es esa
-carpeta: el deploy no puede tocar nada más del hosting.
+Push a `main` → GitHub Actions (`.github/workflows/deploy.yml`):
+
+1. `npm ci` y `npm run check` (tipos y esquemas de contenido).
+2. **Exigir variables del formulario**: corta si `PUBLIC_CONTACT_ENDPOINT` o
+   `PUBLIC_TURNSTILE_SITE_KEY` están vacías. Sin esto el build sale en verde y los
+   formularios quedan sin envío (pasó dos veces, ver la bitácora).
+3. `npm run build`, y una comprobación de que `dist/contacto/` y `dist/canal-etico/`
+   traen `cf-turnstile`.
+4. `dist/` se guarda como artefacto 90 días.
+5. Subida por FTP a `public_html/sites/home.inacons.com.pe/` en cPanel, con una cuenta FTP
+   cuya raíz es esa carpeta: el deploy no puede tocar nada más del hosting.
+6. **Humo posterior**: pide `/contacto/` y `/canal-etico/` ya publicadas (con un query
+   para saltar la caché del proxy) y exige `cf-turnstile`. Avisa, no deshace el deploy.
+
+Un segundo job, `worker`, corre en paralelo: `tsc` sobre `workers/contacto/`. No bloquea la
+publicación del sitio, pero deja el workflow en rojo. El Worker sigue desplegándose a mano.
+
+Las acciones de GitHub están fijadas por SHA de commit, con la versión en un comentario.
+Dependabot (`.github/dependabot.yml`, semanal) abre los PR que mueven SHA y comentario
+juntos. Para fijar una a mano: `git ls-remote --tags https://github.com/<owner>/<repo>.git
+<tag>` da el SHA.
 
 No hay staging: `home.inacons.com.pe` **es** producción. Para volver a una versión
 anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.

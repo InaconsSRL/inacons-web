@@ -1,0 +1,29 @@
+# Actualizaciones semanales. El sitio y el Worker tienen cada uno su
+# package.json; las acciones de GitHub van fijadas por SHA y Dependabot es quien
+# las mueve (y actualiza el comentario con la versión).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      astro:
+        patterns: ['astro', '@astrojs/*']
+    ignore:
+      # TypeScript 7 se evalúa a mano: cambia el compilador.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: npm
+    directory: /workers/contacto
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
