@@ -313,6 +313,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
 
   <script>
     import { PUBLIC_CONTACT_ENDPOINT as ENDPOINT } from 'astro:env/client';
+    import { conectarFormulario } from '../scripts/formulario';
 
     /*
       Envío del Canal Ético. Solo se declara éxito si el Worker responde 2xx,
@@ -324,12 +325,6 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     const estado = document.getElementById('reporteEstado');
     const identidad = document.getElementById('identidad') as HTMLFieldSetElement | null;
     const selectTipo = document.getElementById('tipoReporte') as HTMLSelectElement | null;
-
-    function aviso(tipo: 'ok' | 'error' | 'info', html: string) {
-      if (!estado) return;
-      estado.innerHTML = `<div class="notice notice--${tipo}">${html}</div>`;
-      estado.scrollIntoView({ block: 'nearest' });
-    }
 
     function mostrarIdentidad(si: boolean) {
       if (!identidad) return;
@@ -352,58 +347,27 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
       });
     });
 
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!ENDPOINT) return;
-      const datos = Object.fromEntries(
-        [...new FormData(form)].map(([k, v]) => [k, String(v).trim()]),
-      );
-      if (datos.company_url) return;
-
-      form.classList.add('was-validated');
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-      const turnstile = datos['cf-turnstile-response'] ?? '';
-      delete datos.company_url;
-      delete datos['cf-turnstile-response'];
-
-      if (form.querySelector('.cf-turnstile') && !turnstile) {
-        aviso('info', 'Espera a que termine la verificación de seguridad, sobre el botón, y vuelve a enviar.');
-        return;
-      }
-
-      if (boton) boton.disabled = true;
-      aviso('info', 'Enviando…');
-      try {
-        const respuesta = await fetch(new URL('/canal', ENDPOINT), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ ...datos, turnstile, origen: location.href }),
-          signal: AbortSignal.timeout(10000),
-        });
-        if (!respuesta.ok) throw new Error(String(respuesta.status));
-        const { codigo } = (await respuesta.json()) as { codigo?: string };
-        const codigoValido = /^CE-[A-Z0-9-]+$/.test(codigo ?? '');
-        aviso('ok',
-          '<strong>Reporte enviado.</strong> ' +
-          (codigoValido
-            ? `Su código es <strong>${codigo}</strong>: anótalo y úsalo para cualquier comunicación sobre este caso.`
-            : 'Será atendido de forma confidencial.'));
-        form.reset();
-        form.classList.remove('was-validated');
-        mostrarIdentidad(false);
-      } catch (e) {
-        aviso('error', e instanceof Error && e.message === '429'
+    // El orden del envío (validar, trampa, Turnstile, fetch, avisos) es común
+    // con /contacto/ y vive en scripts/formulario.ts. Aquí solo lo del Canal.
+    if (form) {
+      conectarFormulario({
+        form,
+        boton,
+        estado,
+        url: ENDPOINT ? new URL('/canal', ENDPOINT).href : null,
+        exito: (respuesta) => {
+          const codigo = String(respuesta.codigo ?? '');
+          return '<strong>Reporte enviado.</strong> ' +
+            (/^CE-[A-Z0-9-]+$/.test(codigo)
+              ? `Su código es <strong>${codigo}</strong>: anótalo y úsalo para cualquier comunicación sobre este caso.`
+              : 'Será atendido de forma confidencial.');
+        },
+        error: (codigo) => codigo === '429'
           ? '<strong>Recibimos varios reportes seguidos desde tu conexión.</strong> Lo que escribiste sigue en el formulario: espera un minuto y vuelve a enviarlo.'
-          : '<strong>No pudimos enviar tu reporte.</strong> Lo que escribiste sigue en el formulario: inténtalo de nuevo en unos minutos.');
-      } finally {
-        if (boton) boton.disabled = false;
-        // Cada token sirve para un solo envío, haya salido bien o no.
-        (window as { turnstile?: { reset(): void } }).turnstile?.reset();
-      }
-    });
+          : '<strong>No pudimos enviar tu reporte.</strong> Lo que escribiste sigue en el formulario: inténtalo de nuevo en unos minutos.',
+        alLimpiar: () => mostrarIdentidad(false),
+      });
+    }
   </script>
 
 </BaseLayout>

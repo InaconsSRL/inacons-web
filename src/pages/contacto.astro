@@ -316,6 +316,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
 
   <script>
     import { PUBLIC_CONTACT_ENDPOINT as ENDPOINT } from 'astro:env/client';
+    import { aviso as avisar, conectarFormulario, type TipoAviso } from '../scripts/formulario';
 
     /*
       Envío del formulario.
@@ -334,11 +335,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     const boton = document.getElementById('formSubmit') as HTMLButtonElement | null;
     const estado = document.getElementById('formEstado');
 
-    function aviso(tipo: 'ok' | 'error' | 'info', html: string) {
-      if (!estado) return;
-      estado.innerHTML = `<div class="notice notice--${tipo}">${html}</div>`;
-      estado.scrollIntoView({ block: 'nearest' });
-    }
+    const aviso = (tipo: TipoAviso, html: string) => avisar(estado, tipo, html);
 
     function textoDelMensaje(d: Record<string, string>) {
       return [
@@ -352,16 +349,6 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
         '',
         d.mensaje,
       ].join('\n');
-    }
-
-    async function enviarAlEndpoint(url: string, datos: Record<string, string>, turnstile: string) {
-      const respuesta = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ ...datos, turnstile, origen: location.href }),
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!respuesta.ok) throw new Error(String(respuesta.status));
     }
 
     function abrirCorreo(correo: string, datos: Record<string, string>) {
@@ -389,54 +376,24 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
       });
     }
 
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const datos = Object.fromEntries(
-        [...new FormData(form)].map(([k, v]) => [k, String(v).trim()]),
-      );
-      if (datos.company_url) return;
-
-      form.classList.add('was-validated');
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
-      // Turnstile mete su token como campo del formulario; viaja aparte porque
-      // no es parte del mensaje.
-      const turnstile = datos['cf-turnstile-response'] ?? '';
-      delete datos.company_url;
-      delete datos['cf-turnstile-response'];
-      const correo = form.dataset.correo ?? '';
-
-      if (!ENDPOINT) {
-        abrirCorreo(correo, datos);
-        return;
-      }
-
-      if (form.querySelector('.cf-turnstile') && !turnstile) {
-        aviso('info', 'Espera a que termine la verificación de seguridad, sobre el botón, y vuelve a enviar.');
-        return;
-      }
-
-      if (boton) boton.disabled = true;
-      aviso('info', 'Enviando…');
-      try {
-        await enviarAlEndpoint(ENDPOINT, datos, turnstile);
-        aviso('ok', '<strong>Mensaje enviado.</strong> Te responderemos a la brevedad.');
-        form.reset();
-        form.classList.remove('was-validated');
-      } catch (e) {
-        aviso('error', (e instanceof Error && e.message === '429'
+    // El orden del envío (validar, trampa, Turnstile, fetch, avisos) es común
+    // con el Canal Ético y vive en scripts/formulario.ts.
+    const correo = form?.dataset.correo ?? '';
+    if (form) {
+      conectarFormulario({
+        form,
+        boton,
+        estado,
+        url: ENDPOINT || null,
+        sinEndpoint: (datos) => abrirCorreo(correo, datos),
+        exito: () => '<strong>Mensaje enviado.</strong> Te responderemos a la brevedad.',
+        error: (codigo) => codigo === '429'
           ? `<strong>Ya recibimos varios mensajes tuyos en la última hora.</strong> Tus datos siguen en el formulario: ` +
             `vuelve a intentarlo más tarde o escríbenos a <a href="mailto:${correo}">${correo}</a>.`
           : `<strong>No pudimos enviar tu mensaje.</strong> Tus datos siguen en el formulario: ` +
-            `inténtalo de nuevo o escríbenos a <a href="mailto:${correo}">${correo}</a>.`));
-      } finally {
-        if (boton) boton.disabled = false;
-        // Cada token sirve para un solo envío, haya salido bien o no.
-        (window as { turnstile?: { reset(): void } }).turnstile?.reset();
-      }
-    });
+            `inténtalo de nuevo o escríbenos a <a href="mailto:${correo}">${correo}</a>.`,
+      });
+    }
   </script>
 
 </BaseLayout>

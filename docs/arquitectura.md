@@ -30,6 +30,7 @@ src/
   lib/                 iconos.ts (catálogo de SVG), servicios.ts (orden de la colección)
   pages/               una ruta por archivo
   scripts/main.ts      comportamiento compartido
+  scripts/formulario.ts envío común de /contacto/ y /canal-etico/ (no lo carga main.ts)
   styles/              design-system.css, scroll-animations.css
 public/
   assets/documentos/   PDF: certificados, políticas, brochure
@@ -111,6 +112,15 @@ demás. Todas respetan `prefers-reduced-motion`.
 El HTML ya trae el valor final de cada cifra y el contenido visible: `main.ts` solo anima.
 Las animaciones `data-aos` ocultan contenido únicamente bajo la clase `.js`, que pone una
 línea inline en el `<head>`; sin JavaScript todo se ve.
+
+## formulario.ts
+
+`conectarFormulario()` es el envío que comparten `/contacto/` y `/canal-etico/`: valida, descarta
+el campo trampa, espera el token de Turnstile, hace el POST JSON con `AbortSignal.timeout` y
+pinta el aviso de éxito o de error. Cada página le pasa lo suyo (la URL, qué hacer sin
+endpoint, el texto de éxito y de error); el orden de los pasos es único. Un 503 del Worker
+(Turnstile no respondió) tiene un texto común. No importa `astro:env`: la URL la decide la
+página, que sí lo importa.
 
 ## Mapa de cobertura
 
