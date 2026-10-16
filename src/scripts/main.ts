@@ -108,6 +108,12 @@ function initMobileMenu() {
   const ENFOCABLES = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
   let trampa: ((e: KeyboardEvent) => void) | null = null;
 
+  // aria-modal no basta: varios lectores de pantalla siguen leyendo lo de
+  // detrás, y un clic en el hueco del overlay no es lo único que lo alcanza.
+  // inert saca el fondo del orden de tabulación y del árbol de accesibilidad.
+  // #mobileMenu es hermano de estos (BaseLayout), no queda dentro de ninguno.
+  const fondo = [...document.querySelectorAll<HTMLElement>('.skip-link, .top-bar, #header, #contenido, .footer, #backToTop')];
+
   const resetDesplegables = () => {
     menu.querySelectorAll('.mobile-dropdown').forEach((d) => {
       d.classList.remove('open');
@@ -119,6 +125,7 @@ function initMobileMenu() {
     menu.classList.add('active');
     document.body.classList.add('menu-open');
     toggle.setAttribute('aria-expanded', 'true');
+    fondo.forEach((el) => { el.inert = true; });
     resetDesplegables();
 
     const enfocables = [...menu.querySelectorAll<HTMLElement>(ENFOCABLES)]
@@ -141,6 +148,9 @@ function initMobileMenu() {
     resetDesplegables();
     if (trampa) menu.removeEventListener('keydown', trampa);
     trampa = null;
+    // Antes de devolver el foco: un elemento inert no puede recibirlo, y el
+    // botón del menú vive dentro de #header.
+    fondo.forEach((el) => { el.inert = false; });
     toggle.focus();
   };
 
@@ -318,8 +328,13 @@ function initCoverageMap() {
   const ciudades: Ciudad[] = JSON.parse(contenedor.dataset.ciudades);
 
   const NS = 'http://www.w3.org/2000/svg';
-  const NARANJA = '#d9822b';
-  const RELLENO = ['', 'rgba(27,82,120,0.22)', 'rgba(27,82,120,0.30)', 'rgba(27,82,120,0.40)', 'rgba(27,82,120,0.52)'];
+  // El naranja sale del token y no de una copia: si la marca cambia, el pin
+  // la sigue. El respaldo evita un pin negro (fill vacío) si el token faltara.
+  const NARANJA = getComputedStyle(document.documentElement).getPropertyValue('--c-accent').trim() || '#d9822b';
+  // Tintes de --c-secondary. Son propiedades de estilo y no atributos SVG,
+  // así que aceptan var() y color-mix().
+  const tinte = (porcentaje: number) => `color-mix(in srgb, var(--c-secondary) ${porcentaje}%, transparent)`;
+  const RELLENO = ['', tinte(22), tinte(30), tinte(40), tinte(52)];
   const RADIO = ['', 150, 180, 220, 290];
 
   const circulo = (cx: number, cy: number, r: number, opacidad: number) => {
@@ -346,7 +361,9 @@ function initCoverageMap() {
     return c;
   };
 
-  fetch('/assets/imagenes/peru-depts.svg')
+  // 279 KB que nadie ve hasta llegar a la sección del mapa: se piden cuando
+  // la sección está cerca de la pantalla, no al cargar la página.
+  const pintar = () => fetch('/assets/imagenes/peru-depts.svg')
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.text();
@@ -362,7 +379,7 @@ function initCoverageMap() {
       svg.removeAttribute('height');
       svg.setAttribute('role', 'img');
       svg.setAttribute('aria-label', contenedor.dataset.etiqueta ?? '');
-      Object.assign(svg.style, { width: '100%', height: 'auto', display: 'block', filter: 'drop-shadow(0 8px 28px rgba(20,23,45,0.12))' });
+      Object.assign(svg.style, { width: '100%', height: 'auto', display: 'block', filter: 'drop-shadow(0 8px 28px color-mix(in srgb, var(--c-primary) 12%, transparent))' });
 
       svg.querySelectorAll<SVGElement>('.fil0, .str0, .str1, .str2').forEach((p) => {
         if (p.classList.contains('fil0')) p.style.fill = 'rgba(20,40,80,0.10)';
@@ -370,7 +387,7 @@ function initCoverageMap() {
         p.style.strokeWidth = '55';
       });
       const titicaca = svg.querySelector<SVGElement>('#Titicaca');
-      if (titicaca) titicaca.style.fill = 'rgba(27,82,120,0.38)';
+      if (titicaca) titicaca.style.fill = tinte(38);
 
       const pines = document.createElementNS(NS, 'g');
       svg.appendChild(pines);
@@ -396,6 +413,20 @@ function initCoverageMap() {
       });
     })
     .catch((err) => console.warn('initCoverageMap: no se pudo pintar el mapa.', err));
+
+  // Se observa la sección y no el contenedor: vacío mide 0 de alto, y no puede
+  // ir en display:none (regla 4 de CLAUDE.md) porque getBBox() necesita su caja.
+  const zona = contenedor.closest('section') ?? contenedor;
+  if (!('IntersectionObserver' in window)) {
+    pintar();
+    return;
+  }
+  const observer = new IntersectionObserver((entradas) => {
+    if (!entradas.some((e) => e.isIntersecting)) return;
+    observer.disconnect();
+    pintar();
+  }, { rootMargin: '600px 0px' });
+  observer.observe(zona);
 }
 
 /*

@@ -1993,13 +1993,18 @@ body.menu-open {
     visibility: hidden;
     pointer-events: none;
     opacity: 0;
-    transition: opacity var(--t), visibility var(--t);
+    /*  Al cerrar, visibility espera a que termine el fundido (retraso de --t).
+        Al abrir no espera: con una transición normal arranca en hidden y
+        focus() sobre el botón de cerrar falla en el mismo instante en que se
+        abre, así que el foco nunca entraba al menú. */
+    transition: opacity var(--t), visibility 0s linear var(--t);
 }
 
 .mobile-menu.active {
     visibility: visible;
     pointer-events: auto;
     opacity: 1;
+    transition: opacity var(--t), visibility 0s;
 }
 
 .mobile-menu-overlay {
