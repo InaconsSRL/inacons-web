@@ -4,6 +4,36 @@ Qué se hizo, por qué y qué quedó pendiente, sesión por sesión. El cómo op
 está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el contexto que
 no se deduce del código.
 
+## 2026-10-15 — Alta en Google Search Console
+
+### Punto de partida
+
+`robots.txt` y el sitemap ya funcionaban en producción (200, `application/xml`, sin
+bloqueos para Googlebot); no hizo falta tocar código.
+
+### Hecho (fuera del repositorio)
+
+- Propiedad de dominio `inacons.com.pe` verificada con un TXT agregado en el *Editor de
+  zona* del cPanel. No se tocó el SPF ni ningún otro registro.
+- Sitemap enviado con la URL completa; quedó en *Correcto*.
+- Inspección de URLs: `/`, `/nosotros/`, `/proyectos/` y `/servicios/` ya estaban indexadas,
+  con HTTPS y rutas de exploración válidas (las migas del JSON-LD).
+
+### Problemas encontrados
+
+- **«Dirección de sitemap no válida»** al enviar `sitemap-index.xml`: la propiedad de
+  dominio no completa rutas relativas. Se resolvió con la URL completa.
+- **«No se ha podido obtener»** justo después de enviarlo: era el primer rastreo pendiente,
+  no un fallo del sitio. Pasó a *Correcto* solo.
+
+### Pendiente
+
+- [ ] **Agregar un segundo propietario** en *Configuración → Usuarios y permisos*, para que
+      el acceso no dependa de una sola cuenta de Google.
+- [ ] En 3 a 7 días, revisar *Páginas* y confirmar que las 17 URLs del sitemap están
+      indexadas y que *Páginas descubiertas* dejó de estar en 0.
+- [ ] En 1 a 2 semanas, mirar *Rendimiento* (consultas, clics, impresiones).
+
 ## 2026-10-15 — Formularios de contacto y Canal Ético con receptor propio
 
 ### Punto de partida

@@ -172,3 +172,26 @@ Dos listas en paralelo: el filtro del sitemap (`SECCIONES_PRIVADAS` en
 - `/privacidad/` → fuera del sitemap y con `noindex` mientras sea borrador.
 - `/recursos/` → fuera del sitemap y con `noindex`, pero **no** en `robots.txt`: una URL
   bloqueada no se rastrea y nadie leería su `noindex`.
+
+### Google Search Console
+
+Propiedad de **dominio** `inacons.com.pe`, verificada por DNS: cubre `home`, la raíz y
+`www`, en http y https. Se prefirió a la de prefijo de URL porque el host del sitio podría
+cambiar sin perder el historial, y porque no obliga a tocar el HTML.
+
+**Verificación.** Es un registro TXT `google-site-verification=…` en la zona DNS de
+`inacons.com.pe`, que vive en el cPanel de Ecohosting (*Editor de zona*), no en Cloudflare.
+Convive con el TXT del SPF en el mismo nombre. **No se borra**: sin él Google pierde la
+verificación pasados unos días.
+
+**Sitemap.** Enviado como `https://home.inacons.com.pe/sitemap-index.xml`. En una
+propiedad de dominio hay que dar la URL completa; la ruta relativa da *Dirección de sitemap
+no válida*. Un sitemap recién enviado muestra *No se ha podido obtener* y *Páginas
+descubiertas: 0* durante horas o un par de días aunque responda 200; no se reenvía.
+
+**Qué es normal ver en *Páginas*:** `/sistema/` como *Bloqueada por robots.txt* y
+`/recursos/` y `/privacidad/` como *Excluida por noindex*. Una página pública en esa lista
+sí es un problema.
+
+Al publicar una sección nueva basta con que salga en el sitemap; no hace falta pedir la
+indexación a mano salvo para acelerarla.
