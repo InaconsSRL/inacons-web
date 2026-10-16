@@ -74,6 +74,11 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     .form-sh .sh-title { font-size: var(--fs-xl); }
     .form-estado:not(:empty) { margin-bottom: var(--sp-6); }
     .reporte-no-disponible { margin-bottom: var(--sp-6); }
+    /*  Los canales se ven por defecto y solo se ocultan si hay JavaScript: es un
+        canal de cumplimiento y tiene que ser lo último que falle. `.js` lo pone
+        el script inline de BaseLayout antes del primer pintado, así que con JS no
+        hay destello. El script quita la clase y pasa el control a `hidden`. */
+    html.js .canales--pendiente { display: none; }
     @media (max-width: 767.98px) {
       .guarantees-grid { grid-template-columns: 1fr; }
     }
@@ -151,8 +156,8 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     </div>
   </section>
 
-  <!-- ③ CANALES (oculto hasta aceptar) -->
-  <section class="sec sec--muted" id="channelsSection" hidden>
+  <!-- ③ CANALES: visibles sin JS; con JS quedan ocultos hasta aceptar los términos -->
+  <section class="sec sec--muted canales--pendiente" id="channelsSection">
     <div class="container">
       <div class="sh sh--center sh--medium" data-aos="fade-up">
         <p class="sh-label">Canales Disponibles</p>
@@ -185,6 +190,13 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
               El formulario no está disponible en este momento. Por favor, inténtalo más tarde.
             </div>
           )}
+
+          <!-- Sin JS el formulario no puede enviar (Turnstile y el Worker lo exigen): se dice, en vez de dejarlo fallar mudo. -->
+          <noscript>
+            <div class="notice notice--warn reporte-no-disponible">
+              Para enviar un reporte hace falta tener JavaScript activado en el navegador.
+            </div>
+          </noscript>
 
           <!-- El script pinta aquí el resultado del envío. role="status" lo anuncia sin mover el foco. -->
           <div class="form-estado" id="reporteEstado" role="status" aria-live="polite"></div>
@@ -286,6 +298,12 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
   <script>
     const casilla = document.getElementById('termsCheckbox') as HTMLInputElement | null;
     const canales = document.getElementById('channelsSection');
+    // Se lee `checked` y no se asume false: al volver atrás el navegador
+    // restaura la casilla marcada y los canales tienen que verse con ella.
+    if (canales) {
+      canales.hidden = !casilla?.checked;
+      canales.classList.remove('canales--pendiente');
+    }
     casilla?.addEventListener('change', () => {
       if (!canales) return;
       canales.hidden = !casilla.checked;
