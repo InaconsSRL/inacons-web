@@ -6,7 +6,7 @@ import { Font, getImage } from 'astro:assets';
 import { PUBLIC_ANALYTICS_TOKEN } from 'astro:env/client';
 import Icono from '../components/Icono.astro';
 import { serviciosPorMenu } from '../lib/servicios';
-import { BROCHURE, CONTACTO } from '../data/empresa';
+import { BROCHURE, CONTACTO, DESCRIPCION_EMPRESA } from '../data/empresa';
 import imagenPorDefecto from '../assets/imagenes/image_heroprincipal.webp';
 
 interface Props {
@@ -31,7 +31,7 @@ const {
 } = Astro.props;
 
 const pageTitle       = title ?? 'INACONS — Empresa Constructora en Perú';
-const metaDescription = description ?? 'INACONS S.R.L. — Empresa peruana de ingeniería y construcción con más de 15 años de experiencia en obras civiles, infraestructura, electromecánica y más.';
+const metaDescription = description ?? DESCRIPCION_EMPRESA;
 const canonicalURL    = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const og              = await getImage({ src: ogImage, quality: 70, width: 1200, height: 630, fit: 'cover', format: 'jpg' });
 const ogImageURL      = new URL(og.src, Astro.site).href;
@@ -40,7 +40,8 @@ const ruta      = Astro.url.pathname.replace(/\/$/, '') || '/';
 const actual    = (href: string) => (ruta === href.replace(/\/$/, '') ? 'page' : undefined);
 const seccion   = (href: string) => (ruta.startsWith(href.replace(/\/$/, '')) ? 'page' : undefined);
 const servicios = await serviciosPorMenu();
-const { correoVentas, telefono, whatsapp, redes, intranet, proveedores } = CONTACTO;
+const { correoVentas, telefono, whatsapp, redes, intranet, proveedores, sedes } = CONTACTO;
+const [sedePrincipal] = sedes;
 ---
 
 <html lang="es" class:list={{ 'layout-minimal': minimalChrome }}>
@@ -83,19 +84,21 @@ const { correoVentas, telefono, whatsapp, redes, intranet, proveedores } = CONTA
       "url": Astro.site?.href,
       "logo": new URL('/assets/imagenes/logos/logo_inacons.svg', Astro.site).href,
       "image": ogImageURL,
-      "description": "Empresa peruana de ingeniería y construcción con más de 15 años de experiencia en obras civiles, infraestructura, electromecánica, minería y consultoría.",
-      "foundingDate": "2009",
-      "telephone": "+51 64 654736",
+      "description": DESCRIPCION_EMPRESA,
+      // Sin foundingDate ni postalCode: ningún dato del repositorio los respalda
+      // (regla 5). Se agregan a empresa.ts cuando la empresa los confirme.
+      "telephone": telefono.href.replace('tel:', ''),
       "email": correoVentas,
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Av. Las Casuarinas 256",
-        "addressLocality": "Pucusana",
-        "addressRegion": "Lima",
-        "postalCode": "15830",
+        "streetAddress": sedePrincipal.direccion,
+        "addressLocality": sedePrincipal.distrito,
+        "addressRegion": sedePrincipal.ciudad,
         "addressCountry": "PE"
       },
-      "geo": { "@type": "GeoCoordinates", "latitude": -12.4762, "longitude": -76.7344 },
+      ...(sedePrincipal.coordenadas && {
+        "geo": { "@type": "GeoCoordinates", "latitude": sedePrincipal.coordenadas.lat, "longitude": sedePrincipal.coordenadas.lng },
+      }),
       "areaServed": { "@type": "Country", "name": "Perú" },
       "sameAs": [redes.facebook, redes.linkedin],
       "hasCredential": ['ISO 9001', 'ISO 14001', 'ISO 45001', 'ISO 37001'].map((name) => ({

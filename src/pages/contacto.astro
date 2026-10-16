@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Icono from '../components/Icono.astro';
 import { serviciosPorMenu } from '../lib/servicios';
-import { CONTACTO } from '../data/empresa';
+import { CONTACTO, zonaDeSede } from '../data/empresa';
 import { PUBLIC_CONTACT_ENDPOINT, PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client';
 import imagenHero from '../assets/imagenes/image_heroprincipal.webp';
 
@@ -260,7 +260,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
                 <div class="loc-icon"><Icono nombre="ubicacion" tam={18} /></div>
                 <div>
                   <p class="loc-name">{sede.nombre}</p>
-                  <p class="loc-addr">{sede.direccion}<br />{sede.zona}</p>
+                  <p class="loc-addr">{sede.direccion}<br />{zonaDeSede(sede)}</p>
                 </div>
               </div>
             ))}

@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBand from '../components/CtaBand.astro';
 import PageHero from '../components/PageHero.astro';
-import { CONTACTO } from '../data/empresa';
+import { CONTACTO, zonaDeSede } from '../data/empresa';
 import imagenHero from '../assets/imagenes/home_about.webp';
 
 // Borrador hasta que lo apruebe el abogado. Mientras sea true la página no se
@@ -51,7 +51,7 @@ const [sedePrincipal] = CONTACTO.sedes;
         <ul>
           <li>Razón social: INACONS S.R.L.</li>
           <li>RUC: <mark>pendiente</mark></li>
-          <li>Domicilio: {sedePrincipal.direccion}, {sedePrincipal.zona} <mark>confirmar si es el domicilio fiscal</mark></li>
+          <li>Domicilio: {sedePrincipal.direccion}, {zonaDeSede(sedePrincipal)} <mark>confirmar si es el domicilio fiscal</mark></li>
           <li>Correo para asuntos de datos personales: <mark>pendiente</mark></li>
         </ul>
 

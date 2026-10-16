@@ -13,21 +13,54 @@
  * que el brochure no afirma—.
  */
 
+/**
+ * Texto con que se abre el chat desde el botón de WhatsApp. Quien llega ya trae
+ * el mensaje escrito (menos fricción) y ventas sabe que el contacto salió de la
+ * web. Los números de personas concretas de /mineria/ no llevan texto.
+ */
+const MENSAJE_WHATSAPP = 'Hola INACONS, quiero cotizar un proyecto. Les escribo desde la web.';
+
+/** Descripción corta de la empresa: meta description por defecto y JSON-LD. */
+export const DESCRIPCION_EMPRESA =
+  'Empresa peruana de ingeniería y construcción con más de 15 años de experiencia en obras civiles, infraestructura, electromecánica, minería y consultoría.';
+
+export interface Sede {
+  nombre: string;
+  direccion: string;
+  distrito: string;
+  ciudad: string;
+  /** Solo donde se haya confirmado; alimenta el JSON-LD. */
+  coordenadas?: { lat: number; lng: number };
+}
+
+/** "Pucusana, Lima — Perú": cómo se escribe la zona de una sede en pantalla. */
+export const zonaDeSede = (s: Pick<Sede, 'distrito' | 'ciudad'>) => `${s.distrito}, ${s.ciudad} — Perú`;
+
+const SEDES: readonly Sede[] = [
+  {
+    nombre: 'Oficina Principal — Lima',
+    direccion: 'Av. Las Casuarinas 256',
+    distrito: 'Pucusana',
+    ciudad: 'Lima',
+    // Las mismas del mapa de /contacto/. Falta confirmarlas con el perfil de
+    // Google Business de la empresa.
+    coordenadas: { lat: -12.4762, lng: -76.7344 },
+  },
+  { nombre: 'Oficina Regional — Huancayo', direccion: 'Calle Casuarinas 106', distrito: 'El Tambo', ciudad: 'Huancayo' },
+];
+
 export const CONTACTO = {
   correoVentas: 'ventas@inacons.com.pe',
   correoGerencia: 'gerencia.proyectos@inacons.com.pe',
   telefono: { texto: '+51 064 654 736', href: 'tel:+5164654736' },
-  whatsapp: { texto: '+51 948 888 070', href: 'https://wa.me/51948888070' },
+  whatsapp: { texto: '+51 948 888 070', href: `https://wa.me/51948888070?text=${encodeURIComponent(MENSAJE_WHATSAPP)}` },
   redes: {
     facebook: 'https://www.facebook.com/www.inacons.com.pe',
     linkedin: 'https://pe.linkedin.com/company/inacons',
   },
   intranet: 'https://kapo.com.pe',
   proveedores: 'https://kapo-proveedores-portal.vercel.app/proveedor/login',
-  sedes: [
-    { nombre: 'Oficina Principal — Lima', direccion: 'Av. Las Casuarinas 256', zona: 'Pucusana, Lima — Perú' },
-    { nombre: 'Oficina Regional — Huancayo', direccion: 'Calle Casuarinas 106', zona: 'El Tambo, Huancayo — Perú' },
-  ],
+  sedes: SEDES,
 } as const;
 
 export const BROCHURE = '/assets/documentos/brochure_inacons.pdf';
