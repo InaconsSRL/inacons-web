@@ -12,8 +12,10 @@
   // Variables públicas. Los secrets (CPAAS_TOKEN, TURNSTILE_SECRET,
   // IP_SALT) van con `wrangler secret put` y nunca en este archivo.
   "vars": {
-    // localhost para probar el formulario con `npm run dev` del sitio.
-    "ORIGENES": "https://home.inacons.com.pe,http://localhost:4321",
+    // Solo el sitio publicado. Para probar con `npm run dev` del sitio, se
+    // añade http://localhost:4321 en .dev.vars: ahí pisa a este valor y no
+    // llega a producción.
+    "ORIGENES": "https://home.inacons.com.pe",
     // La muestra CPaaS en Agent → SMTP/API (Anfitrión + /v1.1/email). Depende
     // del centro de datos de la cuenta: .com, .eu, .in…
     "CPAAS_URL": "https://cpaas.zoho.com/v1.1/email",

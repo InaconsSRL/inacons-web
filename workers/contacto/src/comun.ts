@@ -40,15 +40,31 @@ export function leerCampos<K extends string>(
   return campos;
 }
 
+/** Cloudflare no respondió a tiempo o respondió algo que no es JSON. */
+export class VerificacionNoDisponible extends Error {}
+
+/**
+ * false = el token no vale (el visitante repite el desafío). Si Cloudflare no
+ * contesta lanza VerificacionNoDisponible, que index.ts convierte en un 503:
+ * devolver false aquí sería un 403 que culpa al visitante de un fallo ajeno.
+ */
 export async function turnstileValido(token: string, ip: string, secreto: string): Promise<boolean> {
   if (!token) return false;
   const datos = new FormData();
   datos.append('secret', secreto);
   datos.append('response', token);
   if (ip) datos.append('remoteip', ip);
-  const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: datos });
-  const resultado = await r.json<{ success: boolean }>();
-  return resultado.success === true;
+  try {
+    const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: datos,
+      signal: AbortSignal.timeout(5000),
+    });
+    const resultado = await r.json<{ success: boolean }>();
+    return resultado.success === true;
+  } catch {
+    throw new VerificacionNoDisponible();
+  }
 }
 
 export type Destinatario = { address: string; name?: string };

@@ -8,5 +8,9 @@ CPAAS_TOKEN=
 # clave secreta del widget Turnstile de home.inacons.com.pe.
 TURNSTILE_SECRET=1x0000000000000000000000000000000AA
 
+# Orígenes que pueden llamar al Worker. En producción es solo el sitio
+# (wrangler.jsonc); aquí se añade el servidor de desarrollo.
+ORIGENES=https://home.inacons.com.pe,http://localhost:4321
+
 # Cualquier texto aleatorio largo. Si cambia, solo se reinicia el límite por hora.
 IP_SALT=desarrollo-local

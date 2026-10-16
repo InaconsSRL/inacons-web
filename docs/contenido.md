@@ -118,6 +118,13 @@ más de 10 s sin respuesta, muestra el error y conserva lo escrito. El endpoint 
 permitir CORS desde `https://home.inacons.com.pe`. El campo trampa `company_url` se
 filtra en el navegador y no se envía.
 
+Respuestas de error que el Worker da a propósito: **400** datos inválidos o cuerpo que no
+es un objeto JSON; **403** origen no permitido o token de Turnstile inválido; **413** cuerpo
+mayor de 32 KB; **415** `Content-Type` distinto de `application/json`; **429** límite por
+hora; **503** Cloudflare no respondió a Turnstile en 5 s (reintentar, no es culpa de quien
+escribe). Todas salen con CORS, para que el navegador las lea como respuesta y no como
+fallo de red.
+
 Turnstile solo se carga si están definidas `PUBLIC_CONTACT_ENDPOINT` y
 `PUBLIC_TURNSTILE_SITE_KEY`. Con el modo `mailto` no hay nada que proteger.
 

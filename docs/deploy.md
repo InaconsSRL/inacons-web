@@ -84,6 +84,12 @@ siguiente push del sitio ya envía al Worker. Hoy es
 **Cambios posteriores:** `npx wrangler deploy` desde la carpeta. Los secrets no se
 vuelven a poner.
 
+**Probar contra el sitio local.** `ORIGENES` en `wrangler.jsonc` es solo
+`https://home.inacons.com.pe`: el Worker publicado rechaza `localhost`. Para `npm run dev`
+del sitio, `.dev.vars` (copia de `.dev.vars.example`) trae `ORIGENES` con
+`http://localhost:4321` añadido, y ahí pisa al valor del archivo. Si el widget de Turnstile
+todavía incluye `localhost` entre sus dominios, conviene quitarlo desde su panel.
+
 **Ver las consultas** (una con `estado = 'error'` es una que ventas no recibió):
 
 ```bash
