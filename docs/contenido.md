@@ -67,7 +67,7 @@ año: 2023
 imagen: ../../assets/imagenes/proyectos/pucusana.webp
 galeria:                     # opcional
   - ../../assets/imagenes/proyectos/pucusana-2.webp
-destacado: true              # aparece en el home (máximo 3)
+destacado: true              # candidato al home, que muestra los tres primeros
 orden: 1                     # opcional
 resumen: Una frase            # opcional: hero de la ficha y descripción de la tarjeta
 ficha:                       # opcional: se suma a ubicación, categoría y año
@@ -93,7 +93,7 @@ publica. Los campos de `ficha` son texto libre, no cifras.
 titulo: Logo INACONS — Principal
 categoria: logo              # logo | flyer-impreso | flyer-digital | documento
 archivo: /assets/imagenes/logos/logo_inacons.svg   # archivo en public/, se descarga tal cual
-formato: SVG
+formato: SVG                 # si falta, PNG
 dimensiones: 2480×3508px     # opcional
 orden: 10
 ---
@@ -105,6 +105,28 @@ Descripción corta.
 `src/content/certificaciones/<norma>.md`. Alimentan `/documentos/` y los sellos de
 `/nosotros/`. Los campos y por qué cada uno es opcional u obligatorio están comentados en
 `src/content.config.ts`.
+
+```yaml
+---
+norma: ISO 9001
+titulo: Gestión de la Calidad
+organismo: ACS International
+certificado: /assets/documentos/inacons_9001.pdf   # el mismo PDF que enlaza /documentos/
+orden: 1
+etiqueta: Calidad            # opcional: franja de /documentos/
+encabezado: Sistema de Gestión de Calidad   # opcional: h3 de la tarjeta
+descripcion: Una frase.      # opcional
+sello: /assets/imagenes/certificaciones/iso_9001.png   # opcional, ver abajo
+vigencia: 2027-12-31         # opcional, sale del certificado emitido
+---
+```
+
+**`sello` es la puerta:** sin él, en producción la norma no se pinta en `/nosotros/` y, si
+ninguna lo tiene, la franja entera no se emite (en desarrollo salen recuadros punteados con
+el aviso de cuáles faltan). El sello es marca del organismo certificador y solo entra con su
+permiso, con el archivo que él entrega. Hoy las cuatro normas están así, con `sello` y
+`vigencia` comentados en su `.md`. `vigencia` no se inventa: sin certificado emitido que la
+respalde se deja fuera. Para activar una norma se descomentan los dos.
 
 ## Cifras corporativas
 
@@ -121,7 +143,11 @@ armado y le ofrece copiarlo; nunca declara éxito sin confirmación.
 El Worker comprueba Turnstile, limita a 3 envíos por hora por conexión o por correo,
 guarda una copia en D1, avisa a `ventas@` por Zoho CPaaS con *Reply-To* al visitante y le
 manda un acuse de recibo. El acuse no repite el mensaje: va a la dirección que teclea el
-visitante, y con el texto dentro serviría para escribirle a un tercero desde el dominio. Las copias se borran solas a los 12 meses (`RETENCION_MESES`).
+visitante, y con el texto dentro serviría para escribirle a un tercero desde el dominio.
+
+Cada fila de `consultas` lleva un hash con sal de la IP (`ip_hash`, sal en el secret
+`IP_SALT`): sirve solo para el límite por hora y no se puede revertir a la IP. Las copias
+se borran solas a los 12 meses (`RETENCION_MESES`), con una purga diaria.
 
 **Contrato del endpoint** — lo que acepta el Worker, y lo que tendría que aceptar
 cualquier reemplazo:
@@ -216,5 +242,7 @@ Los `tipo` válidos son las claves de `TIPOS` en `canal.ts` y tienen que coincid
 
 ## Vídeo y PDF
 
-- Vídeo: H.264, sin audio, "optimizar para web". `public/assets/videos/hero.mp4`.
+- Vídeo: H.264, sin audio, "optimizar para web". `public/assets/videos/hero.mp4` pesa
+  4,8 MB; solo lo descarga el escritorio.
 - PDF: `public/assets/documentos/`. El brochure pesa 4,7 MB: conviene una versión para web.
+  Es la fuente de las cifras (regla 5 de CLAUDE.md): si se reemplaza, el nombre no cambia.

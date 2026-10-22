@@ -12,6 +12,8 @@ Astro 7 en modo estático. Sin framework de UI, sin backend, sin base de datos. 
 | `npm run dev` | Dev server en http://localhost:4321 |
 | `npm run build` | Genera `dist/` |
 | `npm run preview` | Sirve el build local |
+| `npm run check` | Tipos y esquemas de contenido (`astro check`); el CI lo corre antes de subir nada |
+| `npm test` y `npm run check` en `workers/contacto/` | Pruebas (Vitest) y tipos del Worker; el CI también los corre |
 
 Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/deploy.md](docs/deploy.md).
 

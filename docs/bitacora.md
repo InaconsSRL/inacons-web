@@ -4,6 +4,48 @@ Qué se hizo, por qué y qué quedó pendiente, sesión por sesión. El cómo op
 está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el contexto que
 no se deduce del código.
 
+## 2026-10-22 — Revisión de la documentación
+
+### Punto de partida
+
+Pedido: analizar toda la documentación y corregirla con lo que el repositorio dice hoy. Se
+contrastó cada documento contra el código y la configuración (`deploy.yml`, `wrangler.jsonc`,
+`schema.sql`, `.htaccess`, `astro.config.mjs`, `content.config.ts`, el Worker y las páginas),
+y se corrió `npm test` en `workers/contacto/` (34 pruebas, todas en verde).
+
+### Qué estaba desactualizado
+
+| Dónde | Problema | Ahora |
+|---|---|---|
+| `deploy.md`, tabla de variables | Decía que `PUBLIC_CONTACT_ENDPOINT` y `PUBLIC_TURNSTILE_SITE_KEY` eran opcionales; el CI corta si están vacías desde `745ccff`. | Dice cuáles cortan y cuál solo avisa. |
+| `deploy.md`, job `worker` | Hablaba solo de `tsc`; corre también `npm test`. | Corregido, con la nota de `concurrency` y `workflow_dispatch`. |
+| `deploy.md`, indexación | Hablaba de los `Disallow` de `robots.txt`, que ya no tiene ninguno. | Explica por qué no hay y cuál es la lista que manda. |
+| `deploy.md`, Worker | No mencionaba las variables de `wrangler.jsonc`, la purga diaria ni la tabla `limites` retirada. | Agregado. |
+| `arquitectura.md`, árbol | Faltaban `Galeria`, `workers/contacto/`, `.github/` y los archivos sueltos de `public/`. | Agregados. |
+| `arquitectura.md`, home | Describía las cifras como parte del hero sin la banda ni el `srcset`, y no había nada de las fichas. | Actualizado, con sección nueva de fichas. |
+| `contenido.md` | Faltaba el ejemplo de certificaciones y qué hace `sello`; el tope de 3 destacados no es del schema; no decía que `consultas` guarda `ip_hash`. | Corregido. |
+| `README.md` y `CLAUDE.md` | Sin `npm run check` ni los comandos del Worker; el README no listaba esta bitácora, `workers/` ni `Galeria`. | Corregido. |
+
+### Comprobado en producción (solo lectura)
+
+- `https://inacons.com.pe/` redirige con 301 a `home`, pero `/nosotros/` en `inacons.com.pe` y
+  en `www` da **404**: **E-01 sigue abierto**.
+- La cabecera `Content-Security-Policy-Report-Only` y el HSTS están publicados tal como los
+  define el `.htaccess`.
+
+### Decisiones
+
+| Decisión | Por qué |
+|---|---|
+| No se creó ningún `.md` nuevo | La convención del repositorio lo prohíbe salvo petición; todo cabe en los cuatro de `docs/`. |
+| `AUDITORIA.md` sigue fuera del repositorio | Describe riesgos abiertos de seguridad y de privacidad. Solo se cita por su ID desde aquí. |
+| Lo no verificable se dejó como pendiente, no como hecho | Por ejemplo, si la tabla `limites` se borró de D1: el repositorio no lo dice. |
+
+### Pendiente
+
+- [ ] **Comprobar en D1** si existe la tabla `limites` y borrarla (comando en `deploy.md`).
+- [ ] Los pendientes de las sesiones anteriores siguen vigentes; esta sesión no tocó código.
+
 ## 2026-10-16 — Canal Ético en tres pasos
 
 ### Punto de partida
@@ -40,6 +82,12 @@ antes. Desaparecen las tarjetas aparte y el selector duplicado.
 `.pasos` y `.pasos-acciones` en `design-system.css`, con demo en `/sistema/`: el indicador pinta
 los estados `--hecho` y `--actual`; cambiar de paso lo hace la página. En móvil solo el paso
 actual muestra su nombre.
+
+### Commits
+
+| Commit | Qué |
+|---|---|
+| `a043480` | Canal Ético: asistente de tres pasos en el mismo lugar, componente `.pasos` y su demo en `/sistema/`. |
 
 ### Pruebas hechas
 

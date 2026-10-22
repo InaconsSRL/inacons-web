@@ -23,7 +23,7 @@ su propio `package.json`, que se despliega en Cloudflare y no en el hosting (ver
 ```
 src/
   assets/imagenes/     fotos y logos de clientes — pasan por astro:assets
-  components/          PageHero, MediaCard, CtaBand, Icono, SellosCertificacion
+  components/          PageHero, MediaCard, CtaBand, Galeria, Icono, SellosCertificacion
   content/             servicios, proyectos, recursos, certificaciones (Markdown)
   data/empresa.ts      contacto, cifras del brochure, proyectos por ciudad
   layouts/BaseLayout   head, top-bar, nav, menú móvil, pie, JSON-LD
@@ -34,10 +34,23 @@ src/
   styles/              design-system.css, scroll-animations.css
 public/
   assets/documentos/   PDF: certificados, políticas, brochure
-  assets/imagenes/     logos SVG (header, JSON-LD) y peru-depts.svg (mapa)
+  assets/imagenes/     logos SVG (header, JSON-LD), sellos de certificación y peru-depts.svg (mapa)
   assets/recursos/     flyers descargables
   assets/videos/       hero.mp4
   .htaccess            caché, seguridad y redirecciones de QR impresos
+  robots.txt           solo apunta al sitemap: no bloquea nada (ver deploy.md#indexación)
+  favicon.*, icon-*    iconos y site.webmanifest
+workers/contacto/      receptor de los formularios: proyecto aparte, con su package.json
+  src/index.ts           CORS, tope de cuerpo, Turnstile y reparto por ruta ("/" y "/canal")
+  src/contacto.ts        validación y envío de /contacto/ (y la lista SERVICIOS)
+  src/canal.ts           validación y envío del Canal Ético (y la tabla TIPOS)
+  src/comun.ts           utilidades compartidas: Turnstile, CPaaS, validación de campos
+  schema.sql             tablas D1 `consultas` y `reportes`
+  wrangler.jsonc         variables públicas, D1, límite del Canal y purga diaria
+  test/                  Vitest; contrato.test.ts lee los archivos del sitio
+.github/
+  workflows/deploy.yml   CI y deploy por FTP; job aparte para el Worker
+  dependabot.yml         actualizaciones semanales del sitio, del Worker y de las acciones
 ```
 
 Va en `public/` solo lo que tiene que conservar su URL exacta: lo que se descarga,
@@ -80,8 +93,11 @@ El orden de los servicios en menú, pie, home y formulario lo da el campo `menu`
 ## CSS
 
 `src/styles/design-system.css` tiene los tokens (color, tipografía, espaciado) y todos los
-componentes compartidos (botones, controles, pestañas, prosa, avisos…); `/sistema/` los muestra pintados con ese mismo archivo. Se importa
-en `BaseLayout`, así que sale minificado, con hash y cacheable para siempre.
+componentes compartidos (botones, controles, pestañas, prosa, avisos, banda de cifras,
+asistente de pasos, preguntas frecuentes…); `/sistema/` los muestra pintados con ese mismo
+archivo, pero solo con `npm run dev`. Se importa en `BaseLayout`, así que sale minificado,
+con hash y cacheable para siempre. `scroll-animations.css` guarda solo las animaciones de
+entrada (`data-aos`).
 
 Las páginas solo escriben en su `<style>` el layout que es suyo. Regla 1 de
 [CLAUDE.md](../CLAUDE.md): un selector de página no alcanza a lo que pinta un componente
@@ -122,6 +138,11 @@ endpoint, el texto de éxito y de error); el orden de los pasos es único. Un 50
 (Turnstile no respondió) tiene un texto común. No importa `astro:env`: la URL la decide la
 página, que sí lo importa.
 
+`main.ts` no lo carga: lo importa el `<script>` de cada página. En `/canal-etico/` ese script
+también maneja el asistente de tres pasos (validación por paso, foco, Turnstile explícito);
+como importa `formulario.ts`, Astro lo emite como archivo y no en línea, y por eso la CSP no
+lleva su hash (ver [deploy.md](deploy.md#publichtaccess)).
+
 ## Mapa de cobertura
 
 `initCoverageMap` pide `public/assets/imagenes/peru-depts.svg` (exportado de CorelDRAW), lo
@@ -134,7 +155,16 @@ y `peso` (1–4) la intensidad del relleno y el tamaño del pin.
 
 ## Home
 
-Secciones claro/oscuro alternadas (referencia Bechtel): hero con vídeo y cifras → quiénes
-somos → servicios → dónde construimos (mapa) → proyectos destacados → clientes → banda de
-cierre. El póster del vídeo es la imagen LCP y se precarga; el vídeo solo se descarga en
-escritorio, sin ahorro de datos y sin movimiento reducido.
+Secciones claro/oscuro alternadas (referencia Bechtel): hero con vídeo y, debajo del
+titular, la banda con las cuatro cifras del brochure (`.stat-band`) → quiénes somos →
+servicios → presencia nacional (mapa) → proyectos destacados (los tres primeros con
+`destacado: true`; la sección no se emite si no hay) → clientes → banda de cierre. El
+póster del vídeo es un `<Image>` con `srcset` (768, 1280 y 1920 px) y es la imagen LCP; el
+vídeo solo se descarga en escritorio, sin ahorro de datos y sin movimiento reducido.
+
+## Fichas de servicio y de proyecto
+
+`servicios/[slug].astro` y `proyectos/[slug].astro` pintan solo lo que el `.md` trae: sin
+`destacados`, `faqs`, `galeria` o `ficha`, la sección no se emite. Con `faqs` sale también
+el `FAQPage` en el JSON-LD. Un servicio con `categoria` lista los proyectos de esa
+categoría. Las dos fichas cierran con la banda de contacto sobre la foto de la ficha.

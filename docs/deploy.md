@@ -16,8 +16,14 @@ Push a `main` → GitHub Actions (`.github/workflows/deploy.yml`):
 6. **Humo posterior**: pide `/contacto/` y `/canal-etico/` ya publicadas (con un query
    para saltar la caché del proxy) y exige `cf-turnstile`. Avisa, no deshace el deploy.
 
-Un segundo job, `worker`, corre en paralelo: `tsc` sobre `workers/contacto/`. No bloquea la
-publicación del sitio, pero deja el workflow en rojo. El Worker sigue desplegándose a mano.
+Un segundo job, `worker`, corre en paralelo: `npm run check` (tipos) y `npm test` (34
+pruebas de Vitest) sobre `workers/contacto/`. No bloquea la publicación del sitio, pero deja
+el workflow en rojo. El Worker sigue desplegándose a mano.
+
+Dos pushes seguidos no se pisan: el workflow usa un `concurrency` que encola el segundo en
+vez de cancelar el primero, porque un FTP a medio subir deja el sitio mezclado. Para
+redesplegar sin un commit (por ejemplo tras cambiar una variable) basta *Actions → Deploy a
+cPanel → Run workflow* (`workflow_dispatch`).
 
 Las acciones de GitHub están fijadas por SHA de commit, con la versión en un comentario.
 Dependabot (`.github/dependabot.yml`, semanal) abre los PR que mueven SHA y comentario
@@ -30,9 +36,9 @@ anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.
 | Configuración en GitHub | Tipo | Qué es |
 |---|---|---|
 | `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD` | Secret | Acceso FTP del cPanel |
-| `PUBLIC_CONTACT_ENDPOINT` | Variable | URL del Worker de contacto. Opcional y público |
-| `PUBLIC_TURNSTILE_SITE_KEY` | Variable | Clave de sitio de Turnstile. Pública; solo se usa con endpoint |
-| `PUBLIC_ANALYTICS_TOKEN` | Variable | Token de Cloudflare Web Analytics. Sin él no se carga analítica |
+| `PUBLIC_CONTACT_ENDPOINT` | Variable | URL del Worker de contacto. Pública. **El CI corta si está vacía** (en local, vacía = modo `mailto`) |
+| `PUBLIC_TURNSTILE_SITE_KEY` | Variable | Clave de sitio de Turnstile. Pública. **El CI corta si está vacía** |
+| `PUBLIC_ANALYTICS_TOKEN` | Variable | Token de Cloudflare Web Analytics. Vacía: el CI avisa y el sitio sale sin analítica |
 | `FTP_PROTOCOL` | Variable | `ftps` si el hosting llegara a aceptar TLS. Vacía → `ftp` sin cifrar |
 
 ### Límites del plan de hosting
@@ -72,7 +78,7 @@ npx wrangler d1 create inacons-contacto      # copiar el database_id a wrangler.
 npx wrangler d1 execute inacons-contacto --remote --file=schema.sql
 npx wrangler secret put CPAAS_TOKEN
 npx wrangler secret put TURNSTILE_SECRET
-npx wrangler secret put IP_SALT               # cualquier texto aleatorio largo
+npx wrangler secret put IP_SALT               # cualquier texto aleatorio largo; ver abajo
 npx wrangler deploy                           # imprime la URL *.workers.dev
 ```
 
@@ -81,8 +87,19 @@ siguiente push del sitio ya envía al Worker. Hoy es
 `https://inacons-contacto.inacons-contacto.workers.dev`, en la cuenta de Cloudflare de
 `soporteinformatico.inacons@gmail.com`.
 
-**Cambios posteriores:** `npx wrangler deploy` desde la carpeta. Los secrets no se
-vuelven a poner.
+**Cambios posteriores:** `npm run check` y `npm test` y, si pasan, `npx wrangler deploy`
+desde la carpeta. Los secrets no se vuelven a poner. `contrato.test.ts` lee
+`src/content/servicios/` y `canal-etico.astro`: falla si se creó o renombró un servicio, o un
+tipo del Canal, sin actualizar la lista copiada en el Worker.
+
+**Variables y secrets.** Las públicas están en `wrangler.jsonc` (`vars`): `ORIGENES` (solo
+`https://home.inacons.com.pe`), `CPAAS_URL`, `CORREO_DESTINO`, `CORREO_REMITENTE`,
+`ENVIAR_ACUSE` (`si` o se apagan los acuses) y `RETENCION_MESES` (12). Los secrets son
+`CPAAS_TOKEN`, `TURNSTILE_SECRET` e `IP_SALT`; `IP_SALT` sazona el hash de la IP que usa el
+límite de contacto, así que cambiarla solo reinicia ese límite. El límite del Canal Ético es
+el binding `LIMITE_CANAL` (5 por minuto por conexión, en memoria; `period` solo admite 10 o
+60 s). Un cron diario (08:00 UTC) borra las consultas más antiguas que `RETENCION_MESES`;
+los reportes del Canal no se purgan.
 
 **Probar contra el sitio local.** `ORIGENES` en `wrangler.jsonc` es solo
 `https://home.inacons.com.pe`: el Worker publicado rechaza `localhost`. Para `npm run dev`
@@ -103,7 +120,11 @@ npx wrangler d1 execute inacons-contacto --remote --command "SELECT codigo, crea
 ```
 
 **Cambios en `schema.sql`:** se vuelve a aplicar con el mismo `d1 execute … --file`; todas
-las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe.
+las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe. Si el
+`schema.sql` se aplicó en producción antes de `3e78a2f` (el mismo 2026-10-15), la base
+conserva la tabla `limites`, que guardaba hash de IP y hora de cada envío del Canal y
+permitía cruzar un reporte anónimo con su conexión; el repositorio no dice si se borró.
+Comprobar con `.tables` o un `SELECT name FROM sqlite_master`, y borrarla con `npx wrangler d1 execute inacons-contacto --remote --command "DROP TABLE IF EXISTS limites"`.
 
 **Errores de envío:** Cloudflare → Workers → `inacons-contacto` → Logs. Solo aparecen los
 fallos, con el número de consulta o reporte: el registro automático de cada petición está
@@ -141,7 +162,12 @@ El host del sitio es **`home.inacons.com.pe`**, declarado en `site` de `astro.co
 Es la única fuente del dominio: canonical, sitemap, Open Graph y JSON-LD salen de ahí.
 
 `inacons.com.pe` y `www` redirigen solo la raíz a `home`; cualquier otra ruta da 404 en
-ese host. Toda URL que se comparta o se imprima usa `home.inacons.com.pe`.
+ese host (comprobado en producción el 2026-10-22). Toda URL que se comparta o se imprima usa
+`home.inacons.com.pe`.
+
+**Pendiente:** esa regla vive en el `.htaccess` del docroot del dominio raíz, que no está en
+este repositorio. Mientras no conserve la ruta con un 301, los enlaces antiguos al dominio
+raíz mueren en 404 (E-01 de la auditoría; ver la bitácora).
 
 Los enlaces internos llevan **barra final** (`/servicios/`): Apache sirve
 `ruta/index.html` y responde 301 en `/ruta`. `trailingSlash: 'always'` hace que el
@@ -208,12 +234,13 @@ corresponda. `style-src 'unsafe-inline'` se queda: Astro emite estilos en línea
 
 ## Indexación
 
-Dos listas en paralelo: el filtro del sitemap (`SECCIONES_PRIVADAS` en
-`astro.config.mjs`) y los `Disallow` de `public/robots.txt`.
+La lista que manda es el filtro del sitemap (`SECCIONES_PRIVADAS` en `astro.config.mjs`),
+más el `robots` de cada página. `public/robots.txt` **no tiene ningún `Disallow`**: solo
+`Allow: /` y la URL del sitemap. Es a propósito: una URL bloqueada ahí no se rastrea y
+nadie leería su `noindex`, y listar una página interna la anunciaría.
 
-- `/sistema/` → no existe en producción: solo se genera con `npm run dev`. Tampoco
-  aparece en `robots.txt`, porque ahí anunciaría una página interna. `npm run preview` sirve
-  el build, así que tampoco la muestra.
+- `/sistema/` → no existe en producción: solo se genera con `npm run dev`. `npm run preview`
+  sirve el build, así que tampoco la muestra.
 - `/privacidad/` → fuera del sitemap y con `noindex` mientras sea borrador. **Se publica con
   un solo cambio**: `PRIVACIDAD_PUBLICADA = true` en `src/data/empresa.ts`. Ese valor indexa
   la página, la mete en el sitemap y la enlaza desde el pie, `/contacto/` y los términos del
