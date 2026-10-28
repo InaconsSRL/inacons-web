@@ -4,6 +4,28 @@ Qué se hizo, por qué y qué quedó pendiente, sesión por sesión. El cómo op
 está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el contexto que
 no se deduce del código.
 
+## 2026-10-28 — Revisión general y seguridad
+
+### Qué se revisó
+
+`npm run check` (0 errores), `npm run build` (20 páginas), `npm test` y `npm run check` del
+Worker (34 pruebas), barrido de secretos en lo versionado, `.gitignore`, cabeceras de
+`.htaccess` y los dos hashes de la CSP en modo informe contra los scripts en línea del
+build: coinciden. Las únicas variables `PUBLIC_*` son el endpoint del Worker, la clave de
+sitio de Turnstile y el token del beacon de analítica, públicos por diseño. No hay secretos
+en el repositorio.
+
+### Qué se corrigió
+
+`npm audit` marcaba vulnerabilidades en `undici` y `zod` (raíz, dependencias transitivas de
+`astro` y `@astrojs/sitemap`) y en `undici`/`miniflare`/`wrangler` (Worker, solo
+herramientas de desarrollo). Se resolvió con `npm audit fix`, que solo tocó los lockfiles;
+ahora marca 0 en ambos paquetes y check, build y pruebas siguen en verde.
+
+### Pendiente
+
+- [ ] Los pendientes de privacidad y del Canal Ético de la sesión del Worker siguen abiertos.
+
 ## 2026-10-22 — Revisión de la documentación
 
 ### Punto de partida
