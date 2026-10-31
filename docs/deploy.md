@@ -2,36 +2,58 @@
 
 ## Cómo se publica
 
-Push a `main` → GitHub Actions (`.github/workflows/deploy.yml`):
+GitHub Actions (`.github/workflows/deploy.yml`, "CI y deploy") corre en cada push a
+`main` y en cada pull request. Cuatro jobs:
 
-1. `npm ci` y `npm run check` (tipos y esquemas de contenido).
-2. **Exigir variables del formulario**: corta si `PUBLIC_CONTACT_ENDPOINT` o
+| Job | Qué hace | En un PR | Si falla |
+|---|---|---|---|
+| `sitio` | `npm ci`, `npm run check`, `npm run build` sin variables y `npm run verificar` | Sí | No se despliega |
+| `worker` | `npm run check` y `npm test` (86 pruebas) en `workers/contacto/` | Sí | Rojo, pero el sitio se publica igual |
+| `auditoria` | `npm audit --audit-level=high` del sitio y del Worker | Sí | Rojo, pero el sitio se publica igual |
+| `desplegar` | Espera a `sitio`. Solo en `main`, nunca en un PR | No | — |
+
+`desplegar`, en orden:
+
+1. **Exigir variables del formulario**: corta si `PUBLIC_CONTACT_ENDPOINT` o
    `PUBLIC_TURNSTILE_SITE_KEY` están vacías. Sin esto el build sale en verde y los
    formularios quedan sin envío (pasó dos veces, ver la bitácora).
-3. `npm run build`, y una comprobación de que `dist/contacto/` y `dist/canal-etico/`
-   traen `cf-turnstile`.
-4. `dist/` se guarda como artefacto 90 días.
-5. Subida por FTP a `public_html/sites/home.inacons.com.pe/` en cPanel, con una cuenta FTP
+2. `npm run build` con las variables, `npm run verificar` otra vez sobre ese `dist/`, y
+   una comprobación de que `dist/contacto/` y `dist/canal-etico/` traen `cf-turnstile`.
+3. `dist/` se guarda como artefacto 90 días.
+4. Subida por FTP a `public_html/sites/home.inacons.com.pe/` en cPanel, con una cuenta FTP
    cuya raíz es esa carpeta: el deploy no puede tocar nada más del hosting.
-6. **Humo posterior**: pide `/contacto/` y `/canal-etico/` ya publicadas (con un query
+5. **Humo posterior**: pide `/contacto/` y `/canal-etico/` ya publicadas (con un query
    para saltar la caché del proxy) y exige `cf-turnstile`. Avisa, no deshace el deploy.
 
-Un segundo job, `worker`, corre en paralelo: `npm run check` (tipos) y `npm test` (34
-pruebas de Vitest) sobre `workers/contacto/`. No bloquea la publicación del sitio, pero deja
-el workflow en rojo. El Worker sigue desplegándose a mano.
+`npm run verificar` (`scripts/verificar-dist.mjs`) comprueba lo que el build no ve: que
+cada script en línea tenga su hash en la CSP de `.htaccess`, que cada selector del
+`<style>` de una página encuentre algún elemento (regla 1 de CLAUDE.md) y que ningún
+enlace interno apunte a un archivo que no existe. Se puede correr en local tras
+`npm run build`.
 
-Dos pushes seguidos no se pisan: el workflow usa un `concurrency` que encola el segundo en
-vez de cancelar el primero, porque un FTP a medio subir deja el sitio mezclado. Para
-redesplegar sin un commit (por ejemplo tras cambiar una variable) basta *Actions → Deploy a
-cPanel → Run workflow* (`workflow_dispatch`).
+Dos pushes seguidos no se pisan: en `main` el `concurrency` encola el segundo en vez de
+cancelar el primero, porque un FTP a medio subir deja el sitio mezclado. En un PR, un
+commit nuevo sí cancela la verificación anterior. Cada job tiene `timeout-minutes`: un FTP
+colgado ya no retiene la cola 6 horas. Para redesplegar sin un commit (por ejemplo tras
+cambiar una variable) basta *Actions → CI y deploy → Run workflow* (`workflow_dispatch`).
+
+**Los PR de Dependabot** pasan por `sitio`, `worker` y `auditoria`. Si están en verde se
+pueden fusionar; al fusionar, el push a `main` despliega. Las actualizaciones mayores de
+una acción (por ejemplo `actions/checkout` de v4 a v7) conviene leerlas en sus notas de
+versión antes: cambian el runtime de Node de la acción.
 
 Las acciones de GitHub están fijadas por SHA de commit, con la versión en un comentario.
 Dependabot (`.github/dependabot.yml`, semanal) abre los PR que mueven SHA y comentario
 juntos. Para fijar una a mano: `git ls-remote --tags https://github.com/<owner>/<repo>.git
 <tag>` da el SHA.
 
-No hay staging: `home.inacons.com.pe` **es** producción. Para volver a una versión
-anterior se descarga el artefacto `dist-<sha>` de ese run y se sube.
+No hay staging: `home.inacons.com.pe` **es** producción.
+
+**Volver atrás.** `git revert <commit>` y push: el CI publica la versión anterior por el
+camino normal, con sus comprobaciones. No se sube a mano el artefacto `dist-<sha>`:
+FTP-Deploy-Action decide qué subir comparando con `.ftp-deploy-sync-state.json` del
+servidor, que una subida manual no actualiza, y el deploy siguiente dejaría archivos viejos
+mezclados. El artefacto sirve para ver exactamente qué se publicó en cada run.
 
 | Configuración en GitHub | Tipo | Qué es |
 |---|---|---|

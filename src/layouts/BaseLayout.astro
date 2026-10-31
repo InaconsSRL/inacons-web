@@ -14,7 +14,8 @@ interface Props {
   description?: string;
   /** Imagen para compartir. Se recorta a 1200×630, el tamaño que piden las redes. */
   ogImage?: ImageMetadata;
-  canonical?: string;
+  /** false: sin canonical ni og:url (la 404 se sirve en cualquier ruta y no tiene una propia). */
+  canonical?: string | false;
   /** Valor de meta robots (p. ej. `noindex, follow` en 404) */
   robots?: string;
   /** Sin top bar, header, menú móvil, footer ni volver arriba (p. ej. 404) */
@@ -32,7 +33,7 @@ const {
 
 const pageTitle       = title ?? 'INACONS — Empresa Constructora en Perú';
 const metaDescription = description ?? DESCRIPCION_EMPRESA;
-const canonicalURL    = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const canonicalURL    = canonical === false ? null : canonical ?? new URL(Astro.url.pathname, Astro.site).href;
 const og              = await getImage({ src: ogImage, quality: 70, width: 1200, height: 630, fit: 'cover', format: 'jpg' });
 const ogImageURL      = new URL(og.src, Astro.site).href;
 
@@ -53,7 +54,7 @@ const [sedePrincipal] = sedes;
     <meta name="description" content={metaDescription} />
     <meta name="robots" content={robots} />
     <title>{pageTitle}</title>
-    <link rel="canonical" href={canonicalURL} />
+    {canonicalURL && <link rel="canonical" href={canonicalURL} />}
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -68,7 +69,7 @@ const [sedePrincipal] = sedes;
     <meta property="og:image"        content={ogImageURL} />
     <meta property="og:image:width"  content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:url"          content={canonicalURL} />
+    {canonicalURL && <meta property="og:url" content={canonicalURL} />}
     <meta property="og:locale"       content="es_PE" />
     <meta name="twitter:card"        content="summary_large_image" />
     <meta name="twitter:title"       content={pageTitle} />

@@ -13,6 +13,7 @@ Astro 7 en modo estático. Sin framework de UI, sin backend, sin base de datos. 
 | `npm run build` | Genera `dist/` |
 | `npm run preview` | Sirve el build local |
 | `npm run check` | Tipos y esquemas de contenido (`astro check`); el CI lo corre antes de subir nada |
+| `npm run verificar` | Después del build: hashes de la CSP, regla 1 y enlaces internos sobre `dist/` (`scripts/verificar-dist.mjs`); el CI corta si falla |
 | `npm test` y `npm run check` en `workers/contacto/` | Pruebas (Vitest) y tipos del Worker; el CI también los corre |
 
 Node ≥ 22.12.0. El deploy es automático al hacer push a `main` — ver [docs/deploy.md](docs/deploy.md).
@@ -50,8 +51,11 @@ el CSS se emite, el selector no engancha con nada— en dos casos que ya rompier
   (`style="--card-ratio: 4/5"`), que sí atraviesa.
 
 `<Image>` de `astro:assets` es la excepción: recibe el atributo de scope de la página.
-Se verifica con `grep '\[data-astro-cid-[^]]*\] > \[data-astro-cid' dist/_astro/*.css` —
-ese patrón casi siempre es un bug.
+Se verifica con `npm run build && npm run verificar`: cada selector de página tiene que
+encontrar al menos un elemento en el HTML generado, y el CI corta si alguno no lo hace. El
+grep que había aquí no servía: buscaba `] > [` con espacios y el CSS sale minificado.
+Contenido que hoy los datos no pintan (los sellos ISO) se declara en `CONDICIONALES` del
+script, con el motivo.
 
 **2. Los valores salen de los tokens, y los componentes del sistema.** Si un tamaño,
 espaciado o color no viene de una custom property de `design-system.css`, es un bug. El

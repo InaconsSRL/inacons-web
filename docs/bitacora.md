@@ -88,17 +88,9 @@ entenderlo sin ella.
 Lo que sigue abierto de esa auditoría; los códigos son los suyos. Lo ya resuelto está en
 las sesiones del mismo día, abajo.
 
-- [ ] **CI-01, CI en pull requests.** El workflow solo corre con push a `main`, así que los
-      7 PR de Dependabot (acciones de v4 a v7, astro, wrangler…) publicarían sin pasar
-      ninguna prueba. Disparar `pull_request` con check, build y pruebas, dejar el FTP solo
-      para push, y después fusionarlos.
-- [ ] **CI-02 y CI-03, contratos en CI.** El grep de la regla 1 de CLAUDE.md busca `] > [`
-      con espacios y el CSS minificado es `]>[`: no detecta nada. Corregirlo y llevarlo al
-      CI junto con la comparación de los hashes de la CSP, un link check, `npm audit` y
-      `timeout-minutes`. Borrar los dos selectores muertos que no veía:
-      `.form-estado .btn` (`contacto.astro`) y `.error-actions .btn svg` (`404.astro`).
-- [ ] **CI-04:** el rollback de [deploy.md](deploy.md) (subir el artefacto a mano) deja
-      desfasado `.ftp-deploy-sync-state.json`. Documentarlo como `git revert` + push.
+- [ ] **CI-01, PR de Dependabot.** Ya pasan por el CI (desde el 2026-10-31). Fusionar los 7
+      abiertos cuando estén en verde; las acciones que suben de v4 a v7 (`checkout`,
+      `setup-node`, `upload-artifact`), después de leer sus notas de versión.
 - [ ] **SEG-06, CSP antes del bloqueo:** `report-to` hacia el Worker (sin él no se puede
       verificar "dos semanas sin violaciones"), el host exacto del Worker en `connect-src`
       en vez de `*.workers.dev`, y `form-action 'self'`.
@@ -115,8 +107,8 @@ las sesiones del mismo día, abajo.
       (políticas de `/documentos/`, contactos de `/mineria/`, `hasCredential` del JSON-LD).
 - [ ] **PERF-02:** el fondo de `/mineria/` (la página de los QR, que se abre en el móvil)
       se pide a 1920 px sin srcset.
-- [ ] **SEO-01:** la 404 declara canonical `/404/`; `site.webmanifest` sale sin
-      `Content-Type`; el redirect genérico de `.html` capturaría archivos de verificación.
+- [ ] **SEO-01:** `site.webmanifest` sale sin `Content-Type`; el redirect genérico de
+      `.html` capturaría archivos de verificación de buscadores.
 - [ ] **Worker, restos:** el límite por hora de contacto cuenta y después inserta (carrera);
       `ip_hash` se guarda 12 meses aunque solo sirve una hora; pruebas con
       `@cloudflare/vitest-pool-workers` en vez de Node.
@@ -132,6 +124,24 @@ las sesiones del mismo día, abajo.
       antes de aceptarlas en reportes anónimos.
 - [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
       documentos siguen con la lisa.
+
+## 2026-10-31 — CI en pull requests y contratos del build
+
+Pedido: la tanda de CI de la auditoría del mismo día.
+
+| Qué | Por qué |
+|---|---|
+| El workflow ("CI y deploy") corre también en cada pull request; el FTP solo en `main`, en un job `desplegar` que espera a `sitio` | No corría nada en los PR: fusionar uno de Dependabot publicaba sin pasar ninguna prueba. Por eso había 7 sin fusionar. |
+| `scripts/verificar-dist.mjs` (`npm run verificar`), en CI sobre el build sin variables y otra vez sobre el del deploy | Los contratos que fallan en silencio ahora cortan el CI: un script en línea sin su hash en la CSP, un selector de página que no encuentra ningún elemento (regla 1) y un enlace interno roto. |
+| La regla 1 se comprueba contra el HTML generado, no con un grep | El grep de CLAUDE.md buscaba `] > [` con espacios y el CSS sale minificado: no detectaba nada. Corregir el patrón tampoco servía: `.contact-grid > *` es correcto y `.form-estado .btn` estaba muerto sin tener esa forma. El script distingue "el elemento existe pero lo pinta un componente hijo" (siempre error) de "no está en el HTML" (error, salvo que sea contenido condicional declarado en `CONDICIONALES`, como los sellos ISO). |
+| Borrados `.form-estado .btn` (`contacto.astro`) y `.error-actions .btn svg` (`404.astro`) | Los dos primeros casos que encontró: el botón lo inyecta JS y el `svg` lo pinta `Icono`. Nunca se aplicaron, así que borrarlos no cambia nada visible. |
+| La 404 sin canonical ni `og:url` (`canonical={false}` en `BaseLayout`) | Declaraba `/404/`, una URL que no existe; el verificador de enlaces lo marcó. |
+| Job `auditoria` (`npm audit --audit-level=high`, sitio y Worker) y `timeout-minutes` en todos | Un aviso nuevo se ve en rojo sin frenar un cambio de contenido. Un FTP colgado retenía la cola hasta 6 h. |
+| "Volver atrás" en [deploy.md](deploy.md) pasa a `git revert` + push | Subir el artefacto a mano dejaba desfasado `.ftp-deploy-sync-state.json` y el deploy siguiente mezclaba archivos. |
+
+El verificador se probó con un error a propósito: un estilo en `sostenibilidad.astro`
+sobre `.page-hero-content`, que pinta `PageHero`, cortó con el mensaje de componente hijo.
+`npm audit` da 0 vulnerabilidades en los dos paquetes.
 
 ## 2026-10-31 — Worker: avisos que no se pierden ni se duplican
 

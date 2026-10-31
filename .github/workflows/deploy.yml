@@ -1,28 +1,34 @@
-name: Deploy a cPanel
+name: CI y deploy
 
 on:
   push:
     branches: [main]
+  # Los PR (los de Dependabot incluidos) pasan por las mismas comprobaciones
+  # que un push, pero no despliegan: antes no corría nada en ellos y fusionar
+  # uno publicaba en producción sin haber pasado ninguna prueba.
+  pull_request:
   # Botón "Run workflow" en Actions: para redesplegar tras cambiar una variable.
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Dos push seguidos lanzarían dos subidas FTP en paralelo contra el mismo
-# directorio y el mismo archivo de estado. No se cancela la que está en curso:
-# un deploy a medio subir deja el sitio mezclado.
+# En main, dos push seguidos lanzarían dos subidas FTP en paralelo contra el
+# mismo directorio y el mismo archivo de estado: el segundo espera, y el que
+# está en curso no se cancela (un deploy a medio subir deja el sitio
+# mezclado). En un PR, un commit nuevo sí cancela la verificación anterior.
 concurrency:
-  group: deploy-produccion
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.ref) || 'deploy-produccion' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Las acciones van fijadas por SHA, no por etiqueta: una etiqueta se puede
 # reasignar, y FTP-Deploy-Action recibe la contraseña del FTP. El comentario
 # lleva la versión; Dependabot (github-actions) actualiza las dos cosas juntas.
 jobs:
-  build-and-deploy:
+  sitio:
+    name: Sitio (tipos, build y contratos)
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -36,9 +42,101 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      # Tipos y contenido: un error aquí corta el deploy antes de subir nada.
       - name: Comprobar tipos
         run: npm run check
+
+      # Sin las variables PUBLIC_*: los formularios salen en modo mailto, que
+      # para estas comprobaciones da igual. El build con ellas es el del deploy.
+      - name: Build
+        run: npm run build
+
+      # Lo que el build no ve y rompe en silencio: hashes de la CSP, selectores
+      # de página que no encuentran nada (regla 1 de CLAUDE.md) y enlaces
+      # internos rotos. scripts/verificar-dist.mjs explica cada caso.
+      - name: Contratos del build
+        run: npm run verificar
+
+  # El Worker no se publica con el push (se despliega a mano, docs/deploy.md),
+  # pero un error de tipos o una prueba rota se tienen que ver antes de
+  # desplegarlo. Va en paralelo y el deploy no lo espera: un fallo aquí deja el
+  # workflow en rojo sin impedir que se publique un cambio de contenido del sitio.
+  worker:
+    name: Worker (tipos y pruebas)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: workers/contacto
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: workers/contacto/package-lock.json
+
+      # --ignore-scripts: ni tsc ni las pruebas necesitan los binarios de
+      # workerd ni de esbuild.
+      - name: Instalar dependencias del Worker
+        run: npm ci --ignore-scripts
+
+      - name: Comprobar tipos del Worker
+        run: npm run check
+
+      # Validación, reparto de los seis tipos y anonimato del Canal Ético,
+      # router y cron, y las listas que el Worker comparte con el sitio
+      # (contrato.test.ts lee src/content/servicios y canal-etico.astro).
+      - name: Pruebas del Worker
+        run: npm test
+
+  # Aparte y sin bloquear el deploy, como el Worker: un aviso nuevo de una
+  # dependencia de build no tiene por qué frenar una corrección de contenido,
+  # pero tiene que verse en rojo.
+  auditoria:
+    name: Vulnerabilidades (npm audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+
+      - name: Sitio
+        run: npm audit --audit-level=high
+
+      - name: Worker
+        if: ${{ !cancelled() }}
+        working-directory: workers/contacto
+        run: npm audit --audit-level=high
+
+  desplegar:
+    name: Deploy a producción
+    needs: sitio
+    # Solo main: un PR comprueba, nunca publica.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Un FTP colgado retenía el grupo de concurrencia hasta las 6 h que da
+    # GitHub por defecto, y con él cualquier deploy siguiente.
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
 
       # Con estas variables vacías el build sale en verde y los formularios
       # caen a mailto (contacto) o a "no disponible" (Canal Ético) sin que nadie
@@ -68,6 +166,11 @@ jobs:
           PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
           PUBLIC_ANALYTICS_TOKEN: ${{ vars.PUBLIC_ANALYTICS_TOKEN }}
 
+      # Otra vez sobre lo que de verdad se sube: con las variables cambian el
+      # HTML de los formularios y los scripts que carga.
+      - name: Contratos del build
+        run: npm run verificar
+
       # Segunda red, sobre lo que de verdad se va a subir: las dos páginas con
       # formulario tienen que traer el widget de Turnstile.
       - name: Comprobar que los formularios salen con Turnstile
@@ -78,7 +181,7 @@ jobs:
           done
 
       # La versión exacta que se intentó subir queda descargable 90 días desde
-      # la pestaña Actions, aunque el FTP falle: es el rollback.
+      # la pestaña Actions, aunque el FTP falle (docs/deploy.md, "Volver atrás").
       - name: Guardar dist/ como artefacto
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -107,7 +210,7 @@ jobs:
 
       # Lo que ve el visitante, no lo que se subió. El query evita la caché de
       # una hora que añade el proxy del hosting. Este paso AVISA, no deshace el
-      # deploy: para volver atrás se sube el artefacto de arriba (docs/deploy.md).
+      # deploy: para volver atrás, docs/deploy.md.
       - name: Humo posterior al deploy
         run: |
           for pagina in contacto canal-etico; do
@@ -116,37 +219,3 @@ jobs:
               | grep -q 'cf-turnstile' \
               || { echo "::error::/$pagina/ quedó publicada sin Turnstile"; exit 1; }
           done
-
-  # El Worker no se publica con el push (se despliega a mano, docs/deploy.md),
-  # pero un error de tipos o una prueba rota se tienen que ver antes de
-  # desplegarlo. Va en paralelo y sin `needs`: un fallo aquí deja el workflow en
-  # rojo sin impedir que se publique un cambio de contenido del sitio.
-  worker:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: workers/contacto
-    steps:
-      - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: workers/contacto/package-lock.json
-
-      # --ignore-scripts: ni tsc ni las pruebas necesitan los binarios de
-      # workerd ni de esbuild.
-      - name: Instalar dependencias del Worker
-        run: npm ci --ignore-scripts
-
-      - name: Comprobar tipos del Worker
-        run: npm run check
-
-      # Validación, reparto de los seis tipos y anonimato del Canal Ético, y las
-      # listas que el Worker comparte con el sitio (contrato.test.ts lee
-      # src/content/servicios y canal-etico.astro).
-      - name: Pruebas del Worker
-        run: npm test

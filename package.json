@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "verificar": "node scripts/verificar-dist.mjs",
     "astro": "astro"
   },
   "dependencies": {

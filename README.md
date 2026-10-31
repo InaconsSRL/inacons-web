@@ -20,11 +20,13 @@ Requiere **Node ≥ 22.12.0**.
 | `npm run build` | Genera el sitio en `dist/` |
 | `npm run preview` | Sirve el build para revisarlo antes de publicar |
 | `npm run check` | Tipos y esquemas de contenido; falla si un `.md` no cumple su schema |
+| `npm run verificar` | Tras el build: CSP, estilos de página que no aplican y enlaces rotos en `dist/` |
 
 ## Publicar
 
-Push a `main`. GitHub Actions comprueba tipos, compila y sube `dist/` a cPanel por FTP.
-Ver [docs/deploy.md](docs/deploy.md).
+Push a `main`. GitHub Actions comprueba tipos, compila, verifica `dist/` y lo sube a cPanel
+por FTP. Un pull request pasa por las mismas comprobaciones sin publicar. Ver
+[docs/deploy.md](docs/deploy.md).
 
 Los formularios (contacto y Canal Ético) los recibe un Cloudflare Worker aparte, en
 `workers/contacto/`, que **no** se publica con el push: se despliega a mano.

@@ -9,6 +9,7 @@ Astro.response.status = 404;
   title="Página no encontrada | INACONS"
   description="La página que buscas no existe o fue movida."
   robots="noindex, nofollow"
+  canonical={false}
   minimalChrome
 >
   <style slot="head">
@@ -117,10 +118,6 @@ Astro.response.status = 404;
       display: inline-flex;
       align-items: center;
       gap: var(--sp-2);
-    }
-
-    .error-actions .btn svg {
-      flex-shrink: 0;
     }
 
     .error-links {

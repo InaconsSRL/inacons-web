@@ -48,8 +48,10 @@ workers/contacto/      receptor de los formularios: proyecto aparte, con su pack
   schema.sql             tablas D1 `consultas` y `reportes`
   wrangler.jsonc         variables públicas, D1, límite del Canal y purga diaria
   test/                  Vitest; contrato.test.ts lee los archivos del sitio
+scripts/
+  verificar-dist.mjs     comprueba dist/ tras el build: CSP, regla 1 y enlaces (npm run verificar)
 .github/
-  workflows/deploy.yml   CI y deploy por FTP; job aparte para el Worker
+  workflows/deploy.yml   CI en cada push y PR; deploy por FTP solo desde main
   dependabot.yml         actualizaciones semanales del sitio, del Worker y de las acciones
 ```
 
@@ -173,6 +175,8 @@ categoría. Las dos fichas cierran con la banda de contacto sobre la foto de la 
 
 Contratos que cruzan archivos o salen del repositorio. Ninguno falla en el build si se
 rompe; por eso están juntos aquí y hay que repasarlos antes de cerrar un cambio grande.
+Los que dicen **CI** en la última columna los vigila el workflow (`npm run verificar`,
+`npm test` del Worker o el paso de Turnstile); los demás dependen de quien hace el cambio.
 
 | Contrato | Dónde vive | Qué pasa si se rompe |
 |---|---|---|
@@ -180,10 +184,13 @@ rompe; por eso están juntos aquí y hay que repasarlos antes de cerrar un cambi
 | **QR impresos y sitio anterior**: `/r/…`, `/empresa/…`, `/expomina/`, los `.html` y PDF de la raíz | `public/.htaccess` (regla 6 de CLAUDE.md) | El papel en circulación da 404. `/canal-etico/` y `/mineria/` son destino de QR: no cambian de URL |
 | **Archivos con URL fija**: PDF, vídeo, logos SVG, flyers | `public/assets/` | Los enlazan los certificados, el JSON-LD y material externo. Reemplazar un archivo conserva su nombre |
 | **Campos de los formularios** (`name`, `maxlength`) | `contacto.astro`, `canal-etico.astro` ↔ `LIMITES` de `workers/contacto/src/contacto.ts` y `canal.ts` | El Worker rechaza con 400 lo que el formulario deja escribir. Contrato completo en [contenido.md](contenido.md#formulario-de-contacto) |
-| **Lista de servicios** | títulos de `src/content/servicios/` ↔ `SERVICIOS` del Worker | `npm test` del Worker falla; si no se despliega, el Worker rechaza el servicio nuevo |
-| **Tipos del Canal Ético** | `CANALES` de `canal-etico.astro` ↔ `TIPOS` de `canal.ts` | Igual: `npm test` lo detecta |
-| **Turnstile en `/contacto/` y `/canal-etico/`** | `.github/workflows/deploy.yml` busca `cf-turnstile` en esas dos rutas | Mover o renombrar los formularios exige ajustar el CI y el humo posterior |
-| **Scripts en línea** | hashes de la CSP en `public/.htaccess` | Un script en línea nuevo o editado (la clase `js`, `/mineria/`) sale como violación en la consola mientras la CSP esté en modo informe, y se bloquea cuando deje de estarlo |
+| **Lista de servicios** | títulos de `src/content/servicios/` ↔ `SERVICIOS` del Worker | **CI**: `npm test` del Worker falla; si no se despliega, el Worker rechaza el servicio nuevo |
+| **Tipos del Canal Ético** | `CANALES` de `canal-etico.astro` ↔ `TIPOS` de `canal.ts` | **CI**: igual, `npm test` lo detecta |
+| **`action` de Turnstile** | `data-action="contacto"` y `action: 'canal'` en las páginas ↔ `ACCION_TURNSTILE` de `contacto.ts` y `canal.ts` | El Worker responde 403 a todo envío de ese formulario. Se despliega primero el sitio y después el Worker |
+| **Turnstile en `/contacto/` y `/canal-etico/`** | `.github/workflows/deploy.yml` busca `cf-turnstile` en esas dos rutas | **CI**. Mover o renombrar los formularios exige ajustar el CI y el humo posterior |
+| **Scripts en línea** | hashes de la CSP en `public/.htaccess` | **CI**: `npm run verificar` corta si un script en línea nuevo o editado (la clase `js`, `/mineria/`) no tiene su hash. Sin él, el navegador lo bloquea cuando la CSP deje el modo informe |
+| **Estilos de página** (regla 1 de CLAUDE.md) | `<style>` de cada página | **CI**: `npm run verificar` corta si un selector no encuentra ningún elemento |
+| **Enlaces internos** | todo `href`, `src` y `srcset` | **CI**: `npm run verificar` corta si apunta a algo que no está en `dist/` |
 | **Proveedores externos** (Turnstile, Web Analytics, Maps, YouTube, el Worker) | CSP en `public/.htaccess` | Uno nuevo hay que añadirlo a su directiva |
 | **`#peruMapContainer` con caja** | regla 4 de CLAUDE.md | Los pines desaparecen sin error |
 | **Cifras del brochure** | solo `src/data/empresa.ts` (regla 5) | Una cifra escrita en una página se separa de la fuente |
