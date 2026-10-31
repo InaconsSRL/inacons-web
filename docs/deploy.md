@@ -98,8 +98,20 @@ tipo del Canal, sin actualizar la lista copiada en el Worker.
 `CPAAS_TOKEN`, `TURNSTILE_SECRET` e `IP_SALT`; `IP_SALT` sazona el hash de la IP que usa el
 límite de contacto, así que cambiarla solo reinicia ese límite. El límite del Canal Ético es
 el binding `LIMITE_CANAL` (5 por minuto por conexión, en memoria; `period` solo admite 10 o
-60 s). Un cron diario (08:00 UTC) borra las consultas más antiguas que `RETENCION_MESES`;
-los reportes del Canal no se purgan.
+60 s). Un cron cada 15 minutos reenvía los avisos que no salieron y borra las consultas
+más antiguas que `RETENCION_MESES`; los reportes del Canal no se purgan.
+
+**Avisos que no salieron.** Si CPaaS falla o tarda más de 4 s, la consulta o el reporte
+queda guardado en `estado = 'error'` y el visitante ve el error. El cron lo reenvía a los
+responsables con `[Reenvío]` en el asunto (sin acuse al visitante), hasta 20 filas por
+pasada, mientras tenga menos de 7 días. Puede llegar un duplicado si la persona también
+reenvió a mano: el n.° de consulta o el código del reporte lo delatan. Lo que siga en
+`error` o `recibido` pasados 7 días ya no se reintenta y hay que mirarlo a mano con las
+consultas de abajo.
+
+**Tope diario.** Más de 100 consultas, o 100 reportes, en 24 h responden 503 hasta que
+baje la cuenta; en Logs queda la línea "se alcanzó el tope". El tráfico real está muy por
+debajo: si aparece, es un ataque o hay que subir `TOPE_DIARIO` en `src/comun.ts`.
 
 **Probar contra el sitio local.** `ORIGENES` en `wrangler.jsonc` es solo
 `https://home.inacons.com.pe`: el Worker publicado rechaza `localhost`. Para `npm run dev`
@@ -128,7 +140,10 @@ Comprobar con `.tables` o un `SELECT name FROM sqlite_master`, y borrarla con `n
 
 **Errores de envío:** Cloudflare → Workers → `inacons-contacto` → Logs. Solo aparecen los
 fallos, con el número de consulta o reporte: el registro automático de cada petición está
-apagado (`invocation_logs: false`) para que el Canal Ético no deje datos de conexión.
+apagado (`invocation_logs: false`) para que el Canal Ético no deje datos de conexión. Una
+línea `Turnstile: invalid-input-secret` (o `missing-input-secret`) significa que
+`TURNSTILE_SECRET` está mal: todos los envíos están dando 403. Un `Error no controlado`
+es un 500 (D1 caído, por ejemplo).
 
 ## Cloudflare Web Analytics
 

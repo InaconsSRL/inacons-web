@@ -8,7 +8,10 @@
  * se manda a Turnstile.
  */
 
-import { CORREO_VALIDO, enviar, escapar, leerCampos, nombreValido, tablaHtml, type Env, type Respuesta } from './comun';
+import {
+  CONDICION_PENDIENTES, CORREO_VALIDO, enviar, escapar, fechaValida, leerCampos, limpiarOrigen, nombreValido, saturado,
+  tablaHtml, type Env, type Respuesta,
+} from './comun';
 
 // La clave es el contrato con el sitio: es el value del <select> de
 // canal-etico.astro. El título y los destinatarios solo viven aquí.
@@ -57,6 +60,7 @@ const LIMITES: Record<keyof Reporte, number> = {
 // reportaron antes. Turnstile ya frena a los bots; esto solo corta un abuso
 // evidente.
 export const IP_A_TURNSTILE = false;
+export const ACCION_TURNSTILE = 'canal';
 
 // Acuses por correo y hora. El reporte se guarda y se avisa a los responsables
 // igual; lo que se calla es la cortesía hacia quien lo envía, para que el
@@ -68,14 +72,16 @@ const MAXIMO_ACUSES_POR_HORA = 3;
 const ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 export function validar(cuerpo: Record<string, unknown>): (Reporte & { tipo: Tipo }) | null {
-  const r = leerCampos(cuerpo, LIMITES);
+  const r = leerCampos({ ...cuerpo, origen: limpiarOrigen(cuerpo.origen) }, LIMITES);
   if (!r || !Object.hasOwn(TIPOS, r.tipo) || !r.descripcion) return null;
-  if (r.fecha && !/^\d{4}-\d{2}-\d{2}$/.test(r.fecha)) return null;
+  if (r.fecha && !fechaValida(r.fecha)) return null;
 
   if (r.modalidad === 'anonimo') {
     // Lo que el navegador no debería mandar en anónimo, se descarta igual.
     r.nombre = r.correo = r.telefono = '';
   } else if (r.modalidad === 'nombre') {
+    // El tope de acuses compara correos: Ana@ y ANA@ son el mismo buzón.
+    r.correo = r.correo.toLowerCase();
     if (!r.nombre || !nombreValido(r.nombre) || !CORREO_VALIDO.test(r.correo)) return null;
   } else {
     return null;
@@ -83,9 +89,10 @@ export function validar(cuerpo: Record<string, unknown>): (Reporte & { tipo: Tip
   return r as Reporte & { tipo: Tipo };
 }
 
-export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHash: string): Promise<Respuesta> {
+export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHash: string, ctx: ExecutionContext): Promise<Respuesta> {
   const { success } = await env.LIMITE_CANAL.limit({ key: ipHash });
   if (!success) return { status: 429, datos: { ok: false, error: 'limite' } };
+  if (await saturado(env, 'reportes')) return { status: 503, datos: { ok: false, error: 'saturado' } };
 
   const { titulo, destino } = TIPOS[reporte.tipo];
   const codigo = nuevoCodigo();
@@ -113,34 +120,82 @@ export async function procesar(reporte: Reporte & { tipo: Tipo }, env: Env, ipHa
   ).first<{ id: number }>())!;
 
   try {
-    await enviar(env, {
-      para: [...destino],
-      ...(identificado ? { responderA: { address: reporte.correo, name: reporte.nombre } } : {}),
-      // Sin el nombre en el asunto: los asuntos se ven en listados y avisos
-      // del móvil, y una denuncia no debería delatar a nadie desde ahí.
-      asunto: `Canal Ético — ${titulo} — ${codigo}`,
-      ...aviso(reporte, titulo, codigo),
-    });
+    await avisarResponsables(env, reporte, titulo, [...destino], codigo);
   } catch (e) {
     await marcar(env, id, 'error', String(e));
     console.error(`canal: falló el aviso del reporte ${id}`);
     return { status: 502, datos: { ok: false, error: 'envio' } };
   }
-  await marcar(env, id, 'notificado');
 
-  if (conAcuse && env.ENVIAR_ACUSE === 'si') {
+  // Con el aviso en manos de los responsables la respuesta ya es 200 con el
+  // código: marcar la fila y el acuse siguen después de contestar. Antes se
+  // esperaban aquí, y un acuse lento podía llevar al navegador a los 10 s y
+  // mostrar un error; quien reportaba de forma anónima reenviaba y perdía el
+  // código del primero.
+  ctx.waitUntil(despuesDelAviso(env, id, conAcuse ? reporte : null, titulo, codigo));
+  return { status: 200, datos: { ok: true, codigo } };
+}
+
+async function despuesDelAviso(env: Env, id: number, paraAcuse: Reporte | null, titulo: string, codigo: string): Promise<void> {
+  try {
+    await marcar(env, id, 'notificado');
+  } catch {
+    // Queda en 'recibido' y el cron lo reenvía: mejor un aviso repetido que perdido.
+    console.error(`canal: no se pudo marcar el reporte ${id}`);
+  }
+  if (!paraAcuse || env.ENVIAR_ACUSE !== 'si') return;
+  try {
+    await enviar(env, {
+      para: [paraAcuse.correo],
+      asunto: `Recibimos tu reporte ${codigo} — INACONS`,
+      ...acuse(paraAcuse, titulo, codigo),
+    });
+  } catch (e) {
+    await marcar(env, id, 'notificado', `acuse: ${e}`).catch(() => {});
+  }
+}
+
+type FilaReporte = Omit<Reporte, 'fecha'> & {
+  id: number; codigo: string; fecha_hecho: string; destino: string; estado: string; error: string | null;
+};
+
+/**
+ * Vuelve a avisar a los responsables de los reportes que no les llegaron (ver
+ * CONDICION_PENDIENTES). Lo llama el cron. Una denuncia guardada que nadie
+ * recibe es el peor fallo del canal: antes solo quedaba un console.error.
+ * Sin acuse: quien reportó ya vio el error en su momento.
+ */
+export async function reintentarPendientes(env: Env): Promise<void> {
+  const { results } = await env.DB.prepare(
+    `SELECT id, codigo, tipo, modalidad, nombre, correo, telefono, relacion, lugar, fecha_hecho,
+            personas, descripcion, origen, destino, estado, error
+     FROM reportes WHERE ${CONDICION_PENDIENTES}`,
+  ).all<FilaReporte>();
+  for (const fila of results) {
+    // Si el tipo ya no existe se avisa a quienes figuraban cuando se guardó.
+    const { titulo, destino } = Object.hasOwn(TIPOS, fila.tipo)
+      ? TIPOS[fila.tipo as Tipo]
+      : { titulo: fila.tipo, destino: fila.destino.split(', ') };
     try {
-      await enviar(env, {
-        para: [reporte.correo],
-        asunto: `Recibimos tu reporte ${codigo} — INACONS`,
-        ...acuse(reporte, titulo, codigo),
-      });
+      await avisarResponsables(env, { ...fila, fecha: fila.fecha_hecho }, titulo, [...destino], fila.codigo, true);
+      await marcar(env, fila.id, 'notificado', `reenviado por el cron; antes ${fila.estado}${fila.error ? `: ${fila.error}` : ''}`.slice(0, 1000));
     } catch (e) {
-      await marcar(env, id, 'notificado', `acuse: ${e}`);
+      await marcar(env, fila.id, 'error', String(e));
+      console.error(`canal: falló el reenvío del reporte ${fila.id}`);
     }
   }
+}
 
-  return { status: 200, datos: { ok: true, codigo } };
+function avisarResponsables(env: Env, r: Reporte, titulo: string, destino: string[], codigo: string, reenvio = false): Promise<void> {
+  return enviar(env, {
+    para: destino,
+    ...(r.modalidad === 'nombre' ? { responderA: { address: r.correo, name: r.nombre } } : {}),
+    // Sin el nombre en el asunto: los asuntos se ven en listados y avisos
+    // del móvil, y una denuncia no debería delatar a nadie desde ahí.
+    // "[Reenvío]": el primero pudo llegar tarde; el código delata el duplicado.
+    asunto: `${reenvio ? '[Reenvío] ' : ''}Canal Ético — ${titulo} — ${codigo}`,
+    ...aviso(r, titulo, codigo),
+  });
 }
 
 function nuevoCodigo(): string {

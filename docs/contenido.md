@@ -165,20 +165,30 @@ Content-Type: application/json
 ```
 
 Cualquier respuesta 2xx se muestra como enviado; el Worker solo la da cuando CPaaS aceptó
-el aviso a ventas. Un 429 se explica como límite por hora. Cualquier otra respuesta, o
-más de 10 s sin respuesta, muestra el error y conserva lo escrito. El endpoint tiene que
-permitir CORS desde `https://home.inacons.com.pe`. El campo trampa `company_url` se
-filtra en el navegador y no se envía.
+el aviso a ventas, y manda el acuse después de responder. Un 429 se explica como límite
+por hora. Cualquier otra respuesta, o más de 10 s sin respuesta, muestra el error y
+conserva lo escrito. El endpoint tiene que permitir CORS desde
+`https://home.inacons.com.pe`. El campo trampa `company_url` se filtra en el navegador y
+no se envía. `origen` es la página sin query ni fragmento; si llega con ellos, el Worker
+los quita y recorta a 300 caracteres en vez de rechazar.
 
 Respuestas de error que el Worker da a propósito: **400** datos inválidos o cuerpo que no
-es un objeto JSON; **403** origen no permitido o token de Turnstile inválido; **413** cuerpo
-mayor de 32 KB; **415** `Content-Type` distinto de `application/json`; **429** límite por
-hora; **503** Cloudflare no respondió a Turnstile en 5 s (reintentar, no es culpa de quien
-escribe). Todas salen con CORS, para que el navegador las lea como respuesta y no como
-fallo de red.
+es un objeto JSON; **403** token de Turnstile inválido, de otro host o de la otra `action`;
+**404** ruta desconocida; **405** método distinto de POST; **413** cuerpo mayor de 32 KB;
+**415** `Content-Type` distinto de `application/json`; **429** límite por hora; **500**
+error interno (D1 caído); **502** CPaaS no aceptó el aviso (el cron lo reintenta);
+**503** Cloudflare no respondió a Turnstile en 5 s, o se llegó al tope diario de envíos
+(reintentar más tarde, no es culpa de quien escribe). Todas salen con CORS, para que el
+navegador las lea como respuesta y no como fallo de red; la única excepción es el **403**
+por origen no permitido, que no debe dar pistas a otro sitio.
+
+El widget de Turnstile lleva `action`: `contacto` en `/contacto/` y `canal` en
+`/canal-etico/`. El Worker la exige, junto con el host del sitio, salvo con las claves de
+prueba de Cloudflare. Cambiar una de un lado sin el otro deja el formulario en 403.
 
 Reglas de validación del Worker, además de los límites de longitud: `nombre` no puede
-llevar `://`, `www.`, `@` ni saltos de línea (el acuse lo repite en el saludo), y
+llevar `://`, `www.`, `@`, `/`, un dominio (`.com`, `.ly`…), saltos de línea ni
+tabuladores (el acuse lo repite en el saludo), el correo se guarda en minúsculas, y
 `servicio` tiene que ser uno de los títulos de `src/content/servicios/` o `Otro`. Esa lista
 vive copiada en `SERVICIOS` de `workers/contacto/src/contacto.ts`: al crear, renombrar o
 borrar un servicio hay que cambiarla también, y `npm test` en `workers/contacto/` avisa
@@ -234,8 +244,9 @@ por minuto por conexión se cuenta en memoria (Rate Limiting de Cloudflare) y la
 Turnstile. En `"modalidad": "anonimo"` no van `nombre`, `correo`
 ni `telefono`; `relacion`, `fecha`, `lugar` y `personas` son opcionales.
 
-Con nombre, `nombre` sigue la misma regla que en contacto (sin enlaces, arrobas ni saltos
-de línea), y el acuse de recibo sale como máximo 3 veces por hora y por correo. Pasado el
+Con nombre, `nombre` sigue la misma regla que en contacto (sin enlaces, dominios, arrobas
+ni saltos de línea), y el acuse de recibo sale como máximo 3 veces por hora y por correo.
+`fecha`, si llega, tiene que ser una fecha real (`2026-13-45` da 400). Pasado el
 tope el reporte **se guarda y se avisa a los responsables igual**: solo se omite el acuse.
 Los `tipo` válidos son las claves de `TIPOS` en `canal.ts` y tienen que coincidir con
 `CANALES` de `canal-etico.astro`; `npm test` lo comprueba.

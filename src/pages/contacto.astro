@@ -241,7 +241,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
               <input type="text" name="company_url" class="visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
               {conTurnstile && (
                 <div class="form-group">
-                  <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-language="es" data-theme="light" data-size="flexible"></div>
+                  <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-action="contacto" data-language="es" data-theme="light" data-size="flexible"></div>
                 </div>
               )}
               <p class="form-hint">Usaremos tus datos solo para responder esta consulta{PRIVACIDAD_PUBLICADA && <> (<a href="/privacidad/">política de privacidad</a>)</>}. Los campos con * son obligatorios.</p>

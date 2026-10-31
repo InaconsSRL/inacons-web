@@ -24,12 +24,14 @@ const LIMITE_CUERPO = 32 * 1024;
 type Ruta<T> = {
   /** Si la IP del visitante se manda a Turnstile. Es opcional para Cloudflare. */
   IP_A_TURNSTILE: boolean;
+  /** La `action` con que el sitio pinta el widget de este formulario. */
+  ACCION_TURNSTILE: string;
   validar(cuerpo: Record<string, unknown>): T | null;
-  procesar(datos: T, env: Env, ipHash: string): Promise<Respuesta>;
+  procesar(datos: T, env: Env, ipHash: string, ctx: ExecutionContext): Promise<Respuesta>;
 };
 
 export default {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request, env, ctx): Promise<Response> {
     const origen = request.headers.get('Origin') ?? '';
     const permitidos = env.ORIGENES.split(',').map((o) => o.trim());
     if (!permitidos.includes(origen)) return json({ ok: false, error: 'origen' }, 403);
@@ -67,31 +69,61 @@ export default {
 
     const ip = request.headers.get('CF-Connecting-IP') ?? '';
     const ruta = new URL(request.url).pathname.replace(/\/+$/, '');
-    const { status, datos } =
-      ruta === '' ? await atender(contacto, cuerpo, env, ip)
-      : ruta === '/canal' ? await atender(canal, cuerpo, env, ip)
-      : { status: 404, datos: { ok: false, error: 'ruta' } };
-    return json(datos, status, cors);
+    const hosts = permitidos.map((o) => new URL(o).hostname);
+    // Un fallo de D1, del límite o del código de reporte salía como excepción
+    // sin CORS, y el navegador lo mostraba como corte de red. Ahora es un 500
+    // que el formulario lee y explica. Sin datos del envío en el log: este
+    // Worker recibe reportes anónimos.
+    try {
+      const { status, datos } =
+        ruta === '' ? await atender(contacto, cuerpo, env, ip, hosts, ctx)
+        : ruta === '/canal' ? await atender(canal, cuerpo, env, ip, hosts, ctx)
+        : { status: 404, datos: { ok: false, error: 'ruta' } };
+      return json(datos, status, cors);
+    } catch (e) {
+      console.error(`Error no controlado en ${ruta || '/'}: ${e instanceof Error ? e.message.slice(0, 200) : 'desconocido'}`);
+      return json({ ok: false, error: 'interno' }, 500, cors);
+    }
   },
 
+  // Cada 15 minutos (wrangler.jsonc): reenvía los avisos que no salieron y
+  // purga las consultas vencidas. La purga es barata y no necesita un cron
+  // propio.
   async scheduled(_evento, env): Promise<void> {
+    // Cada tarea por su lado: un fallo de D1 en una no deja sin correr a las otras.
+    const tareas = [['contacto', contacto.reintentarPendientes], ['canal', canal.reintentarPendientes]] as const;
+    for (const [nombre, tarea] of tareas) {
+      await tarea(env).catch((e: unknown) => console.error(`${nombre}: falló el reintento: ${e instanceof Error ? e.message.slice(0, 200) : e}`));
+    }
+
     // Las consultas comerciales no se guardan para siempre: el plazo lo fija
     // RETENCION_MESES y es el que declara la política de privacidad. Los
     // reportes del Canal Ético no se purgan aquí: son registros de
     // cumplimiento y su plazo lo decide quien los gestiona.
-    const meses = Number.parseInt(env.RETENCION_MESES, 10) || 12;
+    const meses = Number.parseInt(env.RETENCION_MESES, 10);
+    if (!(meses > 0)) {
+      // Un valor negativo armaba '--3 months', datetime() daba NULL y no se
+      // borraba nada sin que nadie se enterara.
+      console.error(`RETENCION_MESES no es un número de meses válido: no se purga`);
+      return;
+    }
     await env.DB.prepare(`DELETE FROM consultas WHERE creado < datetime('now', ?1)`).bind(`-${meses} months`).run();
   },
 } satisfies ExportedHandler<Env>;
 
 // Turnstile va después de validar: si los datos no sirven, no se gasta el
 // token, y el visitante puede corregir y reenviar sin volver a resolverlo.
-async function atender<T>(ruta: Ruta<T>, cuerpo: Record<string, unknown>, env: Env, ip: string): Promise<Respuesta> {
+async function atender<T>(
+  ruta: Ruta<T>, cuerpo: Record<string, unknown>, env: Env, ip: string, hosts: string[], ctx: ExecutionContext,
+): Promise<Respuesta> {
   const datos = ruta.validar(cuerpo);
   if (!datos) return { status: 400, datos: { ok: false, error: 'datos' } };
+  // Sin sal, el hash de "undefined:<ip>" se revierte probando las IPv4 en minutos.
+  if (!env.IP_SALT) throw new Error('falta el secret IP_SALT');
   const ipTurnstile = ruta.IP_A_TURNSTILE ? ip : '';
   try {
-    if (!(await turnstileValido(String(cuerpo.turnstile ?? ''), ipTurnstile, env.TURNSTILE_SECRET))) {
+    const esperado = { hosts, accion: ruta.ACCION_TURNSTILE };
+    if (!(await turnstileValido(String(cuerpo.turnstile ?? ''), ipTurnstile, env.TURNSTILE_SECRET, esperado))) {
       return { status: 403, datos: { ok: false, error: 'verificacion' } };
     }
   } catch (e) {
@@ -102,7 +134,7 @@ async function atender<T>(ruta: Ruta<T>, cuerpo: Record<string, unknown>, env: E
     // el navegador lo mostraría como un fallo de red y no como un 503.
     return { status: 503, datos: { ok: false, error: 'verificacion-no-disponible' } };
   }
-  return ruta.procesar(datos, env, await sha256(`${env.IP_SALT}:${ip}`));
+  return ruta.procesar(datos, env, await sha256(`${env.IP_SALT}:${ip}`), ctx);
 }
 
 function json(datos: unknown, status: number, cabeceras: Record<string, string> = {}): Response {

@@ -37,12 +37,13 @@ export interface OpcionesEnvio {
   alLimpiar?: () => void;
 }
 
-// 503 es el Worker diciendo que Turnstile no le contestó (docs/contenido.md):
-// no es culpa de quien escribe ni se arregla reintentando de inmediato, así
-// que el texto es el mismo en los dos formularios.
-const SIN_VERIFICACION =
-  '<strong>La verificación de seguridad no respondió.</strong> ' +
-  'Lo que escribiste sigue en el formulario: inténtalo de nuevo en un momento.';
+// 503 es el Worker diciendo que no puede recibir ahora: Turnstile no le
+// contestó, o se llegó al tope diario de envíos (docs/contenido.md). No es
+// culpa de quien escribe ni se arregla reintentando de inmediato, así que el
+// texto es el mismo en los dos formularios.
+const NO_DISPONIBLE =
+  '<strong>No podemos recibir envíos en este momento.</strong> ' +
+  'Lo que escribiste sigue en el formulario: inténtalo de nuevo en unos minutos.';
 
 type Turnstile = { reset(): void };
 
@@ -90,7 +91,9 @@ export function conectarFormulario(o: OpcionesEnvio): void {
       const respuesta = await fetch(o.url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ ...datos, turnstile, origen: location.href }),
+        // Sin query ni fragmento: los UTM y gclid pasaban el límite del Worker,
+        // y en un reporte anónimo la query puede acotar quién escribe.
+        body: JSON.stringify({ ...datos, turnstile, origen: location.origin + location.pathname }),
         signal: AbortSignal.timeout(10000),
       });
       if (!respuesta.ok) throw new Error(String(respuesta.status));
@@ -109,7 +112,7 @@ export function conectarFormulario(o: OpcionesEnvio): void {
       // Un status HTTP llega como Error("429"); cualquier otra cosa (corte de
       // red, los 10 s de espera) es "red".
       const codigo = err instanceof Error && /^\d{3}$/.test(err.message) ? err.message : 'red';
-      aviso(estado, 'error', codigo === '503' ? SIN_VERIFICACION : o.error(codigo));
+      aviso(estado, 'error', codigo === '503' ? NO_DISPONIBLE : o.error(codigo));
     } finally {
       if (boton) boton.disabled = false;
       // Cada token sirve para un solo envío, haya salido bien o no.

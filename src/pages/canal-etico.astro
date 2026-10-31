@@ -405,7 +405,9 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
         const pintar = () => {
           const api = (window as { turnstile?: Widget }).turnstile;
           if (!api) return false;
-          api.render(contenedor, { sitekey, language: 'es', theme: 'light', size: 'flexible' });
+          // `action` la exige el Worker (ACCION_TURNSTILE de canal.ts): un token
+          // del formulario de contacto no sirve para un reporte.
+          api.render(contenedor, { sitekey, action: 'canal', language: 'es', theme: 'light', size: 'flexible' });
           turnstilePintado = true;
           return true;
         };
