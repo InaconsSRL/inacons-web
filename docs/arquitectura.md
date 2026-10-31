@@ -168,3 +168,25 @@ vídeo solo se descarga en escritorio, sin ahorro de datos y sin movimiento redu
 `destacados`, `faqs`, `galeria` o `ficha`, la sección no se emite. Con `faqs` sale también
 el `FAQPage` en el JSON-LD. Un servicio con `categoria` lista los proyectos de esa
 categoría. Las dos fichas cierran con la banda de contacto sobre la foto de la ficha.
+
+## Lo que un rediseño no puede romper
+
+Contratos que cruzan archivos o salen del repositorio. Ninguno falla en el build si se
+rompe; por eso están juntos aquí y hay que repasarlos antes de cerrar un cambio grande.
+
+| Contrato | Dónde vive | Qué pasa si se rompe |
+|---|---|---|
+| **URLs públicas.** Toda ruta de la tabla de arriba está indexada o impresa | `src/pages/` | Renombrar una exige su 301 en `public/.htaccess`; si no, enlaces y Search Console dan 404 |
+| **QR impresos y sitio anterior**: `/r/…`, `/empresa/…`, `/expomina/`, los `.html` y PDF de la raíz | `public/.htaccess` (regla 6 de CLAUDE.md) | El papel en circulación da 404. `/canal-etico/` y `/mineria/` son destino de QR: no cambian de URL |
+| **Archivos con URL fija**: PDF, vídeo, logos SVG, flyers | `public/assets/` | Los enlazan los certificados, el JSON-LD y material externo. Reemplazar un archivo conserva su nombre |
+| **Campos de los formularios** (`name`, `maxlength`) | `contacto.astro`, `canal-etico.astro` ↔ `LIMITES` de `workers/contacto/src/contacto.ts` y `canal.ts` | El Worker rechaza con 400 lo que el formulario deja escribir. Contrato completo en [contenido.md](contenido.md#formulario-de-contacto) |
+| **Lista de servicios** | títulos de `src/content/servicios/` ↔ `SERVICIOS` del Worker | `npm test` del Worker falla; si no se despliega, el Worker rechaza el servicio nuevo |
+| **Tipos del Canal Ético** | `CANALES` de `canal-etico.astro` ↔ `TIPOS` de `canal.ts` | Igual: `npm test` lo detecta |
+| **Turnstile en `/contacto/` y `/canal-etico/`** | `.github/workflows/deploy.yml` busca `cf-turnstile` en esas dos rutas | Mover o renombrar los formularios exige ajustar el CI y el humo posterior |
+| **Scripts en línea** | hashes de la CSP en `public/.htaccess` | Un script en línea nuevo o editado (la clase `js`, `/mineria/`) sale como violación en la consola mientras la CSP esté en modo informe, y se bloquea cuando deje de estarlo |
+| **Proveedores externos** (Turnstile, Web Analytics, Maps, YouTube, el Worker) | CSP en `public/.htaccess` | Uno nuevo hay que añadirlo a su directiva |
+| **`#peruMapContainer` con caja** | regla 4 de CLAUDE.md | Los pines desaparecen sin error |
+| **Cifras del brochure** | solo `src/data/empresa.ts` (regla 5) | Una cifra escrita en una página se separa de la fuente |
+| **Host del sitio** | `site` de `astro.config.mjs` | Canonical, sitemap, Open Graph y JSON-LD salen de ahí |
+| **Lo que no se indexa** | `SECCIONES_PRIVADAS` de `astro.config.mjs` + `robots` de cada página | Ver [deploy.md](deploy.md#indexación). `robots.txt` no lleva `Disallow` a propósito |
+| **Privacidad sin publicar** | `PRIVACIDAD_PUBLICADA` en `src/data/empresa.ts` | Una página nueva que enlace `/privacidad/` debe respetar ese interruptor |

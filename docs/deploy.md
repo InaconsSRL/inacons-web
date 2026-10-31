@@ -167,7 +167,8 @@ ese host (comprobado en producción el 2026-10-22). Toda URL que se comparta o s
 
 **Pendiente:** esa regla vive en el `.htaccess` del docroot del dominio raíz, que no está en
 este repositorio. Mientras no conserve la ruta con un 301, los enlaces antiguos al dominio
-raíz mueren en 404 (E-01 de la auditoría; ver la bitácora).
+raíz mueren en 404 (E-01, con la regla propuesta, en los pendientes de la
+[bitácora](bitacora.md#pendientes-abiertos)).
 
 Los enlaces internos llevan **barra final** (`/servicios/`): Apache sirve
 `ruta/index.html` y responde 301 en `/ruta`. `trailingSlash: 'always'` hace que el
@@ -249,8 +250,7 @@ nadie leería su `noindex`, y listar una página interna la anunciaría.
   Expomina y el destino de los QR impresos (siguen funcionando); no compite con
   `/servicios/mineria/`. Si se quiere posicionarla, se quita de `SECCIONES_PRIVADAS` y su
   `robots` en `mineria.astro`.
-- `/recursos/` → fuera del sitemap y con `noindex`, pero **no** en `robots.txt`: una URL
-  bloqueada no se rastrea y nadie leería su `noindex`.
+- `/recursos/` → fuera del sitemap y con `noindex`. Material interno con los flyers.
 
 ### Google Search Console
 

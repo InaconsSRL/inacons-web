@@ -35,29 +35,15 @@ Servicios, proyectos, recursos y certificaciones son archivos Markdown en
 `src/content/`; las cifras y los datos de contacto, `src/data/empresa.ts`. Se edita y se
 hace push. Guía en [docs/contenido.md](docs/contenido.md).
 
-## Estructura
-
-```
-src/pages/        páginas
-src/content/      servicios, proyectos, recursos y certificaciones (Markdown)
-src/data/         datos de empresa y cifras del brochure
-src/components/   PageHero, MediaCard, CtaBand, Galeria, Icono, SellosCertificacion
-src/layouts/      BaseLayout — head, nav, footer
-src/styles/       sistema de diseño
-src/scripts/      comportamiento compartido y envío de formularios
-src/assets/       fotos (optimizadas en el build)
-public/           PDF, vídeo, logos, flyers y .htaccess
-workers/contacto/ receptor de los formularios (Cloudflare Worker, con su propio package.json)
-.github/          workflow de deploy y Dependabot
-```
+## Documentación
 
 | Doc | Para qué |
 |---|---|
-| [CLAUDE.md](CLAUDE.md) | Reglas del repositorio |
-| [docs/arquitectura.md](docs/arquitectura.md) | Cómo está armado el sitio |
+| [CLAUDE.md](CLAUDE.md) | Reglas del repositorio y dónde va cada cosa |
+| [docs/arquitectura.md](docs/arquitectura.md) | Estructura de carpetas, rutas, CSS, scripts y lo que un cambio grande no puede romper |
 | [docs/contenido.md](docs/contenido.md) | Editar contenido y contrato de los formularios |
 | [docs/deploy.md](docs/deploy.md) | CI/CD, Worker, dominios, `.htaccess`, indexación |
-| [docs/bitacora.md](docs/bitacora.md) | Qué se hizo en cada sesión, por qué y qué quedó pendiente |
+| [docs/bitacora.md](docs/bitacora.md) | Lista única de pendientes y qué se hizo en cada sesión |
 
 ---
 

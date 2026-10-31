@@ -1,8 +1,114 @@
 # Bitácora
 
-Qué se hizo, por qué y qué quedó pendiente, sesión por sesión. El cómo operar cada cosa
-está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el contexto que
-no se deduce del código.
+Qué se hizo y por qué, sesión por sesión, y la **lista única de pendientes**. El cómo operar
+cada cosa está en [deploy.md](deploy.md) y [contenido.md](contenido.md); aquí solo el
+contexto que no se deduce del código.
+
+## Pendientes abiertos
+
+La única lista: las sesiones de abajo ya no llevan la suya. Al cerrar uno se borra de aquí y
+se cuenta en la sesión que lo cerró. Los códigos (E-01, S-02…) son los de la auditoría
+técnica del 2026-10-16, que se retiró el 2026-10-31: cada uno trae aquí lo necesario para
+entenderlo sin ella.
+
+### Infraestructura y cuentas (fuera del repositorio)
+
+- [ ] **E-01, el más urgente.** `inacons.com.pe` y `www` dan 404 en toda ruta menos `/`
+      (comprobado el 2026-10-22). Falta un 301 que conserve la ruta en el `.htaccess` del
+      docroot del dominio raíz, que no está en este repositorio:
+      `RewriteCond %{HTTP_HOST} ^(www\.)?inacons\.com\.pe$ [NC]` +
+      `RewriteRule ^(.*)$ https://home.inacons.com.pe/$1 [R=301,L]`. Así `/R/CANAL_ETICO`
+      en el dominio raíz llega a `home`, donde ya se resuelve.
+- [ ] **Confirmar que el Worker publicado es el del repositorio.** Los cambios del
+      2026-10-16 solo están en producción tras `npx wrangler deploy`. Prueba: un `OPTIONS` al
+      Worker con `Origin: http://localhost:4321` debe dar 403.
+- [ ] **Tabla `limites` en D1:** comprobar si existe y borrarla (comando en
+      [deploy.md](deploy.md#worker-del-formulario-de-contacto)).
+- [ ] **S-02, accesos.** La cuenta de Cloudflare (Worker, secrets y la base con los reportes
+      del Canal) cuelga del Gmail `soporteinformatico.inacons@gmail.com`: agregar
+      `administracion@inacons.com.pe` como miembro, 2FA en Cloudflare, Zoho, GitHub y cPanel,
+      y un segundo propietario en Search Console.
+- [ ] **Turnstile:** quitar `localhost` de los dominios del widget.
+- [ ] **D-03, monitorización.** Monitor externo gratuito sobre `/` y `/contacto/`, y aviso si
+      hay consultas con `estado = 'error'` (hoy solo se ven consultando D1).
+- [ ] **B-03, respaldo de D1.** Confirmar Time Travel o programar `wrangler d1 export`, y
+      probar una restauración una vez.
+- [ ] **S-01 y D-04, hosting.** El deploy va por FTP sin cifrar y no hay staging. O el
+      proveedor habilita FTPS (variable `FTP_PROTOCOL = ftps`), o el sitio estático pasa a
+      Cloudflare Pages con un CNAME para `home.`, sin mover la zona DNS: deploy por API,
+      vista previa por rama y cabeceras propias (el `.htaccess` se traduce a `_redirects` y
+      `_headers`). Conviene decidirlo antes de la v3.
+- [ ] **D-02:** desplegar el Worker desde CI (hoy CI solo lo prueba; el deploy es a mano).
+- [ ] **CSP a bloqueo:** dos semanas con la consola sin violaciones (ver
+      [deploy.md](deploy.md#publichtaccess)).
+
+### Cumplimiento y abogado
+
+- [ ] **L-01, política de privacidad.** El abogado cierra lo marcado *pendiente* en
+      `privacidad.astro`, que además tiene que nombrar a Cloudflare y a Zoho como proveedores
+      y el plazo de 12 meses de las consultas. Después, `PRIVACIDAD_PUBLICADA = true`.
+- [ ] **L-04:** declarar la transferencia de datos fuera del Perú (D1 en el este de EE. UU.,
+      Zoho CPaaS, Cloudflare).
+- [ ] **B-01:** plazo de conservación de los reportes del Canal Ético; hoy no se purgan.
+- [ ] **B-02:** cada tipo de reporte llega a una sola persona y la página promete un comité.
+      Destinatarios por rol y suplentes (se cambian en `TIPOS` de `canal.ts`).
+- [ ] **L-02:** la cláusula de tratamiento de datos de los términos del Canal solo dice la
+      finalidad; falta responsable, plazo, destinatarios y derechos.
+- [ ] **Confirmar con cumplimiento** que aceptar los términos en el paso 1 del mismo
+      formulario, y no en una página anterior, les basta.
+- [ ] **L-03:** el mapa de Google de `/contacto/` carga sin consentimiento previo (cargarlo
+      tras un clic, o imagen estática con enlace).
+- [ ] **Avisar a los responsables** que estos códigos del 2026-10-15 fueron pruebas:
+      `CE-KMNV-6GUR` (ventas@), `CE-5SLA-9HZN` y `CE-TYJ8-WG85` (oficialdecumplimiento@),
+      `CE-KTK2-7FAK` (sig@), `CE-KUSZ-6Q6S` y `CE-R22C-ED62` (tbalbin@).
+- [ ] Decidir si se borra la consulta de prueba n.° 1 de `consultas`.
+
+### Contenido que tiene que entregar la empresa
+
+- [ ] **E-02:** los servicios tienen entre 105 y 149 palabras y hay 2 fichas de proyecto
+      frente a los 94 que suma `PROYECTOS_POR_CIUDAD`. Ampliar servicios y publicar más fichas.
+- [ ] `destacados`, `faqs`, `ficha` (cliente, plazo, alcance, estado) y `resumen` para
+      servicios y proyectos: las secciones existen y no se ven hasta que el `.md` los traiga.
+- [ ] **Fotos de obra reales.** Las dos fichas de proyecto reutilizan fotos genéricas.
+- [ ] Año de fundación, código postal y coordenadas, para volver a ponerlos en el JSON-LD.
+- [ ] Sellos de las normas ISO, con permiso y archivo del organismo, y su `vigencia`.
+
+### Medición y pruebas
+
+- [ ] **Lighthouse** en móvil sobre las cinco páginas clave, sobre todo el LCP del home.
+- [ ] **C-01:** no se mide ninguna conversión. Mínimo, contar semanalmente las filas de
+      `consultas`; si se quiere atribución, analítica con eventos y sin cookies.
+- [ ] **Móvil real y lector de pantalla:** cambio de foco entre pasos del Canal y menú móvil.
+- [ ] **Search Console:** confirmar que las URLs del sitemap están indexadas y mirar
+      *Rendimiento*.
+
+### Para más adelante
+
+- [ ] **E-04:** servir el sitio desde el dominio raíz y dejar `home.` como redirección. Es
+      decisión de negocio y depende del hosting.
+- [ ] Adjuntar fotos en el Canal Ético: requiere almacenamiento (R2) y limpiar los metadatos
+      antes de aceptarlas en reportes anónimos.
+- [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
+      documentos siguen con la lisa.
+
+## 2026-10-31 — Unificación de la documentación y limpieza
+
+Pedido: dejar el repositorio ordenado antes de los cambios grandes de la v3.
+
+| Qué | Por qué |
+|---|---|
+| **Una sola lista de pendientes**, arriba de esta bitácora | Había listas en cada sesión, repetidas entre sí y con la auditoría; varias ya no decían si seguían abiertas. |
+| Se borró `AUDITORIA.md` (local, fuera de git) | Lo abierto pasó a la lista con su código y una explicación que no depende de ella; lo cerrado ya estaba contado aquí. |
+| Sección *Lo que un rediseño no puede romper* en [arquitectura.md](arquitectura.md) | Junta los contratos que cruzan archivos y que no rompen el build: URLs y QR, campos del Worker, CSP, `cf-turnstile` del CI. Es la lista a repasar en la v3. |
+| El README ya no repite el árbol de carpetas | Vive en `arquitectura.md`. |
+| Se quitó `public/assets/recursos/.gitkeep` | La carpeta ya tiene archivos. |
+
+Revisado sin cambios: todos los archivos de `src/assets/` y `public/assets/` están en uso,
+todos los iconos del catálogo y todos los componentes también. De `design-system.css`, los
+avisos `notice--ok`, `--error` e `--info` los arma `formulario.ts` en tiempo de ejecución;
+`.form-error`, `.panel--ghost`, `.panel-title`, `.panel-desc` y `.status-*` solo los usa hoy
+`/sistema/`. Se dejaron: son piezas del sistema disponibles para la v3, no restos. `npm run check`, `npm run build` (20 páginas) y las 34
+pruebas del Worker, en verde.
 
 ## 2026-10-28 — Revisión general y seguridad
 
@@ -21,10 +127,6 @@ en el repositorio.
 `astro` y `@astrojs/sitemap`) y en `undici`/`miniflare`/`wrangler` (Worker, solo
 herramientas de desarrollo). Se resolvió con `npm audit fix`, que solo tocó los lockfiles;
 ahora marca 0 en ambos paquetes y check, build y pruebas siguen en verde.
-
-### Pendiente
-
-- [ ] Los pendientes de privacidad y del Canal Ético de la sesión del Worker siguen abiertos.
 
 ## 2026-10-22 — Revisión de la documentación
 
@@ -60,13 +162,8 @@ y se corrió `npm test` en `workers/contacto/` (34 pruebas, todas en verde).
 | Decisión | Por qué |
 |---|---|
 | No se creó ningún `.md` nuevo | La convención del repositorio lo prohíbe salvo petición; todo cabe en los cuatro de `docs/`. |
-| `AUDITORIA.md` sigue fuera del repositorio | Describe riesgos abiertos de seguridad y de privacidad. Solo se cita por su ID desde aquí. |
+| `AUDITORIA.md` sigue fuera del repositorio | Describe riesgos abiertos de seguridad y de privacidad. Solo se cita por su ID desde aquí. (Se retiró el 2026-10-31.) |
 | Lo no verificable se dejó como pendiente, no como hecho | Por ejemplo, si la tabla `limites` se borró de D1: el repositorio no lo dice. |
-
-### Pendiente
-
-- [ ] **Comprobar en D1** si existe la tabla `limites` y borrarla (comando en `deploy.md`).
-- [ ] Los pendientes de las sesiones anteriores siguen vigentes; esta sesión no tocó código.
 
 ## 2026-10-16 — Canal Ético en tres pasos
 
@@ -120,11 +217,6 @@ actual muestra su nombre.
 - **CSP en modo informe** sirviendo `dist/` con la cabecera real: sin violaciones al recorrer los tres pasos.
 - **Pruebas del Worker:** 34, incluida la de contrato que lee los tipos de esta página.
 
-### Pendiente
-
-- [ ] **Confirmar con cumplimiento** que aceptar los términos en el paso 1 del mismo formulario, y no en una página anterior, cumple lo que necesitan.
-- [ ] **Probar en un móvil real** y con un lector de pantalla el cambio de foco entre pasos.
-
 ## 2026-10-16 — Pequeño rediseño
 
 ### Punto de partida
@@ -177,18 +269,12 @@ Bechtel (claro y oscuro alternados, tipografía grande, KPIs integrados en el la
 - **Regla 1:** `grep` sobre el CSS construido sin ningún `[cid] > [cid]`.
 - **No se ejecutó Lighthouse**: el LCP y el peso del póster en móvil están razonados por el `srcset`, no medidos.
 
-### Pendiente
-
-- [ ] **Contenido para llenar las secciones nuevas.** Las fichas no inventan nada: cuando la empresa entregue `destacados`, `faqs`, `ficha` (cliente, plazo, alcance, estado) y `resumen`, se agregan al `.md`. Hoy esas secciones no se ven.
-- [ ] **Fotos de obra reales** para las galerías. Las dos fichas reutilizan fotos genéricas del sitio.
-- [ ] **Medir** con Lighthouse en móvil las cinco páginas clave, sobre todo el LCP del home.
-- [ ] La banda de cierre con foto solo se usa en las fichas; las demás páginas (nosotros, sostenibilidad, documentos) siguen con la banda lisa.
-
 ## 2026-10-16 — Correcciones de la auditoría técnica
 
 ### Punto de partida
 
-Auditoría local (`AUDITORIA.md`, excluido de git) con 69/100 y 37 hallazgos. El código es
+Auditoría local (`AUDITORIA.md`, excluido de git y retirado el 2026-10-31; lo que seguía
+abierto está en *Pendientes abiertos*) con 69/100 y 37 hallazgos. El código es
 sano; lo débil era lo que lo rodea: sin pruebas, un deploy que salía en verde con las
 variables vacías, el Canal Ético oculto sin JavaScript y la privacidad sin publicar. Esta
 sesión resuelve **lo que se arregla dentro del repositorio**; lo que depende de cuentas
@@ -242,21 +328,11 @@ de la auditoría.
 - **`focus()` sobre el botón de cerrar del menú móvil fallaba siempre**, ya antes de esta sesión: `visibility` se animaba desde `hidden` y el elemento no era enfocable en ese instante. Con `inert` además dejaba el foco en `body`. Se arregló en el CSS del menú (visible al abrir, se oculta al terminar el fundido).
 - **Astro inlina los scripts pequeños** (los de `/canal-etico/` y `/mineria/`): su hash cambia con cada edición y la CSP los permite por hash.
 
-### Pendiente
+### Lo que quedó fuera
 
-Dentro del repositorio ya no queda nada de la auditoría salvo el rediseño y el contenido. **Fuera:**
-
-- [ ] **Desplegar el Worker** (`npx wrangler deploy` en `workers/contacto/`): sus cambios no están en producción hasta entonces. Después, un `OPTIONS` al Worker con `Origin: http://localhost:4321` debe dar 403.
-- [ ] **E-01 (la más urgente):** `inacons.com.pe` y `www` dan 404 en toda ruta menos `/`. Falta un 301 que conserve la ruta en el `.htaccess` del docroot del dominio raíz (no está en este repositorio).
-- [ ] **S-02:** segundo administrador corporativo y 2FA en Cloudflare, Zoho, GitHub y cPanel.
-- [ ] **D-03:** monitor externo gratuito sobre `/` y `/contacto/`, y alerta si hay consultas con `estado = 'error'`.
-- [ ] **S-01:** FTPS o SFTP con el proveedor, o servir el sitio estático desde otro hosting.
-- [ ] **Turnstile:** quitar `localhost` de los dominios del widget.
-- [ ] **Cumplimiento y abogado:** plazo de conservación de los reportes (B-01), destinatarios por rol y suplentes (B-02), términos del Canal (L-02), transferencia de datos fuera del Perú (L-04), cierre de la política y luego `PRIVACIDAD_PUBLICADA = true`.
-- [ ] **Mapa de Google sin consentimiento previo (L-03)** y **respaldo de D1 (B-03)**: no se tocaron.
-- [ ] **Confirmar con la empresa** año de fundación, código postal y coordenadas (hoy no están en el JSON-LD, salvo las coordenadas del mapa).
-- [ ] **CSP a bloqueo:** dos semanas con la consola sin violaciones (ver `docs/deploy.md`).
-- [ ] **Contenido (E-02):** ampliar los servicios y publicar más fichas de proyecto.
+Dentro del repositorio no quedó nada de la auditoría salvo el rediseño y el contenido; lo de
+fuera está en *Pendientes abiertos*. Se decidió no tocar A-02 (placeholder) ni R-01 (doble
+`Cache-Control` del proxy).
 
 ## 2026-10-15 — Alta en Google Search Console
 
@@ -279,14 +355,6 @@ bloqueos para Googlebot); no hizo falta tocar código.
   dominio no completa rutas relativas. Se resolvió con la URL completa.
 - **«No se ha podido obtener»** justo después de enviarlo: era el primer rastreo pendiente,
   no un fallo del sitio. Pasó a *Correcto* solo.
-
-### Pendiente
-
-- [ ] **Agregar un segundo propietario** en *Configuración → Usuarios y permisos*, para que
-      el acceso no dependa de una sola cuenta de Google.
-- [ ] En 3 a 7 días, revisar *Páginas* y confirmar que las 17 URLs del sitemap están
-      indexadas y que *Páginas descubiertas* dejó de estar en 0.
-- [ ] En 1 a 2 semanas, mirar *Rendimiento* (consultas, clics, impresiones).
 
 ## 2026-10-15 — Formularios de contacto y Canal Ético con receptor propio
 
@@ -367,17 +435,3 @@ variables*: `PUBLIC_CONTACT_ENDPOINT` y `PUBLIC_TURNSTILE_SITE_KEY`.
   variables*. Se crearon ahí y se lanzó *Re-run all jobs*. Con `vars.*` vacías el build
   sale en verde igual, así que hay que mirar la página publicada.
 - **`d1 execute --remote --file` dio *Authentication error* una vez;** al repetirlo funcionó.
-
-### Pendiente
-
-- [ ] **Avisar a los responsables** que estos códigos fueron pruebas: `CE-KMNV-6GUR` (ventas@),
-      `CE-5SLA-9HZN` y `CE-TYJ8-WG85` (oficialdecumplimiento@), `CE-KTK2-7FAK` (sig@),
-      `CE-KUSZ-6Q6S` y `CE-R22C-ED62` (tbalbin@).
-- [ ] **Política de privacidad** (borrador, la revisa el abogado): nombrar a Cloudflare y a
-      Zoho como proveedores, y el plazo de 12 meses de las consultas.
-- [ ] **Plazo de conservación de los reportes** del Canal Ético: lo define cumplimiento.
-- [ ] **Agregar `administracion@inacons.com.pe` como miembro** de la cuenta de Cloudflare,
-      para que el acceso no dependa solo del Gmail de soporte.
-- [ ] Decidir si se borra la consulta de prueba n.° 1 de `consultas`.
-- [ ] Opcional: adjuntar fotos en el Canal Ético. Requiere almacenamiento (R2) y revisar qué
-      metadatos traen las fotos antes de aceptarlas en reportes anónimos.

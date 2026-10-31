@@ -106,7 +106,10 @@ imágenes dramáticas, KPIs integrados en el layout.
 
 | Doc | Contenido |
 |---|---|
-| [docs/arquitectura.md](docs/arquitectura.md) | Estructura, datos compartidos, CSS, `main.ts`, el mapa |
+| [docs/arquitectura.md](docs/arquitectura.md) | Estructura, datos compartidos, CSS, `main.ts`, el mapa y los contratos que un rediseño no puede romper |
 | [docs/contenido.md](docs/contenido.md) | Colecciones, imágenes, cifras y contrato del formulario |
 | [docs/deploy.md](docs/deploy.md) | CI/CD, dominios, `.htaccess`, indexación |
-| [docs/bitacora.md](docs/bitacora.md) | Qué se hizo en cada sesión, por qué, y qué quedó pendiente |
+| [docs/bitacora.md](docs/bitacora.md) | Lista única de pendientes (arriba) y qué se hizo en cada sesión y por qué |
+
+Los pendientes viven solo en la bitácora: no se abren listas paralelas en otros documentos
+ni en archivos sueltos.
