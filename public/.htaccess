@@ -1,6 +1,12 @@
 ErrorDocument 404 /404.html
 Options -Indexes
 
+# Apache no conoce .webmanifest: lo servía sin Content-Type, y con nosniff el
+# navegador podía descartar el manifest.
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
@@ -41,7 +47,10 @@ Options -Indexes
     RewriteRule ^certificacion\.html$ /documentos/ [R=301,NC,NS,L]
     RewriteRule ^(obras-civiles|infraestructura|electromecanica|paisajismo|consultoria)\.html$ /servicios/$1/ [R=301,NC,NS,L]
     RewriteRule ^(brochure_inacons|certificado_ince_489)\.pdf$ /assets/documentos/$1.pdf [R=301,NC,NS,L]
+    #  Los archivos con que Google o Yandex verifican la propiedad del sitio
+    #  (google1a2b….html) se suben a la raíz: no se redirigen.
     RewriteCond %{REQUEST_URI} !^/(index|404)\.html$ [NC]
+    RewriteCond %{REQUEST_URI} !^/(google[0-9a-f]+|yandex_[0-9a-f]+)\.html$ [NC]
     RewriteRule ^[^/]+\.html$ / [R=301,NC,NS,L]
 
     #  Activos con hash de Astro: marca para la regla de caché de abajo.
@@ -91,18 +100,28 @@ Options -Indexes
     Header always set Permissions-Policy        "camera=(), microphone=(), geolocation=()"
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
-    #  Content-Security-Policy SOLO EN MODO INFORME: no bloquea nada, las
-    #  violaciones salen en la consola del navegador. Pasa a Content-Security-
-    #  Policy cuando dos semanas de uso no muestren ninguna (docs/deploy.md).
+    #  Content-Security-Policy SOLO EN MODO INFORME: no bloquea nada. Cada
+    #  violación llega al Worker (ruta /csp) y queda como una línea "CSP: …" en
+    #  sus Logs. Pasa a Content-Security-Policy cuando dos semanas de uso no
+    #  dejen ninguna (docs/deploy.md).
     #
     #  · style-src 'unsafe-inline' es obligado: Astro emite <style> en línea
     #    (las fuentes, y el de cada página) y atributos style="--var".
     #  · img-src data: porque Vite inlinea como data: las imágenes de menos de 4 KB.
     #  · Los dos sha256 son los únicos scripts en línea del build: la clase .js
     #    de BaseLayout (todas las páginas) y el de /mineria/, que cambia con cada
-    #    edición de ese script: la consola dice qué hash esperaba. El del Canal
-    #    Ético sale como archivo porque importa scripts/formulario.ts.
+    #    edición de ese script. `npm run verificar` corta el CI si falta uno y
+    #    dice cuál. El del Canal Ético sale como archivo porque importa
+    #    scripts/formulario.ts.
     #  · Orígenes externos: Turnstile (script e iframe), Web Analytics (script y
-    #    beacon), Google Maps y YouTube (iframes) y el Worker de los formularios.
-    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' 'sha256-X7f38Rm03e4eDWszzUfulzld4NsflpG5r7sS0usZlr0=' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://*.workers.dev https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com https://www.google.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+    #    beacon), Google Maps y YouTube (iframes) y el Worker de los formularios,
+    #    con su host exacto: *.workers.dev dejaba enviar datos a cualquier worker
+    #    de terceros. Si cambia la URL del Worker (PUBLIC_CONTACT_ENDPOINT), se
+    #    cambia aquí también, en connect-src y en los dos destinos de informes.
+    #  · form-action no hereda de default-src: sin él, un formulario inyectado
+    #    podía enviar a cualquier sitio.
+    #  · report-to es el mecanismo actual; report-uri lo usan los navegadores
+    #    que todavía no lo tienen. Los dos van al mismo sitio.
+    Header always set Reporting-Endpoints "csp=\"https://inacons-contacto.inacons-contacto.workers.dev/csp\""
+    Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' 'sha256-X7f38Rm03e4eDWszzUfulzld4NsflpG5r7sS0usZlr0=' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; connect-src 'self' https://inacons-contacto.inacons-contacto.workers.dev https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com https://www.google.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; report-uri https://inacons-contacto.inacons-contacto.workers.dev/csp; report-to csp"
 </IfModule>

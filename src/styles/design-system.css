@@ -1896,6 +1896,19 @@ html {
     transform: translateY(0);
 }
 
+/*  Esc lo cierra aunque el cursor o el foco sigan encima (WCAG 1.4.13): lo
+    pone initNavDropdown() y se quita al salir del menú. Va después de la regla
+    de apertura, con la misma especificidad, para ganarle. */
+.dropdown.dropdown--cerrado .dropdown-menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+}
+
+.dropdown.dropdown--cerrado .nav-chevron {
+    transform: none;
+}
+
 .dropdown-menu a {
     display: flex;
     align-items: center;

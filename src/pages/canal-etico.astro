@@ -42,11 +42,11 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     .terms-box::-webkit-scrollbar { width: 5px; }
     .terms-box::-webkit-scrollbar-track { background: var(--c-border-light); }
     .terms-box::-webkit-scrollbar-thumb { background: var(--c-secondary); border-radius: var(--radius); }
-    .terms-box h3 {
+    .terms-box h4 {
       font-size: var(--fs-sm); font-weight: var(--fw-semibold); letter-spacing: var(--ls-wide);
       color: var(--c-primary); margin: var(--sp-5) 0 var(--sp-1); text-transform: uppercase;
     }
-    .terms-box h3:first-child { margin-top: 0; }
+    .terms-box h4:first-child { margin-top: 0; }
     .terms-box p { margin-bottom: 0; }
     .terms-accept {
       display: flex; align-items: center; gap: var(--sp-3);
@@ -197,15 +197,15 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
               <h3 class="paso-titulo" id="paso1-titulo" tabindex="-1">Términos y condiciones de uso</h3>
               <p class="paso-desc">Léelos antes de continuar.</p>
         <div class="terms-box" tabindex="0" role="region" aria-label="Términos y condiciones del Canal Ético">
-          <h3>1. Objetivo del Canal</h3>
+          <h4>1. Objetivo del Canal</h4>
           <p>El Canal Ético de INACONS es el medio oficial para reportar conductas que puedan implicar la comisión de irregularidades o actos contrarios a la ley, al Código Ético o a las normas internas de la compañía.</p>
-          <h3>2. Confidencialidad y Anonimato</h3>
+          <h4>2. Confidencialidad y Anonimato</h4>
           <p>INACONS garantiza la máxima confidencialidad en la gestión de las comunicaciones recibidas. Si el denunciante lo desea, el reporte puede realizarse de forma totalmente anónima. La identidad del informante no será revelada sin su consentimiento explícito, salvo obligación legal.</p>
-          <h3>3. Garantía de Indemnidad</h3>
+          <h4>3. Garantía de Indemnidad</h4>
           <p>Queda terminantemente prohibida cualquier forma de represalia contra las personas que utilicen este canal de buena fe. INACONS tomará las medidas necesarias para proteger a los denunciantes.</p>
-          <h3>4. Tratamiento de Datos Personales</h3>
+          <h4>4. Tratamiento de Datos Personales</h4>
           <p>Los datos personales facilitados serán tratados por INACONS con la finalidad de gestionar las comunicaciones recibidas e investigar los hechos denunciados.{PRIVACIDAD_PUBLICADA && <> Consulta más detalle en nuestra <a href="/privacidad/">política de privacidad</a>.</>}</p>
-          <h3>5. Responsabilidad del Usuario</h3>
+          <h4>5. Responsabilidad del Usuario</h4>
           <p>El usuario garantiza que los datos personales y la información proporcionada son verdaderos, exactos y completos. Las denuncias falsas realizadas con mala fe podrán ser objeto de sanciones disciplinarias o acciones legales.</p>
         </div>
         <label class="terms-accept">

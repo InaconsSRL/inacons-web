@@ -15,6 +15,8 @@ const comportamientoScroll: ScrollBehavior = reducirMovimiento ? 'auto' : 'smoot
 function initScrollAnimations() {
   const elementos = document.querySelectorAll<HTMLElement>('[data-aos]');
   if (!elementos.length) return;
+  // Apaga el respaldo de scroll-animations.css que muestra todo si este script no corre.
+  document.documentElement.classList.add('aos-listo');
 
   const observer = new IntersectionObserver((entradas) => {
     for (const entrada of entradas) {
@@ -35,6 +37,8 @@ function initScrollAnimations() {
 function initTypewriter() {
   const palabras = [...document.querySelectorAll<HTMLElement>('.word.typewriter')];
   if (!palabras.length) return;
+  // Apaga el respaldo de CSS que muestra el titular si este script no corre (index.astro).
+  document.documentElement.classList.add('tw-listo');
 
   const escribir = (palabra: HTMLElement, texto: string) => {
     const destino = palabra.querySelector('.tw-typed');
@@ -172,6 +176,27 @@ function initMobileMenu() {
   });
 }
 
+/*
+  ─── Desplegable de Servicios (escritorio) ───
+  Se abre con :hover y :focus-within, sin JavaScript. Lo único que el CSS no
+  puede hacer es cerrarlo con Esc mientras el foco o el cursor siguen encima
+  (WCAG 1.4.13): .dropdown--cerrado lo fuerza cerrado hasta que se sale.
+*/
+function initNavDropdown() {
+  document.querySelectorAll<HTMLElement>('.nav .dropdown').forEach((desplegable) => {
+    desplegable.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      desplegable.classList.add('dropdown--cerrado');
+      desplegable.querySelector<HTMLElement>(':scope > a')?.focus();
+    });
+    const reabrir = () => desplegable.classList.remove('dropdown--cerrado');
+    desplegable.addEventListener('mouseleave', reabrir);
+    desplegable.addEventListener('focusout', (e) => {
+      if (!desplegable.contains(e.relatedTarget as Node | null)) reabrir();
+    });
+  });
+}
+
 /* ─── Header: se oculta al bajar, vuelve al subir ─── */
 function initHeaderScroll() {
   const header = document.getElementById('header');
@@ -278,7 +303,7 @@ function initClientsCarousel() {
   ─── Vídeo del hero ───
   El <video> llega sin src: el póster es la imagen LCP y basta en móvil, con
   ahorro de datos o con movimiento reducido. Solo en escritorio se carga el
-  vídeo (4,7 MB) y se le da botón de pausa.
+  vídeo (4,8 MB) y se le da botón de pausa.
 */
 function initHeroVideo() {
   const video = document.querySelector<HTMLVideoElement>('.hero-video');
@@ -475,6 +500,7 @@ for (const init of [
   initTypewriter,
   initCounters,
   initMobileMenu,
+  initNavDropdown,
   initHeaderScroll,
   initBackToTop,
   initSmoothScroll,

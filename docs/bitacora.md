@@ -91,28 +91,15 @@ las sesiones del mismo día, abajo.
 - [ ] **CI-01, PR de Dependabot.** Ya pasan por el CI (desde el 2026-10-31). Fusionar los 7
       abiertos cuando estén en verde; las acciones que suben de v4 a v7 (`checkout`,
       `setup-node`, `upload-artifact`), después de leer sus notas de versión.
-- [ ] **SEG-06, CSP antes del bloqueo:** `report-to` hacia el Worker (sin él no se puede
-      verificar "dos semanas sin violaciones"), el host exacto del Worker en `connect-src`
-      en vez de `*.workers.dev`, y `form-action 'self'`.
-- [ ] **A11Y-07, detalles:** el logo lleva dos `alt="INACONS"`, `aria-label="Breadcrumb"`
-      está en inglés, hay un h3 dentro de un paso h3 en el Canal, el menú desplegable de
-      escritorio no se cierra con Esc y, con movimiento reducido, los últimos logos del
-      carrusel nunca se ven.
-- [ ] **FE-01:** sin JS, el titular del home queda incompleto y `data-aos` deja contenido
-      invisible; no hay `@media print`.
+- [ ] **Desplegar el Worker con la ruta `/csp`** (`npx wrangler deploy` desde
+      `workers/contacto/`). Hasta entonces los informes de la CSP del sitio no llegan a
+      ningún lado y los hash de IP no se vacían a la hora. Luego, el `OPTIONS` a
+      `/csp` debe dar 204 con `Access-Control-Allow-Origin: *`.
 - [ ] **FE-04 y FE-05, reglas 2 y 3:** medidas fijas sin token (`--container-max`,
       `--header-h`), componentes propios de página, y datos escritos en las páginas
       (políticas de `/documentos/`, contactos de `/mineria/`, `hasCredential` del JSON-LD).
-- [ ] **PERF-02:** el fondo de `/mineria/` (la página de los QR, que se abre en el móvil)
-      se pide a 1920 px sin srcset.
-- [ ] **SEO-01:** `site.webmanifest` sale sin `Content-Type`; el redirect genérico de
-      `.html` capturaría archivos de verificación de buscadores.
-- [ ] **Worker, restos:** el límite por hora de contacto cuenta y después inserta (carrera);
-      `ip_hash` se guarda 12 meses aunque solo sirve una hora; pruebas con
-      `@cloudflare/vitest-pool-workers` en vez de Node.
-- [ ] **DOC-01:** afirmaciones desfasadas en `arquitectura.md` (hook de `initTabs`, sellos
-      en `public/`), `contenido.md` (carpeta de proyectos de ejemplo) y `deploy.md` (salida
-      del `curl` de analítica).
+- [ ] **Worker, restos:** el límite por hora de contacto cuenta y después inserta
+      (carrera); pruebas con `@cloudflare/vitest-pool-workers` en vez de Node.
 
 ### Para más adelante
 
@@ -122,6 +109,25 @@ las sesiones del mismo día, abajo.
       antes de aceptarlas en reportes anónimos.
 - [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
       documentos siguen con la lisa.
+
+## 2026-10-31 — CSP con informes, home sin JavaScript y detalles
+
+Pedido: la tanda de "CSP y detalles" de la auditoría del mismo día (SEG-06, FE-01,
+PERF-02, SEO-01, A11Y-07, DOC-01 y el `ip_hash` de los restos del Worker).
+
+| Qué | Por qué |
+|---|---|
+| Ruta `/csp` en el Worker (`src/csp.ts`), y `report-to` + `report-uri` + `Reporting-Endpoints` en la CSP | Sin colector, "dos semanas sin violaciones" antes del bloqueo dependía de que alguien abriera la consola. Ahora cada violación deja una línea `CSP: …` en los Logs del Worker, sin query, IP ni navegador. La ruta va antes del control de origen porque el navegador manda los informes sin un Origin de fiar. |
+| `connect-src` con el host exacto del Worker y `form-action 'self'` | `*.workers.dev` dejaba enviar datos a cualquier worker de terceros; `form-action` no hereda de `default-src`. |
+| El cron vacía `ip_hash` pasada una hora | Solo sirve para el límite por hora; guardado 12 meses, con la sal se podía volver a la IP probando las IPv4. |
+| `AddType` para `.webmanifest`; los archivos de verificación de Google y Yandex fuera del redirect genérico de `.html` | El manifest salía sin `Content-Type` (con `nosniff`); un `google….html` subido a la raíz habría redirigido al inicio. |
+| Respaldo en CSS: si `main.ts` no corre, a los 5 s se ven el titular del home y todo lo que lleva `data-aos`; `@media print` para los dos. `main.ts` pone `.tw-listo` y `.aos-listo` en `<html>` para apagarlo | Con `.js` puesta (la pone una línea en línea) y el módulo sin cargar, el titular quedaba "CONSTRUIMOS ___" y el contenido animado, invisible. Probado quitando el script de la página: a los 5 s todo visible. |
+| `/mineria/`: el fondo es un `<Image>` con srcset y `fetchpriority="high"` | Se pedía a 1920 px en cualquier pantalla, en la página que se abre desde el móvil por los QR; en 375 px ahora baja la de 768. |
+| Logo con un solo `alt`, "Ruta de navegación", términos del Canal en `h4`, Esc cierra el desplegable de Servicios (`initNavDropdown`, la función 14), carrusel en varias filas con movimiento reducido | A11Y-07: "INACONS INACONS" en el lector, etiqueta en inglés, un h3 dentro de otro, un menú que no se podía descartar (WCAG 1.4.13) y logos que nunca se veían. |
+| Docs: salida real del `curl` de analítica, hook de `initTabs`, carpeta de sellos, ejemplo de proyectos, tamaños del vídeo y del brochure, ancla del contrato del Canal | DOC-01. |
+
+El `wrangler deploy` del Worker lo bloqueó el control de permisos de la sesión (despliegue
+a producción) y queda en la lista de arriba. Pruebas del Worker: 94 (antes 86).
 
 ## 2026-10-31 — Accesibilidad de formularios, foco y diálogos; cifras desde `CIFRAS`
 

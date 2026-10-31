@@ -34,7 +34,7 @@ src/
   styles/              design-system.css, scroll-animations.css
 public/
   assets/documentos/   PDF: certificados, políticas, brochure
-  assets/imagenes/     logos SVG (header, JSON-LD), sellos de certificación y peru-depts.svg (mapa)
+  assets/imagenes/     logos SVG (header, JSON-LD), peru-depts.svg (mapa) y certificaciones/, vacía hasta que lleguen los sellos ISO
   assets/recursos/     flyers descargables
   assets/videos/       hero.mp4
   .htaccess            caché, seguridad y redirecciones de QR impresos
@@ -108,22 +108,24 @@ scope de la página, así que `.marco img` en la página funciona.
 
 ## main.ts
 
-Trece funciones `init*`, cada una aislada con `try/catch`: un error en una no detiene a las
-demás. Todas respetan `prefers-reduced-motion`.
+Catorce funciones `init*`, cada una aislada con `try/catch`: un error en una no detiene a
+las demás. Las que mueven algo (animaciones, cifras, máquina de escribir, carrusel, vídeo,
+desplazamiento) respetan `prefers-reduced-motion`.
 
 | Función | Qué hace | Hook HTML |
 |---|---|---|
-| `initScrollAnimations` | Animación de entrada | `data-aos`, `data-aos-duration`, `data-aos-delay` |
-| `initTypewriter` | Escribe las palabras del H1 del home | `.word.typewriter[data-text]` + `.tw-typed` |
+| `initScrollAnimations` | Animación de entrada; pone `.aos-listo` en `<html>`, que apaga el respaldo de CSS que lo muestra todo si el script no corre | `data-aos`, `data-aos-duration`, `data-aos-delay` |
+| `initTypewriter` | Escribe las palabras del H1 del home; pone `.tw-listo` en `<html>` (mismo respaldo) | `.word.typewriter[data-text]` + `.tw-typed` |
 | `initCounters` | Anima cifras al entrar en vista | `data-counter`, `data-prefix`, `data-suffix` |
 | `initMobileMenu` | Menú móvil, acordeón, trampa de foco | `#menuToggle`, `#mobileMenu` |
+| `initNavDropdown` | Esc cierra el desplegable de Servicios aunque el foco o el cursor sigan encima | `.nav .dropdown` (clase `.dropdown--cerrado`) |
 | `initHeaderScroll` | Oculta header y top-bar al bajar | `#header`, `.top-bar` |
 | `initBackToTop` | Botón volver arriba | `#backToTop` |
 | `initSmoothScroll` | Anclas `#` con margen del header | `a[href^="#"]` |
 | `initResponsive` | Clase `with-topbar` en escritorio | `#header`, `.main` |
 | `initClientsCarousel` | Pausa del carrusel de clientes | `.clients-track`, `#clientsPauseBtn` |
 | `initHeroVideo` | Carga el vídeo solo en escritorio | `.hero-video[data-src]`, `#heroPauseBtn` |
-| `initTabs` | Pestañas ARIA: clic, flechas, Inicio y Fin | `[role="tablist"]` con `.tab[aria-controls]` |
+| `initTabs` | Pestañas ARIA: clic, flechas, Inicio y Fin | `[role="tablist"]` con `[role="tab"][aria-controls]` |
 | `initScrollHint` | Flecha del hero | `.scroll-hint` |
 | `initCoverageMap` | Inyecta el mapa y dibuja los pines | `#peruMapContainer[data-ciudades]` |
 
@@ -183,7 +185,7 @@ Los que dicen **CI** en la última columna los vigila el workflow (`npm run veri
 | **URLs públicas.** Toda ruta de la tabla de arriba está indexada o impresa | `src/pages/` | Renombrar una exige su 301 en `public/.htaccess`; si no, enlaces y Search Console dan 404 |
 | **QR impresos y sitio anterior**: `/r/…`, `/empresa/…`, `/expomina/`, los `.html` y PDF de la raíz | `public/.htaccess` (regla 6 de CLAUDE.md) | El papel en circulación da 404. `/canal-etico/` y `/mineria/` son destino de QR: no cambian de URL |
 | **Archivos con URL fija**: PDF, vídeo, logos SVG, flyers | `public/assets/` | Los enlazan los certificados, el JSON-LD y material externo. Reemplazar un archivo conserva su nombre |
-| **Campos de los formularios** (`name`, `maxlength`) | `contacto.astro`, `canal-etico.astro` ↔ `LIMITES` de `workers/contacto/src/contacto.ts` y `canal.ts` | El Worker rechaza con 400 lo que el formulario deja escribir. Contrato completo en [contenido.md](contenido.md#formulario-de-contacto) |
+| **Campos de los formularios** (`name`, `maxlength`) | `contacto.astro`, `canal-etico.astro` ↔ `LIMITES` de `workers/contacto/src/contacto.ts` y `canal.ts` | El Worker rechaza con 400 lo que el formulario deja escribir. Contrato completo en [contenido.md](contenido.md#formulario-de-contacto) y [Canal Ético](contenido.md#canal-ético) |
 | **Lista de servicios** | títulos de `src/content/servicios/` ↔ `SERVICIOS` del Worker | **CI**: `npm test` del Worker falla; si no se despliega, el Worker rechaza el servicio nuevo |
 | **Tipos del Canal Ético** | `CANALES` de `canal-etico.astro` ↔ `TIPOS` de `canal.ts` | **CI**: igual, `npm test` lo detecta |
 | **`action` de Turnstile** | `data-action="contacto"` y `action: 'canal'` en las páginas ↔ `ACCION_TURNSTILE` de `contacto.ts` y `canal.ts` | El Worker responde 403 a todo envío de ese formulario. Se despliega primero el sitio y después el Worker |

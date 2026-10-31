@@ -9,8 +9,12 @@
   custom properties.
 
   Solo se oculta bajo `.js`, que BaseLayout pone en <html> con una línea
-  inline antes de pintar. Sin JavaScript —o si el script falla— el
-  contenido se ve: una animación nunca puede costar el contenido.
+  inline antes de pintar: sin JavaScript el contenido se ve. Si hay
+  JavaScript pero main.ts no llega a correr (falla la descarga, un error),
+  `.js` ya está puesta y el contenido quedaba invisible para siempre. Por eso
+  initScrollAnimations() pone `.aos-listo` en <html>, y sin ella, a los 5 s,
+  el respaldo de abajo lo muestra todo. Una animación nunca puede costar el
+  contenido.
 */
 
 .js [data-aos] {
@@ -28,6 +32,22 @@
 .js [data-aos].aos-animate {
   opacity: 1;
   transform: translate(0, 0);
+}
+
+.js:not(.aos-listo) [data-aos] {
+  animation: aos-respaldo 0s 5s forwards;
+}
+
+@keyframes aos-respaldo {
+  to { opacity: 1; transform: none; }
+}
+
+/* Al imprimir sale todo, también lo que no se llegó a ver en pantalla. */
+@media print {
+  .js [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

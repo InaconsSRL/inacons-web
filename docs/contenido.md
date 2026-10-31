@@ -64,7 +64,7 @@ titulo: Habilitación Urbana Pucusana
 ubicacion: Pucusana, Lima
 categoria: Obras Civiles     # Obras Civiles | Infraestructura | Electromecánica | Paisajismo | Minería | Consultoría
 año: 2023
-imagen: ../../assets/imagenes/proyectos/pucusana.webp
+imagen: ../../assets/imagenes/proyectos/pucusana.webp   # proyectos/ se crea con las primeras fotos de obra
 galeria:                     # opcional
   - ../../assets/imagenes/proyectos/pucusana-2.webp
 destacado: true              # candidato al home, que muestra los tres primeros
@@ -151,8 +151,9 @@ manda un acuse de recibo. El acuse no repite el mensaje: va a la dirección que 
 visitante, y con el texto dentro serviría para escribirle a un tercero desde el dominio.
 
 Cada fila de `consultas` lleva un hash con sal de la IP (`ip_hash`, sal en el secret
-`IP_SALT`): sirve solo para el límite por hora y no se puede revertir a la IP. Las copias
-se borran solas a los 12 meses (`RETENCION_MESES`), con una purga diaria.
+`IP_SALT`): sirve solo para el límite por hora, y el cron lo vacía pasada esa hora. Con la
+sal, un hash se podría revertir probando todas las IPv4, por eso no se guarda más. Las
+copias se borran solas a los 12 meses (`RETENCION_MESES`).
 
 **Contrato del endpoint** — lo que acepta el Worker, y lo que tendría que aceptar
 cualquier reemplazo:
@@ -260,5 +261,5 @@ Los `tipo` válidos son las claves de `TIPOS` en `canal.ts` y tienen que coincid
 
 - Vídeo: H.264, sin audio, "optimizar para web". `public/assets/videos/hero.mp4` pesa
   4,8 MB; solo lo descarga el escritorio.
-- PDF: `public/assets/documentos/`. El brochure pesa 4,7 MB: conviene una versión para web.
+- PDF: `public/assets/documentos/`. El brochure pesa 4,8 MB: conviene una versión para web.
   Es la fuente de las cifras (regla 5 de CLAUDE.md): si se reemplaza, el nombre no cambia.

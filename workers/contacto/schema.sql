@@ -1,6 +1,7 @@
 -- Copia de cada consulta del formulario de /contacto/. Se aplica con
 --   npx wrangler d1 execute inacons-contacto --remote --file=schema.sql
--- La IP no se guarda: solo un hash con sal, para limitar envíos por hora.
+-- La IP no se guarda: solo un hash con sal, para limitar envíos por hora. El cron lo
+-- vacía pasada la hora (index.ts, scheduled).
 
 CREATE TABLE IF NOT EXISTS consultas (
   id        INTEGER PRIMARY KEY AUTOINCREMENT,

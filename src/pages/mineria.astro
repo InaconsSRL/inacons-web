@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 import Icono from '../components/Icono.astro';
 import { BROCHURE, CIFRAS, NORMAS_ISO } from '../data/empresa';
 import imagenFondo from '../assets/imagenes/mineria_stand.webp';
@@ -15,7 +15,6 @@ const TEXTO_COMPARTIR = `INACONS en el sector minero — ${URL_PAGINA}`;
 const URL_WHATSAPP = `https://wa.me/?text=${encodeURIComponent(TEXTO_COMPARTIR)}`;
 const URL_CORREO = `mailto:?subject=${encodeURIComponent('INACONS en el sector minero')}&body=${encodeURIComponent(TEXTO_COMPARTIR)}`;
 
-const fondo = await getImage({ src: imagenFondo, quality: 70, width: 1920, format: 'webp' });
 const badges = [CIFRAS.experiencia, NORMAS_ISO, CIFRAS.trabajadores];
 
 // Personas de contacto del diálogo. Editar acá para agregar, quitar o
@@ -69,11 +68,16 @@ const CONTACTOS = [
       overflow: hidden;
     }
 
+    /*  Un <Image> con srcset y no un background-image: esta página se abre
+        casi siempre desde el móvil, escaneando un QR, y el fondo se pedía a
+        1920 px en cualquier pantalla. Es la imagen LCP: va con prioridad. */
     .mn-bg {
       position: absolute;
       inset: 0;
-      background-size: cover;
-      background-position: center;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
     }
 
     /* Velo diagonal: oscuro a la izquierda (donde va el texto) y más
@@ -313,7 +317,7 @@ const CONTACTOS = [
   </style>
 
   <div class="mn-hero-screen">
-    <div class="mn-bg" style={`background-image: url('${fondo.src}')`}></div>
+    <Image class="mn-bg" src={imagenFondo} alt="" quality={70} widths={[768, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" />
     <div class="mn-overlay"></div>
 
     <div class="mn-brand">

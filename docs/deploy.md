@@ -183,7 +183,8 @@ completo. Con el snippet pegado el build sale en verde pero el HTML publicado tr
 curl -s https://home.inacons.com.pe/ | grep -o 'data-cf-beacon="[^"]*"'
 ```
 
-Debe imprimir `{"token":"<32 caracteres>"}` y nada más.
+Debe imprimir `data-cf-beacon="{&quot;token&quot;:&quot;<32 caracteres>&quot;}"` (las
+comillas van como entidades HTML) y nada más.
 
 **Cambiar el token:** actualizar la variable y volver a lanzar el deploy (*Re-run all jobs*
 basta: las variables se leen en cada build).
@@ -249,24 +250,27 @@ archivos viejos pueden seguir en el servidor sin que nadie llegue a verlos.
 `Referrer-Policy`, `Permissions-Policy` y HSTS.
 
 **Content-Security-Policy, en modo informe.** La cabecera es
-`Content-Security-Policy-Report-Only`: no bloquea nada y no hay colector, así que las
-violaciones solo se ven abriendo la consola del navegador. Limita qué puede cargar la página
+`Content-Security-Policy-Report-Only`: no bloquea nada. Limita qué puede cargar la página
 si alguien llegara a inyectar un script (por ejemplo en `/canal-etico/`, donde se escriben
-denuncias). Para pasar a bloqueo:
+denuncias). Cada violación la manda el navegador al Worker (`report-to csp`, declarado en
+`Reporting-Endpoints`, y `report-uri` para los navegadores que no lo tienen), a la ruta
+`/csp`, que deja una línea por violación en Cloudflare → Workers → `inacons-contacto` →
+Logs: `CSP: script-src-elem bloqueó https://… en home.inacons.com.pe/ruta/`. No guarda nada
+más: sin query, IP ni navegador. Para pasar a bloqueo:
 
-1. Con el sitio publicado, recorrer `/`, `/contacto/` (enviando una consulta de prueba, con
-   Turnstile), `/canal-etico/`, `/nosotros/` (vídeo), `/mineria/` y el menú móvil, con la
-   consola abierta, y anotar toda violación.
-2. Hacerlo de nuevo tras cada cambio de scripts o de proveedores externos, durante dos
-   semanas. Cero violaciones → cambiar el nombre de la cabecera a
-   `Content-Security-Policy`.
+1. Dos semanas de uso normal del sitio sin ninguna línea `CSP:` en los Logs del Worker.
+   Tras un cambio de scripts o de proveedores externos, el plazo vuelve a empezar.
+2. Entonces, cambiar el nombre de la cabecera a `Content-Security-Policy`, conservando
+   `report-to` y `report-uri` para enterarse de lo que se bloquee después.
 
 Dos cosas que la rompen en silencio: (a) el script en línea de `/mineria/` está permitido
-**por hash** y el hash cambia con cualquier edición de ese script; Chrome indica el hash
-esperado en el mensaje de la violación. El del Canal Ético no cuenta: importa
+**por hash** y el hash cambia con cualquier edición de ese script; `npm run verificar`
+corta el CI y dice qué hash falta. El del Canal Ético no cuenta: importa
 `scripts/formulario.ts` y Astro lo emite como archivo. (b) Un proveedor
 nuevo (otro iframe, otro script, otro host de fetch) hay que añadirlo a la directiva que
-corresponda. `style-src 'unsafe-inline'` se queda: Astro emite estilos en línea.
+corresponda. `style-src 'unsafe-inline'` se queda: Astro emite estilos en línea. La URL
+del Worker aparece tres veces en `.htaccess` (`connect-src`, `report-uri` y
+`Reporting-Endpoints`): si cambia `PUBLIC_CONTACT_ENDPOINT`, se cambia ahí también.
 
 ## Indexación
 

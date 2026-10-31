@@ -130,6 +130,12 @@ describe('index.scheduled', () => {
     expect(purga?.params).toEqual(['-12 months']);
   });
 
+  it('vacía los hash de IP de más de una hora', async () => {
+    redFalsa();
+    const { sentencias } = await correrCron();
+    expect(sentencias.some((s) => s.sql.includes("SET ip_hash = ''") && s.sql.includes("'-1 hour'"))).toBe(true);
+  });
+
   it('con RETENCION_MESES inválido no purga y lo registra', async () => {
     redFalsa();
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});

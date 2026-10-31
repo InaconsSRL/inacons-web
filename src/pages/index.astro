@@ -129,9 +129,20 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       display: inline-block;
     }
     .tw-ghost {
-      visibility: hidden;
       user-select: none;
       pointer-events: none;
+    }
+    /*  El fantasma solo se oculta con JavaScript, que escribe encima. Si
+        main.ts no llega a correr (initTypewriter pone .tw-listo en <html>), a
+        los 5 s vuelve a verse: antes el titular quedaba "CONSTRUIMOS ___". Si
+        el script corre, el texto escrito queda justo encima del fantasma, así
+        que el respaldo no cambia nada a la vista. Al imprimir, siempre. */
+    html.js .tw-ghost { visibility: hidden; }
+    html.js:not(.tw-listo) .tw-ghost { animation: tw-respaldo 0s 5s forwards; }
+    @keyframes tw-respaldo { to { visibility: visible; } }
+    @media print {
+      html.js .tw-ghost { visibility: visible; animation: none; }
+      .tw-typed { display: none; }
     }
     .tw-typed {
       position: absolute;
@@ -276,9 +287,14 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     }
 
     /* Accesibilidad: todo lo que se mueve solo, quieto. Bloque unico. */
+    /*  Quieto, el carrusel recortaba la fila y los últimos logos no se veían
+        nunca: sin movimiento, la lista se acomoda en varias filas, sin la
+        copia del bucle y sin el botón de pausa, que ya no tiene qué pausar. */
     @media (prefers-reduced-motion: reduce) {
       .scroll-hint   { animation: none; opacity: 0.55; }
-      .clients-track { animation: none; }
+      .clients-track { animation: none; width: auto; flex-wrap: wrap; justify-content: center; }
+      .client-logo-item[aria-hidden="true"],
+      .clients-controls { display: none; }
     }
 
     /* ── SERVICES SHOWCASE ── */

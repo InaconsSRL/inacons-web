@@ -14,6 +14,7 @@
 
 import * as canal from './canal';
 import * as contacto from './contacto';
+import * as csp from './csp';
 import { VerificacionNoDisponible, sha256, turnstileValido, type Env, type Respuesta } from './comun';
 
 // El envío más grande es el del Canal Ético: la descripción (5000 caracteres)
@@ -32,6 +33,10 @@ type Ruta<T> = {
 
 export default {
   async fetch(request, env, ctx): Promise<Response> {
+    // Los informes de la CSP los manda el navegador sin un Origin de fiar: van
+    // antes del control de origen y no tocan nada más (ver csp.ts).
+    if (new URL(request.url).pathname.replace(/\/+$/, '') === '/csp') return csp.recibir(request);
+
     const origen = request.headers.get('Origin') ?? '';
     const permitidos = env.ORIGENES.split(',').map((o) => o.trim());
     if (!permitidos.includes(origen)) return json({ ok: false, error: 'origen' }, 403);
@@ -86,15 +91,20 @@ export default {
     }
   },
 
-  // Cada 15 minutos (wrangler.jsonc): reenvía los avisos que no salieron y
-  // purga las consultas vencidas. La purga es barata y no necesita un cron
-  // propio.
+  // Cada 15 minutos (wrangler.jsonc): reenvía los avisos que no salieron,
+  // borra los hash de IP de más de una hora y purga las consultas vencidas.
+  // Todo es barato y no necesita un cron propio.
   async scheduled(_evento, env): Promise<void> {
     // Cada tarea por su lado: un fallo de D1 en una no deja sin correr a las otras.
     const tareas = [['contacto', contacto.reintentarPendientes], ['canal', canal.reintentarPendientes]] as const;
     for (const [nombre, tarea] of tareas) {
       await tarea(env).catch((e: unknown) => console.error(`${nombre}: falló el reintento: ${e instanceof Error ? e.message.slice(0, 200) : e}`));
     }
+
+    // El hash de la IP solo sirve para el límite de 3 consultas por hora:
+    // pasada la hora se borra. Guardado 12 meses, con la sal se podía volver a
+    // la IP probando todas las IPv4.
+    await env.DB.prepare(`UPDATE consultas SET ip_hash = '' WHERE ip_hash != '' AND creado < datetime('now', '-1 hour')`).run();
 
     // Las consultas comerciales no se guardan para siempre: el plazo lo fija
     // RETENCION_MESES y es el que declara la política de privacidad. Los
