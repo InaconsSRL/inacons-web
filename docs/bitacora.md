@@ -19,18 +19,19 @@ entenderlo sin ella.
       `RewriteCond %{HTTP_HOST} ^(www\.)?inacons\.com\.pe$ [NC]` +
       `RewriteRule ^(.*)$ https://home.inacons.com.pe/$1 [R=301,L]`. Así `/R/CANAL_ETICO`
       en el dominio raíz llega a `home`, donde ya se resuelve.
-- [ ] **Confirmar que el Worker publicado es el del repositorio.** Los cambios del
-      2026-10-16 solo están en producción tras `npx wrangler deploy`. Prueba: un `OPTIONS` al
-      Worker con `Origin: http://localhost:4321` debe dar 403.
-- [ ] **Tabla `limites` en D1:** comprobar si existe y borrarla (comando en
-      [deploy.md](deploy.md#worker-del-formulario-de-contacto)).
+- [ ] **SEG-01, repositorio público.** `InaconsSRL/inacons-web` es público en GitHub. No hay
+      secretos, pero esta bitácora y `deploy.md` publican las debilidades abiertas, el usuario
+      principal de cPanel y los correos que reciben cada tipo de denuncia. Decidir si debe
+      serlo; si no, pasarlo a privado (el deploy y Dependabot siguen igual).
 - [ ] **S-02, accesos.** La cuenta de Cloudflare (Worker, secrets y la base con los reportes
       del Canal) cuelga del Gmail `soporteinformatico.inacons@gmail.com`: agregar
       `administracion@inacons.com.pe` como miembro, 2FA en Cloudflare, Zoho, GitHub y cPanel,
       y un segundo propietario en Search Console.
-- [ ] **Turnstile:** quitar `localhost` de los dominios del widget.
-- [ ] **D-03, monitorización.** Monitor externo gratuito sobre `/` y `/contacto/`, y aviso si
-      hay consultas con `estado = 'error'` (hoy solo se ven consultando D1).
+- [ ] **Turnstile:** quitar `localhost` de los dominios del widget. Desde el 2026-10-31 el
+      Worker ya rechaza los tokens resueltos fuera del sitio; esto es higiene.
+- [ ] **D-03, monitorización.** Monitor externo gratuito sobre `/` y `/contacto/`. Los avisos
+      fallidos ya se reintentan solos, pero lo que siga en `error` pasados 7 días, o el tope
+      diario alcanzado, solo se ve en D1 o en Logs: falta que alguien reciba la alerta.
 - [ ] **B-03, respaldo de D1.** Confirmar Time Travel o programar `wrangler d1 export`, y
       probar una restauración una vez.
 - [ ] **S-01 y D-04, hosting.** El deploy va por FTP sin cifrar y no hay staging. O el
@@ -56,8 +57,8 @@ entenderlo sin ella.
       finalidad; falta responsable, plazo, destinatarios y derechos.
 - [ ] **Confirmar con cumplimiento** que aceptar los términos en el paso 1 del mismo
       formulario, y no en una página anterior, les basta.
-- [ ] **L-03:** el mapa de Google de `/contacto/` carga sin consentimiento previo (cargarlo
-      tras un clic, o imagen estática con enlace).
+- [ ] **L-03:** el mapa de Google de `/contacto/` y el vídeo de YouTube de `/nosotros/` cargan
+      sin consentimiento previo (cargarlos tras un clic, o imagen estática con enlace).
 - [ ] **Avisar a los responsables** que estos códigos del 2026-10-15 fueron pruebas:
       `CE-KMNV-6GUR` (ventas@), `CE-5SLA-9HZN` y `CE-TYJ8-WG85` (oficialdecumplimiento@),
       `CE-KTK2-7FAK` (sig@), `CE-KUSZ-6Q6S` y `CE-R22C-ED62` (tbalbin@).
@@ -82,6 +83,47 @@ entenderlo sin ella.
 - [ ] **Search Console:** confirmar que las URLs del sitemap están indexadas y mirar
       *Rendimiento*.
 
+### Auditoría técnica del 2026-10-31
+
+Lo que sigue abierto de esa auditoría; los códigos son los suyos. Lo ya resuelto está en
+las sesiones del mismo día, abajo.
+
+- [ ] **CI-01, CI en pull requests.** El workflow solo corre con push a `main`, así que los
+      7 PR de Dependabot (acciones de v4 a v7, astro, wrangler…) publicarían sin pasar
+      ninguna prueba. Disparar `pull_request` con check, build y pruebas, dejar el FTP solo
+      para push, y después fusionarlos.
+- [ ] **CI-02 y CI-03, contratos en CI.** El grep de la regla 1 de CLAUDE.md busca `] > [`
+      con espacios y el CSS minificado es `]>[`: no detecta nada. Corregirlo y llevarlo al
+      CI junto con la comparación de los hashes de la CSP, un link check, `npm audit` y
+      `timeout-minutes`. Borrar los dos selectores muertos que no veía:
+      `.form-estado .btn` (`contacto.astro`) y `.error-actions .btn svg` (`404.astro`).
+- [ ] **CI-04:** el rollback de [deploy.md](deploy.md) (subir el artefacto a mano) deja
+      desfasado `.ftp-deploy-sync-state.json`. Documentarlo como `git revert` + push.
+- [ ] **SEG-06, CSP antes del bloqueo:** `report-to` hacia el Worker (sin él no se puede
+      verificar "dos semanas sin violaciones"), el host exacto del Worker en `connect-src`
+      en vez de `*.workers.dev`, y `form-action 'self'`.
+- [ ] **A11Y-02 a 06:** errores de formulario con texto, `aria-invalid` y foco al primero;
+      foco al aviso con el código del reporte (hoy va al paso 1 y pisa el anuncio); header
+      oculto y submenú móvil cerrado que tapan o reciben el foco; `<dialog>` real en
+      `/mineria/`.
+- [ ] **FE-01:** sin JS, el titular del home queda incompleto y `data-aos` deja contenido
+      invisible; no hay `@media print`.
+- [ ] **FE-02, regla 5:** "15 años" está escrito a mano en 11 lugares y "200 trabajadores"
+      en `nosotros.astro`. Sacarlos de `CIFRAS`.
+- [ ] **FE-04 y FE-05, reglas 2 y 3:** medidas fijas sin token (`--container-max`,
+      `--header-h`), componentes propios de página, y datos escritos en las páginas
+      (políticas de `/documentos/`, contactos de `/mineria/`, `hasCredential` del JSON-LD).
+- [ ] **PERF-02:** el fondo de `/mineria/` (la página de los QR, que se abre en el móvil)
+      se pide a 1920 px sin srcset.
+- [ ] **SEO-01:** la 404 declara canonical `/404/`; `site.webmanifest` sale sin
+      `Content-Type`; el redirect genérico de `.html` capturaría archivos de verificación.
+- [ ] **Worker, restos:** el límite por hora de contacto cuenta y después inserta (carrera);
+      `ip_hash` se guarda 12 meses aunque solo sirve una hora; pruebas con
+      `@cloudflare/vitest-pool-workers` en vez de Node.
+- [ ] **DOC-01:** afirmaciones desfasadas en `arquitectura.md` (hook de `initTabs`, sellos
+      en `public/`), `contenido.md` (carpeta de proyectos de ejemplo) y `deploy.md` (salida
+      del `curl` de analítica).
+
 ### Para más adelante
 
 - [ ] **E-04:** servir el sitio desde el dominio raíz y dejar `home.` como redirección. Es
@@ -90,6 +132,31 @@ entenderlo sin ella.
       antes de aceptarlas en reportes anónimos.
 - [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
       documentos siguen con la lisa.
+
+## 2026-10-31 — Worker: avisos que no se pierden ni se duplican
+
+Pedido: la tanda del Worker de la auditoría del mismo día, y desplegarlo. Commit `acdb0c8`;
+desplegado como versión `f9f44fac`.
+
+| Qué | Por qué |
+|---|---|
+| Tope de 4 s al enviar a CPaaS; marcar la fila y el acuse con `ctx.waitUntil`, después de responder | Un acuse lento llevaba al navegador a sus 10 s: el visitante veía error aunque el aviso había salido, reenviaba y, si era anónimo, perdía el código del primero. |
+| Cron cada 15 min que reenvía con `[Reenvío]` lo que quedó en `error` o `recibido` (hasta 7 días, 20 por pasada) | Un reporte cuyo aviso fallaba quedaba guardado en D1 sin que nadie lo recibiera: solo dejaba un `console.error`. |
+| `try/catch` global con CORS (500); falla si falta `IP_SALT`; sin purga si `RETENCION_MESES` no es válido | Un fallo de D1 salía sin CORS y el navegador lo mostraba como corte de red. Sin sal, el hash de la IP se revierte probando las IPv4; un valor negativo hacía que la purga no borrara nada en silencio. |
+| Turnstile exige el host del sitio y una `action` por formulario (`contacto`, `canal`) y registra los errores del secret | Servía un token resuelto en `localhost` o en el otro formulario, y un secret mal puesto daba 403 a todos sin dejar rastro. |
+| `origen` sin query (sitio y Worker), nombre sin dominios sueltos ni separadores Unicode, correo en minúsculas, fecha real, tope de 100 envíos por día y tabla | Una URL con UTM pasaba el límite y la consulta se perdía; la query podía acotar a quien reporta. "bit.ly/x" en el nombre llegaba como enlace desde nuestro dominio. `Ana@` y `ana@` esquivaban el tope. Sin tope global, con proxies se inundaba el buzón de cumplimiento. |
+
+El sitio se publicó primero, con la `action` en los dos widgets, y el Worker después: al
+revés, durante unos minutos el Worker habría rechazado los tokens de las páginas viejas.
+
+Pruebas: de 34 a 86, con el router y el cron incluidos; `tsc` ahora también revisa las
+pruebas. En producción: `OPTIONS` desde `localhost` da 403 (antes 204), desde el sitio
+204 con CORS; GET 405, texto plano 415, datos inválidos y fecha imposible 400, token falso
+403, ruta desconocida 404. No se envió ningún formulario real. En D1 no había nada que
+reenviar (2 consultas, ambas avisadas; `reportes` vacía) y la tabla `limites` no existe:
+se cierran los pendientes "Confirmar que el Worker publicado es el del repositorio" y
+"Tabla `limites` en D1". Los hallazgos abiertos de la auditoría pasaron a la lista de
+arriba.
 
 ## 2026-10-31 — Auditoría: tres arreglos rápidos
 

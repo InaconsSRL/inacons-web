@@ -132,11 +132,9 @@ npx wrangler d1 execute inacons-contacto --remote --command "SELECT codigo, crea
 ```
 
 **Cambios en `schema.sql`:** se vuelve a aplicar con el mismo `d1 execute … --file`; todas
-las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe. Si el
-`schema.sql` se aplicó en producción antes de `3e78a2f` (el mismo 2026-10-15), la base
-conserva la tabla `limites`, que guardaba hash de IP y hora de cada envío del Canal y
-permitía cruzar un reporte anónimo con su conexión; el repositorio no dice si se borró.
-Comprobar con `.tables` o un `SELECT name FROM sqlite_master`, y borrarla con `npx wrangler d1 execute inacons-contacto --remote --command "DROP TABLE IF EXISTS limites"`.
+las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe. La tabla `limites`
+(hash de IP y hora de cada envío del Canal, retirada en `3e78a2f`) no existe en
+producción: comprobado el 2026-10-31.
 
 **Errores de envío:** Cloudflare → Workers → `inacons-contacto` → Logs. Solo aparecen los
 fallos, con el número de consulta o reporte: el registro automático de cada petición está
