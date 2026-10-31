@@ -40,8 +40,10 @@ entenderlo sin ella.
       vista previa por rama y cabeceras propias (el `.htaccess` se traduce a `_redirects` y
       `_headers`). Conviene decidirlo antes de la v3.
 - [ ] **D-02:** desplegar el Worker desde CI (hoy CI solo lo prueba; el deploy es a mano).
-- [ ] **CSP a bloqueo:** dos semanas con la consola sin violaciones (ver
-      [deploy.md](deploy.md#publichtaccess)).
+- [ ] **CSP a bloqueo, a partir del 2026-11-14:** si en los Logs del Worker no aparece
+      ninguna línea `CSP:` (salvo la de prueba del 2026-10-31, que bloquea
+      `prueba-de-despliegue.invalid`), cambiar la cabecera a `Content-Security-Policy`
+      (ver [deploy.md](deploy.md#publichtaccess)).
 
 ### Cumplimiento y abogado
 
@@ -91,10 +93,6 @@ las sesiones del mismo día, abajo.
 - [ ] **CI-01, PR de Dependabot.** Ya pasan por el CI (desde el 2026-10-31). Fusionar los 7
       abiertos cuando estén en verde; las acciones que suben de v4 a v7 (`checkout`,
       `setup-node`, `upload-artifact`), después de leer sus notas de versión.
-- [ ] **Desplegar el Worker con la ruta `/csp`** (`npx wrangler deploy` desde
-      `workers/contacto/`). Hasta entonces los informes de la CSP del sitio no llegan a
-      ningún lado y los hash de IP no se vacían a la hora. Luego, el `OPTIONS` a
-      `/csp` debe dar 204 con `Access-Control-Allow-Origin: *`.
 - [ ] **FE-04 y FE-05, reglas 2 y 3:** medidas fijas sin token (`--container-max`,
       `--header-h`), componentes propios de página, y datos escritos en las páginas
       (políticas de `/documentos/`, contactos de `/mineria/`, `hasCredential` del JSON-LD).
@@ -126,8 +124,15 @@ PERF-02, SEO-01, A11Y-07, DOC-01 y el `ip_hash` de los restos del Worker).
 | Logo con un solo `alt`, "Ruta de navegación", términos del Canal en `h4`, Esc cierra el desplegable de Servicios (`initNavDropdown`, la función 14), carrusel en varias filas con movimiento reducido | A11Y-07: "INACONS INACONS" en el lector, etiqueta en inglés, un h3 dentro de otro, un menú que no se podía descartar (WCAG 1.4.13) y logos que nunca se veían. |
 | Docs: salida real del `curl` de analítica, hook de `initTabs`, carpeta de sellos, ejemplo de proyectos, tamaños del vídeo y del brochure, ancla del contrato del Canal | DOC-01. |
 
-El `wrangler deploy` del Worker lo bloqueó el control de permisos de la sesión (despliegue
-a producción) y queda en la lista de arriba. Pruebas del Worker: 94 (antes 86).
+El primer `wrangler deploy` lo bloqueó el control de permisos de la sesión (despliegue a
+producción); con la autorización explícita se desplegó el Worker (versión `53eabcc4`)
+antes del push del sitio (`e4c57c1`), para que `/csp` existiera cuando la cabecera
+empezara a apuntarle. En producción: `OPTIONS /csp` 204 con `Access-Control-Allow-Origin: *`,
+un informe de prueba 204 (su línea, que bloquea `prueba-de-despliegue.invalid`, es la
+única esperada en los Logs), el resto del Worker sin cambios (`localhost` 403, datos
+inválidos 400, token falso 403); cabeceras `Reporting-Endpoints` y CSP nuevas, manifest con
+`application/manifest+json`, un `google….html` inexistente da 404 en vez de redirigir, y
+los `.html` viejos siguen en 301. Pruebas del Worker: 94 (antes 86).
 
 ## 2026-10-31 — Accesibilidad de formularios, foco y diálogos; cifras desde `CIFRAS`
 
