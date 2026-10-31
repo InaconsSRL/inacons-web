@@ -5,7 +5,7 @@ import PageHero from '../components/PageHero.astro';
 import SellosCertificacion from '../components/SellosCertificacion.astro';
 import Icono from '../components/Icono.astro';
 import { Image } from 'astro:assets';
-import { CIFRAS } from '../data/empresa';
+import { ANIOS_EXPERIENCIA, CIFRAS } from '../data/empresa';
 import imagenNosotros from '../assets/imagenes/image_nosotros.webp';
 import imagenObra from '../assets/imagenes/about_section.webp';
 import imagenEquipo from '../assets/imagenes/about_team.webp';
@@ -14,14 +14,14 @@ const cifras = [CIFRAS.experiencia, CIFRAS.trabajadores, CIFRAS.inversion];
 ---
 
 <BaseLayout
-  title="Nosotros: más de 15 años construyendo | INACONS"
-  description="Conoce más sobre INACONS: nuestra misión, visión y los valores que nos han consolidado como líderes en construcción e ingeniería durante más de 15 años."
+  title={`Nosotros: más de ${ANIOS_EXPERIENCIA} años construyendo | INACONS`}
+  description={`Conoce más sobre INACONS: nuestra misión, visión y los valores que nos han consolidado como líderes en construcción e ingeniería durante más de ${ANIOS_EXPERIENCIA} años.`}
 >
 
   <PageHero
     image={imagenNosotros}
     title="Comprometidos con la<br>Excelencia en Construcción"
-    subtitle="Más de 15 años construyendo confianza en el Perú"
+    subtitle={`Más de ${ANIOS_EXPERIENCIA} años construyendo confianza en el Perú`}
     current="Nosotros"
   />
 
@@ -35,10 +35,10 @@ const cifras = [CIFRAS.experiencia, CIFRAS.trabajadores, CIFRAS.inversion];
             <h2 class="sh-title">Una empresa construida sobre confianza y resultados</h2>
           </div>
           <p class="body-text">
-            Somos INACONS, una empresa con más de 15 años de experiencia en ingeniería y construcción en el Perú. Desarrollamos proyectos de alta complejidad con los más altos estándares de calidad, seguridad y sostenibilidad.
+            Somos INACONS, una empresa con más de {ANIOS_EXPERIENCIA} años de experiencia en ingeniería y construcción en el Perú. Desarrollamos proyectos de alta complejidad con los más altos estándares de calidad, seguridad y sostenibilidad.
           </p>
           <p class="body-text">
-            Nuestro equipo multidisciplinario, con más de 200 trabajadores por obra, nos permite ofrecer soluciones especializadas y cumplir con nuestra misión: transformar espacios y construir confianza en cada proyecto.
+            Nuestro equipo multidisciplinario, con más de {CIFRAS.trabajadores.valor} trabajadores por obra, nos permite ofrecer soluciones especializadas y cumplir con nuestra misión: transformar espacios y construir confianza en cada proyecto.
           </p>
           <div class="about-stat-row">
             {cifras.map((c) => (
@@ -148,7 +148,7 @@ const cifras = [CIFRAS.experiencia, CIFRAS.trabajadores, CIFRAS.inversion];
         <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="80">
           <div class="feature-num" aria-hidden="true">01</div>
           <h3 class="feature-title">Experiencia</h3>
-          <p class="feature-desc">Más de 15 años de trayectoria nos respaldan como líderes en el sector, desarrollando proyectos innovadores y sostenibles a lo largo de todo el Perú.</p>
+          <p class="feature-desc">Más de {ANIOS_EXPERIENCIA} años de trayectoria nos respaldan como líderes en el sector, desarrollando proyectos innovadores y sostenibles a lo largo de todo el Perú.</p>
         </div>
         <div class="feature-item feature-item--card" data-aos="fade-up" data-aos-delay="160">
           <div class="feature-num" aria-hidden="true">02</div>
@@ -183,7 +183,7 @@ const cifras = [CIFRAS.experiencia, CIFRAS.trabajadores, CIFRAS.inversion];
   <CtaBand
     label="Trabajemos juntos"
     title="¿Buscas un contratista con respaldo?"
-    description="Quince años de obra ejecutada y un sistema de gestión certificado."
+    description={`Más de ${ANIOS_EXPERIENCIA} años de obra ejecutada y un sistema de gestión certificado.`}
     primaryHref="/contacto/"
     primaryLabel="Contáctenos"
     secondaryHref="/proyectos/"

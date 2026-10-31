@@ -13,11 +13,123 @@
 
 export type TipoAviso = 'ok' | 'error' | 'info';
 
-/** Pinta un aviso en el contenedor `role="status"` de la página. */
+/**
+ * Pinta un aviso en el contenedor `role="status"` de la página. El aviso puede
+ * recibir foco (tabindex -1) para cuando haya que llevarlo ahí a propósito.
+ */
 export function aviso(estado: HTMLElement | null, tipo: TipoAviso, html: string): void {
   if (!estado) return;
-  estado.innerHTML = `<div class="notice notice--${tipo}">${html}</div>`;
+  estado.innerHTML = `<div class="notice notice--${tipo}" tabindex="-1">${html}</div>`;
   estado.scrollIntoView({ block: 'nearest' });
+}
+
+/*
+  Errores de campo. Antes solo cambiaba el color del borde y aparecía la
+  burbuja del navegador en el primer campo, que se va sola: quien no distingue
+  el rojo, o usa lector de pantalla, no sabía qué faltaba (WCAG 1.4.1 y 3.3.1).
+  Ahora cada campo inválido lleva un .form-error con el motivo, enlazado por
+  aria-describedby, y aria-invalid; el foco va al primero.
+*/
+type Campo = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+function mensajeDe(c: Campo): string {
+  const v = c.validity;
+  if (v.valueMissing) {
+    if (c.type === 'radio') return 'Elige una opción.';
+    if (c.type === 'checkbox') return 'Marca la casilla para continuar.';
+    return 'Este campo es obligatorio.';
+  }
+  if (v.typeMismatch && c.type === 'email') return 'Escribe un correo válido, como nombre@empresa.pe.';
+  if (v.tooLong && 'maxLength' in c) return `Usa como máximo ${c.maxLength} caracteres.`;
+  return c.validationMessage;
+}
+
+// Dónde va el mensaje y qué elemento lo anuncia: un grupo de radios lo anuncia
+// su fieldset; la casilla de términos, después de su etiqueta; el resto, al
+// final de su .form-group.
+function destinoDe(c: Campo): { despuesDe: HTMLElement; describe: HTMLElement[] } | null {
+  if (c.type === 'radio') {
+    const grupo = c.closest('fieldset');
+    if (!grupo) return null;
+    return { despuesDe: grupo.lastElementChild as HTMLElement, describe: [grupo] };
+  }
+  const etiqueta = c.closest<HTMLElement>('label');
+  if (c.type === 'checkbox' && etiqueta) return { despuesDe: etiqueta, describe: [c] };
+  const grupo = c.closest<HTMLElement>('.form-group');
+  return grupo ? { despuesDe: grupo.lastElementChild as HTMLElement, describe: [c] } : null;
+}
+
+function marcar(c: Campo, mensaje: string | null): void {
+  const id = `error-${c.name || c.id}`;
+  const destino = destinoDe(c);
+  const radios = c.type === 'radio' && c.form
+    ? [...c.form.querySelectorAll<HTMLInputElement>(`input[type="radio"][name="${c.name}"]`)]
+    : [c];
+  let nodo = document.getElementById(id);
+  if (!mensaje) {
+    nodo?.remove();
+    radios.forEach((r) => r.removeAttribute('aria-invalid'));
+    destino?.describe.forEach((el) => quitarDescripcion(el, id));
+    return;
+  }
+  if (!nodo && destino) {
+    nodo = document.createElement('span');
+    nodo.id = id;
+    nodo.className = 'form-error';
+    destino.despuesDe.after(nodo);
+  }
+  if (nodo) nodo.textContent = mensaje;
+  radios.forEach((r) => r.setAttribute('aria-invalid', 'true'));
+  destino?.describe.forEach((el) => agregarDescripcion(el, id));
+}
+
+function agregarDescripcion(el: HTMLElement, id: string): void {
+  const ids = new Set((el.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean));
+  ids.add(id);
+  el.setAttribute('aria-describedby', [...ids].join(' '));
+}
+
+function quitarDescripcion(el: HTMLElement, id: string): void {
+  const ids = (el.getAttribute('aria-describedby') ?? '').split(/\s+/).filter((x) => x && x !== id);
+  if (ids.length) el.setAttribute('aria-describedby', ids.join(' '));
+  else el.removeAttribute('aria-describedby');
+}
+
+const camposDe = (contenedor: HTMLElement) =>
+  [...contenedor.querySelectorAll<Campo>('input, select, textarea')].filter((c) => c.willValidate);
+
+/**
+ * Valida los campos de `contenedor` (un formulario o un paso del asistente),
+ * marca los inválidos con su mensaje y lleva el foco al primero. Devuelve si
+ * todo es válido. Los campos apagados (un fieldset disabled) no cuentan.
+ */
+export function validarCampos(contenedor: HTMLElement): boolean {
+  let primero: Campo | null = null;
+  for (const c of camposDe(contenedor)) {
+    const valido = c.checkValidity();
+    marcar(c, valido ? null : mensajeDe(c));
+    if (!valido && !primero) primero = c;
+  }
+  primero?.focus();
+  return !primero;
+}
+
+/** Quita todos los mensajes de error, por ejemplo tras un envío correcto. */
+export function limpiarErrores(contenedor: HTMLElement): void {
+  for (const c of camposDe(contenedor)) marcar(c, null);
+}
+
+// Una vez marcado, el mensaje sigue al campo mientras la persona lo corrige:
+// desaparece en cuanto el valor es válido, sin esperar a otro envío.
+function vigilarCampos(form: HTMLFormElement): void {
+  const revisar = (e: Event) => {
+    const c = e.target as Campo;
+    if (!c.willValidate || c.getAttribute('aria-invalid') !== 'true') return;
+    if (c.checkValidity()) marcar(c, null);
+    else marcar(c, mensajeDe(c));
+  };
+  form.addEventListener('input', revisar);
+  form.addEventListener('change', revisar);
 }
 
 export interface OpcionesEnvio {
@@ -54,6 +166,7 @@ export function conectarFormulario(o: OpcionesEnvio): void {
   // la vía nativa. Se enciende si hay adónde mandar los datos: el Worker o, en
   // /contacto/, el correo del visitante.
   if (boton && (o.url || o.sinEndpoint)) boton.disabled = false;
+  vigilarCampos(form);
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -64,10 +177,7 @@ export function conectarFormulario(o: OpcionesEnvio): void {
     if (datos.company_url) return;
 
     form.classList.add('was-validated');
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
+    if (!validarCampos(form)) return;
 
     // Turnstile mete su token como campo del formulario; viaja aparte porque
     // no es parte del mensaje.
@@ -107,7 +217,13 @@ export function conectarFormulario(o: OpcionesEnvio): void {
       aviso(estado, 'ok', o.exito(cuerpo));
       form.reset();
       form.classList.remove('was-validated');
+      limpiarErrores(form);
       o.alLimpiar?.();
+      // El foco va al aviso, después de alLimpiar (que en el Canal lo lleva al
+      // paso 1): el aviso trae el código del reporte, y un cambio de foco a otro
+      // lado suele pisar el anuncio de role="status" en el lector de pantalla.
+      // Para un reporte anónimo ese código es la única forma de seguir el caso.
+      estado?.querySelector<HTMLElement>('.notice')?.focus();
     } catch (err) {
       // Un status HTTP llega como Error("429"); cualquier otra cosa (corte de
       // red, los 10 s de espera) es "red".

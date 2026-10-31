@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import PageHero from '../../components/PageHero.astro';
+import { ANIOS_EXPERIENCIA } from '../../data/empresa';
 import MediaCard from '../../components/MediaCard.astro';
 
 import imagenHero from '../../assets/imagenes/hero_project.webp';
@@ -11,7 +12,7 @@ const proyectos = (await getCollection('proyectos'))
   .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99));
 ---
 
-<BaseLayout title="Proyectos de construcción ejecutados en Perú | INACONS" description="Proyectos de INACONS en distintas regiones del Perú: habilitaciones urbanas, obras civiles e infraestructura, con más de 15 años de experiencia.">
+<BaseLayout title="Proyectos de construcción ejecutados en Perú | INACONS" description={`Proyectos de INACONS en distintas regiones del Perú: habilitaciones urbanas, obras civiles e infraestructura, con más de ${ANIOS_EXPERIENCIA} años de experiencia.`}>
 
   <PageHero
     image={imagenHero}

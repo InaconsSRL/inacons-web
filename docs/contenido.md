@@ -134,6 +134,11 @@ Están en `src/data/empresa.ts` y se copian **tal cual del brochure**
 (`public/assets/documentos/brochure_inacons.pdf`). Si el brochure cambia, se cambian ahí y
 en ningún otro sitio.
 
+Eso vale también para las frases: "más de 15 años" se escribe
+`más de {ANIOS_EXPERIENCIA} años` (o `${ANIOS_EXPERIENCIA}` dentro de un `title` o
+`description`), y "200 trabajadores", `{CIFRAS.trabajadores.valor}`. Un `.md` de
+colección no puede interpolar: ahí no se cita la cifra.
+
 ## Formulario de contacto
 
 `/contacto/` envía a la URL de `PUBLIC_CONTACT_ENDPOINT` (variable de build), que es el

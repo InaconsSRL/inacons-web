@@ -7,7 +7,7 @@ import CtaBand from '../components/CtaBand.astro';
 import MediaCard from '../components/MediaCard.astro';
 import Icono from '../components/Icono.astro';
 import { serviciosPorMenu } from '../lib/servicios';
-import { BROCHURE, CIFRAS, PROYECTOS_POR_CIUDAD } from '../data/empresa';
+import { ANIOS_EXPERIENCIA, BROCHURE, CIFRAS, PROYECTOS_POR_CIUDAD } from '../data/empresa';
 import imagenHero from '../assets/imagenes/image_heroprincipal.webp';
 import imagenNosotros from '../assets/imagenes/image_nosotros.webp';
 
@@ -41,7 +41,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
 
 <BaseLayout
   title="INACONS | Constructora e ingeniería en Perú"
-  description="Empresa constructora peruana con más de 15 años en obras civiles, infraestructura, electromecánica, minería y consultoría. Oficinas en Lima y Huancayo."
+  description={`Empresa constructora peruana con más de ${ANIOS_EXPERIENCIA} años en obras civiles, infraestructura, electromecánica, minería y consultoría. Oficinas en Lima y Huancayo.`}
 >
 <style slot="head">
     /* ── HERO ── */
@@ -438,7 +438,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
             <span class="word highlight typewriter" data-text="JUNTOS"><span class="tw-ghost">JUNTOS</span><span class="tw-typed"></span></span>
           </span>
         </h1>
-        <p class="hero-desc">Más de 15 años de experiencia en ingeniería y construcción al servicio del Perú.</p>
+        <p class="hero-desc">Más de {ANIOS_EXPERIENCIA} años de experiencia en ingeniería y construcción al servicio del Perú.</p>
         <div class="hero-actions">
           <a href="/proyectos/" class="btn btn-primary btn-lg">Ver Proyectos</a>
           <a href={BROCHURE} target="_blank" rel="noopener" class="btn btn-outline-light btn-lg" data-astro-prefetch="false">Descargar Brochure</a>
@@ -477,7 +477,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         </div>
 
         <div class="about-content">
-          <p class="about-body-text">Somos una empresa peruana de ingeniería y construcción con más de 15 años ejecutando proyectos en toda la geografía nacional — desde la costa del Pacífico hasta la alta sierra.</p>
+          <p class="about-body-text">Somos una empresa peruana de ingeniería y construcción con más de {ANIOS_EXPERIENCIA} años ejecutando proyectos en toda la geografía nacional — desde la costa del Pacífico hasta la alta sierra.</p>
           <p class="about-body-text">Trabajamos con empresas líderes del sector público y privado, aplicando las más altas normas de calidad, seguridad y metodología BIM en cada obra.</p>
           <a href="/nosotros/" class="btn btn-primary">Conoce nuestra historia</a>
         </div>

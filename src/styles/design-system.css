@@ -1723,6 +1723,22 @@ a.btn:active {
     transform: translateY(-100%);
 }
 
+/*  Oculto al bajar, el header seguía en el orden de tabulación: al volver
+    hacia arriba con Shift+Tab el foco caía en enlaces que no se veían (WCAG
+    2.4.11). Si algo de adentro recibe foco, el header vuelve. Lo mismo el
+    top-bar. */
+.header.hidden:focus-within,
+.top-bar.hidden:focus-within {
+    transform: none;
+}
+
+/*  Al recorrer la página con el teclado, el navegador desplaza hasta el
+    elemento enfocado; sin esto lo dejaba debajo del header fijo. Mismo
+    margen que ya usa el asistente del Canal Ético para su indicador. */
+html {
+    scroll-padding-top: calc(var(--sp-l4) + var(--sp-4));
+}
+
 .header .container {
     display: flex;
     justify-content: space-between;
@@ -2357,17 +2373,24 @@ body.menu-open {
     transform: rotate(180deg);
 }
 
+/*  Cerrado no basta con max-height: 0: los seis enlaces seguían recibiendo
+    foco sin verse. visibility: hidden los saca de la tabulación y del lector
+    de pantalla; al cerrar, su transición espera a que termine la del alto,
+    para que la animación se vea. */
 .mobile-submenu {
     list-style: none;
     margin: 0;
     padding: 0 0 0 var(--sp-l1);
     max-height: 0;
     overflow: hidden;
-    transition: max-height var(--t);
+    visibility: hidden;
+    transition: max-height var(--t), visibility 0s linear var(--t);
 }
 
 .mobile-dropdown.open .mobile-submenu {
     max-height: 320px;
+    visibility: visible;
+    transition: max-height var(--t), visibility 0s;
 }
 
 .mobile-submenu a {
@@ -3210,23 +3233,43 @@ body.menu-open {
 
 /* ── Diálogo ────────────────────────────────────────────────── */
 /*
-  Se muestra con el atributo `hidden`, no con una clase: así el contenido
-  queda fuera del árbol de accesibilidad cuando está cerrado, sin que haya que
-  acordarse de sincronizar `aria-hidden` a mano.
+  Un <dialog> nativo abierto con showModal(), o sin JavaScript con
+  <button command="show-modal" commandfor="id">. El navegador hace lo que
+  antes había que programar y no estaba: deja inerte el resto de la página,
+  atrapa el foco, cierra con Esc y devuelve el foco a quien lo abrió.
 
-  Quien lo abra tiene que ocuparse de dos cosas que el CSS no puede: bloquear
-  el scroll del fondo y devolver el foco al elemento que lo abrió.
+  El <dialog> ocupa toda la pantalla y centra .dialogo-caja: un clic en el
+  hueco alrededor llega al propio <dialog> y lo cierra (lo hace el script de
+  la página). `display: flex` solo con [open]: sin el atributo, el estilo del
+  autor taparía el `display: none` con que el navegador oculta el cerrado.
 */
 .dialogo {
     position: fixed;
     inset: 0;
-    z-index: var(--z-mobile-menu);
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    padding: var(--sp-5);
+    background: transparent;
+    overflow-y: auto;
+}
+
+.dialogo[open] {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--sp-5);
+}
+
+.dialogo::backdrop {
     background: color-mix(in srgb, var(--c-primary) 55%, transparent);
-    overflow-y: auto;
+}
+
+/*  Un modal nativo no bloquea el scroll del fondo. */
+html:has(.dialogo[open]) {
+    overflow: hidden;
 }
 
 .dialogo-caja {

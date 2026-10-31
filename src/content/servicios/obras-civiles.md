@@ -18,4 +18,4 @@ especialidades:
   - Cercos perimétricos
 ---
 
-Del terreno crudo a la operación: ejecutamos obras civiles integrando movimiento de tierras, vías, redes y edificaciones bajo una sola gestión y una sola responsabilidad técnica. Con metodología BIM, supervisión inteligente y gobernanza de datos, maquinaria propia y más de 15 años de obra en los sectores minero, industrial e inmobiliario.
+Del terreno crudo a la operación: ejecutamos obras civiles integrando movimiento de tierras, vías, redes y edificaciones bajo una sola gestión y una sola responsabilidad técnica. Con metodología BIM, supervisión inteligente y gobernanza de datos, maquinaria propia y obra ejecutada en los sectores minero, industrial e inmobiliario.

@@ -326,7 +326,7 @@ const CONTACTOS = [
       />
       <div class="mn-brand-right">
         <a href="/" class="mn-back">inacons.com.pe</a>
-        <button type="button" class="btn-control btn-control--dark mn-share-btn" data-abrir="dlg-compartir" aria-haspopup="dialog">
+        <button type="button" class="btn-control btn-control--dark mn-share-btn" commandfor="dlg-compartir" command="show-modal" aria-haspopup="dialog">
           <Icono nombre="compartir" tam={15} />
           <span>Compartir</span>
         </button>
@@ -347,7 +347,7 @@ const CONTACTOS = [
           <a class="btn btn-primary btn-lg" href={BROCHURE} target="_blank" rel="noopener" data-astro-prefetch="false">
             Brochure
           </a>
-          <button type="button" class="btn btn-primary btn-lg" data-abrir="dlg-contacto" aria-haspopup="dialog">
+          <button type="button" class="btn btn-primary btn-lg" commandfor="dlg-contacto" command="show-modal" aria-haspopup="dialog">
             Contacto
           </button>
           <a class="btn btn-primary btn-lg" href={URL_DOCUMENTOS}>
@@ -404,9 +404,9 @@ const CONTACTOS = [
   </div>
 
   <!-- Diálogo de contacto — abre desde el botón "Contacto" de arriba -->
-  <div class="dialogo" id="dlg-contacto" role="dialog" aria-modal="true" aria-labelledby="dlg-contacto-titulo" hidden>
+  <dialog class="dialogo" id="dlg-contacto" aria-labelledby="dlg-contacto-titulo">
     <div class="dialogo-caja">
-      <button type="button" class="dialogo-cerrar" data-cerrar="dlg-contacto" aria-label="Cerrar">
+      <button type="button" class="dialogo-cerrar" commandfor="dlg-contacto" command="close" aria-label="Cerrar" autofocus>
         <Icono nombre="cerrar" tam={20} />
       </button>
 
@@ -434,12 +434,12 @@ const CONTACTOS = [
         </div>
       ))}
     </div>
-  </div>
+  </dialog>
 
   <!-- Diálogo de compartir — abre desde el botón "Compartir" del encabezado -->
-  <div class="dialogo" id="dlg-compartir" role="dialog" aria-modal="true" aria-labelledby="dlg-compartir-titulo" hidden>
+  <dialog class="dialogo" id="dlg-compartir" aria-labelledby="dlg-compartir-titulo">
     <div class="dialogo-caja">
-      <button type="button" class="dialogo-cerrar" data-cerrar="dlg-compartir" aria-label="Cerrar">
+      <button type="button" class="dialogo-cerrar" commandfor="dlg-compartir" command="close" aria-label="Cerrar" autofocus>
         <Icono nombre="cerrar" tam={20} />
       </button>
 
@@ -466,40 +466,27 @@ const CONTACTOS = [
         </button>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <script>
-    // Diálogos con `hidden` (no clase): se bloquea el scroll del fondo y el
-    // foco vuelve a quien abrió.
-    let ultimoFoco: HTMLElement | null = null;
-
-    function abrir(id: string) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      ultimoFoco = document.activeElement as HTMLElement;
-      el.hidden = false;
-      document.body.style.overflow = 'hidden';
-      el.querySelector<HTMLElement>('button, a')?.focus();
+    // Los botones abren y cierran los <dialog> con command/commandfor, sin
+    // JavaScript: esta página es la de los QR impresos y tiene que funcionar
+    // aunque el script no cargue. El script solo cubre lo que eso no hace: los
+    // navegadores que todavía no entienden `command`, y cerrar con un clic
+    // fuera de la caja.
+    if (!('command' in HTMLButtonElement.prototype)) {
+      document.querySelectorAll<HTMLButtonElement>('button[commandfor]').forEach((b) =>
+        b.addEventListener('click', () => {
+          const dialogo = document.getElementById(b.getAttribute('commandfor') ?? '');
+          if (!(dialogo instanceof HTMLDialogElement)) return;
+          if (b.getAttribute('command') === 'show-modal') dialogo.showModal();
+          else dialogo.close();
+        })
+      );
     }
-
-    function cerrar(id: string) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.hidden = true;
-      document.body.style.overflow = '';
-      ultimoFoco?.focus();
-    }
-
-    document.querySelectorAll<HTMLElement>('[data-abrir]').forEach((b) =>
-      b.addEventListener('click', () => abrir(b.getAttribute('data-abrir')!))
+    document.querySelectorAll<HTMLDialogElement>('dialog.dialogo').forEach((d) =>
+      d.addEventListener('click', (e) => { if (e.target === d) d.close(); })
     );
-    document.querySelectorAll<HTMLElement>('[data-cerrar]').forEach((b) =>
-      b.addEventListener('click', () => cerrar(b.getAttribute('data-cerrar')!))
-    );
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape') return;
-      document.querySelectorAll<HTMLElement>('.dialogo:not([hidden])').forEach((d) => cerrar(d.id));
-    });
 
     // ── Copiar enlace ──
     const inputLink = document.getElementById('mn-link-input') as HTMLInputElement | null;

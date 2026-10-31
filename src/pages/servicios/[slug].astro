@@ -7,7 +7,7 @@ import Galeria from '../../components/Galeria.astro';
 import Icono from '../../components/Icono.astro';
 import MediaCard from '../../components/MediaCard.astro';
 import { serviciosPorOrden, type Servicio } from '../../lib/servicios';
-import { BROCHURE } from '../../data/empresa';
+import { ANIOS_EXPERIENCIA, BROCHURE } from '../../data/empresa';
 
 export async function getStaticPaths() {
   const servicios = await serviciosPorOrden();
@@ -38,7 +38,7 @@ const proyectos = categoria
 // La descripción del servicio es corta (68 a 109 caracteres) y un meta
 // description útil ronda los 120 a 155: se le suma la frase de respaldo más
 // larga que quepa. Si ya no cabe ninguna, va sola.
-const RESPALDOS = ['INACONS, constructora peruana con más de 15 años de experiencia.', 'INACONS: más de 15 años en obra.'];
+const RESPALDOS = [`INACONS, constructora peruana con más de ${ANIOS_EXPERIENCIA} años de experiencia.`, `INACONS: más de ${ANIOS_EXPERIENCIA} años en obra.`];
 const metaDescripcion = RESPALDOS.map((r) => `${descripcion}. ${r}`).find((d) => d.length <= 155) ?? descripcion;
 
 // Las secciones opcionales aparecen o no según el .md; las claras alternan

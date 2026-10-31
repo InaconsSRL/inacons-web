@@ -346,7 +346,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
 
   <script>
     import { PUBLIC_CONTACT_ENDPOINT as ENDPOINT, PUBLIC_TURNSTILE_SITE_KEY as SITE_KEY } from 'astro:env/client';
-    import { conectarFormulario } from '../scripts/formulario';
+    import { conectarFormulario, validarCampos } from '../scripts/formulario';
 
     /*
       Asistente de tres pasos. Cada paso ocupa el lugar del anterior: el
@@ -438,16 +438,12 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
       // Valida solo el paso que se deja: los campos de los otros pasos no
       // existen todavía para quien escribe. was-validated va en el panel y no en
       // el formulario, para no pintar de rojo los campos del paso siguiente.
+      // Los mensajes y el foco al primer error los pone validarCampos(), igual
+      // que en /contacto/.
       const validar = (n: number) => {
         const paso = pasos[n - 1];
         paso.classList.add('was-validated');
-        for (const campo of paso.querySelectorAll<HTMLInputElement>('input, select, textarea')) {
-          if (!campo.checkValidity()) {
-            campo.reportValidity();
-            return false;
-          }
-        }
-        return true;
+        return validarCampos(paso);
       };
 
       form.addEventListener('click', (e) => {

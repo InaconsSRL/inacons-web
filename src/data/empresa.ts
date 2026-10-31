@@ -20,10 +20,6 @@
  */
 const MENSAJE_WHATSAPP = 'Hola INACONS, quiero cotizar un proyecto. Les escribo desde la web.';
 
-/** Descripción corta de la empresa: meta description por defecto y JSON-LD. */
-export const DESCRIPCION_EMPRESA =
-  'Empresa peruana de ingeniería y construcción con más de 15 años de experiencia en obras civiles, infraestructura, electromecánica, minería y consultoría.';
-
 /**
  * Interruptor único de la política de privacidad. En false la página es un
  * borrador: `noindex`, fuera del sitemap, sin enlaces desde el sitio y con el
@@ -89,6 +85,17 @@ export const CIFRAS: Record<'experiencia' | 'inversion' | 'trabajadores' | 'supe
   trabajadores: { valor: 200, prefijo: '+', rotulo: 'Trabajadores por obra' },
   superficie:   { valor: 150, prefijo: '+', sufijo: ' km²', rotulo: 'Construidos' },
 };
+
+/**
+ * "15", para las frases que citan la experiencia ("más de 15 años"). El
+ * número sale de CIFRAS: escrito a mano en cada página, una actualización del
+ * brochure dejaba frases con el valor viejo.
+ */
+export const ANIOS_EXPERIENCIA = CIFRAS.experiencia.valor;
+
+/** Descripción corta de la empresa: meta description por defecto y JSON-LD. */
+export const DESCRIPCION_EMPRESA =
+  `Empresa peruana de ingeniería y construcción con más de ${ANIOS_EXPERIENCIA} años de experiencia en obras civiles, infraestructura, electromecánica, minería y consultoría.`;
 
 /** Normas ISO certificadas. El brochure dice "las cuatro normas ISO". */
 export const NORMAS_ISO: Cifra = { valor: 4, rotulo: 'Normas ISO certificadas' };

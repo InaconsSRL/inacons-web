@@ -94,14 +94,12 @@ las sesiones del mismo día, abajo.
 - [ ] **SEG-06, CSP antes del bloqueo:** `report-to` hacia el Worker (sin él no se puede
       verificar "dos semanas sin violaciones"), el host exacto del Worker en `connect-src`
       en vez de `*.workers.dev`, y `form-action 'self'`.
-- [ ] **A11Y-02 a 06:** errores de formulario con texto, `aria-invalid` y foco al primero;
-      foco al aviso con el código del reporte (hoy va al paso 1 y pisa el anuncio); header
-      oculto y submenú móvil cerrado que tapan o reciben el foco; `<dialog>` real en
-      `/mineria/`.
+- [ ] **A11Y-07, detalles:** el logo lleva dos `alt="INACONS"`, `aria-label="Breadcrumb"`
+      está en inglés, hay un h3 dentro de un paso h3 en el Canal, el menú desplegable de
+      escritorio no se cierra con Esc y, con movimiento reducido, los últimos logos del
+      carrusel nunca se ven.
 - [ ] **FE-01:** sin JS, el titular del home queda incompleto y `data-aos` deja contenido
       invisible; no hay `@media print`.
-- [ ] **FE-02, regla 5:** "15 años" está escrito a mano en 11 lugares y "200 trabajadores"
-      en `nosotros.astro`. Sacarlos de `CIFRAS`.
 - [ ] **FE-04 y FE-05, reglas 2 y 3:** medidas fijas sin token (`--container-max`,
       `--header-h`), componentes propios de página, y datos escritos en las páginas
       (políticas de `/documentos/`, contactos de `/mineria/`, `hasCredential` del JSON-LD).
@@ -124,6 +122,26 @@ las sesiones del mismo día, abajo.
       antes de aceptarlas en reportes anónimos.
 - [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
       documentos siguen con la lisa.
+
+## 2026-10-31 — Accesibilidad de formularios, foco y diálogos; cifras desde `CIFRAS`
+
+Pedido: la tanda de accesibilidad y front de la auditoría del mismo día (A11Y-02 a 06 y
+FE-02).
+
+| Qué | Por qué |
+|---|---|
+| `validarCampos()` en `formulario.ts`: cada campo inválido lleva un `.form-error` con el motivo, `aria-invalid` y `aria-describedby`, y el foco va al primero; el mensaje se va al corregir. Lo usan `/contacto/` y los tres pasos del Canal | Antes solo cambiaba el color del borde y salía la burbuja del navegador en el primer campo, que desaparece sola: sin ver el rojo, o con lector de pantalla, no se sabía qué faltaba (WCAG 1.4.1 y 3.3.1). |
+| Tras un envío correcto el foco va al aviso de éxito | En el Canal iba al título del paso 1 justo cuando `role="status"` anunciaba el código: el cambio de foco suele pisar el anuncio, y en un reporte anónimo ese código es la única forma de seguir el caso. |
+| El header y el top-bar ocultos vuelven si algo de adentro recibe foco; `scroll-padding-top` en `html` | Al volver con Shift+Tab el foco caía en enlaces que no se veían, o debajo del header fijo (WCAG 2.4.11). |
+| El submenú móvil cerrado lleva `visibility: hidden` | Con solo `max-height: 0` los seis servicios seguían recibiendo foco sin verse. |
+| `/mineria/`: `<dialog>` nativo con `command`/`commandfor`; un script solo para navegadores sin invocadores y para cerrar con un clic fuera; `autofocus` en Cerrar | Los `div[role=dialog]` no atrapaban el foco ni dejaban inerte el fondo, y sin JS el botón "Contacto" de la página de los QR no hacía nada. Ahora el navegador hace todo eso. El script en línea cambió: nuevo hash en la CSP (el verificador lo pidió). |
+| "15 años" (11 frases) y "200 trabajadores" salen de `CIFRAS` vía `ANIOS_EXPERIENCIA`; `DESCRIPCION_EMPRESA` también | Regla 5: si el brochure cambia, las frases se quedaban con el número viejo. En `obras-civiles.md`, que no puede interpolar, la frase ya no cita la cifra ("maquinaria propia y obra ejecutada en los sectores…"). |
+
+Probado en el navegador con un build con endpoint de prueba y `fetch` sustituido en la
+página (sin envíos reales): mensajes y foco en `/contacto/` y en los tres pasos del Canal,
+foco en el aviso con el código tras el envío, header de vuelta con el foco adentro,
+submenú cerrado sin foco y abierto con foco, diálogos modales con foco en Cerrar, cierre
+por clic fuera y foco devuelto al botón. Consola sin errores.
 
 ## 2026-10-31 — CI en pull requests y contratos del build
 
