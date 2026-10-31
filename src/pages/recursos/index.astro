@@ -124,7 +124,7 @@ const recursos = await Promise.all(
                 <h2 class="recurso-titulo">{r.titulo}</h2>
                 <p class="recurso-meta">{formato}{r.dimensiones && ` · ${r.dimensiones}`}</p>
                 <div class="recurso-desc"><r.Descripcion /></div>
-                <a href={r.archivo} download class="btn btn-primary btn-sm">
+                <a href={r.archivo} download class="btn btn-primary btn-sm" data-astro-prefetch="false">
                   <Icono nombre="descarga" tam={14} />
                   Descargar
                 </a>

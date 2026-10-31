@@ -49,6 +49,11 @@ type Turnstile = { reset(): void };
 export function conectarFormulario(o: OpcionesEnvio): void {
   const { form, boton, estado } = o;
 
+  // El HTML trae el botón apagado para que, sin este script, nada se envíe por
+  // la vía nativa. Se enciende si hay adónde mandar los datos: el Worker o, en
+  // /contacto/, el correo del visitante.
+  if (boton && (o.url || o.sinEndpoint)) boton.disabled = false;
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const datos = Object.fromEntries(

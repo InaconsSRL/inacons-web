@@ -113,7 +113,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
             400: no es una norma ISO ni esta en la coleccion.
           */}
           {certificaciones.map((c, i) => (
-            <a href={c.data.certificado} target="_blank" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay={String((i + 1) * 80)}>
+            <a href={c.data.certificado} target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay={String((i + 1) * 80)}>
               <span class="feature-num feature-num--marca" aria-hidden="true">{c.data.norma.replace('ISO ', '')}</span>
               <div class="feature-icon"><Icono nombre={ICONO_POR_NORMA[c.data.norma] ?? ICONO_POR_DEFECTO} tam={24} /></div>
               <p class="panel-label">{c.data.norma}</p>
@@ -124,7 +124,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
               </span>
             </a>
           ))}
-          <a href="/assets/documentos/certificado_ince_489.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="400">
+          <a href="/assets/documentos/certificado_ince_489.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="400">
             <span class="feature-num feature-num--marca" aria-hidden="true">INCE</span>
             <div class="feature-icon"><Icono nombre="insignia-check" tam={24} /></div>
             <p class="panel-label">INCE-489</p>
@@ -146,7 +146,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
       <!-- Panel: Políticas -->
       <div id="tab-politicas" role="tabpanel" hidden aria-labelledby="tabbtn-politicas">
         <div class="cert-grid grid-3">
-          <a href="/assets/documentos/politica_alcohol_drogas.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+          <a href="/assets/documentos/politica_alcohol_drogas.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
             <div class="feature-icon"><Icono nombre="escudo-alerta" tam={24} /></div>
             <p class="panel-label">Política</p>
@@ -156,7 +156,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
               <Icono nombre="descarga" tam={14} /> Ver documento
             </span>
           </a>
-          <a href="/assets/documentos/politica_negativa_trabajo_inseguro.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+          <a href="/assets/documentos/politica_negativa_trabajo_inseguro.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
             <div class="feature-icon"><Icono nombre="escudo-aspa" tam={24} /></div>
             <p class="panel-label">Política</p>
@@ -166,7 +166,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
               <Icono nombre="descarga" tam={14} /> Ver documento
             </span>
           </a>
-          <a href="/assets/documentos/politica_sig.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+          <a href="/assets/documentos/politica_sig.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
             <div class="feature-icon"><Icono nombre="ajustes" tam={24} /></div>
             <p class="panel-label">Política</p>
@@ -176,7 +176,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
               <Icono nombre="descarga" tam={14} /> Ver documento
             </span>
           </a>
-          <a href="/assets/documentos/politica_antisoborno.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+          <a href="/assets/documentos/politica_antisoborno.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
             <div class="feature-icon"><Icono nombre="mano" tam={24} />
             </div>
@@ -187,7 +187,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
               <Icono nombre="descarga" tam={14} /> Ver documento
             </span>
           </a>
-          <a href="/assets/documentos/otros_alcance_sig.pdf" target="_blank" class="feature-item feature-item--card feature-item--accion">
+          <a href="/assets/documentos/otros_alcance_sig.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
             <div class="feature-icon"><Icono nombre="documento-texto" tam={24} /></div>
             <p class="panel-label">Documento</p>

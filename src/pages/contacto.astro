@@ -192,7 +192,19 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
             <!-- El script pinta aquí el resultado del envío. role="status" lo anuncia sin mover el foco. -->
             <div class="form-estado" id="formEstado" role="status" aria-live="polite"></div>
 
-            <form id="contactForm" novalidate data-correo={correoVentas}>
+            <noscript>
+              <div class="notice notice--warn">
+                Para enviar el formulario hace falta tener JavaScript activado. También puedes escribirnos a <a href={`mailto:${correoVentas}`}>{correoVentas}</a>.
+              </div>
+            </noscript>
+
+            <!--
+              method="post" aunque el script siempre intercepta el envío: si el
+              script no carga, un GET pondría nombre, correo y mensaje en la URL,
+              el historial y los logs del hosting. Por lo mismo el botón sale
+              apagado y lo enciende conectarFormulario().
+            -->
+            <form id="contactForm" method="post" novalidate data-correo={correoVentas}>
               <div class="form-row">
                 <div class="form-group">
                   <label for="fullName">Nombre completo *</label>
@@ -233,7 +245,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
                 </div>
               )}
               <p class="form-hint">Usaremos tus datos solo para responder esta consulta{PRIVACIDAD_PUBLICADA && <> (<a href="/privacidad/">política de privacidad</a>)</>}. Los campos con * son obligatorios.</p>
-              <button type="submit" class="btn btn-primary btn-block" id="formSubmit">
+              <button type="submit" class="btn btn-primary btn-block" id="formSubmit" disabled>
                 <Icono nombre="enviar" tam={15} />
                 Enviar mensaje
               </button>

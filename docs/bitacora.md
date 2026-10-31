@@ -91,6 +91,21 @@ entenderlo sin ella.
 - [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
       documentos siguen con la lisa.
 
+## 2026-10-31 — Auditoría: tres arreglos rápidos
+
+Pedido: corregir lo más barato de la auditoría técnica del mismo día.
+
+| Qué | Por qué |
+|---|---|
+| `tabindex="-1"` en `<main>` y sin anillo de foco en él | "Saltar al contenido" no hacía nada: `initSmoothScroll` cancela la navegación nativa y `focus()` sobre un `<main>` no enfocable no mueve el foco, así que el siguiente Tab volvía al menú. |
+| `method="post"` en `/contacto/` y `/canal-etico/`, y botón de envío apagado en el HTML | Sin el script, el formulario se enviaba por GET y la descripción de una denuncia quedaba en la URL, el historial y los logs del hosting. Ahora `conectarFormulario()` enciende el botón si hay endpoint (o, en contacto, el respaldo `mailto`). `/contacto/` ganó un `<noscript>` con el correo. |
+| `data-astro-prefetch="false"` en los 14 enlaces a `/assets/` | El prefetch de Astro no distingue páginas de archivos: rozar "Descargar Brochure" bajaba 4,8 MB. La regla quedó escrita junto a `prefetch` en `astro.config.mjs`. |
+
+Probado en el navegador: el foco llega a `<main>` y el siguiente Tab cae dentro del
+contenido; los botones se encienden con endpoint y el del Canal sigue apagado sin él;
+al pasar el cursor se precarga `/nosotros/` y no el PDF. `npm run check`, `npm run build`
+y las 34 pruebas del Worker, en verde; los hashes de la CSP no cambian.
+
 ## 2026-10-31 — Unificación de la documentación y limpieza
 
 Pedido: dejar el repositorio ordenado antes de los cambios grandes de la v3.

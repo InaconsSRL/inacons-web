@@ -68,7 +68,7 @@ const fmtVigencia = new Intl.DateTimeFormat('es-PE', {
       <ul class="sellos-grid" data-aos="fade-up" data-aos-delay="80">
         {conSello.map((c) => (
           <li class="sello">
-            <a class="sello-caja" href={c.data.certificado} target="_blank" rel="noopener">
+            <a class="sello-caja" href={c.data.certificado} target="_blank" rel="noopener" data-astro-prefetch="false">
               <img
                 class="sello-img"
                 src={c.data.sello}

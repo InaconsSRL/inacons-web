@@ -3329,6 +3329,13 @@ body.menu-open {
     padding-top: 0;
 }
 
+/* <main> recibe foco solo como destino del skip link; el anillo de
+   :focus-visible enmarcaría la página entera sin señalar nada útil. */
+.main:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
 /* ── Chrome minimo ──
    Lo activa `minimalChrome` de BaseLayout: sin top bar, header, menu movil,
    pie ni boton de volver arriba. Hoy solo lo usa /404.

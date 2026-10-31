@@ -183,7 +183,14 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
           <!-- El script pinta aquí el resultado del envío. role="status" lo anuncia sin mover el foco. -->
           <div class="form-estado" id="reporteEstado" role="status" aria-live="polite"></div>
 
-          <form id="reporteForm" novalidate>
+          <!--
+            method="post" aunque el script siempre intercepta el envío: si el
+            script no carga, un GET dejaría la descripción, las personas y el
+            lugar del reporte en la URL, el historial y los logs del hosting. Por
+            lo mismo el botón de enviar sale apagado y lo enciende
+            conectarFormulario() cuando hay endpoint.
+          -->
+          <form id="reporteForm" method="post" novalidate>
 
             <!-- PASO 1 · Términos -->
             <div class="paso paso--activo" data-paso="1" role="group" aria-labelledby="paso1-titulo">
@@ -323,7 +330,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
 
               <div class="pasos-acciones">
                 <button type="button" class="btn btn-outline" data-accion="atras">Atrás</button>
-                <button type="submit" class="btn btn-primary" id="reporteEnviar" disabled={!PUBLIC_CONTACT_ENDPOINT}>
+                <button type="submit" class="btn btn-primary" id="reporteEnviar" disabled>
                   <Icono nombre="enviar" tam={15} />
                   Enviar reporte
                 </button>

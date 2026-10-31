@@ -29,7 +29,10 @@ export default defineConfig({
   // servidor de desarrollo avisa de cualquier enlace interno sin barra final.
   trailingSlash: 'always',
 
-  // Precarga la página de destino al pasar el cursor sobre un enlace interno.
+  // Precarga la página de destino al pasar el cursor sobre un enlace interno
+  // (o al enfocarlo). Astro no distingue páginas de archivos: todo enlace a
+  // /assets/ (PDF, flyers) lleva data-astro-prefetch="false", o rozar
+  // "Descargar Brochure" baja 4,8 MB que nadie pidió.
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 
   // Montserrat se descarga en el build y se sirve desde /_astro/: el visitante

@@ -242,7 +242,7 @@ const [sedePrincipal] = sedes;
               </div>
               <div class="mobile-menu-actions">
                 <a href="/contacto/" class="mobile-btn-primary">Contáctenos</a>
-                <a href={BROCHURE} target="_blank" rel="noopener" class="mobile-btn-outline">Descargar Brochure</a>
+                <a href={BROCHURE} target="_blank" rel="noopener" class="mobile-btn-outline" data-astro-prefetch="false">Descargar Brochure</a>
               </div>
               <div class="mobile-menu-footer">
                 <div class="mobile-menu-socials">
@@ -257,7 +257,8 @@ const [sedePrincipal] = sedes;
       </>
     )}
 
-    <main id="contenido" class:list={['main', { 'with-topbar': !minimalChrome }]}>
+    <!-- tabindex="-1": destino del "Saltar al contenido". Sin él, focus() sobre <main> no hace nada y el siguiente Tab vuelve al menú. -->
+    <main id="contenido" tabindex="-1" class:list={['main', { 'with-topbar': !minimalChrome }]}>
       <slot />
     </main>
 
