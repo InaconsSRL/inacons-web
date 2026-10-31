@@ -9,8 +9,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "test/**/*"],
-  // contrato.test.ts lee los archivos del sitio con node:fs, y el Worker no
-  // instala los tipos de Node solo para eso: Vitest lo corre igual.
-  "exclude": ["test/contrato.test.ts"]
+  "include": ["src/**/*", "test/**/*"]
 }

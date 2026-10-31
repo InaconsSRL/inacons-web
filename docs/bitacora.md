@@ -143,6 +143,14 @@ El verificador se probó con un error a propósito: un estilo en `sostenibilidad
 sobre `.page-hero-content`, que pinta `PageHero`, cortó con el mensaje de componente hijo.
 `npm audit` da 0 vulnerabilidades en los dos paquetes.
 
+El primer run en GitHub dejó en rojo el job `worker`, aunque en local las 86 pruebas
+pasaban. `contrato.test.ts` estaba excluido del `tsconfig` del Worker, así que Vite subió
+hasta el del sitio, que extiende `astro/tsconfigs/strict`; el job solo instala el Worker y
+no lo encontró. En local funcionaba porque `node_modules` del sitio estaba instalado.
+Ahora todas las pruebas están en el `tsconfig` del Worker y `test/node.d.ts` declara lo
+poco de Node que usan. Se reprodujo con una copia limpia y `npm ci --ignore-scripts`,
+como en el CI.
+
 ## 2026-10-31 — Worker: avisos que no se pierden ni se duplican
 
 Pedido: la tanda del Worker de la auditoría del mismo día, y desplegarlo. Commit `acdb0c8`;
