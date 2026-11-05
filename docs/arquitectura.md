@@ -119,15 +119,16 @@ desplazamiento) respetan `prefers-reduced-motion`.
 | `initCounters` | Anima cifras al entrar en vista | `data-counter`, `data-prefix`, `data-suffix` |
 | `initMobileMenu` | Menú móvil, acordeón, trampa de foco | `#menuToggle`, `#mobileMenu` |
 | `initNavDropdown` | Esc cierra el desplegable de Servicios aunque el foco o el cursor sigan encima | `.nav .dropdown` (clase `.dropdown--cerrado`) |
+| `initAccesos` | Esc, clic fuera y foco fuera cierran el `<details>` de Accesos del top-bar | `.top-bar-accesos` |
 | `initHeaderScroll` | Oculta header y top-bar al bajar | `#header`, `.top-bar` |
-| `initBackToTop` | Botón volver arriba | `#backToTop` |
+| `initBackToTop` | Botón volver arriba; se aparta mientras hay foco en un campo de formulario | `#backToTop` |
 | `initSmoothScroll` | Anclas `#` con margen del header | `a[href^="#"]` |
 | `initResponsive` | Clase `with-topbar` en escritorio | `#header`, `.main` |
 | `initClientsCarousel` | Pausa del carrusel de clientes | `.clients-track`, `#clientsPauseBtn` |
 | `initHeroVideo` | Carga el vídeo solo en escritorio | `.hero-video[data-src]`, `#heroPauseBtn` |
 | `initTabs` | Pestañas ARIA: clic, flechas, Inicio y Fin | `[role="tablist"]` con `[role="tab"][aria-controls]` |
 | `initScrollHint` | Flecha del hero | `.scroll-hint` |
-| `initCoverageMap` | Inyecta el mapa y dibuja los pines | `#peruMapContainer[data-ciudades]` |
+| `initCoverageMap` | Inyecta el mapa, dibuja los pines y resalta juntos departamento y fila de la lista | `#peruMapContainer[data-ciudades]`, `[data-id-mapa]` en cada fila |
 
 El HTML ya trae el valor final de cada cifra y el contenido visible: `main.ts` solo anima.
 Las animaciones `data-aos` ocultan contenido únicamente bajo la clase `.js`, que pone una

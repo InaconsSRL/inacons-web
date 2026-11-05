@@ -50,6 +50,13 @@ entenderlo sin ella.
 - [ ] **L-01, política de privacidad.** El abogado cierra lo marcado *pendiente* en
       `privacidad.astro`, que además tiene que nombrar a Cloudflare y a Zoho como proveedores
       y el plazo de 12 meses de las consultas. Después, `PRIVACIDAD_PUBLICADA = true`.
+- [ ] **Libro de Reclamaciones virtual:** `/contacto/` ofrece "Reclamo o sugerencia".
+      Confirmar si a INACONS le aplica (depende de si atiende a consumidores finales o solo a
+      empresas).
+- [ ] **Quejas y sugerencias en dos sitios:** el Canal Ético tiene "Reporte de Quejas" y
+      "Canal de Sugerencias" (al oficial de cumplimiento y a `sig@`), y el formulario de
+      contacto ahora "Reclamo o sugerencia" (a ventas). Decidir con cumplimiento qué va
+      por cada lado y decirlo en las dos páginas.
 - [ ] **L-04:** declarar la transferencia de datos fuera del Perú (D1 en el este de EE. UU.,
       Zoho CPaaS, Cloudflare).
 - [ ] **B-01:** plazo de conservación de los reportes del Canal Ético; hoy no se purgan.
@@ -75,12 +82,26 @@ entenderlo sin ella.
 - [ ] **Fotos de obra reales.** Las dos fichas de proyecto reutilizan fotos genéricas.
 - [ ] Año de fundación, código postal y coordenadas, para volver a ponerlos en el JSON-LD.
 - [ ] Sellos de las normas ISO, con permiso y archivo del organismo, y su `vigencia`.
+- [ ] **Brochure con texto y más liviano.** El PDF pesa 4.8 MB y es solo imagen: ni Google
+      ni un lector de pantalla lo leen. Una versión exportada con texto, de menos de 1.5 MB,
+      para quien lo abre desde un QR en el celular.
+- [ ] Logos de **Activos Mineros** y **Pluz**: en la franja de clientes son los únicos que van
+      como texto.
+- [ ] Confirmar la unidad de **"+150 km² construidos"** (150 millones de m²). El brochure no
+      tiene texto y no se pudo comprobar; al lado de las obras publicadas (18,500 m² de
+      pavimento) un comprador técnico lo va a notar.
+- [ ] **Huancayo:** concentra 50 de los proyectos por ciudad y tiene oficina, pero ninguna
+      página apunta a "constructora en Huancayo". Una página de sede con contenido propio y
+      un perfil de Google Business por oficina.
 
 ### Medición y pruebas
 
 - [ ] **Lighthouse** en móvil sobre las cinco páginas clave, sobre todo el LCP del home.
 - [ ] **C-01:** no se mide ninguna conversión. Mínimo, contar semanalmente las filas de
-      `consultas`; si se quiere atribución, analítica con eventos y sin cookies.
+      `consultas` (ahora con su `motivo`). Cloudflare Web Analytics no registra eventos ni
+      query strings, así que ni los clics en WhatsApp ni un UTM en los QR se verían: para
+      eso hace falta elegir otra herramienta sin cookies (Plausible, Umami). Mientras tanto,
+      el mensaje de WhatsApp ya dice desde qué página se escribe.
 - [ ] **Móvil real y lector de pantalla:** cambio de foco entre pasos del Canal y menú móvil.
 - [ ] **Search Console:** confirmar que las URLs del sitemap están indexadas y mirar
       *Rendimiento*.
@@ -95,7 +116,7 @@ las sesiones del mismo día, abajo.
       `setup-node`, `upload-artifact`), después de leer sus notas de versión.
 - [ ] **FE-04 y FE-05, reglas 2 y 3:** medidas fijas sin token (`--container-max`,
       `--header-h`), componentes propios de página, y datos escritos en las páginas
-      (políticas de `/documentos/`, contactos de `/mineria/`, `hasCredential` del JSON-LD).
+      (políticas de `/documentos/`, contactos de `/mineria/`).
 - [ ] **Worker, restos:** el límite por hora de contacto cuenta y después inserta
       (carrera); pruebas con `@cloudflare/vitest-pool-workers` en vez de Node.
 
@@ -107,6 +128,42 @@ las sesiones del mismo día, abajo.
       antes de aceptarlas en reportes anónimos.
 - [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
       documentos siguen con la lisa.
+
+## 2026-11-04 — Auditoría de experiencia: redacción, navegación, home y formulario
+
+Pedido: aplicar la auditoría de UX, contenido, accesibilidad y SEO del 2026-11-03 con lo que
+el usuario aprobó. Quedaron fuera a propósito: el botón "Ver proyectos" del hero, la
+homologación fuera de `/documentos/` y el orden de `/contacto/`. Tono elegido: tú,
+profesional y cercano.
+
+| Qué | Por qué |
+|---|---|
+| `/contacto/` pregunta el motivo (cotizar, consulta general, reclamo o sugerencia, proveedores) y solo al cotizar pide el servicio. Se quitó la banda "Canal de Comunicación", que mandaba consultas y reclamos comerciales a `/canal-etico/`; queda una línea que remite allí las denuncias. Worker: `MOTIVOS`, columna `motivo` y asunto "Consulta web — motivo — servicio — nombre" | El Canal Ético es de cumplimiento (lo atiende el oficial de cumplimiento y cuenta para las ISO) y no se mezcla con lo comercial. Ventas filtra por asunto sin abrir cada correo. Pruebas del Worker: 100 (antes 94) |
+| Intranet y Proveedores en un `<details>` "Accesos" del top-bar (`initAccesos`: Esc, clic fuera), en el menú móvil y en el pie. `/recursos/` fuera del pie | Son para colaboradores y proveedores, y competían con "Contáctanos". En móvil no estaban en el menú. Recursos es interno y aún no se usa |
+| "Documentos" pasa a llamarse **Cumplimiento** en el menú, el pie, la miga y la 404; la URL sigue siendo `/documentos/` | La página tiene certificados y políticas: "Documentos" no decía qué había. La URL se queda para no romper enlaces ni QR |
+| Home: clientes justo después del hero, "Quiénes somos", servicios, mapa, proyectos, una franja con las normas ISO que enlaza a Cumplimiento, y el cierre | Los logos eran la mejor prueba y estaban al final |
+| Mapa de cobertura: barras proporcionales por ciudad y resaltado cruzado entre fila y departamento | La lista de números sueltos no se leía, y no había forma de saber qué mancha del mapa era qué ciudad |
+| Escala tipográfica sin `--fs-2xs`: nada baja de 12px. `--fs-hero` sube su mínimo a 20px (la descripción del hero baja a 16 en móvil). `--fs-decorativo` para el "404" y `--fs-section` en `/mineria/`, en vez de `clamp()` sueltos. `--tap-min` (24px) en los enlaces del pie y del menú móvil | Los rótulos de 11px no se leían en el celular. En móvil el H1 del home medía 16px y el párrafo de abajo 18. Los enlaces del pie medían 22px de alto (WCAG 2.5.8 pide 24) |
+| Redacción en todo el sitio: tú en lugar de usted ("Contáctanos") y del voseo ("Contanos"); mayúscula solo inicial en rótulos, títulos y botones; H1 que dicen qué es la página y el eslogan como subtítulo; fuera los superlativos sin respaldo ("líderes", "los más altos estándares", "satisfacción total"), cambiados por lo que se puede comprobar (ISO, BIM, cifras de `CIFRAS`); ODS con su número; "Conoce INACONS" | El sitio mezclaba tres registros, y las promesas sin prueba restan credibilidad frente a un comprador técnico |
+| Canal Ético: "Reporte anónimo… salvo obligación legal" y "Atención especializada" en vez de "Comité de Investigación independiente" | Arriba se prometía más que lo que dicen los términos y que lo que pasa hoy con cada reporte (B-02) |
+| Teléfono "+51 64 654736" | Con el +51 delante el 0 del código de ciudad sobra |
+| Los enlaces a PDF dicen formato y peso (`formatoYPeso`, leído del archivo en el build), y los que abren pestaña nueva lo anuncian al lector de pantalla (`<PestanaNueva />`, `PESTANA_NUEVA`) | El brochure pesa 4.8 MB y se abre desde el celular; quien no ve la pantalla no se enteraba del cambio de pestaña |
+| WhatsApp: el mensaje dice desde qué página se escribe (`enlaceWhatsapp`) | La analítica sin cookies no registra clics: así ventas sabe de dónde viene cada chat |
+| JSON-LD en `@graph` con `@id` de la empresa, `WebSite`, la sede de Huancayo como `department`, normas leídas de la colección, y un `Service` en cada ficha que cita a la empresa por `@id`. `tituloSeo` en los servicios ("Campamentos mineros y movimiento de tierras") | Cada página declaraba la empresa entera; "Minería en Perú" no decía qué se hace |
+| Pasos del Canal en móvil: los nombres de los pasos no actuales se ocultan solo a la vista | Con `display:none` el lector anunciaba los pasos 2 y 3 vacíos |
+| "Volver arriba" se aparta mientras hay foco en un campo | En móvil tapaba el texto legal del formulario |
+
+No se cambiaron: la misión y los valores (son texto oficial del SIG), los nombres de las
+líneas de servicio y de los canales del Canal Ético (los usan el Worker, los correos y las
+categorías de proyecto), y el formato de los números de las fichas (85,000 m³ y 4.2 km son
+lo habitual en es-PE). `check`, build y `verificar` pasan; revisado en 1280 y 375 px.
+
+Con la autorización del usuario, en este orden: columna `motivo` agregada a `consultas` en
+D1 (comprobada con `pragma_table_info`) y Worker desplegado (versión `a3824401`). En
+producción, con token de Turnstile falso: los cuatro motivos sin servicio llegan a 403
+(pasan la validación), el formulario viejo sin `motivo` también, y "Cotizar un proyecto"
+sin servicio o un motivo inventado dan 400. En los primeros segundos tras el deploy
+respondía todavía la versión anterior. El sitio ya se puede subir.
 
 ## 2026-10-31 — CSP con informes, home sin JavaScript y detalles
 

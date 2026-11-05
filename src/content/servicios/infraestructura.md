@@ -1,6 +1,7 @@
 ---
 titulo: Obras de Infraestructura
 descripcion: "Reservorios, plantas de tratamiento, bombeo, subestaciones y edificaciones funcionales, seguras y sostenibles"
+tituloSeo: "Infraestructura: reservorios, plantas y bombeo"
 resumen: "Reservorios, plantas de tratamiento, bombeo, subestaciones y edificaciones"
 imagen: ../../assets/imagenes/image_infraestructura.webp
 icono: servidor

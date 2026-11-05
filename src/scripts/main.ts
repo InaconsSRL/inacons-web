@@ -225,11 +225,49 @@ function initHeaderScroll() {
 }
 
 /* ─── Volver arriba ─── */
+/*
+  Mientras alguien escribe en un formulario el botón se aparta: en móvil,
+  flotando en la esquina, tapaba el texto legal y el final de los campos de
+  /contacto/ y del Canal Ético, justo donde se está mirando.
+*/
 function initBackToTop() {
   const boton = document.getElementById('backToTop');
   if (!boton) return;
-  window.addEventListener('scroll', () => boton.classList.toggle('visible', window.scrollY > 400), { passive: true });
+  let escribiendo = false;
+  const actualizar = () => boton.classList.toggle('visible', window.scrollY > 400 && !escribiendo);
+  window.addEventListener('scroll', actualizar, { passive: true });
+  document.addEventListener('focusin', (e) => {
+    escribiendo = (e.target as Element).matches('form input, form select, form textarea');
+    actualizar();
+  });
+  document.addEventListener('focusout', () => {
+    escribiendo = false;
+    actualizar();
+  });
   boton.addEventListener('click', () => window.scrollTo({ top: 0, behavior: comportamientoScroll }));
+}
+
+/*
+  ─── Desplegable "Accesos" del top-bar ───
+  Es un <details>: abre, cierra y se anuncia sin JavaScript. Esto suma lo que
+  un desplegable tiene que hacer y <details> no hace solo: cerrarse con Esc
+  (devolviendo el foco al botón), con un clic fuera y al salir el foco.
+*/
+function initAccesos() {
+  const accesos = document.querySelector<HTMLDetailsElement>('.top-bar-accesos');
+  if (!accesos) return;
+  const resumen = accesos.querySelector<HTMLElement>('summary');
+  accesos.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !accesos.open) return;
+    accesos.open = false;
+    resumen?.focus();
+  });
+  document.addEventListener('click', (e) => {
+    if (accesos.open && !accesos.contains(e.target as Node)) accesos.open = false;
+  });
+  accesos.addEventListener('focusout', (e) => {
+    if (!accesos.contains(e.relatedTarget as Node | null)) accesos.open = false;
+  });
 }
 
 /* ─── Anclas #hash con desplazamiento suave, descontando el header ─── */
@@ -417,10 +455,35 @@ function initCoverageMap() {
       const pines = document.createElementNS(NS, 'g');
       svg.appendChild(pines);
 
+      // Fila y departamento se resaltan juntos, pase el cursor por cualquiera
+      // de los dos: la lista dice cuánto y el mapa dónde, y antes no había
+      // forma de saber qué mancha era qué ciudad. Todo con element.style: las
+      // filas son de la página, pero el resaltado no existe en el HTML
+      // estático y el SVG es inyectado (regla 1).
+      const filas = new Map<string, HTMLElement>();
+      document.querySelectorAll<HTMLElement>('[data-id-mapa]').forEach((f) => filas.set(f.dataset.idMapa ?? '', f));
+      const RESALTE = 'color-mix(in srgb, var(--c-accent) 55%, transparent)';
+      const enlazar = (depto: SVGGraphicsElement, ciudad: Ciudad) => {
+        const fila = filas.get(ciudad.idMapa);
+        const barra = fila?.querySelector<HTMLElement>('.map-stat-fill');
+        const resaltar = (activo: boolean) => {
+          depto.style.fill = activo ? RESALTE : RELLENO[ciudad.peso];
+          if (fila) fila.style.background = activo ? 'var(--c-bg-muted)' : '';
+          if (barra) barra.style.background = activo ? 'var(--c-accent-ink)' : '';
+        };
+        for (const el of [depto, fila]) {
+          el?.addEventListener('mouseenter', () => resaltar(true));
+          el?.addEventListener('mouseleave', () => resaltar(false));
+        }
+        depto.style.cursor = 'default';
+        depto.style.transition = 'fill var(--t)';
+      };
+
       ciudades.forEach((ciudad, i) => {
         const depto = svg.querySelector<SVGGraphicsElement>(`[id="${ciudad.idMapa}"]`);
         if (!depto) return;
         depto.style.fill = RELLENO[ciudad.peso];
+        enlazar(depto, ciudad);
 
         const caja = depto.getBBox();
         if (!caja.width) return;
@@ -501,6 +564,7 @@ for (const init of [
   initCounters,
   initMobileMenu,
   initNavDropdown,
+  initAccesos,
   initHeaderScroll,
   initBackToTop,
   initSmoothScroll,

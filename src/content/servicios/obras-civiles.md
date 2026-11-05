@@ -1,6 +1,7 @@
 ---
 titulo: Obras Civiles
 descripcion: "Del terreno crudo a la operación: movimiento de tierras, vías, redes y edificaciones bajo una sola gestión"
+tituloSeo: "Obras civiles y habilitaciones urbanas en Perú"
 resumen: "Movimiento de tierras, vías, redes y edificaciones bajo una sola gestión"
 imagen: ../../assets/imagenes/image_obra_civiles.webp
 icono: edificio

@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS consultas (
   correo    TEXT    NOT NULL,
   telefono  TEXT    NOT NULL,
   empresa   TEXT    NOT NULL DEFAULT '',
+  -- Cotizar un proyecto | Consulta general | Reclamo o sugerencia | Proveedores.
+  -- Vacío en las filas anteriores al campo. En una base que ya existe se agrega con
+  --   npx wrangler d1 execute inacons-contacto --remote --command "ALTER TABLE consultas ADD COLUMN motivo TEXT NOT NULL DEFAULT ''"
+  -- y tiene que correr ANTES de desplegar el Worker que lo inserta.
+  motivo    TEXT    NOT NULL DEFAULT '',
+  -- Vacío cuando el motivo no es cotizar.
   servicio  TEXT    NOT NULL,
   mensaje   TEXT    NOT NULL,
   origen    TEXT    NOT NULL DEFAULT '',

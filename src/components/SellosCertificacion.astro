@@ -31,6 +31,7 @@
  *   <SellosCertificacion />
  */
 import { getCollection } from 'astro:content';
+import PestanaNueva from './PestanaNueva.astro';
 
 const certs = (await getCollection('certificaciones'))
   .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99));
@@ -78,6 +79,7 @@ const fmtVigencia = new Intl.DateTimeFormat('es-PE', {
                 loading="lazy"
               />
               <span class="sello-norma">{c.data.norma}</span>
+              <PestanaNueva />
               <span class="sello-titulo">{c.data.titulo}</span>
               {c.data.vigencia && (
                 <span class="sello-dato">Vigente hasta {fmtVigencia.format(c.data.vigencia)}</span>

@@ -34,6 +34,13 @@ const servicios = defineCollection({
   schema: ({ image }) => z.object({
     titulo:         z.string(),
     descripcion:    z.string(),
+    /**
+     * Título para Google, sin la marca (BaseLayout no la agrega: la ficha suma
+     * " | INACONS"). Nombra lo que se busca, no la línea de negocio: "Minería en
+     * Perú" no dice qué se hace. Hasta 50 caracteres para que con la marca no
+     * pase de 60 y Google no lo corte. Sin él: "<titulo> en Perú".
+     */
+    tituloSeo:      z.string().max(50).optional(),
     /** Frase corta para la tarjeta del home. */
     resumen:        z.string(),
     imagen:         image(),

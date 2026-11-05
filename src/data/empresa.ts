@@ -19,6 +19,15 @@
  * web. Los números de personas concretas de /mineria/ no llevan texto.
  */
 const MENSAJE_WHATSAPP = 'Hola INACONS, quiero cotizar un proyecto. Les escribo desde la web.';
+const NUMERO_WHATSAPP = '51948888070';
+
+/**
+ * Enlace al WhatsApp de ventas. Con `pagina`, el mensaje dice desde qué página
+ * se escribe: la analítica sin cookies no registra clics, y así ventas sabe de
+ * qué servicio viene cada chat sin preguntarlo.
+ */
+export const enlaceWhatsapp = (pagina?: string) =>
+  `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(pagina ? `${MENSAJE_WHATSAPP} (Página: ${pagina})` : MENSAJE_WHATSAPP)}`;
 
 /**
  * Interruptor único de la política de privacidad. En false la página es un
@@ -58,8 +67,10 @@ const SEDES: readonly Sede[] = [
 export const CONTACTO = {
   correoVentas: 'ventas@inacons.com.pe',
   correoGerencia: 'gerencia.proyectos@inacons.com.pe',
-  telefono: { texto: '+51 064 654 736', href: 'tel:+5164654736' },
-  whatsapp: { texto: '+51 948 888 070', href: `https://wa.me/51948888070?text=${encodeURIComponent(MENSAJE_WHATSAPP)}` },
+  // Con el +51 delante el 0 del código de ciudad no se marca: "+51 064" no es
+  // un número que se pueda teclear tal cual desde fuera del Perú.
+  telefono: { texto: '+51 64 654736', href: 'tel:+5164654736' },
+  whatsapp: { texto: '+51 948 888 070', href: enlaceWhatsapp() },
   redes: {
     facebook: 'https://www.facebook.com/www.inacons.com.pe',
     linkedin: 'https://pe.linkedin.com/company/inacons',

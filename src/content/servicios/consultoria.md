@@ -1,6 +1,7 @@
 ---
 titulo: Consultoría
 descripcion: "Factibilidad con BIM, gerencia de proyectos y supervisión independiente con drones y cámaras 3D"
+tituloSeo: "Consultoría, supervisión de obras y BIM en Perú"
 resumen: "Gerencia de proyectos, factibilidad BIM y supervisión con drones"
 imagen: ../../assets/imagenes/image_consultor.webp
 icono: grafico

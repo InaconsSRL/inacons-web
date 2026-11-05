@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
 import Icono from '../components/Icono.astro';
+import PestanaNueva from '../components/PestanaNueva.astro';
+import { formatoYPeso } from '../lib/archivos';
 import { BROCHURE, CIFRAS, NORMAS_ISO } from '../data/empresa';
 import imagenFondo from '../assets/imagenes/mineria_stand.webp';
 
@@ -146,7 +148,7 @@ const CONTACTOS = [
       display: flex;
       align-items: center;
       gap: var(--sp-2);
-      font-size: var(--fs-2xs);
+      font-size: var(--fs-xs);
       font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
@@ -220,7 +222,7 @@ const CONTACTOS = [
     .mn-solutions-inner { max-width: 1200px; margin: 0 auto; }
 
     .mn-solutions-label {
-      font-size: var(--fs-2xs);
+      font-size: var(--fs-xs);
       font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
@@ -305,7 +307,8 @@ const CONTACTOS = [
     @media (max-width: 767.98px) {
       .mn-brand { padding: var(--sp-5) var(--sp-4); }
       .mn-hero { padding: 0 var(--sp-4); }
-      .mn-title { font-size: clamp(1.6rem, 7vw, 2.25rem); }
+      /* Un escalón abajo de --fs-display: en 360px el título entra en dos líneas. */
+      .mn-title { font-size: var(--fs-section); }
       .mn-sub { max-width: none; }
       .mn-ctas .btn { flex: 1 1 calc(50% - var(--sp-3) / 2); }
       .mn-solutions { padding: var(--sp-5) var(--sp-4) var(--sp-6); }
@@ -349,13 +352,13 @@ const CONTACTOS = [
 
         <div class="mn-ctas" data-aos="fade-up" data-aos-delay="240">
           <a class="btn btn-primary btn-lg" href={BROCHURE} target="_blank" rel="noopener" data-astro-prefetch="false">
-            Brochure
+            Brochure ({formatoYPeso(BROCHURE)})<PestanaNueva />
           </a>
           <button type="button" class="btn btn-primary btn-lg" commandfor="dlg-contacto" command="show-modal" aria-haspopup="dialog">
             Contacto
           </button>
           <a class="btn btn-primary btn-lg" href={URL_DOCUMENTOS}>
-            Documentos
+            Cumplimiento
           </a>
         </div>
       </div>
@@ -432,7 +435,7 @@ const CONTACTOS = [
             </a>
             <a href={`https://wa.me/${c.whatsapp}`} target="_blank" rel="noopener">
               <Icono nombre="whatsapp" tam={15} />
-              WhatsApp
+              WhatsApp<PestanaNueva />
             </a>
           </div>
         </div>
@@ -458,7 +461,7 @@ const CONTACTOS = [
       <div class="mn-compartir-redes">
         <a class="btn btn-outline btn-sm" href={URL_WHATSAPP} target="_blank" rel="noopener">
           <Icono nombre="whatsapp" />
-          WhatsApp
+          WhatsApp<PestanaNueva />
         </a>
         <a class="btn btn-outline btn-sm" href={URL_CORREO}>
           <Icono nombre="correo" />

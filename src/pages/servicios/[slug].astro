@@ -8,6 +8,9 @@ import Icono from '../../components/Icono.astro';
 import MediaCard from '../../components/MediaCard.astro';
 import { serviciosPorOrden, type Servicio } from '../../lib/servicios';
 import { ANIOS_EXPERIENCIA, BROCHURE } from '../../data/empresa';
+import { formatoYPeso } from '../../lib/archivos';
+import { ID_ORGANIZACION } from '../../lib/datos-estructurados';
+import PestanaNueva from '../../components/PestanaNueva.astro';
 
 export async function getStaticPaths() {
   const servicios = await serviciosPorOrden();
@@ -24,7 +27,7 @@ interface Props {
 
 const { servicio, otros } = Astro.props;
 const { Content } = await render(servicio);
-const { titulo, descripcion, imagen, especialidades, categoria, destacados, faqs, galeria } = servicio.data;
+const { titulo, tituloSeo, descripcion, imagen, especialidades, categoria, destacados, faqs, galeria } = servicio.data;
 
 // Los proyectos de la misma categoría, para que la ficha enseñe obra y no solo
 // texto. Sin `categoria` en el .md, o sin proyectos de ella, la sección no sale.
@@ -56,9 +59,31 @@ const jsonLdFaq = faqs && faqs.length > 0 && {
     acceptedAnswer: { '@type': 'Answer', text: f.respuesta },
   })),
 };
+
+// El servicio como tal, con la empresa por referencia: el nodo completo de
+// INACONS ya lo declara BaseLayout con este mismo @id.
+const jsonLdServicio = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: titulo,
+  serviceType: titulo,
+  description: descripcion,
+  url: new URL(Astro.url.pathname, Astro.site).href,
+  provider: { '@id': ID_ORGANIZACION },
+  areaServed: { '@type': 'Country', name: 'Perú' },
+  ...(especialidades && especialidades.length > 0 && {
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: `Especialidades de ${titulo}`,
+      itemListElement: especialidades.map((e: string) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: e } })),
+    },
+  }),
+};
+const pesoBrochure = formatoYPeso(BROCHURE);
 ---
 
-<BaseLayout title={`${titulo} en Perú | INACONS`} description={metaDescripcion} ogImage={imagen}>
+<BaseLayout title={`${tituloSeo ?? `${titulo} en Perú`} | INACONS`} description={metaDescripcion} ogImage={imagen}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLdServicio)} />
 
   <PageHero
     image={imagen}
@@ -81,7 +106,7 @@ const jsonLdFaq = faqs && faqs.length > 0 && {
 
             {especialidades && especialidades.length > 0 && (
               <>
-                <h2>Nos especializamos en:</h2>
+                <h2>En qué nos especializamos</h2>
                 <ul>
                   {especialidades.map((e: string) => <li>{e}</li>)}
                 </ul>
@@ -103,7 +128,7 @@ const jsonLdFaq = faqs && faqs.length > 0 && {
             <div class="download-list">
               <a href={BROCHURE} target="_blank" rel="noopener" class="download-item" data-astro-prefetch="false">
                 <Icono nombre="documento" tam={18} />
-                Brochure General
+                Brochure corporativo ({pesoBrochure})<PestanaNueva />
               </a>
             </div>
           </div>
@@ -208,11 +233,11 @@ const jsonLdFaq = faqs && faqs.length > 0 && {
   {jsonLdFaq && <script type="application/ld+json" set:html={JSON.stringify(jsonLdFaq)} />}
 
   <CtaBand
-    label="¿Listo para iniciar?"
+    label="Hablemos de tu proyecto"
     title={`¿Tienes un proyecto de ${titulo}?`}
-    description="Nuestro equipo técnico está disponible para asesorarte y presentarte una propuesta sin compromiso."
+    description="Nuestro equipo técnico revisa el alcance y te presenta una propuesta sin compromiso."
     primaryHref="/contacto/"
-    primaryLabel="Contáctenos"
+    primaryLabel="Contáctanos"
     secondaryHref="/proyectos/"
     secondaryLabel="Ver proyectos"
     image={imagen}

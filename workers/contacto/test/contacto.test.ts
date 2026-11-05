@@ -19,6 +19,23 @@ describe('contacto.validar', () => {
     expect(validar({ ...base, [campo]: '' })).toBeNull();
   });
 
+  it('sin motivo es una cotización: el formulario de antes del campo sigue funcionando', () => {
+    expect(validar(base)?.motivo).toBe('Cotizar un proyecto');
+  });
+
+  it('rechaza un motivo que no está en la lista', () => {
+    expect(validar({ ...base, motivo: 'Denuncia' })).toBeNull();
+  });
+
+  it('al cotizar exige el servicio', () => {
+    expect(validar({ ...base, motivo: 'Cotizar un proyecto', servicio: '' })).toBeNull();
+  });
+
+  it('en los otros motivos el servicio es opcional, pero si llega tiene que ser de la lista', () => {
+    expect(validar({ ...base, motivo: 'Reclamo o sugerencia', servicio: '' })).toMatchObject({ motivo: 'Reclamo o sugerencia', servicio: '' });
+    expect(validar({ ...base, motivo: 'Consulta general', servicio: 'Cualquier cosa' })).toBeNull();
+  });
+
   it('rechaza un correo mal formado', () => {
     expect(validar({ ...base, correo: 'maria@empresa' })).toBeNull();
   });
@@ -81,6 +98,13 @@ describe('contacto.procesar', () => {
     expect(respuesta.status).toBe(502);
     expect(correos).toHaveLength(1);
     expect(estados()).toEqual(['error']);
+  });
+
+  it('el asunto lleva el motivo, y el servicio solo si lo hay', async () => {
+    const red = redFalsa();
+    const e = entorno();
+    await procesar(validar({ ...base, motivo: 'Proveedores', servicio: '' })!, e.env, 'hash', e.ctx);
+    expect(red.correos[0].asunto).toBe('Consulta web — Proveedores — María López');
   });
 
   it('con 3 envíos en la última hora: 429', async () => {

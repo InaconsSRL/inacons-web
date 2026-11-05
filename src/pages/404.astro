@@ -31,7 +31,7 @@ Astro.response.status = 404;
     .error-section::before {
       content: '404';
       position: absolute;
-      font-size: clamp(12rem, 30vw, 22rem);
+      font-size: var(--fs-decorativo);
       font-weight: var(--fw-display);
       color: var(--c-ink-ghost);
       line-height: 1;
@@ -82,7 +82,7 @@ Astro.response.status = 404;
     }
 
     .error-label {
-      font-size: var(--fs-2xs);
+      font-size: var(--fs-xs);
       font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
@@ -92,7 +92,7 @@ Astro.response.status = 404;
     }
 
     .error-title {
-      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-size: var(--fs-display);
       font-weight: var(--fw-display);
       color: var(--c-text-heading);
       line-height: 1.15;
@@ -192,7 +192,7 @@ Astro.response.status = 404;
         </a>
         <a href="/contacto/" class="btn btn-outline">
           <Icono nombre="correo" />
-          Contáctenos
+          Contáctanos
         </a>
       </div>
 
@@ -202,7 +202,7 @@ Astro.response.status = 404;
           <a href="/nosotros/" class="error-link-item">Nosotros</a>
           <a href="/servicios/" class="error-link-item">Servicios</a>
           <a href="/proyectos/" class="error-link-item">Proyectos</a>
-          <a href="/documentos/" class="error-link-item">Documentos</a>
+          <a href="/documentos/" class="error-link-item">Cumplimiento</a>
           <a href="/sostenibilidad/" class="error-link-item">Sostenibilidad</a>
           <a href="/canal-etico/" class="error-link-item">Canal ético</a>
         </div>

@@ -5,8 +5,13 @@ import type { ImageMetadata } from 'astro';
 import { Font, getImage } from 'astro:assets';
 import { PUBLIC_ANALYTICS_TOKEN } from 'astro:env/client';
 import Icono from '../components/Icono.astro';
+import PestanaNueva from '../components/PestanaNueva.astro';
 import { serviciosPorMenu } from '../lib/servicios';
-import { BROCHURE, CONTACTO, DESCRIPCION_EMPRESA, PRIVACIDAD_PUBLICADA } from '../data/empresa';
+import { formatoYPeso } from '../lib/archivos';
+import { PESTANA_NUEVA } from '../lib/enlaces';
+import { getCollection } from 'astro:content';
+import { BROCHURE, CONTACTO, DESCRIPCION_EMPRESA, PRIVACIDAD_PUBLICADA, enlaceWhatsapp, type Sede } from '../data/empresa';
+import { ID_ORGANIZACION } from '../lib/datos-estructurados';
 import imagenPorDefecto from '../assets/imagenes/image_heroprincipal.webp';
 
 interface Props {
@@ -41,8 +46,23 @@ const ruta      = Astro.url.pathname.replace(/\/$/, '') || '/';
 const actual    = (href: string) => (ruta === href.replace(/\/$/, '') ? 'page' : undefined);
 const seccion   = (href: string) => (ruta.startsWith(href.replace(/\/$/, '')) ? 'page' : undefined);
 const servicios = await serviciosPorMenu();
-const { correoVentas, telefono, whatsapp, redes, intranet, proveedores, sedes } = CONTACTO;
-const [sedePrincipal] = sedes;
+const { correoVentas, telefono, redes, intranet, proveedores, sedes } = CONTACTO;
+const [sedePrincipal, ...otrasSedes] = sedes;
+const direccionDe = (sede: Sede) => ({
+  "@type": "PostalAddress",
+  "streetAddress": sede.direccion,
+  "addressLocality": sede.distrito,
+  "addressRegion": sede.ciudad,
+  "addressCountry": "PE",
+});
+// Las normas salen de la colección (regla 3): antes eran una lista escrita aquí.
+const normas = (await getCollection('certificaciones'))
+  .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99))
+  .map((c) => c.data.norma);
+// El chat dice desde qué página se escribe ("Obras Civiles en Perú"): el título
+// sin la marca, o "Inicio" en el home, cuyo título es solo la marca.
+const whatsappHref = enlaceWhatsapp(ruta === '/' ? 'Inicio' : pageTitle.split('|')[0].trim());
+const pesoBrochure = formatoYPeso(BROCHURE);
 ---
 
 <html lang="es" class:list={{ 'layout-minimal': minimalChrome }}>
@@ -80,31 +100,48 @@ const [sedePrincipal] = sedes;
 
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
-      "@type": "GeneralContractor",
-      "name": "INACONS S.R.L.",
-      "url": Astro.site?.href,
-      "logo": new URL('/assets/imagenes/logos/logo_inacons.svg', Astro.site).href,
-      "image": ogImageURL,
-      "description": DESCRIPCION_EMPRESA,
-      // Sin foundingDate ni postalCode: ningún dato del repositorio los respalda
-      // (regla 5). Se agregan a empresa.ts cuando la empresa los confirme.
-      "telephone": telefono.href.replace('tel:', ''),
-      "email": correoVentas,
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": sedePrincipal.direccion,
-        "addressLocality": sedePrincipal.distrito,
-        "addressRegion": sedePrincipal.ciudad,
-        "addressCountry": "PE"
-      },
-      ...(sedePrincipal.coordenadas && {
-        "geo": { "@type": "GeoCoordinates", "latitude": sedePrincipal.coordenadas.lat, "longitude": sedePrincipal.coordenadas.lng },
-      }),
-      "areaServed": { "@type": "Country", "name": "Perú" },
-      "sameAs": [redes.facebook, redes.linkedin],
-      "hasCredential": ['ISO 9001', 'ISO 14001', 'ISO 45001', 'ISO 37001'].map((name) => ({
-        "@type": "EducationalOccupationalCredential", name,
-      })),
+      "@graph": [
+        {
+          "@type": "GeneralContractor",
+          // Un @id fijo: el Service de cada ficha y el WebSite apuntan a esta
+          // misma entidad en vez de declarar una empresa nueva en cada página.
+          "@id": ID_ORGANIZACION,
+          "name": "INACONS S.R.L.",
+          "url": Astro.site?.href,
+          "logo": new URL('/assets/imagenes/logos/logo_inacons.svg', Astro.site).href,
+          "image": ogImageURL,
+          "description": DESCRIPCION_EMPRESA,
+          // Sin foundingDate ni postalCode: ningún dato del repositorio los respalda
+          // (regla 5). Se agregan a empresa.ts cuando la empresa los confirme.
+          "telephone": telefono.href.replace('tel:', ''),
+          "email": correoVentas,
+          "address": direccionDe(sedePrincipal),
+          ...(sedePrincipal.coordenadas && {
+            "geo": { "@type": "GeoCoordinates", "latitude": sedePrincipal.coordenadas.lat, "longitude": sedePrincipal.coordenadas.lng },
+          }),
+          // Las otras sedes (Huancayo): Google las lee como ubicaciones de la
+          // misma empresa, no como un negocio aparte.
+          "department": otrasSedes.map((sede) => ({
+            "@type": "GeneralContractor",
+            "name": `INACONS — ${sede.nombre}`,
+            "address": direccionDe(sede),
+            "telephone": telefono.href.replace('tel:', ''),
+          })),
+          "areaServed": { "@type": "Country", "name": "Perú" },
+          "sameAs": [redes.facebook, redes.linkedin],
+          "hasCredential": normas.map((name) => ({
+            "@type": "EducationalOccupationalCredential", "credentialCategory": "Certificación", name,
+          })),
+        },
+        {
+          "@type": "WebSite",
+          "@id": new URL('/#sitio', Astro.site).href,
+          "url": Astro.site?.href,
+          "name": "INACONS",
+          "inLanguage": "es-PE",
+          "publisher": { "@id": ID_ORGANIZACION },
+        },
+      ],
     })} />
 
     <slot name="head" />
@@ -129,14 +166,29 @@ const [sedePrincipal] = sedes;
             </div>
             <div class="top-bar-right">
               <div class="top-bar-social">
-                <a href={whatsapp.href} target="_blank" rel="noopener" aria-label="WhatsApp"><Icono nombre="whatsapp" /></a>
-                <a href={redes.facebook} target="_blank" rel="noopener" aria-label="Facebook"><Icono nombre="facebook" /></a>
+                <a href={whatsappHref} target="_blank" rel="noopener" aria-label={`WhatsApp ${PESTANA_NUEVA}`}><Icono nombre="whatsapp" /></a>
+                <a href={redes.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${PESTANA_NUEVA}`}><Icono nombre="facebook" /></a>
+                <a href={redes.linkedin} target="_blank" rel="noopener" aria-label={`LinkedIn ${PESTANA_NUEVA}`}><Icono nombre="linkedin" /></a>
               </div>
               <span class="tb-sep" aria-hidden="true">|</span>
               <div class="top-bar-links">
-                <a href={intranet} class="top-bar-pill" target="_blank" rel="noopener">Intranet</a>
-                <a href={proveedores} class="top-bar-pill" target="_blank" rel="noopener">Proveedores</a>
-                <a href="/contacto/" class="top-bar-pill top-bar-pill--accent">Contáctenos</a>
+                <!--
+                  Intranet y Proveedores son para colaboradores y proveedores, no
+                  para el cliente: juntos en un desplegable dejan de competir con
+                  "Contáctanos". <details> abre y cierra sin script; initAccesos()
+                  solo suma Esc y el clic fuera.
+                -->
+                <details class="top-bar-accesos">
+                  <summary class="top-bar-pill">
+                    Accesos
+                    <Icono nombre="chevron-abajo" tam={10} trazo={2.5} class="top-bar-accesos-chevron" />
+                  </summary>
+                  <ul class="top-bar-accesos-menu">
+                    <li><a href={intranet} target="_blank" rel="noopener">Intranet<PestanaNueva /></a></li>
+                    <li><a href={proveedores} target="_blank" rel="noopener">Portal de proveedores<PestanaNueva /></a></li>
+                  </ul>
+                </details>
+                <a href="/contacto/" class="top-bar-pill top-bar-pill--accent">Contáctanos</a>
               </div>
             </div>
           </div>
@@ -170,7 +222,7 @@ const [sedePrincipal] = sedes;
                 </li>
                 <li><a href="/proyectos/" aria-current={seccion('/proyectos/')}>Proyectos</a></li>
                 <li><a href="/sostenibilidad/" aria-current={actual('/sostenibilidad/')}>Sostenibilidad</a></li>
-                <li><a href="/documentos/" aria-current={actual('/documentos/')}>Documentos</a></li>
+                <li><a href="/documentos/" aria-current={actual('/documentos/')}>Cumplimiento</a></li>
               </ul>
             </nav>
             <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
@@ -224,7 +276,7 @@ const [sedePrincipal] = sedes;
                 <li>
                   <a href="/documentos/">
                     <Icono nombre="documento" />
-                    Documentos
+                    Cumplimiento
                   </a>
                 </li>
                 <li>
@@ -243,14 +295,19 @@ const [sedePrincipal] = sedes;
                 <a href={`mailto:${correoVentas}`}><Icono nombre="correo" tam={16} /> {correoVentas}</a>
               </div>
               <div class="mobile-menu-actions">
-                <a href="/contacto/" class="mobile-btn-primary">Contáctenos</a>
-                <a href={BROCHURE} target="_blank" rel="noopener" class="mobile-btn-outline" data-astro-prefetch="false">Descargar Brochure</a>
+                <a href="/contacto/" class="mobile-btn-primary">Contáctanos</a>
+                <a href={BROCHURE} target="_blank" rel="noopener" class="mobile-btn-outline" data-astro-prefetch="false">Descargar brochure ({pesoBrochure})<PestanaNueva /></a>
+              </div>
+              <!-- En móvil no hay top-bar: sin esto, Intranet y Proveedores solo estaban al final del pie. -->
+              <div class="mobile-menu-accesos" role="group" aria-label="Accesos">
+                <a href={intranet} target="_blank" rel="noopener">Intranet<PestanaNueva /></a>
+                <a href={proveedores} target="_blank" rel="noopener">Portal de proveedores<PestanaNueva /></a>
               </div>
               <div class="mobile-menu-footer">
                 <div class="mobile-menu-socials">
-                  <a href={whatsapp.href} target="_blank" rel="noopener" aria-label="WhatsApp"><Icono nombre="whatsapp" tam={18} /></a>
-                  <a href={redes.facebook} target="_blank" rel="noopener" aria-label="Facebook"><Icono nombre="facebook" tam={18} /></a>
-                  <a href={redes.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn"><Icono nombre="linkedin" tam={18} /></a>
+                  <a href={whatsappHref} target="_blank" rel="noopener" aria-label={`WhatsApp ${PESTANA_NUEVA}`}><Icono nombre="whatsapp" tam={18} /></a>
+                  <a href={redes.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${PESTANA_NUEVA}`}><Icono nombre="facebook" tam={18} /></a>
+                  <a href={redes.linkedin} target="_blank" rel="noopener" aria-label={`LinkedIn ${PESTANA_NUEVA}`}><Icono nombre="linkedin" tam={18} /></a>
                 </div>
               </div>
             </div>
@@ -279,33 +336,33 @@ const [sedePrincipal] = sedes;
                   TRASCENDEMOS JUNTOS
                 </p>
                 <div class="footer-social">
-                  <a href={whatsapp.href} target="_blank" rel="noopener" aria-label="WhatsApp"><Icono nombre="whatsapp" /></a>
-                  <a href={redes.facebook} target="_blank" rel="noopener" aria-label="Facebook"><Icono nombre="facebook" /></a>
-                  <a href={redes.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn"><Icono nombre="linkedin" /></a>
+                  <a href={whatsappHref} target="_blank" rel="noopener" aria-label={`WhatsApp ${PESTANA_NUEVA}`}><Icono nombre="whatsapp" /></a>
+                  <a href={redes.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${PESTANA_NUEVA}`}><Icono nombre="facebook" /></a>
+                  <a href={redes.linkedin} target="_blank" rel="noopener" aria-label={`LinkedIn ${PESTANA_NUEVA}`}><Icono nombre="linkedin" /></a>
                 </div>
               </div>
 
+              <!-- h2 y no h3: el pie no cuelga de ninguna sección de la página, y un h3 suelto salta un nivel. -->
               <div class="footer-section">
-                <h3>Navegación</h3>
+                <h2>Navegación</h2>
                 <ul>
                   <li><a href="/nosotros/">Nosotros</a></li>
                   <li><a href="/servicios/">Servicios</a></li>
                   <li><a href="/proyectos/">Proyectos</a></li>
                   <li><a href="/sostenibilidad/">Sostenibilidad</a></li>
-                  <li><a href="/documentos/">Documentos</a></li>
-                  <li><a href="/recursos/">Recursos</a></li>
+                  <li><a href="/documentos/">Cumplimiento</a></li>
                 </ul>
               </div>
 
               <div class="footer-section">
-                <h3>Servicios</h3>
+                <h2>Servicios</h2>
                 <ul>
                   {servicios.map((s) => <li><a href={`/servicios/${s.id}/`}>{s.data.titulo}</a></li>)}
                 </ul>
               </div>
 
               <div class="footer-section">
-                <h3>Contacto</h3>
+                <h2>Contacto</h2>
                 <ul>
                   <li><a href={`mailto:${correoVentas}`}><Icono nombre="correo" tam={14} /> {correoVentas}</a></li>
                   <li><a href={telefono.href}><Icono nombre="telefono" tam={14} /> {telefono.texto}</a></li>
@@ -336,8 +393,8 @@ const [sedePrincipal] = sedes;
               <p>&copy; {new Date().getFullYear()} INACONS S.R.L. — Todos los derechos reservados.</p>
               <div class="footer-bottom-links">
                 <a href="/documentos/">Certificaciones y políticas</a>
-                <a href={intranet} target="_blank" rel="noopener">Intranet</a>
-                <a href={proveedores} target="_blank" rel="noopener">Proveedores</a>
+                <a href={intranet} target="_blank" rel="noopener">Intranet<PestanaNueva /></a>
+                <a href={proveedores} target="_blank" rel="noopener">Portal de proveedores<PestanaNueva /></a>
                 {PRIVACIDAD_PUBLICADA && <a href="/privacidad/">Política de privacidad</a>}
               </div>
             </div>

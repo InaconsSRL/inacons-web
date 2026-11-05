@@ -1,6 +1,7 @@
 ---
 titulo: Arquitectura y Paisajismo
 descripcion: "Ambientes funcionales y estéticamente equilibrados que respetan el entorno y promueven la sostenibilidad"
+tituloSeo: "Arquitectura, paisajismo y áreas verdes en Perú"
 resumen: "Parques, áreas verdes, ornamentación e interiores"
 imagen: ../../assets/imagenes/image_paisajismo.webp
 icono: hoja

@@ -10,6 +10,7 @@ type Consulta = {
   correo: string;
   telefono: string;
   empresa: string;
+  motivo: string;
   servicio: string;
   mensaje: string;
   origen: string;
@@ -22,11 +23,26 @@ const LIMITES: Record<keyof Consulta, number> = {
   correo: 160,
   telefono: 30,
   empresa: 160,
+  motivo: 60,
   servicio: 120,
   mensaje: 3000,
   origen: 300,
 };
-const OBLIGATORIOS: (keyof Consulta)[] = ['nombre', 'correo', 'telefono', 'servicio', 'mensaje'];
+// `servicio` no está: solo es obligatorio al cotizar (ver validar).
+const OBLIGATORIOS: (keyof Consulta)[] = ['nombre', 'correo', 'telefono', 'mensaje'];
+
+// Los motivos del <select> de contacto.astro (const MOTIVOS), en el mismo
+// orden; test/contrato.test.ts falla si se separan. Van en el asunto del
+// correo a ventas, que así puede filtrar cotizaciones de reclamos sin abrirlos.
+// Las denuncias no están a propósito: van al Canal Ético, que tiene otro
+// destinatario, anonimato y registro de cumplimiento.
+export const MOTIVO_COTIZAR = 'Cotizar un proyecto';
+export const MOTIVOS: ReadonlySet<string> = new Set([
+  MOTIVO_COTIZAR,
+  'Consulta general',
+  'Reclamo o sugerencia',
+  'Proveedores',
+]);
 
 // Son los `titulo` de src/content/servicios/*.md más "Otro": el <select> de
 // contacto.astro. El Worker no ve las colecciones de Astro, así que la lista se
@@ -54,7 +70,14 @@ export function validar(cuerpo: Record<string, unknown>): Consulta | null {
   if (!c || OBLIGATORIOS.some((campo) => !c[campo])) return null;
   // El tope por hora compara correos: Ana@ y ANA@ son el mismo buzón.
   c.correo = c.correo.toLowerCase();
-  if (!CORREO_VALIDO.test(c.correo) || !nombreValido(c.nombre) || !SERVICIOS.has(c.servicio)) return null;
+  // Sin motivo es el formulario de antes de este campo, en el que todo era
+  // cotización: así el Worker puede desplegarse antes que el sitio.
+  c.motivo ||= MOTIVO_COTIZAR;
+  if (!MOTIVOS.has(c.motivo)) return null;
+  // Al cotizar, el servicio dice a quién derivar. En los demás motivos el
+  // formulario no lo envía, pero si llega tiene que ser uno de la lista.
+  const servicioValido = c.motivo === MOTIVO_COTIZAR ? SERVICIOS.has(c.servicio) : !c.servicio || SERVICIOS.has(c.servicio);
+  if (!CORREO_VALIDO.test(c.correo) || !nombreValido(c.nombre) || !servicioValido) return null;
   return c;
 }
 
@@ -68,11 +91,11 @@ export async function procesar(consulta: Consulta, env: Env, ipHash: string, ctx
 
   // Se guarda antes de enviar: si CPaaS falla, la consulta no se pierde.
   const { id } = (await env.DB.prepare(
-    `INSERT INTO consultas (nombre, correo, telefono, empresa, servicio, mensaje, origen, ip_hash)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING id`,
+    `INSERT INTO consultas (nombre, correo, telefono, empresa, motivo, servicio, mensaje, origen, ip_hash)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9) RETURNING id`,
   ).bind(
     consulta.nombre, consulta.correo, consulta.telefono, consulta.empresa,
-    consulta.servicio, consulta.mensaje, consulta.origen, ipHash,
+    consulta.motivo, consulta.servicio, consulta.mensaje, consulta.origen, ipHash,
   ).first<{ id: number }>())!;
 
   try {
@@ -119,7 +142,7 @@ async function despuesDelAviso(consulta: Consulta, env: Env, id: number): Promis
  */
 export async function reintentarPendientes(env: Env): Promise<void> {
   const { results } = await env.DB.prepare(
-    `SELECT id, nombre, correo, telefono, empresa, servicio, mensaje, origen, estado, error
+    `SELECT id, nombre, correo, telefono, empresa, motivo, servicio, mensaje, origen, estado, error
      FROM consultas WHERE ${CONDICION_PENDIENTES}`,
   ).all<Consulta & { id: number; estado: string; error: string | null }>();
   for (const fila of results) {
@@ -139,7 +162,9 @@ function avisarAVentas(env: Env, c: Consulta, id: number, reenvio = false): Prom
     responderA: { address: c.correo, name: c.nombre },
     // "[Reenvío]": el primer intento pudo haber llegado tarde, o el visitante
     // reenviar a mano; así ventas reconoce el posible duplicado por el n.°.
-    asunto: `${reenvio ? '[Reenvío] ' : ''}Consulta web — ${c.servicio} — ${c.nombre}`,
+    // Las partes vacías se saltan: una consulta guardada antes del campo
+    // motivo no lo tiene, y una que no es cotización no lleva servicio.
+    asunto: `${reenvio ? '[Reenvío] ' : ''}${['Consulta web', c.motivo, c.servicio, c.nombre].filter(Boolean).join(' — ')}`,
     ...avisoAVentas(c, id),
   });
 }
@@ -150,7 +175,8 @@ function avisoAVentas(c: Consulta, id: number) {
     ['Correo', c.correo],
     ['Teléfono', c.telefono],
     ['Empresa', c.empresa || '—'],
-    ['Servicio de interés', c.servicio],
+    ['Motivo', c.motivo || '—'],
+    ['Servicio de interés', c.servicio || '—'],
   ];
   const texto = [
     `Consulta n.° ${id} desde el formulario web de INACONS`,

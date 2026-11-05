@@ -145,6 +145,12 @@ colección no puede interpolar: ahí no se cita la cifra.
 Worker de `workers/contacto/`. Sin ella, abre el correo del visitante con el mensaje
 armado y le ofrece copiarlo; nunca declara éxito sin confirmación.
 
+El formulario pregunta primero el **motivo**: cotizar un proyecto, consulta general,
+reclamo o sugerencia, o proveedores. Solo al cotizar aparece "Servicio de interés" (el
+grupo se oculta y el select queda `disabled`, así que no se valida ni se envía). Las
+denuncias no son un motivo: la página remite al Canal Ético, que tiene otro destinatario
+y admite anonimato.
+
 El Worker comprueba Turnstile, limita a 3 envíos por hora por conexión o por correo,
 guarda una copia en D1, avisa a `ventas@` por Zoho CPaaS con *Reply-To* al visitante y le
 manda un acuse de recibo. El acuse no repite el mensaje: va a la dirección que teclea el
@@ -164,7 +170,7 @@ Content-Type: application/json
 
 {
   "nombre": "…", "correo": "…", "telefono": "…", "empresa": "…",
-  "servicio": "Obras Civiles", "mensaje": "…",
+  "motivo": "Cotizar un proyecto", "servicio": "Obras Civiles", "mensaje": "…",
   "origen": "https://home.inacons.com.pe/contacto/",
   "turnstile": "<token del widget>"
 }
@@ -194,8 +200,12 @@ prueba de Cloudflare. Cambiar una de un lado sin el otro deja el formulario en 4
 
 Reglas de validación del Worker, además de los límites de longitud: `nombre` no puede
 llevar `://`, `www.`, `@`, `/`, un dominio (`.com`, `.ly`…), saltos de línea ni
-tabuladores (el acuse lo repite en el saludo), el correo se guarda en minúsculas, y
-`servicio` tiene que ser uno de los títulos de `src/content/servicios/` o `Otro`. Esa lista
+tabuladores (el acuse lo repite en el saludo), el correo se guarda en minúsculas,
+`motivo` tiene que ser uno de `MOTIVOS` (sin él se toma como cotización, que es lo que
+enviaba el formulario anterior) y `servicio` tiene que ser uno de los títulos de
+`src/content/servicios/` o `Otro`; al cotizar es obligatorio, en los demás motivos puede ir
+vacío. Los motivos están en `const MOTIVOS` de `contacto.astro` y copiados en `MOTIVOS` del
+Worker, con su prueba de contrato como los servicios. Esa lista
 vive copiada en `SERVICIOS` de `workers/contacto/src/contacto.ts`: al crear, renombrar o
 borrar un servicio hay que cambiarla también, y `npm test` en `workers/contacto/` avisa
 si se olvidó.

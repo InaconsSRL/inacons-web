@@ -49,17 +49,18 @@ const colores = [
 ];
 
 const tipografia = [
-  { token: '--fs-2xs',     px: '11px',    uso: 'Rótulos en caja alta' },
-  { token: '--fs-xs',      px: '12px',    uso: 'Metadatos, pies de foto' },
+  { token: '--fs-xs',      px: '12px',    uso: 'Rótulos en caja alta, metadatos, pies de foto. El mínimo del sitio' },
   { token: '--fs-sm',      px: '13px',    uso: 'Texto secundario' },
   { token: '--fs-base',    px: '14px',    uso: 'Cuerpo en tarjetas' },
   { token: '--fs-md',      px: '16px',    uso: 'Cuerpo principal' },
   { token: '--fs-lg',      px: '18px',    uso: 'Párrafo destacado' },
   { token: '--fs-xl',      px: '22px',    uso: 'h3' },
   { token: '--fs-2xl',     px: '24–32px', uso: 'h2, cifras' },
+  { token: '--fs-title',   px: '21–27px', uso: 'Título de bloque dentro de una ficha' },
   { token: '--fs-section', px: '28–44px', uso: 'h2 de sección (.sh-title)' },
   { token: '--fs-display', px: '32–48px', uso: 'h1 de páginas interiores, cifras destacadas' },
   { token: '--fs-display-lg', px: '36–60px', uso: 'h1 de la cabecera de página (.page-hero-title)' },
+  { token: '--fs-hero',    px: '20–56px', uso: 'h1 del home' },
 ];
 
 const espaciado = ['--sp-1', '--sp-2', '--sp-3', '--sp-4', '--sp-5', '--sp-6', '--sp-7', '--sp-l1', '--sp-l2', '--sp-l3'];
@@ -279,7 +280,7 @@ const codigoLista = `<ul class="data-list">
     .ds-color-info code { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--c-text-heading); }
     .ds-color-info small { display: block; margin-top: var(--sp-1); font-size: var(--fs-xs); color: var(--c-text-muted); }
     .ds-color-info em { display: block; margin-top: var(--sp-2); font-size: var(--fs-xs); color: var(--c-text-muted); font-style: normal; line-height: 1.5; }
-    .ds-grupo { font-size: var(--fs-2xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--c-text-muted); margin: var(--sp-6) 0 var(--sp-3); }
+    .ds-grupo { font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: var(--ls-label); text-transform: uppercase; color: var(--c-text-muted); margin: var(--sp-6) 0 var(--sp-3); }
     .ds-grupo:first-of-type { margin-top: 0; }
 
     /* Tipografía y espaciado */

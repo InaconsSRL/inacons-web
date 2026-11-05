@@ -8,7 +8,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { SERVICIOS } from '../src/contacto';
+import { MOTIVOS, SERVICIOS } from '../src/contacto';
 import { TIPOS } from '../src/canal';
 
 const raiz = (ruta: string) => fileURLToPath(new URL(`../../../${ruta}`, import.meta.url));
@@ -22,6 +22,15 @@ describe('contrato con el sitio', () => {
 
     expect(titulos.every(Boolean)).toBe(true);
     expect([...SERVICIOS].sort()).toEqual([...(titulos as string[]), 'Otro'].sort());
+  });
+
+  it('MOTIVOS del Worker son los de contacto.astro, en el mismo orden', () => {
+    const pagina = readFileSync(raiz('src/pages/contacto.astro'), 'utf8');
+    const lista = pagina.match(/const MOTIVOS = \[([^\]]+)\]/)?.[1] ?? '';
+    const motivos = [...lista.matchAll(/'([^']+)'/g)].map((m) => m[1]);
+
+    expect(motivos.length).toBeGreaterThan(0);
+    expect([...MOTIVOS]).toEqual(motivos);
   });
 
   it('TIPOS del Worker son los tipos de CANALES en canal-etico.astro', () => {

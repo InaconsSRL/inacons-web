@@ -4,7 +4,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBand from '../components/CtaBand.astro';
 import PageHero from '../components/PageHero.astro';
 import Icono from '../components/Icono.astro';
+import PestanaNueva from '../components/PestanaNueva.astro';
 import type { NombreIcono } from '../lib/iconos';
+import { formatoYPeso } from '../lib/archivos';
 import imagenHero from '../assets/imagenes/home_about.webp';
 
 const certificaciones = (await getCollection('certificaciones'))
@@ -22,7 +24,7 @@ const ICONO_POR_NORMA: Record<string, NombreIcono> = {
 const ICONO_POR_DEFECTO: NombreIcono = 'premio';
 ---
 
-<BaseLayout title="Certificaciones ISO y documentos corporativos | INACONS" description="Certificados ISO 9001, 14001, 45001 y 37001, políticas y documentos corporativos de INACONS para procesos de homologación y licitación.">
+<BaseLayout title="Cumplimiento: certificaciones ISO y políticas | INACONS" description="Certificados ISO 9001, 14001, 45001 y 37001, políticas y documentos corporativos de INACONS para procesos de homologación y licitación.">
 
   <style slot="head">
     /* Intro de sección */
@@ -73,9 +75,9 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
   <!-- HERO -->
   <PageHero
     image={imagenHero}
-    title="Transparencia en<br>cada proceso"
-    subtitle="Certificaciones y políticas que respaldan nuestra forma de trabajar"
-    current="Documentos"
+    title="Certificaciones ISO<br>y políticas corporativas"
+    subtitle="Transparencia en cada proceso: los documentos que respaldan nuestra forma de trabajar"
+    current="Cumplimiento"
     bgPosition="center top"
   />
 
@@ -86,10 +88,10 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
       <!-- Intro -->
       <div class="docs-intro" data-aos="fade-up">
         <div class="sh">
-          <p class="sh-label">Gestión y Calidad</p>
-          <h2 class="sh-title">Nuestro Sistema Integrado</h2>
+          <p class="sh-label">Gestión y calidad</p>
+          <h2 class="sh-title">Nuestro sistema integrado de gestión</h2>
         </div>
-        <p>Nuestros clientes operan en sectores donde el cumplimiento no es negociable: minería, inmobiliaria, energía, saneamiento. Por eso, desde 2020 sostenemos certificación continua en las cuatro normas ISO, auditadas de forma independiente e integradas en nuestro Sistema Integrado de Gestión. No solo presentamos certificados: presentamos evidencia de cómo trabajamos, proyecto por proyecto.</p>
+        <p>Nuestros clientes operan en sectores donde el cumplimiento no es negociable: minería, inmobiliaria, energía, saneamiento. Por eso, desde 2020 sostenemos certificación continua en las cuatro normas ISO, auditadas de forma independiente e integradas en nuestro Sistema Integrado de Gestión.</p>
       </div>
 
       <!-- Pestañas -->
@@ -98,7 +100,7 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
           Certificaciones ISO
         </button>
         <button type="button" class="tab" role="tab" id="tabbtn-politicas" aria-selected="false" aria-controls="tab-politicas" tabindex="-1">
-          Políticas Corporativas
+          Políticas corporativas
         </button>
       </div>
 
@@ -120,19 +122,21 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
               <h3 class="feature-title">{c.data.encabezado ?? c.data.titulo}</h3>
               <p class="feature-desc">{c.data.descripcion}</p>
               <span class="btn btn-outline btn-sm">
-                <Icono nombre="descarga" tam={14} /> Descargar
+                <Icono nombre="descarga" tam={14} /> Descargar ({formatoYPeso(c.data.certificado)})
               </span>
+              <PestanaNueva />
             </a>
           ))}
           <a href="/assets/documentos/certificado_ince_489.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion" data-aos="fade-up" data-aos-delay="400">
             <span class="feature-num feature-num--marca" aria-hidden="true">INCE</span>
             <div class="feature-icon"><Icono nombre="insignia-check" tam={24} /></div>
             <p class="panel-label">INCE-489</p>
-            <h3 class="feature-title">Certificado de Capacidad Técnica</h3>
+            <h3 class="feature-title">Certificado de capacidad técnica</h3>
             <p class="feature-desc">Acredita nuestra capacidad técnica y experiencia comprobada en la ejecución de proyectos.</p>
             <span class="btn btn-outline btn-sm">
-              <Icono nombre="descarga" tam={14} /> Descargar
+              <Icono nombre="descarga" tam={14} /> Descargar ({formatoYPeso('/assets/documentos/certificado_ince_489.pdf')})
             </span>
+            <PestanaNueva />
           </a>
         </div>
         <div class="norms-band" data-aos="fade-up">
@@ -150,21 +154,23 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
             <div class="feature-icon"><Icono nombre="escudo-alerta" tam={24} /></div>
             <p class="panel-label">Política</p>
-            <h3 class="feature-title">Alcohol y Drogas</h3>
+            <h3 class="feature-title">Alcohol y drogas</h3>
             <p class="feature-desc">Normativa sobre prevención y control del consumo de sustancias en el entorno de trabajo.</p>
             <span class="btn btn-outline btn-sm">
-              <Icono nombre="descarga" tam={14} /> Ver documento
+              <Icono nombre="descarga" tam={14} /> Ver documento ({formatoYPeso('/assets/documentos/politica_alcohol_drogas.pdf')})
             </span>
+            <PestanaNueva />
           </a>
           <a href="/assets/documentos/politica_negativa_trabajo_inseguro.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
             <div class="feature-icon"><Icono nombre="escudo-aspa" tam={24} /></div>
             <p class="panel-label">Política</p>
-            <h3 class="feature-title">Negativa al Trabajo Inseguro</h3>
+            <h3 class="feature-title">Negativa al trabajo inseguro</h3>
             <p class="feature-desc">Derecho de los trabajadores a rechazar actividades que pongan en riesgo su seguridad.</p>
             <span class="btn btn-outline btn-sm">
-              <Icono nombre="descarga" tam={14} /> Ver documento
+              <Icono nombre="descarga" tam={14} /> Ver documento ({formatoYPeso('/assets/documentos/politica_negativa_trabajo_inseguro.pdf')})
             </span>
+            <PestanaNueva />
           </a>
           <a href="/assets/documentos/politica_sig.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
@@ -173,8 +179,9 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
             <h3 class="feature-title">Sistema Integrado de Gestión</h3>
             <p class="feature-desc">Política del Sistema Integrado de Gestión de Calidad, Medio Ambiente y Seguridad.</p>
             <span class="btn btn-outline btn-sm">
-              <Icono nombre="descarga" tam={14} /> Ver documento
+              <Icono nombre="descarga" tam={14} /> Ver documento ({formatoYPeso('/assets/documentos/politica_sig.pdf')})
             </span>
+            <PestanaNueva />
           </a>
           <a href="/assets/documentos/politica_antisoborno.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
@@ -184,8 +191,9 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
             <h3 class="feature-title">Antisoborno</h3>
             <p class="feature-desc">Compromiso con la integridad y prevención de prácticas corruptas en todas las operaciones.</p>
             <span class="btn btn-outline btn-sm">
-              <Icono nombre="descarga" tam={14} /> Ver documento
+              <Icono nombre="descarga" tam={14} /> Ver documento ({formatoYPeso('/assets/documentos/politica_antisoborno.pdf')})
             </span>
+            <PestanaNueva />
           </a>
           <a href="/assets/documentos/otros_alcance_sig.pdf" target="_blank" data-astro-prefetch="false" class="feature-item feature-item--card feature-item--accion">
             <span class="feature-num feature-num--marca" aria-hidden="true">PDF</span>
@@ -194,8 +202,9 @@ const ICONO_POR_DEFECTO: NombreIcono = 'premio';
             <h3 class="feature-title">Alcance del SIG</h3>
             <p class="feature-desc">Documentación complementaria sobre el alcance de nuestro Sistema Integrado de Gestión.</p>
             <span class="btn btn-outline btn-sm">
-              <Icono nombre="descarga" tam={14} /> Ver documento
+              <Icono nombre="descarga" tam={14} /> Ver documento ({formatoYPeso('/assets/documentos/otros_alcance_sig.pdf')})
             </span>
+            <PestanaNueva />
           </a>
         </div>
       </div>

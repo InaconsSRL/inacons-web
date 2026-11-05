@@ -1,6 +1,7 @@
 ---
 titulo: Obras Electromecánicas
 descripcion: "Proyectos electromecánicos de alta complejidad: subestaciones, transformadores de potencia y redes MT/BT"
+tituloSeo: "Subestaciones y redes eléctricas MT/BT en Perú"
 resumen: "Subestaciones, redes MT/BT, automatización y control"
 imagen: ../../assets/imagenes/image_electromecanica.webp
 icono: rayo

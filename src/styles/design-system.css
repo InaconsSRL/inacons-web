@@ -109,16 +109,18 @@
     /* La define <Font> en BaseLayout (astro.config.mjs → fonts), con su fallback métrico */
     --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
-    /*  Escala de texto — 8 pasos.
+    /*  Escala de texto — 7 pasos, con 12px como piso.
         Calibrada sobre el uso real: los pasos caen donde ya había masa,
         salvo en el extremo chico, que sube. El sitio tenía 29 tamaños
         distintos entre 9.3px y 16px; el más repetido de todos era 12.5px
         y el rótulo de sección estaba en 10.4px en caja alta. Demasiado
-        chico para el público que lee esto. */
-    --fs-2xs: 0.6875rem;
-    /* 11px — rótulos en caja alta (antes 10.4px) */
+        chico para el público que lee esto.
+
+        No hay paso de 11px ni para los rótulos en caja alta: en móvil, que
+        es donde se abre el sitio desde los QR de obra y de feria, 11px
+        espaciados no se leen a pleno sol. Nada en el sitio baja de 12px. */
     --fs-xs: 0.75rem;
-    /* 12px — metadatos, pies de foto */
+    /* 12px — rótulos en caja alta, metadatos, pies de foto. El mínimo. */
     --fs-sm: 0.8125rem;
     /* 13px — texto secundario */
     --fs-base: 0.875rem;
@@ -141,19 +143,22 @@
     --fs-display-lg: clamp(2.25rem, 5vw, 3.75rem);
     /* 36–60px — h1 de la cabecera de página (.page-hero-title). Antes era un
        clamp escrito en el componente, fuera de los tokens. */
+    --fs-decorativo: clamp(12rem, 30vw, 22rem);
+    /* 192–352px — el "404" de fondo de la página de error. No es texto que
+       se lea (es un ::before): por eso no cuenta en la escala. */
     --fs-section: clamp(1.75rem, 3vw, 2.75rem);
     /* 28–44px — h2 de sección (.sh-title). Subió ~6% el tope: es el escalón
        que da el "tipografía grande" de la referencia sin tocar ningún layout. */
-    --fs-hero: clamp(1rem, 4.3vw, 3.5rem);
-    /* 16–56px — h1 del home. Estuvo en clamp(1.05rem, 5.2vw, 3.8rem) y se
-       bajó a 3.1rem porque, con las cifras al costado, un titular de 61px
-       se partía antes de tiempo. Las cifras ya van en banda debajo y el
-       titular tiene todo el ancho, así que sube a 3.5rem: más grande, pero
-       no los 3.8rem que se comían la pantalla.
+    --fs-hero: clamp(1.25rem, 4.3vw, 3.5rem);
+    /* 20–56px — h1 del home. Arriba se queda en 3.5rem: con las cifras en
+       banda debajo el titular tiene todo el ancho, y 3.8rem se comían la
+       pantalla.
 
-       El minimo sigue siendo bajo a proposito: la linea mas larga es
-       "CONSTRUIMOS CONFIANZA" y en un telefono de 360px tiene que
-       entrar sin recortarse. */
+       Abajo, 20px. Con 16px el titular quedaba más chico que el párrafo
+       que lo sigue (18px) y la jerarquía se leía al revés. Más de 20 no
+       entra: "CONSTRUIMOS CONFIANZA" mide unos 320px a ese tamaño y un
+       teléfono de 360px deja 320 de ancho útil. Si aun así no cabe, la
+       línea se parte (flex-wrap en .hero-line) en vez de recortarse. */
 
     /*  Pesos. El sitio usaba 700 en 77 lugares y 300/400/500 en 10:
         cuando casi todo es bold, no hay jerarquía, hay volumen parejo.
@@ -243,6 +248,11 @@
     --shadow-card-hover: 0 8px 32px rgba(20, 23, 45, 0.13);
 
     --radius: 2px;
+
+    /*  Área táctil mínima de un enlace de texto suelto (WCAG 2.5.8, nivel
+        AA). Los botones e iconos ya van a 44px; esto es para los enlaces
+        en lista, que con 13–14px de texto quedaban en 21–22px de alto. */
+    --tap-min: 24px;
 
     --z-topbar: 1001;
     --z-header: 1000;
@@ -447,7 +457,7 @@ button {
     display: inline-flex;
     align-items: center;
     gap: var(--sp-2);
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
@@ -696,7 +706,7 @@ a.btn:active {
     border-radius: var(--radius);
     color: var(--c-text-muted);
     font-family: var(--font-ui);
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     text-transform: uppercase;
     letter-spacing: var(--ls-label);
@@ -938,7 +948,7 @@ a.btn:active {
 }
 
 .card-media-meta {
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     color: var(--c-on-dark-3);
     margin: 0;
 }
@@ -958,7 +968,7 @@ a.btn:active {
     plano que este componente no tiene. */
 .card-media-tag {
     display: inline-block;
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     text-transform: uppercase;
     letter-spacing: var(--ls-label);
@@ -1075,7 +1085,7 @@ a.btn:active {
 
 .stat-label {
     display: block;
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     text-transform: uppercase;
     letter-spacing: var(--ls-label);
@@ -1560,7 +1570,7 @@ a.btn:active {
 
 .breadcrumb-sep {
     color: var(--c-on-dark-icono);
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
 }
 
 .breadcrumb-current {
@@ -1618,14 +1628,13 @@ a.btn:active {
     gap: var(--sp-2);
 }
 
-/*  Pildoras de acceso rapido del topbar: Intranet, Proveedores y Contactenos.
-    "Canal Etico" salio de aca y vive en el pie, donde tiene su propio
-    boton de acento — no era un tercer enlace mas de esta fila. */
+/*  Pildoras del topbar: "Accesos" (Intranet y Proveedores) y Contactanos.
+    "Canal Etico" vive en el pie, donde tiene su propio boton de acento. */
 .top-bar-pill {
     display: inline-flex;
     align-items: center;
     padding: var(--sp-1) var(--sp-3);
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-ui);
     text-transform: uppercase;
@@ -1658,6 +1667,70 @@ a.btn:active {
     display: flex;
     align-items: center;
     gap: var(--sp-1);
+}
+
+/*  Desplegable "Accesos": un <details>, que abre y cierra sin JavaScript y
+    se anuncia como boton expandible. initAccesos() le suma Esc y el clic
+    fuera. Es para colaboradores y proveedores: va como pildora neutra y no
+    compite con la de acento. */
+.top-bar-accesos {
+    position: relative;
+}
+
+.top-bar-accesos summary {
+    gap: var(--sp-1);
+    cursor: pointer;
+    list-style: none;
+}
+
+.top-bar-accesos summary::-webkit-details-marker {
+    display: none;
+}
+
+.top-bar-accesos-chevron {
+    transition: transform var(--t);
+}
+
+.top-bar-accesos[open] .top-bar-accesos-chevron {
+    transform: rotate(180deg);
+}
+
+.top-bar-accesos[open] summary {
+    background: var(--c-border-dark);
+    color: var(--c-text-white);
+}
+
+.top-bar-accesos-menu {
+    position: absolute;
+    top: calc(100% + var(--sp-2));
+    right: 0;
+    min-width: 200px;
+    padding: var(--sp-2);
+    background: var(--c-primary);
+    border-top: 2px solid var(--c-accent);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow-card-hover);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.top-bar-accesos-menu a {
+    display: flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--fs-sm);
+    letter-spacing: var(--ls-wide);
+    color: var(--c-on-dark-2);
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: background var(--t), color var(--t);
+}
+
+.top-bar-accesos-menu a:hover {
+    color: var(--c-text-white);
+    background: color-mix(in srgb, var(--c-accent) 12%, transparent);
 }
 
 .tb-sep {
@@ -2052,8 +2125,8 @@ html {
     flex-direction: column;
 }
 
-.footer-section h3 {
-    font-size: var(--fs-2xs);
+.footer-section h2 {
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
@@ -2094,9 +2167,12 @@ html {
     color: var(--c-on-dark-2);
 }
 
+/*  min-height: WCAG 2.5.8 pide 24px de área táctil. Con el texto a 14px el
+    enlace medía 22 y la lista no deja el espacio que lo compensaría. */
 .footer-section ul li a {
     display: inline-flex;
     align-items: center;
+    min-height: var(--tap-min);
     gap: var(--sp-2);
     color: var(--c-on-dark-3);
     text-decoration: none;
@@ -2142,6 +2218,9 @@ html {
 }
 
 .footer-bottom-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
     color: var(--c-on-dark-3);
     font-size: var(--fs-sm);
     text-decoration: none;
@@ -2439,6 +2518,7 @@ body.menu-open {
 .mobile-menu-contact a {
     display: flex;
     align-items: center;
+    min-height: var(--tap-min);
     gap: var(--sp-2);
     font-size: var(--fs-sm);
     color: var(--c-on-dark-2);
@@ -2501,6 +2581,30 @@ body.menu-open {
 .mobile-btn-outline:hover {
     background: var(--c-border-dark);
     border-color: var(--c-border-dark-strong);
+}
+
+/*  Intranet y Proveedores: en móvil no hay top-bar que los lleve. Enlaces
+    discretos, debajo de las acciones del cliente y no a su altura. */
+.mobile-menu-accesos {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--sp-1) var(--sp-5);
+    padding: 0 var(--sp-5) var(--sp-3);
+}
+
+.mobile-menu-accesos a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    font-size: var(--fs-sm);
+    color: var(--c-on-dark-3);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.mobile-menu-accesos a:hover {
+    color: var(--c-text-white);
 }
 
 /* Footer */
@@ -2572,7 +2676,7 @@ body.menu-open {
 .form-fieldset > legend {
     display: block;
     padding: 0;
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
@@ -2823,8 +2927,16 @@ body.menu-open {
         flex-grow: 3;
     }
 
+    /*  En móvil solo se ve el nombre del paso actual, pero los demás se
+        siguen leyendo: el número es aria-hidden, y con display:none el
+        lector anunciaba los pasos 2 y 3 como elementos vacíos. */
     .pasos-item:not(.pasos-item--actual) .pasos-etiqueta {
-        display: none;
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
     }
 }
 
@@ -2947,7 +3059,7 @@ body.menu-open {
     que era el tercer sitio donde aparecía escrito a mano. .sh-label no
     sirve acá: lleva el guión naranja de cabecera de sección. */
 .panel-label {
-    font-size: var(--fs-2xs);
+    font-size: var(--fs-xs);
     font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-label);
     text-transform: uppercase;

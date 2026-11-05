@@ -7,7 +7,9 @@ import CtaBand from '../components/CtaBand.astro';
 import MediaCard from '../components/MediaCard.astro';
 import Icono from '../components/Icono.astro';
 import { serviciosPorMenu } from '../lib/servicios';
-import { ANIOS_EXPERIENCIA, BROCHURE, CIFRAS, PROYECTOS_POR_CIUDAD } from '../data/empresa';
+import PestanaNueva from '../components/PestanaNueva.astro';
+import { formatoYPeso } from '../lib/archivos';
+import { ANIOS_EXPERIENCIA, BROCHURE, CIFRAS, NORMAS_ISO, PROYECTOS_POR_CIUDAD } from '../data/empresa';
 import imagenHero from '../assets/imagenes/image_heroprincipal.webp';
 import imagenNosotros from '../assets/imagenes/image_nosotros.webp';
 
@@ -36,6 +38,21 @@ const CLIENTES: { nombre: string; imagen?: ImageMetadata }[] = [
 ];
 
 const cifrasHero = [CIFRAS.experiencia, CIFRAS.superficie, CIFRAS.inversion, CIFRAS.trabajadores];
+const pesoBrochure = formatoYPeso(BROCHURE);
+
+const certificaciones = (await getCollection('certificaciones'))
+  .sort((a, b) => (a.data.orden ?? 99) - (b.data.orden ?? 99));
+
+// "Seis líneas de servicio", "cuatro normas ISO": el número sale de los datos.
+// Escrito a mano, el próximo servicio que se agregue deja la frase mintiendo.
+const EN_LETRAS = ['cero', 'una', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez'];
+const enLetras = (n: number) => EN_LETRAS[n] ?? String(n);
+const lineasDeServicio = enLetras(servicios.length);
+
+// Largo de cada barra de "Proyectos por ciudad", relativo a la ciudad con más
+// obra. Es una proporción para dibujar, no una cifra nueva: en pantalla solo
+// se leen las del brochure.
+const maximoPorCiudad = Math.max(...PROYECTOS_POR_CIUDAD.map((c) => c.proyectos));
 const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) => ({ idMapa, peso })));
 ---
 
@@ -79,9 +96,12 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       inset: 0;
       z-index: 1;
       background:
-        linear-gradient(to bottom, color-mix(in srgb, var(--c-primary) 30%, transparent) 0%, color-mix(in srgb, var(--c-primary) 92%, transparent) 100%),
-        linear-gradient(110deg, color-mix(in srgb, var(--c-primary) 85%, transparent) 0%, color-mix(in srgb, var(--c-secondary) 35%, transparent) 60%, transparent 100%);
+        linear-gradient(to bottom, color-mix(in srgb, var(--c-primary) 20%, transparent) 0%, color-mix(in srgb, var(--c-primary) 82%, transparent) 100%),
+        linear-gradient(110deg, color-mix(in srgb, var(--c-primary) 78%, transparent) 0%, color-mix(in srgb, var(--c-secondary) 30%, transparent) 60%, transparent 100%);
     }
+    /*  El velo llegaba al 92% y la foto de obra casi no se veía, que es lo
+        que da el "imágenes dramáticas" de la referencia. El texto va a la
+        izquierda y abajo, donde el velo sigue siendo más denso. */
     /*  Todo en una columna: mensaje y, debajo, las cifras en banda. Al costado
         competían con el titular por el ancho y lo obligaban a partirse antes de
         tiempo; en banda el titular puede crecer (--fs-hero) y las cifras quedan
@@ -190,6 +210,14 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       line-height: 1.78;
       margin: 0 0 var(--sp-3);
     }
+    /* ── CLIENTES ──
+        Van justo después del hero: son la prueba más fuerte que tiene el
+        home, y al final de la página casi nadie llegaba a verlos. Por eso
+        la sección es más baja que las demás: una franja, no un capítulo. */
+    .clientes-sec { padding: var(--sp-l2) 0; }
+    .clientes-sec .sh { margin-bottom: var(--sp-6); }
+    .clientes-sec .sh-title { font-size: var(--fs-2xl); }
+
     /* ── CLIENTES SCROLL ── */
     .clients-track-wrap {
       overflow: hidden;
@@ -243,7 +271,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
 
     /* ── EYEBROW ── */
     .hero-eyebrow {
-      font-size: var(--fs-2xs);
+      font-size: var(--fs-xs);
       font-weight: var(--fw-semibold);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
@@ -329,11 +357,12 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     }
     #peruMapContainer {
       width: 100%;
-      max-width: 280px;
+      max-width: 340px;
     }
-    /* El SVG se inyecta vía JS — su tamaño y su sombra van con element.style
-       en main.ts, no acá: Astro le pega data-astro-cid a este selector pero
-       el SVG inyectado nunca lo lleva, así que una regla acá nunca engancha. */
+    /* El SVG se inyecta vía JS — su tamaño, su sombra y el resaltado del
+       departamento van con element.style en main.ts, no acá: Astro le pega
+       data-astro-cid a este selector pero el SVG inyectado nunca lo lleva,
+       así que una regla acá nunca engancha. */
     .map-stats-title {
       font-size: var(--fs-xs);
       font-weight: var(--fw-semibold);
@@ -342,30 +371,66 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       color: var(--c-text-muted);
       margin-bottom: var(--sp-5);
     }
+    /*  Una rejilla para toda la lista y subgrid en cada fila: así las barras
+        empiezan y terminan en la misma columna aunque los nombres de ciudad
+        midan distinto, sin fijar el ancho de la primera a ojo. */
+    .map-stats-lista {
+      display: grid;
+      grid-template-columns: max-content 1fr max-content;
+      column-gap: var(--sp-5);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
     .map-stat {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: var(--sp-4);
-      padding: var(--sp-3) 0;
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
+      align-items: center;
+      padding: var(--sp-3) var(--sp-2);
       border-bottom: 1px solid var(--c-border-light);
+      border-radius: var(--radius);
+      transition: background var(--t);
     }
     .map-stat:last-child { border-bottom: none; }
+    .map-stat:hover { background: var(--c-bg-muted); }
     .map-stat-city {
       font-size: var(--fs-md);
       font-weight: var(--fw-semibold);
       color: var(--c-primary);
     }
+    .map-stat-bar {
+      display: block;
+      height: var(--sp-2);
+      background: var(--c-bg-muted);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    /*  --fill llega en línea desde la página (proyectos / el máximo): una
+        custom property sí atraviesa, y el largo es dato, no estilo. */
+    .map-stat-fill {
+      display: block;
+      height: 100%;
+      background: var(--c-secondary);
+      transform-origin: left;
+      transform: scaleX(var(--fill));
+      transition: background var(--t);
+    }
+    .map-stat:hover .map-stat-fill { background: var(--c-accent-ink); }
     .map-stat-count {
       font-size: var(--fs-md);
       font-weight: var(--fw-display);
       /* Son las cifras de proyectos por ciudad: el dato del bloque.
          --c-accent sobre claro da 2.93:1 y no pasa AA. --c-accent-ink
-         conserva el naranja y llega a 5.33:1 sobre --c-bg-muted, que
-         es el fondo de esta seccion. */
+         conserva el naranja y pasa AA sobre blanco y sobre --c-bg-muted,
+         el fondo de la fila resaltada. */
       color: var(--c-accent-ink);
       letter-spacing: var(--ls-tight);
+      text-align: right;
     }
+
+    /* ── NORMAS ISO ── */
+    .normas-grid { margin-top: var(--sp-l1); }
 
     @media (max-width: 767.98px) {
       /* Hero */
@@ -401,7 +466,10 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         white-space: nowrap;
         font-size: inherit;
       }
+      /*  16px y no 18: el titular baja a 20px en móvil y el párrafo que lo
+          sigue no puede ser casi igual de grande. */
       .hero-desc {
+        font-size: var(--fs-md);
         text-align: center;
         margin-left: auto;
         margin-right: auto;
@@ -424,13 +492,16 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
       .about-grid { grid-template-columns: 1fr; gap: var(--sp-l2); }
       .about-img-frame { height: 360px; }
       .coverage-grid { grid-template-columns: 1fr; gap: var(--sp-7); }
-      #peruMapContainer { max-width: 220px; }
+      #peruMapContainer { max-width: 240px; }
+      .normas-grid { grid-template-columns: 1fr 1fr; margin-top: var(--sp-7); }
     }
   </style>
 
   <!--
-    ORDEN DEL HOME — claro y oscuro alternados (referencia Bechtel): cada
-    sección se apoya en el contraste de la anterior y Clientes cierra en claro.
+    ORDEN DEL HOME — de la promesa a la prueba: hero, quién confía en
+    nosotros, quiénes somos, qué hacemos, dónde, qué obras, con qué gestión
+    certificada, y el cierre. Claro y oscuro alternados (referencia
+    Bechtel): cada sección se apoya en el contraste de la anterior.
   -->
   <section class="home-hero">
     <!-- Sin src: main.ts lo carga solo en escritorio. En móvil basta el póster. -->
@@ -456,8 +527,8 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         </h1>
         <p class="hero-desc">Más de {ANIOS_EXPERIENCIA} años de experiencia en ingeniería y construcción al servicio del Perú.</p>
         <div class="hero-actions">
-          <a href="/proyectos/" class="btn btn-primary btn-lg">Ver Proyectos</a>
-          <a href={BROCHURE} target="_blank" rel="noopener" class="btn btn-outline-light btn-lg" data-astro-prefetch="false">Descargar Brochure</a>
+          <a href="/proyectos/" class="btn btn-primary btn-lg">Ver proyectos</a>
+          <a href={BROCHURE} target="_blank" rel="noopener" class="btn btn-outline-light btn-lg" data-astro-prefetch="false">Descargar brochure ({pesoBrochure})<PestanaNueva /></a>
         </div>
       </div>
 
@@ -480,7 +551,36 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     </div>
   </section>
 
-  <section class="sec sec--white">
+  <section class="sec sec--white clientes-sec" id="clientes">
+    <div class="container">
+      <div class="sh sh--center sh--medium" data-aos="fade-up" data-aos-duration="600">
+        <p class="sh-label">Nuestros clientes</p>
+        <h2 class="sh-title">Empresas que confían en nosotros</h2>
+      </div>
+      <div class="clients-track-wrap">
+        <!-- La lista va dos veces para el desplazamiento infinito; la copia se oculta a lectores de pantalla. -->
+        <div class="clients-track">
+          {[false, true].map((copia) => CLIENTES.map((c) => (
+            <div class="client-logo-item" aria-hidden={copia ? 'true' : undefined}>
+              {c.imagen
+                ? <Image quality={70} src={c.imagen} alt={copia ? '' : c.nombre} width={216} loading="lazy" />
+                : <span class="client-logo-nombre">{c.nombre}</span>}
+            </div>
+          )))}
+        </div>
+      </div>
+
+      <div class="clients-controls">
+        <button type="button" class="btn-control" id="clientsPauseBtn" aria-pressed="false">
+          <Icono nombre="pausa" tam={12} class="icon-pause" />
+          <Icono nombre="reproducir" tam={12} class="icon-play" />
+          <span class="clients-pause-label">Pausar</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec--muted">
     <div class="container">
       <div class="sh sh--medium" data-aos="fade-up">
         <p class="sh-label">Quiénes somos</p>
@@ -495,7 +595,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         <div class="about-content">
           <p class="about-body-text">Somos una empresa peruana de ingeniería y construcción con más de {ANIOS_EXPERIENCIA} años ejecutando proyectos en toda la geografía nacional — desde la costa del Pacífico hasta la alta sierra.</p>
           <p class="about-body-text">Trabajamos con empresas líderes del sector público y privado, aplicando las más altas normas de calidad, seguridad y metodología BIM en cada obra.</p>
-          <a href="/nosotros/" class="btn btn-primary">Conoce nuestra historia</a>
+          <a href="/nosotros/" class="btn btn-primary">Conoce INACONS</a>
         </div>
       </div>
     </div>
@@ -505,9 +605,9 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     <div class="container">
       <div class="sh sh--row" data-aos="fade-up" data-aos-duration="700">
         <div class="sh-text">
-          <p class="sh-label">Nuestras Especialidades</p>
+          <p class="sh-label">Nuestras especialidades</p>
           <h2 class="sh-title">Lo que construimos</h2>
-          <p class="sh-desc">Seis líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
+          <p class="sh-desc">{lineasDeServicio[0].toUpperCase() + lineasDeServicio.slice(1)} líneas de servicio integradas para proyectos de cualquier escala, en cualquier región del Perú.</p>
         </div>
         <a href="/servicios/" class="btn btn-outline-light">Ver todos los servicios</a>
       </div>
@@ -519,7 +619,7 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     </div>
   </section>
 
-  <section class="sec sec--muted">
+  <section class="sec sec--white">
     <div class="container">
       <div class="sh sh--medium" data-aos="fade-up">
         <p class="sh-label">Presencia nacional</p>
@@ -538,13 +638,17 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
         </div>
 
         <div class="map-stats">
-          <p class="map-stats-title">Proyectos por ciudad</p>
-          {PROYECTOS_POR_CIUDAD.map((c) => (
-            <div class="map-stat">
-              <span class="map-stat-city">{c.ciudad}</span>
-              <span class="map-stat-count">+{c.proyectos}</span>
-            </div>
-          ))}
+          <p class="map-stats-title" id="proyectosPorCiudad">Proyectos por ciudad</p>
+          <!-- data-id-mapa enlaza cada fila con su departamento: initCoverageMap los resalta juntos al pasar por encima de cualquiera de los dos. -->
+          <ol class="map-stats-lista" aria-labelledby="proyectosPorCiudad">
+            {PROYECTOS_POR_CIUDAD.map((c) => (
+              <li class="map-stat" data-id-mapa={c.idMapa}>
+                <span class="map-stat-city">{c.ciudad}</span>
+                <span class="map-stat-bar" aria-hidden="true"><span class="map-stat-fill" style={`--fill: ${c.proyectos / maximoPorCiudad}`}></span></span>
+                <span class="map-stat-count">+{c.proyectos}<span class="visually-hidden"> proyectos</span></span>
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
     </div>
@@ -578,32 +682,27 @@ const ciudadesMapa = JSON.stringify(PROYECTOS_POR_CIUDAD.map(({ idMapa, peso }) 
     </section>
   )}
 
-  <section class="sec sec--white" id="clientes">
+  <!--
+    Las normas en una franja y los certificados en /documentos/: el home
+    dice que existen, Cumplimiento es donde se descargan.
+  -->
+  <section class="sec sec--muted">
     <div class="container">
-      <div class="sh sh--center sh--medium" data-aos="fade-up" data-aos-duration="600">
-        <p class="sh-label">Nuestros Clientes</p>
-        <h2 class="sh-title">Empresas que confían en nuestra experiencia y calidad</h2>
-        <p class="sh-desc">Trabajamos con empresas líderes que valoran la calidad, innovación y compromiso en cada proyecto de construcción.</p>
-      </div>
-      <div class="clients-track-wrap">
-        <!-- La lista va dos veces para el desplazamiento infinito; la copia se oculta a lectores de pantalla. -->
-        <div class="clients-track">
-          {[false, true].map((copia) => CLIENTES.map((c) => (
-            <div class="client-logo-item" aria-hidden={copia ? 'true' : undefined}>
-              {c.imagen
-                ? <Image quality={70} src={c.imagen} alt={copia ? '' : c.nombre} width={216} loading="lazy" />
-                : <span class="client-logo-nombre">{c.nombre}</span>}
-            </div>
-          )))}
+      <div class="sh sh--row" data-aos="fade-up">
+        <div class="sh-text">
+          <p class="sh-label">Sistema integrado de gestión</p>
+          <h2 class="sh-title">Gestión certificada en {enLetras(NORMAS_ISO.valor)} normas ISO</h2>
+          <p class="sh-desc">Auditadas de forma independiente e integradas en un solo sistema de gestión.</p>
         </div>
+        <a href="/documentos/" class="btn btn-outline">Ver certificados y políticas</a>
       </div>
-
-      <div class="clients-controls">
-        <button type="button" class="btn-control" id="clientsPauseBtn" aria-pressed="false">
-          <Icono nombre="pausa" tam={12} class="icon-pause" />
-          <Icono nombre="reproducir" tam={12} class="icon-play" />
-          <span class="clients-pause-label">Pausar</span>
-        </button>
+      <div class="feature-grid normas-grid" data-aos="fade-up">
+        {certificaciones.map((c) => (
+          <div class="feature-item feature-item--card feature-item--sm">
+            <span class="feature-title">{c.data.norma}</span>
+            <p class="feature-desc">{c.data.titulo}</p>
+          </div>
+        ))}
       </div>
     </div>
   </section>

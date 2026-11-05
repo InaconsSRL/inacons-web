@@ -154,7 +154,13 @@ npx wrangler d1 execute inacons-contacto --remote --command "SELECT codigo, crea
 ```
 
 **Cambios en `schema.sql`:** se vuelve a aplicar con el mismo `d1 execute … --file`; todas
-las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe. La tabla `limites`
+las sentencias son `IF NOT EXISTS`, así que no tocan lo que ya existe. Por lo mismo, una
+columna nueva en una tabla que ya existe no entra así: va con su `ALTER TABLE`, anotado en
+`schema.sql` junto a la columna, y corre **antes** de desplegar el Worker que la inserta.
+El orden con el campo `motivo` de contacto (2026-11-04): 1) el `ALTER TABLE`, 2)
+`npx wrangler deploy`, 3) el push del sitio. El Worker nuevo acepta el formulario viejo
+(sin `motivo` lo toma como cotización), así que entre el paso 2 y el 3 nada se rompe; al
+revés, el sitio nuevo con el Worker viejo da 400 en todo lo que no sea cotizar. La tabla `limites`
 (hash de IP y hora de cada envío del Canal, retirada en `3e78a2f`) no existe en
 producción: comprobado el 2026-10-31.
 

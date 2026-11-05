@@ -1,6 +1,7 @@
 ---
 titulo: Minería
 descripcion: "Soluciones integrales para las operaciones mineras de alta exigencia"
+tituloSeo: "Campamentos mineros y movimiento de tierras"
 resumen: "Soluciones integrales para las operaciones mineras de alta exigencia"
 imagen: ../../assets/imagenes/image_mineria.webp
 icono: diamante
