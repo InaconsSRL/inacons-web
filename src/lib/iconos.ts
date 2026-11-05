@@ -24,6 +24,25 @@
  * Uso: <Icono nombre="descarga" tam={14} /> — ver src/components/Icono.astro.
  */
 
+/**
+ * Los únicos tamaños de icono del sitio, en px:
+ *   12 → chevrons y marcas dentro de texto chico
+ *   14 → dentro de botones, enlaces y texto de 13–14px
+ *   16 → junto a texto de cuerpo (el que se usa si no se dice nada)
+ *   20 → dentro de una caja de 36–44px: contacto, redes, descargas
+ *   24 → icono de tarjeta (.feature-icon)
+ *   28 → decorativo, uno por bloque
+ */
+export const TAMANOS_ICONO = [12, 14, 16, 20, 24, 28] as const;
+export type TamIcono = (typeof TAMANOS_ICONO)[number];
+
+/**
+ * Grosor del trazo, en unidades del viewBox de 24. Se ve en pantalla como
+ * trazo × tam / 24: con un trazo fijo, el 12 quedaba en 1px y se perdía y el
+ * 28 llegaba a 2.3px y se veía tosco. Así todos quedan entre 1.1 y 2px.
+ */
+export const trazoPara = (tam: TamIcono): number => (tam <= 14 ? 2.25 : tam <= 20 ? 2 : 1.75);
+
 export interface Icono {
   /** El interior del <svg>: los paths, rects y circles que dibujan el símbolo. */
   d: string;

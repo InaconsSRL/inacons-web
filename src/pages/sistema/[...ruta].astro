@@ -13,6 +13,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MediaCard from '../../components/MediaCard.astro';
 import Icono from '../../components/Icono.astro';
+import { TAMANOS_ICONO, trazoPara } from '../../lib/iconos';
 import CtaBand from '../../components/CtaBand.astro';
 import Galeria from '../../components/Galeria.astro';
 import imagenProyecto from '../../assets/imagenes/hero_project.webp';
@@ -166,7 +167,7 @@ const codigoProsaFicha = `<div class="prosa prosa--ficha">
 
 const codigoFaq = `<div class="faq">
   <details class="faq-item">
-    <summary>¿Trabajan fuera de Lima? <Icono nombre="chevron-abajo" tam={18} /></summary>
+    <summary>¿Trabajan fuera de Lima? <Icono nombre="chevron-abajo" tam={20} /></summary>
     <div class="faq-respuesta">Respuesta.</div>
   </details>
 </div>`;
@@ -294,6 +295,10 @@ const codigoLista = `<ul class="data-list">
     .ds-sp { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-2) 0; }
     .ds-sp code { font-size: var(--fs-xs); color: var(--c-text-muted); min-width: 80px; flex-shrink: 0; }
     .ds-sp-barra { height: 14px; background: var(--c-secondary); border-radius: var(--radius); }
+    .ds-radios { display: flex; flex-wrap: wrap; gap: var(--sp-6); }
+    .ds-radio { width: 120px; height: 72px; background: var(--c-bg-muted); border: 1.5px solid var(--c-border); display: flex; align-items: center; justify-content: center; }
+    .ds-iconos { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-7); color: var(--c-secondary); }
+    .ds-icono { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
 
     .ds-nota {
       border-left: 3px solid var(--c-accent);
@@ -333,6 +338,7 @@ const codigoLista = `<ul class="data-list">
           <a href="#color">Color</a>
           <a href="#tipografia">Tipografía</a>
           <a href="#espaciado">Espaciado</a>
+          <a href="#radios-iconos">Radios e iconos</a>
           <a href="#botones">Botones</a>
           <a href="#superficies">Superficies</a>
           <a href="#tarjetas">Tarjetas</a>
@@ -428,6 +434,34 @@ const codigoLista = `<ul class="data-list">
         </div>
       </section>
 
+      <!-- ── RADIOS E ICONOS ─────────────────────────────────── -->
+      <section class="ds-seccion" id="radios-iconos">
+        <h2>Radios e iconos</h2>
+        <p>
+          Dos radios: <code>--radius-sm</code> para lo que se toca (botones, campos,
+          píldoras) y <code>--radius</code> para lo que contiene (tarjetas, paneles,
+          fotos, avisos y la caja de un icono). El círculo queda solo para viñetas y
+          números de paso.
+        </p>
+        <div class="ds-demo ds-radios">
+          <div class="ds-radio" style="border-radius: var(--radius-sm)"><code>--radius-sm</code></div>
+          <div class="ds-radio" style="border-radius: var(--radius)"><code>--radius</code></div>
+        </div>
+        <p>
+          Seis tamaños de icono, y el grosor del trazo sale del tamaño: no se pasa a
+          mano. <code>&lt;Icono tam&gt;</code> no acepta otro valor (lo revisa
+          <code>npm run check</code>).
+        </p>
+        <div class="ds-demo ds-iconos">
+          {TAMANOS_ICONO.map((t) => (
+            <div class="ds-icono">
+              <Icono nombre="escudo-check" tam={t} />
+              <code>{t} · trazo {trazoPara(t)}</code>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <!-- ── BOTONES ─────────────────────────────────────────── -->
       <section class="ds-seccion" id="botones">
         <h2>Botones</h2>
@@ -511,7 +545,7 @@ const codigoLista = `<ul class="data-list">
           <div class="feature-grid ds-cols-3">
             <div class="feature-item feature-item--card feature-item--centrado">
               <div class="feature-icon">
-                <Icono nombre="escudo" tam={22} />
+                <Icono nombre="escudo" tam={24} />
               </div>
               <p class="feature-title">--card --centrado</p>
               <p class="feature-desc">Superficie propia y texto centrado. Para una fila de cuatro.</p>
@@ -519,7 +553,7 @@ const codigoLista = `<ul class="data-list">
 
             <div class="feature-item feature-item--card feature-item--fila">
               <div class="feature-icon">
-                <Icono nombre="check-circulo" tam={22} />
+                <Icono nombre="check-circulo" tam={24} />
               </div>
               <div>
                 <p class="feature-title">--fila</p>
@@ -996,11 +1030,11 @@ const codigoLista = `<ul class="data-list">
         <div class="ds-demo">
           <div class="faq">
             <details class="faq-item" open>
-              <summary>¿Trabajan fuera de Lima? <Icono nombre="chevron-abajo" tam={18} /></summary>
+              <summary>¿Trabajan fuera de Lima? <Icono nombre="chevron-abajo" tam={20} /></summary>
               <div class="faq-respuesta">Sí. Ejecutamos obras en distintas regiones del Perú; las sedes son Lima y Huancayo.</div>
             </details>
             <details class="faq-item">
-              <summary>¿Cómo solicito una propuesta? <Icono nombre="chevron-abajo" tam={18} /></summary>
+              <summary>¿Cómo solicito una propuesta? <Icono nombre="chevron-abajo" tam={20} /></summary>
               <div class="faq-respuesta">Desde la página de contacto, con el alcance del proyecto.</div>
             </details>
           </div>

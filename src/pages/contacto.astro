@@ -165,9 +165,9 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
           </div>
 
           <div class="contact-social">
-            <a href={whatsappHref} target="_blank" rel="noopener" aria-label={`WhatsApp ${PESTANA_NUEVA}`}><Icono nombre="whatsapp" tam={18} /></a>
-            <a href={redes.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${PESTANA_NUEVA}`}><Icono nombre="facebook" tam={18} /></a>
-            <a href={redes.linkedin} target="_blank" rel="noopener" aria-label={`LinkedIn ${PESTANA_NUEVA}`}><Icono nombre="linkedin" tam={18} /></a>
+            <a href={whatsappHref} target="_blank" rel="noopener" aria-label={`WhatsApp ${PESTANA_NUEVA}`}><Icono nombre="whatsapp" tam={20} /></a>
+            <a href={redes.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${PESTANA_NUEVA}`}><Icono nombre="facebook" tam={20} /></a>
+            <a href={redes.linkedin} target="_blank" rel="noopener" aria-label={`LinkedIn ${PESTANA_NUEVA}`}><Icono nombre="linkedin" tam={20} /></a>
           </div>
         </div>
 
@@ -249,7 +249,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
               )}
               <p class="form-hint">Usaremos tus datos solo para responder esta consulta{PRIVACIDAD_PUBLICADA && <> (<a href="/privacidad/">política de privacidad</a>)</>}. Los campos con * son obligatorios.</p>
               <button type="submit" class="btn btn-primary btn-block" id="formSubmit" disabled>
-                <Icono nombre="enviar" tam={15} />
+                <Icono nombre="enviar" tam={14} />
                 Enviar mensaje
               </button>
             </form>
@@ -276,7 +276,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
           <div class="location-items">
             {sedes.map((sede) => (
               <div class="location-item">
-                <div class="loc-icon"><Icono nombre="ubicacion" tam={18} /></div>
+                <div class="loc-icon"><Icono nombre="ubicacion" tam={20} /></div>
                 <div>
                   <p class="loc-name">{sede.nombre}</p>
                   <p class="loc-addr">{sede.direccion}<br />{zonaDeSede(sede)}</p>

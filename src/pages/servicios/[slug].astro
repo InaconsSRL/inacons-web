@@ -116,7 +116,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
 
           <a href="/contacto/" class="btn btn-primary">
             Solicitar cotización
-            <Icono nombre="flecha-derecha" tam={15} />
+            <Icono nombre="flecha-derecha" tam={14} />
           </a>
         </div>
 
@@ -127,7 +127,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
             <p class="panel-label">Descargas</p>
             <div class="download-list">
               <a href={BROCHURE} target="_blank" rel="noopener" class="download-item" data-astro-prefetch="false">
-                <Icono nombre="documento" tam={18} />
+                <Icono nombre="documento" tam={20} />
                 Brochure corporativo ({pesoBrochure})<PestanaNueva />
               </a>
             </div>
@@ -221,7 +221,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
             <details class="faq-item">
               <summary>
                 {f.pregunta}
-                <Icono nombre="chevron-abajo" tam={18} />
+                <Icono nombre="chevron-abajo" tam={20} />
               </summary>
               <div class="faq-respuesta">{f.respuesta}</div>
             </details>
@@ -275,7 +275,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
     padding: var(--sp-3) var(--sp-4);
     background: var(--c-bg-muted);
     border: 1.5px solid var(--c-border-light);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     text-decoration: none;
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);

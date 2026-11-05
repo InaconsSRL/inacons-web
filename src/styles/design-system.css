@@ -232,8 +232,9 @@
         · Elevacion: --shadow-card y --shadow-card-hover. Nada mas.
           Si algo necesita destacarse y no es una superficie que flota,
           no lleva sombra: lleva contraste, borde o espacio.
-        · Radio: --radius. Unicas excepciones, 50% para circulos y el
-          1px del anillo de foco.
+        · Radio: --radius-sm para controles y --radius para superficies.
+          Unicas excepciones, 50% para lo que es un punto o un numero en
+          circulo (vinetas, pasos del Canal) y el 1px del anillo de foco.
         · Movimiento: --t para cambios de estado, --t-slow SOLO para
           el zoom de imagen en tarjetas. Dos duraciones honestas baten
           a una sola mentirosa: forzar 240ms sobre un zoom de foto lo
@@ -247,7 +248,16 @@
     --shadow-card: 0 2px 16px rgba(20, 23, 45, 0.07);
     --shadow-card-hover: 0 8px 32px rgba(20, 23, 45, 0.13);
 
-    --radius: 2px;
+    /*  Dos radios. --radius-sm (6px) para lo que se toca: botones, campos,
+        pildoras, enlaces del menu. --radius (8px) para lo que contiene:
+        tarjetas, paneles, fotos, avisos y la caja de los iconos.
+
+        Estuvo todo en 2px, y el sitio se leia "en punta": esquinas vivas
+        al lado de iconos de trazo redondeado y contenedores en circulo,
+        tres lenguajes en la misma tarjeta. 6 y 8 suavizan sin volverlo una
+        app: una constructora sigue siendo sobria, y el logo es de rectas. */
+    --radius-sm: 6px;
+    --radius: 8px;
 
     /*  Área táctil mínima de un enlace de texto suelto (WCAG 2.5.8, nivel
         AA). Los botones e iconos ya van a 44px; esto es para los enlaces
@@ -389,7 +399,7 @@ button {
     outline: 2px solid var(--c-text-white);
     outline-offset: 0;
     box-shadow: 0 0 0 4px var(--c-secondary);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -566,7 +576,7 @@ a.btn {
     letter-spacing: var(--ls-ui);
     text-transform: uppercase;
     text-decoration: none;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     border: 1.5px solid transparent;
     cursor: pointer;
     transition: all var(--t);
@@ -703,7 +713,7 @@ a.btn:active {
     min-height: 32px;
     background: transparent;
     border: 1px solid var(--c-border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     color: var(--c-text-muted);
     font-family: var(--font-ui);
     font-size: var(--fs-xs);
@@ -740,7 +750,7 @@ a.btn:active {
     justify-content: center;
     background: var(--c-border-dark);
     border: 1px solid var(--c-border-dark-strong);
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     color: var(--c-on-dark-3);
     cursor: pointer;
     transition: background var(--t), color var(--t), border-color var(--t);
@@ -974,6 +984,7 @@ a.btn:active {
     letter-spacing: var(--ls-label);
     color: var(--c-text-white);
     border: 1px solid var(--c-border-dark-strong);
+    border-radius: var(--radius-sm);
     padding: var(--sp-1) var(--sp-2);
     margin-bottom: var(--sp-2);
 }
@@ -1203,7 +1214,7 @@ a.btn:active {
     gap: var(--sp-2);
     padding: var(--sp-2) var(--sp-4);
     border: 1.5px solid var(--c-border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
     color: var(--c-text-heading);
@@ -1333,7 +1344,7 @@ a.btn:active {
     width: 44px;
     height: 44px;
     flex-shrink: 0;
-    border-radius: 50%;
+    border-radius: var(--radius);
     background: var(--c-bg-muted);
     color: var(--c-secondary);
 }
@@ -1641,7 +1652,7 @@ a.btn:active {
     text-decoration: none;
     color: var(--c-on-dark-2);
     border: 1px solid var(--c-border-dark-strong);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     transition: background var(--t), color var(--t), border-color var(--t);
     white-space: nowrap;
 }
@@ -1724,7 +1735,7 @@ a.btn:active {
     letter-spacing: var(--ls-wide);
     color: var(--c-on-dark-2);
     text-decoration: none;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     transition: background var(--t), color var(--t);
 }
 
@@ -1747,7 +1758,7 @@ a.btn:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     background: var(--c-surface-dark-2);
     color: var(--c-on-dark-2);
     text-decoration: none;
@@ -1990,7 +2001,7 @@ html {
     letter-spacing: var(--ls-wide);
     padding: var(--sp-2) var(--sp-3);
     color: var(--c-on-dark-2) !important;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     transition: background var(--t), color var(--t);
 }
 
@@ -2108,7 +2119,7 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     background: var(--c-surface-dark-2);
     color: var(--c-on-dark-2);
     text-decoration: none;
@@ -2245,7 +2256,7 @@ html {
     background: var(--c-secondary);
     color: var(--c-text-white);
     border: none;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
@@ -2345,7 +2356,7 @@ body.menu-open {
     justify-content: center;
     background: var(--c-surface-dark-2);
     border: none;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     color: var(--c-text-white);
     cursor: pointer;
     transition: background var(--t);
@@ -2396,7 +2407,7 @@ body.menu-open {
     align-items: center;
     gap: var(--sp-3);
     padding: var(--sp-3) var(--sp-3);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--c-text-white);
     font-size: var(--fs-sm);
@@ -2429,7 +2440,7 @@ body.menu-open {
     align-items: center;
     gap: var(--sp-3);
     padding: var(--sp-3) var(--sp-3);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     background: none;
     border: none;
     color: var(--c-text-white);
@@ -2544,7 +2555,7 @@ body.menu-open {
     gap: var(--sp-2);
     width: 100%;
     padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     text-decoration: none;
     background: var(--c-secondary);
     color: var(--c-text-white);
@@ -2566,7 +2577,7 @@ body.menu-open {
     gap: var(--sp-2);
     width: 100%;
     padding: var(--sp-3) var(--sp-4);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     text-decoration: none;
     background: var(--c-surface-dark-1);
     border: 1px solid var(--c-border-dark);
@@ -2632,7 +2643,7 @@ body.menu-open {
     align-items: center;
     justify-content: center;
     background: var(--c-surface-dark-2);
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     color: var(--c-on-dark-3);
     text-decoration: none;
     transition: background var(--t), color var(--t);
@@ -2698,7 +2709,7 @@ body.menu-open {
     color: var(--c-text-heading);
     background: var(--c-bg-muted);
     border: 1.5px solid var(--c-border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     outline: none;
     transition: border-color var(--t), box-shadow var(--t), background var(--t);
     -webkit-appearance: none;
@@ -3196,7 +3207,7 @@ body.menu-open {
 
       <div class="faq">
         <details class="faq-item">
-          <summary>¿Pregunta? <Icono nombre="chevron-abajo" tam={18} /></summary>
+          <summary>¿Pregunta? <Icono nombre="chevron-abajo" tam={20} /></summary>
           <div class="faq-respuesta">…</div>
         </details>
       </div>                                                                  */
@@ -3270,6 +3281,7 @@ body.menu-open {
     width: 100%;
     aspect-ratio: 16 / 9;
     overflow: hidden;
+    border-radius: var(--radius);
     margin-bottom: var(--sp-1);
 }
 
@@ -3293,6 +3305,7 @@ body.menu-open {
 .galeria-thumb {
     aspect-ratio: 4 / 3;
     overflow: hidden;
+    border-radius: var(--radius);
 }
 
 .galeria-thumb img {
@@ -3437,7 +3450,7 @@ html:has(.dialogo[open]) {
     justify-content: center;
     background: transparent;
     border: none;
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     color: var(--c-text-muted);
     cursor: pointer;
     transition: background var(--t), color var(--t);
@@ -3479,7 +3492,7 @@ html:has(.dialogo[open]) {
     background: var(--c-primary);
     color: var(--c-text-white);
     font-weight: var(--fw-semibold);
-    border-radius: var(--radius);
+    border-radius: var(--radius-sm);
     text-decoration: none;
 }
 

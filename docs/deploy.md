@@ -207,10 +207,12 @@ Es la única fuente del dominio: canonical, sitemap, Open Graph y JSON-LD salen 
 ese host (comprobado en producción el 2026-10-22). Toda URL que se comparta o se imprima usa
 `home.inacons.com.pe`.
 
-**Pendiente:** esa regla vive en el `.htaccess` del docroot del dominio raíz, que no está en
-este repositorio. Mientras no conserve la ruta con un 301, los enlaces antiguos al dominio
-raíz mueren en 404 (E-01, con la regla propuesta, en los pendientes de la
-[bitácora](bitacora.md#pendientes-abiertos)).
+Esa regla vive en el `.htaccess` del docroot del dominio raíz, que no está en este
+repositorio, y así se queda: los QR impresos apuntan a `home.` y no hay enlaces con ruta en el
+dominio raíz (confirmado el 2026-11-05). Si algún día se imprime o comparte
+`inacons.com.pe/<ruta>`, hace falta un 301 que conserve la ruta:
+`RewriteCond %{HTTP_HOST} ^(www\.)?inacons\.com\.pe$ [NC]` +
+`RewriteRule ^(.*)$ https://home.inacons.com.pe/$1 [R=301,L]`.
 
 Los enlaces internos llevan **barra final** (`/servicios/`): Apache sirve
 `ruta/index.html` y responde 301 en `/ruta`. `trailingSlash: 'always'` hace que el

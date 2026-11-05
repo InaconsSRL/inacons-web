@@ -13,12 +13,6 @@ entenderlo sin ella.
 
 ### Infraestructura y cuentas (fuera del repositorio)
 
-- [ ] **E-01, el más urgente.** `inacons.com.pe` y `www` dan 404 en toda ruta menos `/`
-      (comprobado el 2026-10-22). Falta un 301 que conserve la ruta en el `.htaccess` del
-      docroot del dominio raíz, que no está en este repositorio:
-      `RewriteCond %{HTTP_HOST} ^(www\.)?inacons\.com\.pe$ [NC]` +
-      `RewriteRule ^(.*)$ https://home.inacons.com.pe/$1 [R=301,L]`. Así `/R/CANAL_ETICO`
-      en el dominio raíz llega a `home`, donde ya se resuelve.
 - [ ] **SEG-01, repositorio público.** `InaconsSRL/inacons-web` es público en GitHub. No hay
       secretos, pero esta bitácora y `deploy.md` publican las debilidades abiertas, el usuario
       principal de cPanel y los correos que reciben cada tipo de denuncia. Decidir si debe
@@ -47,9 +41,11 @@ entenderlo sin ella.
 
 ### Cumplimiento y abogado
 
-- [ ] **L-01, política de privacidad.** El abogado cierra lo marcado *pendiente* en
-      `privacidad.astro`, que además tiene que nombrar a Cloudflare y a Zoho como proveedores
-      y el plazo de 12 meses de las consultas. Después, `PRIVACIDAD_PUBLICADA = true`.
+- [ ] **L-01, política de privacidad, ahora urgente.** La empresa empieza a recopilar datos
+      con los formularios. El abogado cierra lo marcado *pendiente* en `privacidad.astro`,
+      que además tiene que nombrar a Cloudflare y a Zoho como proveedores, el plazo de 12
+      meses de las consultas y, si entra, Google Analytics. Después,
+      `PRIVACIDAD_PUBLICADA = true`.
 - [ ] **Libro de Reclamaciones virtual:** `/contacto/` ofrece "Reclamo o sugerencia".
       Confirmar si a INACONS le aplica (depende de si atiende a consumidores finales o solo a
       empresas).
@@ -87,9 +83,6 @@ entenderlo sin ella.
       para quien lo abre desde un QR en el celular.
 - [ ] Logos de **Activos Mineros** y **Pluz**: en la franja de clientes son los únicos que van
       como texto.
-- [ ] Confirmar la unidad de **"+150 km² construidos"** (150 millones de m²). El brochure no
-      tiene texto y no se pudo comprobar; al lado de las obras publicadas (18,500 m² de
-      pavimento) un comprador técnico lo va a notar.
 - [ ] **Huancayo:** concentra 50 de los proyectos por ciudad y tiene oficina, pero ninguna
       página apunta a "constructora en Huancayo". Una página de sede con contenido propio y
       un perfil de Google Business por oficina.
@@ -100,8 +93,11 @@ entenderlo sin ella.
 - [ ] **C-01:** no se mide ninguna conversión. Mínimo, contar semanalmente las filas de
       `consultas` (ahora con su `motivo`). Cloudflare Web Analytics no registra eventos ni
       query strings, así que ni los clics en WhatsApp ni un UTM en los QR se verían: para
-      eso hace falta elegir otra herramienta sin cookies (Plausible, Umami). Mientras tanto,
-      el mensaje de WhatsApp ya dice desde qué página se escribe.
+      eso la empresa quiere **Google Analytics 4**, que hoy no está en el sitio (solo
+      Cloudflare): se instala junto con la política de privacidad, con un banner de
+      consentimiento (GA usa cookies) y sumando sus dominios a la CSP. Necesita el ID de
+      medición (`G-…`). Mientras tanto, el mensaje de WhatsApp ya dice desde qué página se
+      escribe.
 - [ ] **Móvil real y lector de pantalla:** cambio de foco entre pasos del Canal y menú móvil.
 - [ ] **Search Console:** confirmar que las URLs del sitemap están indexadas y mirar
       *Rendimiento*.
@@ -128,6 +124,22 @@ las sesiones del mismo día, abajo.
       antes de aceptarlas en reportes anónimos.
 - [ ] La banda de cierre con foto solo se usa en las fichas; nosotros, sostenibilidad y
       documentos siguen con la lisa.
+
+## 2026-11-05 — Redondeo suave e iconografía
+
+Pedido: mejorar la iconografía y ver si convenía redondear, porque el sitio se leía "en
+punta". Se mostraron tres niveles (recto, suave, redondeado) y el usuario eligió suave.
+
+| Qué | Por qué |
+|---|---|
+| Dos radios: `--radius-sm` (6px) en botones, campos, píldoras, enlaces del menú, etiquetas y "volver arriba"; `--radius` (8px) en tarjetas, paneles, avisos, diálogos, fotos (galería, "Quiénes somos") y cajas de icono | Todo estaba a 2px junto a iconos de trazo redondeado y cajas en círculo: tres lenguajes en la misma tarjeta |
+| Las cajas de icono y los botones de redes dejan el círculo por el cuadrado redondeado. El círculo queda para viñetas y números de paso | Un solo lenguaje de forma en todo el sitio |
+| Iconos en seis tamaños (12, 14, 16, 20, 24, 28; `TAMANOS_ICONO`) que `astro check` hace cumplir; el trazo sale del tamaño (`trazoPara`) y el prop `trazo` desaparece. Los 10, 15, 18, 22 y 26 pasaron al paso más cercano | Había once tamaños y cuatro grosores puestos a mano: dos iconos vecinos nunca pesaban lo mismo |
+| `/sistema/` muestra los dos radios y la escala de iconos | Es la referencia viva del sistema |
+
+Cerrados en la misma conversación: **E-01** no aplica (los QR impresos apuntan a
+`home.inacons.com.pe`, y el dominio raíz solo redirige `/`), y la empresa confirmó "+150 km²
+construidos". `check`, build y `verificar` pasan; revisado en 1280px.
 
 ## 2026-11-04 — Auditoría de experiencia: redacción, navegación, home y formulario
 

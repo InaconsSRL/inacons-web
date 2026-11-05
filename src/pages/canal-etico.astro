@@ -60,7 +60,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
     .terms-accept:has(input:focus-visible) { outline: 2px solid var(--c-secondary); outline-offset: 2px; }
     .check-box {
       width: 22px; height: 22px;
-      border: 2px solid var(--c-border); border-radius: var(--radius);
+      border: 2px solid var(--c-border); border-radius: var(--radius-sm);
       flex-shrink: 0; display: flex; align-items: center; justify-content: center;
       transition: border-color var(--t), background var(--t); position: relative;
     }
@@ -123,21 +123,21 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
       </div>
       <div class="guarantees-grid">
         <div class="feature-item feature-item--card feature-item--fila" data-aos="fade-up" data-aos-delay="80">
-          <div class="feature-icon"><Icono nombre="ojo-tachado" tam={22} /></div>
+          <div class="feature-icon"><Icono nombre="ojo-tachado" tam={24} /></div>
           <div>
             <p class="feature-title">Reporte anónimo</p>
             <p class="feature-desc">Puedes reportar sin dar tu nombre. Si te identificas, tu identidad no se revela sin tu consentimiento, salvo obligación legal.</p>
           </div>
         </div>
         <div class="feature-item feature-item--card feature-item--fila" data-aos="fade-up" data-aos-delay="160">
-          <div class="feature-icon"><Icono nombre="escudo-check" tam={22} /></div>
+          <div class="feature-icon"><Icono nombre="escudo-check" tam={24} /></div>
           <div>
             <p class="feature-title">Protección contra represalias</p>
             <p class="feature-desc">Queda terminantemente prohibida cualquier represalia contra quien use este canal de buena fe.</p>
           </div>
         </div>
         <div class="feature-item feature-item--card feature-item--fila" data-aos="fade-up" data-aos-delay="240">
-          <div class="feature-icon"><Icono nombre="equipo" tam={22} /></div>
+          <div class="feature-icon"><Icono nombre="equipo" tam={24} /></div>
           <div>
             <p class="feature-title">Atención especializada</p>
             <p class="feature-desc">Cada reporte llega solo a las personas responsables de su tipo y se gestiona con confidencialidad.</p>
@@ -215,7 +215,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
         </label>
               <div class="pasos-acciones">
                 <button type="button" class="btn btn-primary" data-accion="siguiente">
-                  Continuar <Icono nombre="flecha-derecha" tam={15} />
+                  Continuar <Icono nombre="flecha-derecha" tam={14} />
                 </button>
               </div>
             </div>
@@ -263,7 +263,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
               <div class="pasos-acciones">
                 <button type="button" class="btn btn-outline" data-accion="atras">Atrás</button>
                 <button type="button" class="btn btn-primary" data-accion="siguiente">
-                  Continuar <Icono nombre="flecha-derecha" tam={15} />
+                  Continuar <Icono nombre="flecha-derecha" tam={14} />
                 </button>
               </div>
             </div>
@@ -331,7 +331,7 @@ const conTurnstile = Boolean(PUBLIC_CONTACT_ENDPOINT && PUBLIC_TURNSTILE_SITE_KE
               <div class="pasos-acciones">
                 <button type="button" class="btn btn-outline" data-accion="atras">Atrás</button>
                 <button type="submit" class="btn btn-primary" id="reporteEnviar" disabled>
-                  <Icono nombre="enviar" tam={15} />
+                  <Icono nombre="enviar" tam={14} />
                   Enviar reporte
                 </button>
               </div>

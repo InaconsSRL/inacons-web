@@ -181,7 +181,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
                 <details class="top-bar-accesos">
                   <summary class="top-bar-pill">
                     Accesos
-                    <Icono nombre="chevron-abajo" tam={10} trazo={2.5} class="top-bar-accesos-chevron" />
+                    <Icono nombre="chevron-abajo" tam={12} class="top-bar-accesos-chevron" />
                   </summary>
                   <ul class="top-bar-accesos-menu">
                     <li><a href={intranet} target="_blank" rel="noopener">Intranet<PestanaNueva /></a></li>
@@ -207,13 +207,13 @@ const pesoBrochure = formatoYPeso(BROCHURE);
                 <li class="dropdown">
                   <a href="/servicios/" aria-current={seccion('/servicios/')}>
                     Servicios
-                    <Icono nombre="chevron-abajo" tam={10} trazo={2.5} class="nav-chevron" />
+                    <Icono nombre="chevron-abajo" tam={12} class="nav-chevron" />
                   </a>
                   <ul class="dropdown-menu">
                     {servicios.map((s) => (
                       <li>
                         <a href={`/servicios/${s.id}/`} aria-current={actual(`/servicios/${s.id}/`)}>
-                          <Icono nombre={s.data.icono} trazo={1.75} />
+                          <Icono nombre={s.data.icono} />
                           {s.data.titulo}
                         </a>
                       </li>
@@ -239,7 +239,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
                 <img src="/assets/imagenes/logos/logo_inacons_white.svg" alt="" width="160" height="40" />
               </a>
               <button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Cerrar menú">
-                <Icono nombre="cerrar" tam={18} trazo={2.5} />
+                <Icono nombre="cerrar" tam={20} />
               </button>
             </div>
 
@@ -255,7 +255,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
                   <button type="button" class="mobile-dropdown-toggle" aria-expanded="false" aria-controls="mobile-servicios-submenu" id="mobile-servicios-btn">
                     <Icono nombre="cuadricula" />
                     Servicios
-                    <Icono nombre="chevron-abajo" tam={14} trazo={2.5} class="mobile-dropdown-icon" />
+                    <Icono nombre="chevron-abajo" tam={14} class="mobile-dropdown-icon" />
                   </button>
                   <ul class="mobile-submenu" id="mobile-servicios-submenu" role="group" aria-labelledby="mobile-servicios-btn">
                     {servicios.map((s) => <li><a href={`/servicios/${s.id}/`}>{s.data.titulo}</a></li>)}
@@ -305,9 +305,9 @@ const pesoBrochure = formatoYPeso(BROCHURE);
               </div>
               <div class="mobile-menu-footer">
                 <div class="mobile-menu-socials">
-                  <a href={whatsappHref} target="_blank" rel="noopener" aria-label={`WhatsApp ${PESTANA_NUEVA}`}><Icono nombre="whatsapp" tam={18} /></a>
-                  <a href={redes.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${PESTANA_NUEVA}`}><Icono nombre="facebook" tam={18} /></a>
-                  <a href={redes.linkedin} target="_blank" rel="noopener" aria-label={`LinkedIn ${PESTANA_NUEVA}`}><Icono nombre="linkedin" tam={18} /></a>
+                  <a href={whatsappHref} target="_blank" rel="noopener" aria-label={`WhatsApp ${PESTANA_NUEVA}`}><Icono nombre="whatsapp" tam={20} /></a>
+                  <a href={redes.facebook} target="_blank" rel="noopener" aria-label={`Facebook ${PESTANA_NUEVA}`}><Icono nombre="facebook" tam={20} /></a>
+                  <a href={redes.linkedin} target="_blank" rel="noopener" aria-label={`LinkedIn ${PESTANA_NUEVA}`}><Icono nombre="linkedin" tam={20} /></a>
                 </div>
               </div>
             </div>
@@ -381,7 +381,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
                   una lista: tres menciones en texto plano por página no se veían.
                 -->
                 <a href="/canal-etico/" class="btn btn-accent btn-sm footer-ethics">
-                  <Icono nombre="escudo" tam={15} />
+                  <Icono nombre="escudo" tam={14} />
                   Canal Ético
                 </a>
               </div>
@@ -402,7 +402,7 @@ const pesoBrochure = formatoYPeso(BROCHURE);
         </footer>
 
         <button class="back-to-top" id="backToTop" aria-label="Volver arriba">
-          <Icono nombre="chevron-arriba" tam={18} trazo={2.5} />
+          <Icono nombre="chevron-arriba" tam={20} />
         </button>
       </>
     )}
